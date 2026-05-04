@@ -2,54 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import { COLOURS, RADIUS } from '../theme';
 import { SectionTitle, BtnRow, Btn, EmptyState } from '../components/UI';
 import { fmtDate } from '../utils';
-
-async function exportSession(session, compositions) {
-  const compName = id => (compositions.find(c => c.id === id) || {}).title || id;
-
-  const payload = {
-    exported_at: new Date().toISOString(),
-    app: 'Music.log',
-    session: {
-      date: session.date,
-      energy: session.energy,
-      duration_minutes: session.duration,
-      wins: session.wins || null,
-      tomorrow_focus: session.tomorrowFocus || null,
-      segments: (session.segments || []).map(seg => ({
-        type: seg.type,
-        group: seg.group || null,
-        piece: seg.compositionId ? compName(seg.compositionId) : (seg.title || null),
-        section: seg.section || null,
-        duration_minutes: seg.duration ? Number(seg.duration) : null,
-        notes: seg.notes || null,
-        challenge_tags: seg.challenges || [],
-        progress_tags: seg.progress || [],
-      })),
-    },
-  };
-
-  const filename = `musiclog-${session.date}.json`;
-  const path = FileSystem.cacheDirectory + filename;
-  await FileSystem.writeAsStringAsync(path, JSON.stringify(payload, null, 2), {
-    encoding: FileSystem.EncodingType.UTF8,
-  });
-
-  const canShare = await Sharing.isAvailableAsync();
-  if (canShare) {
-    await Sharing.shareAsync(path, {
-      mimeType: 'application/json',
-      dialogTitle: `Export session — ${fmtDate(session.date)}`,
-      UTI: 'public.json',
-    });
-  } else {
-    Alert.alert('Sharing not available', 'This device does not support file sharing.');
-  }
-}
+import { exportSessionJSON } from '../utils/export';
 
 export default function HistoryScreen({ sessions, compositions, onDelete }) {
   const [expanded, setExpanded] = useState(null);
@@ -153,7 +109,11 @@ export default function HistoryScreen({ sessions, compositions, onDelete }) {
                       />
                       <Btn
                         label="Export JSON"
-                        onPress={() => exportSession(s, compositions).catch(e => Alert.alert('Export failed', e.message))}
+                        onPress={() =>
+                          exportSessionJSON(s, compositions).catch(e =>
+                            Alert.alert('Export failed', e.message)
+                          )
+                        }
                       />
                     </BtnRow>
                   </View>

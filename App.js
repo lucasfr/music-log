@@ -49,6 +49,13 @@ function TabLabel({ label, focused }) {
   );
 }
 
+// Register service worker on web
+if (Platform.OS === 'web' && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  });
+}
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     'LibreBaskerville':        LibreBaskerville_400Regular,

@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#fafaf8"
+      "backgroundColor": "#EAF0F5"
     },
     "ios": {
       "supportsTablet": false,
@@ -19,14 +19,23 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#2d5a3d"
+        "backgroundColor": "#213C51"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.lucasfranca.musiclog"
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "name": "Music.log",
+      "shortName": "Music.log",
+      "description": "Piano practice session logger",
+      "themeColor": "#213C51",
+      "backgroundColor": "#EAF0F5",
+      "display": "standalone",
+      "orientation": "portrait",
+      "scope": "/",
+      "startUrl": "/"
     }
   }
 }
