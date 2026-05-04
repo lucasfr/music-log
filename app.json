@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Music.log",
+    "name": "music.log",
     "slug": "music-log",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -27,8 +27,8 @@
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png",
-      "name": "Music.log",
-      "shortName": "Music.log",
+      "name": "music.log",
+      "shortName": "music.log",
       "description": "Piano practice session logger",
       "themeColor": "#213C51",
       "backgroundColor": "#EAF0F5",

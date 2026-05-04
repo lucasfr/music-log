@@ -49,7 +49,6 @@ function TabLabel({ label, focused }) {
   );
 }
 
-// Register service worker on web
 if (Platform.OS === 'web' && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js').catch(() => {});
@@ -81,7 +80,7 @@ export default function App() {
     return (
       <View style={{ flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ fontFamily: 'serif', fontSize: 28, color: COLOURS.navy, fontStyle: 'italic', letterSpacing: -0.5 }}>
-          Music.log
+          music.log
         </Text>
       </View>
     );

@@ -6,7 +6,7 @@ export async function exportSessionJSON(session, compositions) {
 
   const payload = {
     exported_at: new Date().toISOString(),
-    app: 'Music.log',
+    app: 'music.log',
     session: {
       date: session.date,
       energy: session.energy,
@@ -30,7 +30,6 @@ export async function exportSessionJSON(session, compositions) {
   const filename = `musiclog-${session.date}.json`;
 
   if (Platform.OS === 'web') {
-    // Web: trigger a file download
     const blob = new Blob([json], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -41,7 +40,6 @@ export async function exportSessionJSON(session, compositions) {
     return;
   }
 
-  // Native: write to cache then share
   const FileSystem = await import('expo-file-system');
   const Sharing    = await import('expo-sharing');
 
