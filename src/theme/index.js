@@ -1,67 +1,56 @@
-import { useColorScheme } from 'react-native';
+// Music.log — colour tokens
+// Palette: #213C51 (deep navy), #6594B1 (steel blue), #DDAED3 (soft pink), #EEEEEE (light grey)
 
-export const COLORS_LIGHT = {
-  ink: '#1a1a1a',
-  ink2: '#555555',
-  ink3: '#888888',
-  surface: '#fafaf8',
-  card: '#ffffff',
-  border: '#e8e6e0',
-  border2: '#d4d0c8',
-  accent: '#2d5a3d',
-  accentLight: '#e8f0eb',
-  accent2: '#7c5c3a',
-  accent2Light: '#f5ede4',
-  danger: '#992222',
-  dangerLight: '#fdf0f0',
+export const COLOURS = {
+  // Palette
+  navy:      '#213C51',
+  steel:     '#6594B1',
+  pink:      '#DDAED3',
+  grey:      '#EEEEEE',
+
+  // Backgrounds
+  bg:        '#EAF0F5',   // very light blue-tinted surface
+  bg2:       '#D8E4ED',
+
+  // Text
+  text:      '#1A2E3D',
+  textMuted: '#4A6A82',
+  textDim:   '#8AAABF',
+
+  // Glass
+  glass:        'rgba(255,255,255,0.48)',
+  glassHover:   'rgba(255,255,255,0.68)',
+  glassBorder:  'rgba(255,255,255,0.72)',
+  glassShadow:  'rgba(33,60,81,0.10)',
+  glassShadowMd:'rgba(33,60,81,0.16)',
+  entryBg:      'rgba(255,255,255,0.74)',
+  modalBg:      'rgba(255,255,255,0.70)',
+  backdropColor:'rgba(26,46,61,0.45)',
+
+  // Accents
+  accent:      '#213C51',  // navy — primary
+  accentLight: 'rgba(33,60,81,0.10)',
+  accent2:     '#6594B1',  // steel — secondary
+  accent2Light:'rgba(101,148,177,0.12)',
+  pinkLight:   'rgba(221,174,211,0.18)',
+
+  // Status
+  danger:      '#A03030',
+  dangerLight: 'rgba(160,48,48,0.10)',
+  success:     '#2E6B5E',
+  successLight:'rgba(46,107,94,0.10)',
 };
 
-export const COLORS_DARK = {
-  ink: '#f0ede8',
-  ink2: '#b8b4ab',
-  ink3: '#7a7670',
-  surface: '#1a1916',
-  card: '#242220',
-  border: '#333028',
-  border2: '#44403a',
-  accent: '#7ab890',
-  accentLight: '#1c2d22',
-  accent2: '#c4956a',
-  accent2Light: '#2a201a',
-  danger: '#ee8888',
-  dangerLight: '#2a1818',
-};
-
-export function useTheme() {
-  const scheme = useColorScheme();
-  return scheme === 'dark' ? COLORS_DARK : COLORS_LIGHT;
-}
-
-export const STATUS_COLORS_LIGHT = {
-  learning:            { bg: '#FFF7ED', text: '#92400E', border: '#FED7AA' },
-  consolidating:       { bg: '#EFF6FF', text: '#1E40AF', border: '#BFDBFE' },
-  'performance-ready': { bg: '#F0FDF4', text: '#166534', border: '#BBF7D0' },
-};
-
-export const STATUS_COLORS_DARK = {
-  learning:            { bg: '#2a1f10', text: '#FBBF24', border: '#92400E' },
-  consolidating:       { bg: '#0f1f35', text: '#93C5FD', border: '#1E40AF' },
-  'performance-ready': { bg: '#0d2318', text: '#86EFAC', border: '#166534' },
-};
-
-export function useStatusColors() {
-  const scheme = useColorScheme();
-  return scheme === 'dark' ? STATUS_COLORS_DARK : STATUS_COLORS_LIGHT;
-}
-
-export const FONTS = {
-  serif: 'serif',       // fallback — replace with loaded font if desired
-  sans: 'System',
+export const STATUS_COLOURS = {
+  learning:            { bg: 'rgba(101,148,177,0.12)', text: '#213C51', border: 'rgba(101,148,177,0.40)' },
+  consolidating:       { bg: 'rgba(221,174,211,0.15)', text: '#5C2D6E', border: 'rgba(221,174,211,0.50)' },
+  'performance-ready': { bg: 'rgba(46,107,94,0.10)',   text: '#1E5046', border: 'rgba(46,107,94,0.30)'   },
 };
 
 export const RADIUS = {
-  sm: 6,
-  md: 10,
-  lg: 14,
-  pill: 20,
+  sm:   10,
+  md:   16,
+  lg:   22,
+  xl:   28,
+  pill: 99,
 };

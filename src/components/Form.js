@@ -1,10 +1,9 @@
 import React from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  ScrollView, Modal, Platform,
+  View, Text, TextInput, TouchableOpacity, Modal, Platform,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useTheme, RADIUS } from '../theme';
+import { COLOURS, RADIUS } from '../theme';
 import { Label } from './UI';
 
 export function Field({ label, children, style }) {
@@ -17,59 +16,66 @@ export function Field({ label, children, style }) {
 }
 
 export function TextF({ value, onChange, placeholder, multiline, style }) {
-  const C = useTheme();
   return (
     <TextInput
       value={value}
       onChangeText={onChange}
       placeholder={placeholder}
-      placeholderTextColor={C.ink3}
+      placeholderTextColor={COLOURS.textDim}
       multiline={multiline}
       style={[{
-        backgroundColor: C.surface,
+        backgroundColor: 'rgba(255,255,255,0.65)',
         borderWidth: 1,
-        borderColor: C.border2,
+        borderColor: COLOURS.glassBorder,
         borderRadius: RADIUS.sm,
-        paddingHorizontal: 11,
-        paddingVertical: 9,
-        fontSize: 14,
-        color: C.ink,
-        fontFamily: 'System',
-        minHeight: multiline ? 72 : undefined,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 15,
+        fontFamily: 'SourceSans3',
+        color: COLOURS.text,
+        minHeight: multiline ? 76 : undefined,
         textAlignVertical: multiline ? 'top' : 'auto',
+        shadowColor: COLOURS.glassShadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 6,
+        elevation: 2,
       }, style]}
     />
   );
 }
 
 export function NumberF({ value, onChange, placeholder, style }) {
-  const C = useTheme();
   return (
     <TextInput
       value={value ? String(value) : ''}
       onChangeText={onChange}
       placeholder={placeholder || '0'}
-      placeholderTextColor={C.ink3}
+      placeholderTextColor={COLOURS.textDim}
       keyboardType="number-pad"
       style={[{
-        backgroundColor: C.surface,
+        backgroundColor: 'rgba(255,255,255,0.65)',
         borderWidth: 1,
-        borderColor: C.border2,
+        borderColor: COLOURS.glassBorder,
         borderRadius: RADIUS.sm,
-        paddingHorizontal: 11,
-        paddingVertical: 9,
-        fontSize: 14,
-        color: C.ink,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 15,
+        fontFamily: 'SourceSans3',
+        color: COLOURS.text,
+        shadowColor: COLOURS.glassShadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 6,
+        elevation: 2,
       }, style]}
     />
   );
 }
 
-// Native picker wrapped in a tappable field
 export function SelectF({ label, value, onChange, options, placeholder }) {
-  const C = useTheme();
   const [open, setOpen] = React.useState(false);
-  const display = options.find(o => (o.value ?? o) === value)?.label ?? value ?? placeholder ?? '—';
+  const display = options.find(o => (o.value ?? o) === value)?.label ?? (typeof value === 'string' && value) ? value : (placeholder || '—');
 
   if (Platform.OS === 'ios') {
     return (
@@ -79,33 +85,51 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
             onPress={() => setOpen(true)}
             activeOpacity={0.8}
             style={{
-              backgroundColor: C.surface, borderWidth: 1, borderColor: C.border2,
-              borderRadius: RADIUS.sm, paddingHorizontal: 11, paddingVertical: 10,
-              flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+              backgroundColor: 'rgba(255,255,255,0.65)',
+              borderWidth: 1,
+              borderColor: COLOURS.glassBorder,
+              borderRadius: RADIUS.sm,
+              paddingHorizontal: 12,
+              paddingVertical: 11,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              shadowColor: COLOURS.glassShadow,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 1,
+              shadowRadius: 6,
+              elevation: 2,
             }}
           >
-            <Text style={{ fontSize: 14, color: value ? C.ink : C.ink3 }}>{display}</Text>
-            <Text style={{ fontSize: 12, color: C.ink3 }}>▾</Text>
+            <Text style={{ fontSize: 15, fontFamily: 'SourceSans3', color: value ? COLOURS.text : COLOURS.textDim }}>
+              {display}
+            </Text>
+            <Text style={{ fontSize: 12, color: COLOURS.textDim }}>▾</Text>
           </TouchableOpacity>
         </Field>
         <Modal visible={open} transparent animationType="slide">
           <TouchableOpacity style={{ flex: 1 }} onPress={() => setOpen(false)} activeOpacity={1}>
-            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: C.card, borderTopWidth: 1, borderTopColor: C.border }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 12, borderBottomWidth: 1, borderBottomColor: C.border }}>
+            <View style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              backgroundColor: 'rgba(234,240,245,0.97)',
+              borderTopWidth: 1, borderTopColor: COLOURS.glassBorder,
+              borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl,
+            }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 14, borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
                 <TouchableOpacity onPress={() => setOpen(false)}>
-                  <Text style={{ color: C.accent, fontSize: 16, fontWeight: '500' }}>Done</Text>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
                 </TouchableOpacity>
               </View>
               <Picker
                 selectedValue={value || ''}
                 onValueChange={v => { onChange(v); }}
-                style={{ backgroundColor: C.card }}
+                style={{ backgroundColor: 'transparent' }}
               >
-                <Picker.Item label={placeholder || '—'} value="" color={C.ink3} />
+                <Picker.Item label={placeholder || '—'} value="" color={COLOURS.textDim} />
                 {options.map(o => {
                   const v = o.value ?? o;
                   const l = o.label ?? o;
-                  return <Picker.Item key={v} label={l} value={v} color={C.ink} />;
+                  return <Picker.Item key={v} label={l} value={v} color={COLOURS.text} />;
                 })}
               </Picker>
             </View>
@@ -115,11 +139,13 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
     );
   }
 
-  // Android — Picker renders inline
   return (
     <Field label={label}>
-      <View style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.border2, borderRadius: RADIUS.sm, overflow: 'hidden' }}>
-        <Picker selectedValue={value || ''} onValueChange={onChange} style={{ color: C.ink, height: 44 }}>
+      <View style={{
+        backgroundColor: 'rgba(255,255,255,0.65)', borderWidth: 1, borderColor: COLOURS.glassBorder,
+        borderRadius: RADIUS.sm, overflow: 'hidden',
+      }}>
+        <Picker selectedValue={value || ''} onValueChange={onChange} style={{ color: COLOURS.text, height: 44 }}>
           <Picker.Item label={placeholder || '—'} value="" />
           {options.map(o => {
             const v = o.value ?? o;

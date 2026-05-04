@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform,
+  View, Text, ScrollView, TouchableOpacity, Alert,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme, RADIUS } from '../theme';
-import { Card, SectionTitle, Btn, BtnRow, Label } from '../components/UI';
+import { BlurView } from 'expo-blur';
+import { COLOURS, RADIUS } from '../theme';
+import { GlassCard, Card, SectionTitle, Btn, BtnRow, Label } from '../components/UI';
 import { Field, TextF, NumberF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
 import { ENERGY_LABELS } from '../constants';
 import { uid, todayISO } from '../utils';
 
 export default function LogScreen({ sessions, compositions, onSave }) {
-  const C = useTheme();
-
   const [date, setDate]       = useState(todayISO());
   const [energy, setEnergy]   = useState(null);
   const [duration, setDuration] = useState('');
@@ -30,29 +30,29 @@ export default function LogScreen({ sessions, compositions, onSave }) {
     if (energy === null) { Alert.alert('Energy required', 'Please set an energy level before saving.'); return; }
     const totalFromSegs = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
     const session = {
-      id: uid(),
-      date,
-      energy: Number(energy),
+      id: uid(), date, energy: Number(energy),
       duration: Number(duration) || totalFromSegs || null,
-      segments,
-      wins,
-      tomorrowFocus: focus,
+      segments, wins, tomorrowFocus: focus,
       createdAt: new Date().toISOString(),
     };
     onSave(session);
     setEnergy(null); setDuration(''); setSegments([]); setWins(''); setFocus('');
-    Alert.alert('Saved', 'Session logged.');
+    Alert.alert('Saved ✓', 'Session logged.');
   }
 
   const totalMin = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.surface }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-          <SectionTitle>Log session</SectionTitle>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <SectionTitle style={{ marginTop: 4 }}>Log session</SectionTitle>
 
-          <Card>
+          <GlassCard>
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1 }}>
                 <Field label="Date">
@@ -60,8 +60,8 @@ export default function LogScreen({ sessions, compositions, onSave }) {
                 </Field>
               </View>
               <View style={{ width: 120 }}>
-                <Field label={`Duration${totalMin ? ` (~${totalMin}m)` : ' (min)'}`}>
-                  <NumberF value={duration} onChange={setDuration} placeholder={String(totalMin || '')} />
+                <Field label={totalMin ? `Duration (~${totalMin}m)` : 'Duration (min)'}>
+                  <NumberF value={duration} onChange={setDuration} placeholder={totalMin ? String(totalMin) : ''} />
                 </Field>
               </View>
             </View>
@@ -74,50 +74,69 @@ export default function LogScreen({ sessions, compositions, onSave }) {
                   <TouchableOpacity
                     key={v}
                     onPress={() => setEnergy(v)}
-                    activeOpacity={0.7}
+                    activeOpacity={0.75}
                     style={{
-                      flex: 1, paddingVertical: 8, alignItems: 'center',
+                      flex: 1, paddingVertical: 10, alignItems: 'center',
                       borderRadius: RADIUS.sm, borderWidth: 1,
-                      borderColor: active ? C.accent : C.border2,
-                      backgroundColor: active ? C.accent : C.surface,
+                      borderColor: active ? COLOURS.navy : COLOURS.glassBorder,
+                      backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.50)',
+                      shadowColor: active ? COLOURS.navy : 'transparent',
+                      shadowOffset: { width: 0, height: 3 },
+                      shadowOpacity: active ? 0.35 : 0,
+                      shadowRadius: 8,
+                      elevation: active ? 4 : 0,
                     }}
                   >
-                    <Text style={{ fontSize: 14, fontWeight: '600', color: active ? '#fff' : C.ink2 }}>
+                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: active ? '#fff' : COLOURS.textMuted }}>
                       {Number(v) > 0 ? `+${v}` : v}
                     </Text>
-                    <Text style={{ fontSize: 10, color: active ? '#ffffffcc' : C.ink3, marginTop: 2 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 10, color: active ? 'rgba(255,255,255,0.75)' : COLOURS.textDim, marginTop: 2 }}>
                       {ENERGY_LABELS[v]}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
-          </Card>
+          </GlassCard>
 
-          {/* Segments */}
+          {/* Segments header */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 }}>
             <SectionTitle style={{ marginBottom: 0 }}>Segments</SectionTitle>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <TouchableOpacity
                 onPress={() => addSegment('technique')}
-                activeOpacity={0.7}
-                style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: C.accent2 }}
+                activeOpacity={0.75}
+                style={{
+                  paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill,
+                  borderWidth: 1, borderColor: COLOURS.steel,
+                  backgroundColor: COLOURS.accent2Light,
+                }}
               >
-                <Text style={{ fontSize: 12, color: C.accent2 }}>+ Technique</Text>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Technique</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => addSegment('repertoire')}
-                activeOpacity={0.7}
-                style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: C.accent }}
+                activeOpacity={0.75}
+                style={{
+                  paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill,
+                  borderWidth: 1, borderColor: COLOURS.navy,
+                  backgroundColor: COLOURS.accentLight,
+                }}
               >
-                <Text style={{ fontSize: 12, color: C.accent }}>+ Repertoire</Text>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Repertoire</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {segments.length === 0 && (
-            <View style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: C.border2, borderRadius: RADIUS.md, padding: 20, alignItems: 'center', marginBottom: 12 }}>
-              <Text style={{ color: C.ink3, fontSize: 13 }}>Add technique and repertoire segments above</Text>
+            <View style={{
+              borderWidth: 1, borderStyle: 'dashed', borderColor: COLOURS.glassBorder,
+              borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12,
+              backgroundColor: 'rgba(255,255,255,0.25)',
+            }}>
+              <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 14 }}>
+                Add technique and repertoire segments above
+              </Text>
             </View>
           )}
 
@@ -131,19 +150,16 @@ export default function LogScreen({ sessions, compositions, onSave }) {
             />
           ))}
 
-          {/* Wins + Focus */}
-          <Card>
+          <GlassCard>
             <Field label="Wins today">
               <TextF value={wins} onChange={setWins} placeholder="What went well? Any breakthroughs?" multiline />
             </Field>
             <Field label="Tomorrow's focus" style={{ marginBottom: 0 }}>
               <TextF value={focus} onChange={setFocus} placeholder="What to prioritise next session?" multiline />
             </Field>
-          </Card>
+          </GlassCard>
 
-          <BtnRow>
-            <Btn label="Save session" variant="primary" onPress={handleSave} style={{ flex: 1 }} />
-          </BtnRow>
+          <Btn label="Save session" variant="primary" onPress={handleSave} style={{ marginTop: 4 }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

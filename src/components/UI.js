@@ -1,115 +1,175 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme, RADIUS } from '../theme';
+import { BlurView } from 'expo-blur';
+import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 
-export function Card({ children, style }) {
-  const C = useTheme();
+// Glass card — the core building block
+export function GlassCard({ children, style, intensity = 40 }) {
   return (
-    <View style={[{ backgroundColor: C.card, borderRadius: RADIUS.md, borderWidth: 1, borderColor: C.border, padding: 16, marginBottom: 12 }, style]}>
+    <BlurView
+      intensity={intensity}
+      tint="light"
+      style={[{
+        borderRadius: RADIUS.md,
+        borderWidth: 1,
+        borderColor: COLOURS.glassBorder,
+        overflow: 'hidden',
+        marginBottom: 12,
+        shadowColor: COLOURS.glassShadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 16,
+        elevation: 4,
+      }, style]}
+    >
+      <View style={{ backgroundColor: COLOURS.glass, padding: 16 }}>
+        {children}
+      </View>
+    </BlurView>
+  );
+}
+
+// Card alias for non-blurred surfaces (e.g. modals where blur nests badly)
+export function Card({ children, style }) {
+  return (
+    <View style={[{
+      backgroundColor: COLOURS.entryBg,
+      borderRadius: RADIUS.md,
+      borderWidth: 1,
+      borderColor: COLOURS.glassBorder,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: COLOURS.glassShadow,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 1,
+      shadowRadius: 12,
+      elevation: 3,
+    }, style]}>
       {children}
     </View>
   );
 }
 
 export function SectionTitle({ children, style }) {
-  const C = useTheme();
   return (
-    <Text style={[{ fontFamily: 'serif', fontSize: 17, color: C.ink, marginBottom: 14, letterSpacing: -0.2 }, style]}>
+    <Text style={[{
+      fontFamily: 'LibreBaskerville-Italic',
+      fontSize: 19,
+      color: COLOURS.text,
+      marginBottom: 14,
+      letterSpacing: -0.3,
+    }, style]}>
       {children}
     </Text>
   );
 }
 
-export function Label({ children }) {
-  const C = useTheme();
+export function Label({ children, style }) {
   return (
-    <Text style={{ fontSize: 11, fontWeight: '600', color: C.ink3, marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+    <Text style={[{
+      fontFamily: 'SourceSans3-Bold',
+      fontSize: 11,
+      color: COLOURS.textDim,
+      marginBottom: 5,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+    }, style]}>
       {children}
     </Text>
   );
 }
 
 export function Btn({ onPress, label, variant = 'default', style, disabled }) {
-  const C = useTheme();
   const isPrimary = variant === 'primary';
   const isDanger  = variant === 'danger';
   const isGhost   = variant === 'ghost';
 
-  const bg = isPrimary ? C.accent : isGhost ? 'transparent' : C.card;
-  const borderColor = isPrimary ? C.accent : isDanger ? C.danger : isGhost ? 'transparent' : C.border2;
-  const textColor = isPrimary ? '#fff' : isDanger ? C.danger : C.ink;
+  if (isPrimary) {
+    return (
+      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.8}
+        style={[{
+          backgroundColor: COLOURS.navy,
+          borderRadius: RADIUS.sm,
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          alignItems: 'center',
+          shadowColor: COLOURS.navy,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.35,
+          shadowRadius: 12,
+          elevation: 5,
+          opacity: disabled ? 0.4 : 1,
+        }, style]}>
+        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#fff' }}>{label}</Text>
+      </TouchableOpacity>
+    );
+  }
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      activeOpacity={0.7}
+    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75}
       style={[{
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        paddingVertical: 9, paddingHorizontal: 16,
-        borderRadius: RADIUS.sm, borderWidth: 1,
-        backgroundColor: bg, borderColor,
+        backgroundColor: isGhost ? 'transparent' : COLOURS.glass,
+        borderRadius: RADIUS.sm,
+        borderWidth: 1,
+        borderColor: isDanger ? COLOURS.danger : isGhost ? 'transparent' : COLOURS.glassBorder,
+        paddingVertical: 9,
+        paddingHorizontal: 14,
+        alignItems: 'center',
         opacity: disabled ? 0.4 : 1,
-      }, style]}
-    >
-      <Text style={{ fontSize: 13, fontWeight: isPrimary ? '500' : '400', color: textColor }}>
+      }, style]}>
+      <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: isDanger ? COLOURS.danger : COLOURS.textMuted }}>
         {label}
       </Text>
     </TouchableOpacity>
   );
 }
 
-export function BtnRow({ children }) {
+export function BtnRow({ children, style }) {
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+    <View style={[{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4, flexWrap: 'wrap' }, style]}>
       {children}
     </View>
   );
 }
 
 export function StatusPill({ status }) {
-  const colors = {
-    learning:            { bg: '#FFF7ED', text: '#92400E', border: '#FED7AA' },
-    consolidating:       { bg: '#EFF6FF', text: '#1E40AF', border: '#BFDBFE' },
-    'performance-ready': { bg: '#F0FDF4', text: '#166534', border: '#BBF7D0' },
-  };
-  const c = colors[status] || colors.learning;
+  const c = STATUS_COLOURS[status] || STATUS_COLOURS.learning;
   return (
-    <View style={{ paddingHorizontal: 9, paddingVertical: 3, borderRadius: 20, borderWidth: 1, backgroundColor: c.bg, borderColor: c.border }}>
-      <Text style={{ fontSize: 11, fontWeight: '500', color: c.text }}>{status}</Text>
+    <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, borderWidth: 1, backgroundColor: c.bg, borderColor: c.border }}>
+      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: c.text }}>{status}</Text>
     </View>
   );
 }
 
 export function MetaChip({ label }) {
-  const C = useTheme();
   if (!label) return null;
   return (
-    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface }}>
-      <Text style={{ fontSize: 12, color: C.ink3 }}>{label}</Text>
+    <View style={{ paddingHorizontal: 9, paddingVertical: 3, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: COLOURS.glassBorder, backgroundColor: COLOURS.glass }}>
+      <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textMuted }}>{label}</Text>
     </View>
   );
 }
 
 export function TagCloud({ tags, selected, onToggle }) {
-  const C = useTheme();
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
       {tags.map(t => {
         const active = selected.includes(t);
         return (
           <TouchableOpacity
             key={t}
             onPress={() => onToggle(t)}
-            activeOpacity={0.7}
+            activeOpacity={0.75}
             style={{
-              paddingHorizontal: 10, paddingVertical: 4,
-              borderRadius: 20, borderWidth: 1,
-              borderColor: active ? C.accent : C.border2,
-              backgroundColor: active ? C.accentLight : C.surface,
+              paddingHorizontal: 11,
+              paddingVertical: 5,
+              borderRadius: RADIUS.pill,
+              borderWidth: 1,
+              borderColor: active ? COLOURS.steel : COLOURS.glassBorder,
+              backgroundColor: active ? COLOURS.accent2Light : COLOURS.glass,
             }}
           >
-            <Text style={{ fontSize: 12, color: active ? C.accent : C.ink2, fontWeight: active ? '500' : '400' }}>
+            <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>
               {t}
             </Text>
           </TouchableOpacity>
@@ -120,16 +180,14 @@ export function TagCloud({ tags, selected, onToggle }) {
 }
 
 export function Divider({ style }) {
-  const C = useTheme();
-  return <View style={[{ height: 1, backgroundColor: C.border, marginVertical: 14 }, style]} />;
+  return <View style={[{ height: 1, backgroundColor: COLOURS.glassBorder, marginVertical: 14 }, style]} />;
 }
 
 export function EmptyState({ icon, text }) {
-  const C = useTheme();
   return (
-    <View style={{ alignItems: 'center', padding: 40 }}>
-      <Text style={{ fontSize: 32, marginBottom: 10 }}>{icon}</Text>
-      <Text style={{ fontSize: 14, color: C.ink3, textAlign: 'center' }}>{text}</Text>
+    <View style={{ alignItems: 'center', padding: 48 }}>
+      <Text style={{ fontSize: 36, marginBottom: 12 }}>{icon}</Text>
+      <Text style={{ fontFamily: 'SourceSans3', fontSize: 15, color: COLOURS.textDim, textAlign: 'center', lineHeight: 22 }}>{text}</Text>
     </View>
   );
 }

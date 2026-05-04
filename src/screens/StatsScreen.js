@@ -1,20 +1,19 @@
 import React from 'react';
 import { View, Text, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme, RADIUS } from '../theme';
-import { SectionTitle, Card } from '../components/UI';
+import { BlurView } from 'expo-blur';
+import { COLOURS, RADIUS } from '../theme';
+import { GlassCard, SectionTitle } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
-import { fmtDateShort } from '../utils';
 
-const STATUS_COLORS = {
-  learning:            '#92400E',
-  consolidating:       '#1E40AF',
-  'performance-ready': '#166534',
+const STATUS_TEXT_COLOURS = {
+  learning:            COLOURS.steel,
+  consolidating:       '#7A4FA0',
+  'performance-ready': COLOURS.success,
 };
 
 export default function StatsScreen({ sessions, compositions }) {
-  const C = useTheme();
-  const W = Dimensions.get('window').width - 32; // screen minus padding
+  const W = Dimensions.get('window').width - 32;
 
   const last30 = sessions.filter(s => {
     const d = new Date(s.date + 'T12:00:00');
@@ -28,14 +27,12 @@ export default function StatsScreen({ sessions, compositions }) {
     : '—';
 
   const streak = (() => {
-    let count = 0;
-    let d = new Date();
+    let count = 0, d = new Date();
     const dateSet = new Set(sessions.map(s => s.date));
     while (true) {
       const iso = d.toISOString().slice(0, 10);
       if (!dateSet.has(iso)) break;
-      count++;
-      d.setDate(d.getDate() - 1);
+      count++; d.setDate(d.getDate() - 1);
     }
     return count;
   })();
@@ -65,59 +62,77 @@ export default function StatsScreen({ sessions, compositions }) {
     };
   });
   const maxDur = Math.max(...last14.map(d => d.duration), 1);
-  const barHeight = 72;
+  const barH = 72;
 
   const statItems = [
     { value: Math.round(totalMin), label: 'minutes this month' },
-    { value: last30.length, label: 'sessions this month' },
-    { value: streak, label: 'day streak' },
+    { value: last30.length,        label: 'sessions this month' },
+    { value: streak,               label: 'day streak' },
     { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy' },
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.surface }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        <SectionTitle>Overview</SectionTitle>
+        <SectionTitle style={{ marginTop: 4 }}>Overview</SectionTitle>
 
         {/* Stat grid */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
           {statItems.map((item, i) => (
-            <View key={i} style={{ width: (W - 10) / 2, backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: RADIUS.md, padding: 14 }}>
-              <Text style={{ fontFamily: 'serif', fontSize: 28, color: C.accent }}>{item.value}</Text>
-              <Text style={{ fontSize: 12, color: C.ink3, marginTop: 2 }}>{item.label}</Text>
-            </View>
+            <BlurView
+              key={i}
+              intensity={36}
+              tint="light"
+              style={{
+                width: (W - 10) / 2,
+                borderRadius: RADIUS.md,
+                borderWidth: 1,
+                borderColor: COLOURS.glassBorder,
+                overflow: 'hidden',
+                shadowColor: COLOURS.glassShadow,
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 1,
+                shadowRadius: 10,
+                elevation: 3,
+              }}
+            >
+              <View style={{ backgroundColor: COLOURS.glass, padding: 16 }}>
+                <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 32, color: COLOURS.navy }}>{item.value}</Text>
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{item.label}</Text>
+              </View>
+            </BlurView>
           ))}
         </View>
 
         <SectionTitle>Last 14 days</SectionTitle>
-        <View style={{ backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: RADIUS.md, padding: 16, marginBottom: 20 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barHeight + 18, gap: 3 }}>
+        <GlassCard style={{ paddingBottom: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barH + 18, gap: 3 }}>
             {last14.map(d => (
               <View key={d.iso} style={{ flex: 1, alignItems: 'center' }}>
                 <View style={{
                   width: '100%',
-                  height: d.practiced ? Math.max((d.duration / maxDur) * barHeight, 4) : 4,
-                  backgroundColor: d.practiced ? C.accent : C.border,
-                  borderRadius: 3,
+                  height: d.practiced ? Math.max((d.duration / maxDur) * barH, 5) : 5,
+                  backgroundColor: d.practiced ? COLOURS.navy : COLOURS.glassBorder,
+                  borderRadius: 4,
                 }} />
-                <Text style={{ fontSize: 9, color: C.ink3, marginTop: 4 }}>{d.label}</Text>
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: 9, color: COLOURS.textDim, marginTop: 4 }}>{d.label}</Text>
               </View>
             ))}
           </View>
-        </View>
+        </GlassCard>
 
         {topPieces.length > 0 && (
           <>
-            <SectionTitle>Most practiced (30 days)</SectionTitle>
+            <SectionTitle style={{ marginTop: 8 }}>Most practiced (30 days)</SectionTitle>
             {topPieces.map(([name, count]) => (
-              <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 14, fontWeight: '500', color: C.ink, marginBottom: 4 }}>{name}</Text>
-                  <View style={{ height: 5, backgroundColor: C.border, borderRadius: 3 }}>
-                    <View style={{ height: '100%', width: `${(count / topPieces[0][1]) * 100}%`, backgroundColor: C.accent, borderRadius: 3 }} />
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 5 }}>{name}</Text>
+                  <View style={{ height: 5, backgroundColor: COLOURS.glassBorder, borderRadius: 3 }}>
+                    <View style={{ height: '100%', width: `${(count / topPieces[0][1]) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
                   </View>
                 </View>
-                <Text style={{ fontSize: 13, color: C.ink3, minWidth: 24, textAlign: 'right' }}>{count}×</Text>
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.textDim, minWidth: 24, textAlign: 'right' }}>{count}×</Text>
               </View>
             ))}
           </>
@@ -126,12 +141,25 @@ export default function StatsScreen({ sessions, compositions }) {
         <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           {STATUS_OPTIONS.map(s => (
-            <View key={s} style={{ flex: 1, backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: RADIUS.md, padding: 14 }}>
-              <Text style={{ fontFamily: 'serif', fontSize: 28, color: STATUS_COLORS[s] }}>
-                {compositions.filter(c => c.status === s).length}
-              </Text>
-              <Text style={{ fontSize: 11, color: C.ink3, marginTop: 2 }}>{s}</Text>
-            </View>
+            <BlurView
+              key={s}
+              intensity={32}
+              tint="light"
+              style={{
+                flex: 1, borderRadius: RADIUS.md, borderWidth: 1,
+                borderColor: COLOURS.glassBorder, overflow: 'hidden',
+                shadowColor: COLOURS.glassShadow,
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 1, shadowRadius: 8, elevation: 3,
+              }}
+            >
+              <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
+                <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 30, color: STATUS_TEXT_COLOURS[s] || COLOURS.navy }}>
+                  {compositions.filter(c => c.status === s).length}
+                </Text>
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{s}</Text>
+              </View>
+            </BlurView>
           ))}
         </View>
       </ScrollView>
