@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 
 function openIDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('musiclog', 1);
+    const req = indexedDB.open('musiclog', 2);
     req.onupgradeneeded = e => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('sessions'))     db.createObjectStore('sessions',     { keyPath: 'id' });
