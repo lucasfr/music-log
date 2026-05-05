@@ -270,9 +270,14 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                   ) : null}
                   <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>
-                      ⚡ {todaySession.energy > 0 ? `+${todaySession.energy}` : todaySession.energy} · {ENERGY_LABELS[String(todaySession.energy)]}{todaySession.enjoyment ? `   ❤️ ${todaySession.enjoyment}/5` : ''}
+                      ⚡ {todaySession.energy > 0 ? `+${todaySession.energy}` : todaySession.energy} · {ENERGY_LABELS[String(todaySession.energy)]}
                     </Text>
                   </View>
+                  {todaySession.enjoyment ? (
+                    <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>❤️ {todaySession.enjoyment}/5</Text>
+                    </View>
+                  ) : null}
                 </View>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
                   {todayTech.map(t => (
