@@ -178,7 +178,7 @@ function CompModal({ comp, onSave, onClose }) {
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1 }}>
                 <Field label="Arrangement / arrangers">
-                  <TextF value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Rachmaninoff, Kerrin Tatwood" />
+                  <TextF value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Rachmaninoff" />
                 </Field>
               </View>
               <View style={{ flex: 1 }}>
