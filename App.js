@@ -18,15 +18,15 @@ import {
 
 import { useSessions, useCompositions } from './src/db/hooks';
 import HomeScreen from './src/screens/HomeScreen';
+import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
-import HistoryScreen from './src/screens/HistoryScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import { AppBackground } from './src/components/Background';
 import { COLOURS } from './src/theme';
 
 const Tab = createBottomTabNavigator();
 
-const ICONS = { Home: '◈', Pieces: '♩', History: '◷', Stats: '▦' };
+const ICONS = { Home: '◈', Calendar: '◻', Pieces: '♩', Stats: '▦' };
 
 function TabIcon({ name, color, size }) {
   return (
@@ -123,20 +123,13 @@ export default function App() {
           })}
         >
           <Tab.Screen name="Home">
-            {() => (
-              <HomeScreen
-                sessions={sessions}
-                compositions={compositions}
-                onSave={saveSession}
-                onDelete={deleteSession}
-              />
-            )}
+            {() => <HomeScreen sessions={sessions} compositions={compositions} onSave={saveSession} onDelete={deleteSession} />}
+          </Tab.Screen>
+          <Tab.Screen name="Calendar">
+            {() => <CalendarScreen sessions={sessions} compositions={compositions} onSave={saveSession} onDelete={deleteSession} />}
           </Tab.Screen>
           <Tab.Screen name="Pieces">
             {() => <CompositionsScreen compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} />}
-          </Tab.Screen>
-          <Tab.Screen name="History">
-            {() => <HistoryScreen sessions={sessions} compositions={compositions} onDelete={deleteSession} />}
           </Tab.Screen>
           <Tab.Screen name="Stats">
             {() => <StatsScreen sessions={sessions} compositions={compositions} />}
