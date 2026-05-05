@@ -74,3 +74,14 @@ export const RADIUS = {
   xl:   28,
   pill: 99,
 };
+
+export const SIZES = {
+  screenTitle:  28,   // music.log wordmark
+  sectionTitle: 22,   // screen headings (Compositions, Calendar…)
+  cardTitle:    18,   // piece title, session date in card
+  body:         16,   // primary body text
+  bodySmall:    14,   // secondary body, subtitles
+  label:        12,   // uppercase labels, tags, pills
+  labelSmall:   11,   // timestamps, meta
+  tiny:         10,   // calendar day headers, legend
+};

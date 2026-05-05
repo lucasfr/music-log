@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
 import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
@@ -54,12 +54,12 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
             <View style={{ width: 3, height: 36, borderRadius: 2, backgroundColor: energyDotColour(session.energy) }} />
             <View style={{ flex: 1 }}>
               {showDate && (
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
                   {fmtDate(session.date)}
                 </Text>
               )}
               {showDate ? (
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 1 }}>
                   {session.duration ? `${session.duration} min · ` : ''}⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}{session.enjoyment ? `  ❤️ ${session.enjoyment}/5` : ''}
                 </Text>
               ) : (
@@ -225,8 +225,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
 
         <View style={{ marginBottom: 20, marginTop: 4 }}>
-          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 26, color: COLOURS.text, letterSpacing: -0.5 }}>music.log</Text>
-          <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>
+          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>music.log</Text>
+          <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
             {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
           </Text>
         </View>
@@ -260,7 +260,6 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               </View>
             )}
           </View>
-        </View>
 
         {/* Feed */}
         {feedItems.length > 0 && (

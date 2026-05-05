@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, Modal, Platform,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
 import { Label } from './UI';
 
 export function Field({ label, children, style }) {
@@ -21,7 +21,7 @@ const inputStyle = {
   borderRadius: RADIUS.sm,
   paddingHorizontal: 12,
   paddingVertical: 10,
-  fontSize: 15,
+  fontSize: SIZES.body,
   fontFamily: 'SourceSans3',
   color: COLOURS.text,
   shadowColor: COLOURS.glassShadow,
@@ -79,7 +79,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
               paddingVertical: 11,
             }]}
           >
-            <Text style={{ fontSize: 15, fontFamily: 'SourceSans3', color: value ? COLOURS.text : COLOURS.textDim }}>
+            <Text style={{ fontSize: SIZES.body, fontFamily: 'SourceSans3', color: value ? COLOURS.text : COLOURS.textDim }}>
               {display}
             </Text>
             <Text style={{ fontSize: 12, color: COLOURS.textDim }}>▾</Text>

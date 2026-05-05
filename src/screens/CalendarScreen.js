@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
 import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
@@ -219,7 +219,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             <View style={{ flexDirection: 'row', marginBottom: 4 }}>
               {DAYS.map((d, i) => (
                 <View key={i} style={{ width: cellSize, alignItems: 'center' }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>{d}</Text>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>{d}</Text>
                 </View>
               ))}
             </View>
@@ -228,7 +228,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             {Array.from({ length: cells.length / 7 }, (_, row) => (
               <View key={row} style={{ flexDirection: 'row' }}>
                 {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
-                  if (!day) return <View key={col} style={{ width: cellSize, height: cellSize + 18 }} />;
+                  if (!day) return <View key={col} style={{ width: cellSize, height: cellSize + 24 }} />;
 
                   const iso        = isoFor(viewYear, viewMonth, day);
                   const daySessions = sessionsByDate[iso] || [];
@@ -244,7 +244,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       activeOpacity={isFuture ? 1 : 0.7}
                       style={{
                         width: cellSize,
-                        height: cellSize + 18,
+                        height: cellSize + 24,
                         alignItems: 'center',
                         justifyContent: 'flex-start',
                         paddingTop: 10,
@@ -259,7 +259,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       {/* Day number */}
                       <Text style={{
                         fontFamily: isToday ? 'SourceSans3-Bold' : 'SourceSans3',
-                        fontSize: 14,
+                        fontSize: SIZES.bodySmall,
                         color: isFuture ? COLOURS.textDim
                           : isToday ? COLOURS.navy
                           : hasData  ? COLOURS.text
@@ -274,11 +274,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                         const joy = daySessions[0].enjoyment;
                         return (
                           <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 8, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: 10 }}>
+                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: SIZES.tiny + 3 }}>
                               {e > 0 ? `+${e}` : e}
                             </Text>
                             {joy ? (
-                              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 8, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: 10 }}>
+                              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: SIZES.tiny + 3 }}>
                                 {joy}
                               </Text>
                             ) : null}

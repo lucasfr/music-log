@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
+import { COLOURS, RADIUS, SIZES, STATUS_COLOURS } from '../theme';
 
 // ─── Glass card ───────────────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ export function SectionTitle({ children, style }) {
   return (
     <Text style={[{
       fontFamily: 'LibreBaskerville-Italic',
-      fontSize: 19,
+      fontSize: SIZES.sectionTitle,
       color: COLOURS.text,
       marginBottom: 14,
       letterSpacing: -0.3,
@@ -66,9 +66,9 @@ export function Label({ children, style }) {
   return (
     <Text style={[{
       fontFamily: 'SourceSans3-Bold',
-      fontSize: 11,
+      fontSize: SIZES.label,
       color: COLOURS.textDim,
-      marginBottom: 5,
+      marginBottom: 6,
       textTransform: 'uppercase',
       letterSpacing: 0.8,
     }, style]}>
@@ -100,7 +100,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           elevation: 5,
           opacity: disabled ? 0.4 : 1,
         }, style]}>
-        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 15, color: COLOURS.text }}>{label}</Text>
+        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.body, color: COLOURS.text }}>{label}</Text>
       </TouchableOpacity>
     );
   }
@@ -121,7 +121,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           elevation: 3,
           opacity: disabled ? 0.4 : 1,
         }, style]}>
-        <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.danger }}>{label}</Text>
+        <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.danger }}>{label}</Text>
       </TouchableOpacity>
     );
   }
@@ -141,7 +141,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
         elevation: 3,
         opacity: disabled ? 0.4 : 1,
       }, style]}>
-      <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -169,7 +169,7 @@ export function StatusPill({ status }) {
       shadowRadius: 6,
       elevation: 2,
     }}>
-      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: c.text }}>{status}</Text>
+      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.label, color: c.text }}>{status}</Text>
     </View>
   );
 }
@@ -189,7 +189,7 @@ export function MetaChip({ label }) {
       shadowRadius: 4,
       elevation: 1,
     }}>
-      <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textMuted }}>{label}</Text>
     </View>
   );
 }
@@ -220,7 +220,7 @@ export function TagCloud({ tags, selected, onToggle }) {
           >
             <Text style={{
               fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3',
-              fontSize: 12,
+              fontSize: SIZES.label,
               color: active ? '#7A3A00' : COLOURS.textMuted,
             }}>
               {t}
