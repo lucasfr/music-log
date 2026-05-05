@@ -70,9 +70,10 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
     : (linkedComp ? linkedComp.title : (item.pieceName || 'Piece'));
 
   return (
-    <BlurView intensity={28} tint="light" style={{
-      borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder,
-      overflow: 'hidden', marginBottom: 10,
+    <View style={{
+      borderRadius: RADIUS.md,
+      marginBottom: 10,
+      backgroundColor: COLOURS.glass,
       shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 3,
     }}>
       {/* Header */}
@@ -115,7 +116,7 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
       </TouchableOpacity>
 
       {open && (
-        <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
+        <View style={{ padding: 14, backgroundColor: 'rgba(255,255,255,0.30)' }}>
 
           {isTech ? (
             <>
@@ -186,6 +187,10 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
             <ZeldaBar emoji="🎵" value={item.feltDifficulty || 0} onChange={v => f('feltDifficulty', v)} />
           </Field>
 
+          <Field label="Liking" style={{ marginBottom: 0 }}>
+            <ZeldaBar emoji="⭐" value={item.liking || 0} onChange={v => f('liking', v)} />
+          </Field>
+
           <Field label="Challenge tags">
             <TagCloud tags={CHALLENGE_TAGS} selected={item.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
@@ -195,7 +200,7 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
           </Field>
         </View>
       )}
-    </BlurView>
+    </View>
   );
 }
 
@@ -227,7 +232,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
   }, [visible, initialDate]);
 
   function addPiece(type = 'repertoire') {
-    setPieces(p => [...p, { id: uid(), type, compositionId: '', pieceName: '', title: '', group: '', feedback: '', assignment: '', isNew: false, section: '', feltDifficulty: 0, challenges: [], progress: [] }]);
+    setPieces(p => [...p, { id: uid(), type, compositionId: '', pieceName: '', title: '', group: '', feedback: '', assignment: '', isNew: false, section: '', feltDifficulty: 0, liking: 0, challenges: [], progress: [] }]);
   }
   function updatePiece(id, val) { setPieces(p => p.map(x => x.id === id ? val : x)); }
   function removePiece(id)      { setPieces(p => p.filter(x => x.id !== id)); }

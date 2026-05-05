@@ -237,6 +237,23 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
 
             <DifficultyPicker value={data.difficulty || 0} onChange={v => f('difficulty', v)} />
 
+            <Field label="Liking">
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ flexDirection: 'row', gap: 2 }}>
+                  {[1,2,3,4,5].map(n => (
+                    <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75}>
+                      <Text style={{ fontSize: 26, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {(data.liking || 0) > 0 && (
+                  <TouchableOpacity onPress={() => f('liking', 0)} activeOpacity={0.7} hitSlop={{ top:8, bottom:8, left:8, right:8 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </Field>
+
             <SectionDivider label="Status" />
             <Field label="Status">
               <View style={{ flexDirection: 'row', gap: 7, flexWrap: 'wrap' }}>
@@ -380,6 +397,13 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, alignItems: 'center' }}>
           {comp.difficulty > 0 && <DifficultyDisplay value={comp.difficulty} />}
+          {comp.liking > 0 && (
+            <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
+              {[1,2,3,4,5].map(n => (
+                <Text key={n} style={{ fontSize: 14, opacity: n <= comp.liking ? 1 : 0.18 }}>⭐</Text>
+              ))}
+            </View>
+          )}
           {comp.grade   ? <MetaChip label={comp.grade} /> : null}
           {comp.keyRoot ? <MetaChip label={`${comp.keyRoot} ${comp.keyMode || ''}`.trim()} /> : null}
           {comp.timeSig ? <MetaChip label={comp.timeSig} /> : null}
@@ -501,7 +525,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
   const blank = () => ({
     id: uid(), title: '', composer: '', arrangement: '', collection: '',
     status: 'learning', grade: '', keyRoot: '', keyMode: '', timeSig: '',
-    difficulty: 0, year: '', tags: [],
+    difficulty: 0, liking: 0, year: '', tags: [],
     dateStarted: '', dateCompleted: '',
     info: '', technicalChallenges: '', musicalFocus: '', practiceNotes: '',
     kerrinNotes: '', teacherFeedback: '', myNotes: '',

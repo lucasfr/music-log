@@ -89,6 +89,7 @@ async function getDB() {
 
   const newCols = [
     'ALTER TABLE compositions ADD COLUMN difficulty INTEGER DEFAULT 0',
+    'ALTER TABLE compositions ADD COLUMN liking INTEGER DEFAULT 0',
     'ALTER TABLE compositions ADD COLUMN arrangement TEXT',
     'ALTER TABLE compositions ADD COLUMN collection TEXT',
     'ALTER TABLE compositions ADD COLUMN year TEXT',
@@ -186,6 +187,7 @@ function rowToComp(r) {
     grade: r.grade, keyRoot: r.key_root, keyMode: r.key_mode, timeSig: r.time_sig,
     info: r.info, kerrinNotes: r.kerrin_notes, myNotes: r.my_notes,
     difficulty: r.difficulty || 0,
+    liking: r.liking || 0,
     arrangement: r.arrangement || '',
     collection: r.collection || '',
     year: r.year || '',
@@ -221,16 +223,17 @@ export async function saveComposition(comp) {
   await db.runAsync(
     `INSERT OR REPLACE INTO compositions
        (id, title, composer, status, grade, key_root, key_mode, time_sig,
-        info, kerrin_notes, my_notes, difficulty, arrangement, collection,
+        info, kerrin_notes, my_notes, difficulty, liking, arrangement, collection,
         year, tags, date_started, date_completed, technical_challenges,
         musical_focus, practice_notes, resource_sheet, resource_recordings,
         resource_tutorials, teacher_feedback, created_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       comp.id, comp.title, comp.composer || null, comp.status || 'learning',
       comp.grade || null, comp.keyRoot || null, comp.keyMode || null, comp.timeSig || null,
       comp.info || null, comp.kerrinNotes || null, comp.myNotes || null,
       comp.difficulty || 0,
+      comp.liking || 0,
       comp.arrangement || null, comp.collection || null, comp.year || null,
       comp.tags?.length ? JSON.stringify(comp.tags) : null,
       comp.dateStarted || null, comp.dateCompleted || null,

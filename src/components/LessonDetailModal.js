@@ -84,9 +84,27 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                       </View>
                     ) : null}
                     {item.assignment ? (
-                      <View style={{ paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}>
+                      <View style={{ paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginTop: item.feedback ? 10 : 0 }}>
                         <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>Assignment</Text>
                         <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{item.assignment}</Text>
+                      </View>
+                    ) : null}
+                    {(item.feltDifficulty || item.liking) ? (
+                      <View style={{ flexDirection: 'row', gap: 12, marginTop: 10 }}>
+                        {item.feltDifficulty ? (
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            {[...Array(5)].map((_, i) => (
+                              <Text key={i} style={{ fontSize: 14, opacity: i < item.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
+                            ))}
+                          </View>
+                        ) : null}
+                        {item.liking ? (
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            {[...Array(5)].map((_, i) => (
+                              <Text key={i} style={{ fontSize: 14, opacity: i < item.liking ? 1 : 0.18 }}>⭐</Text>
+                            ))}
+                          </View>
+                        ) : null}
                       </View>
                     ) : null}
                   </View>
