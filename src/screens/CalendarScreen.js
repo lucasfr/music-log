@@ -13,7 +13,10 @@ import { LessonDetailModal } from '../components/LessonDetailModal';
 const DAYS   = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function isoFor(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -35,7 +38,7 @@ function currentStreak(sessions) {
   let count = 0;
   const d = new Date();
   while (true) {
-    const iso = d.toISOString().slice(0, 10);
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     if (!dateSet.has(iso)) break;
     count++;
     d.setDate(d.getDate() - 1);

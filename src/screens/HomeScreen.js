@@ -26,7 +26,10 @@ function ZeldaMini({ emoji, value, total = 5 }) {
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function energyDotColour(energy) {
   if (energy >= 1)  return COLOURS.red;
