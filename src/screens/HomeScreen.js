@@ -66,18 +66,15 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
                   <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: '#8A1010' }}>🎹 practice</Text>
                 </View>
               </View>
-              {showDate ? (
+              {showDate && session.duration ? (
                 <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 1 }}>
-                  {session.duration ? `${session.duration} min · ` : ''}⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}{session.enjoyment ? `  ❤️ ${session.enjoyment}/5` : ''}
+                  {session.duration} min
                 </Text>
-              ) : (
-                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
-                  {session.duration ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>{session.duration} min</Text> : null}
-                  {session.duration ? <Text style={{ color: COLOURS.textDim, fontSize: 12 }}>·</Text> : null}
-                  <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} />
-                  {session.enjoyment ? <ZeldaMini emoji="❤️" value={session.enjoyment} /> : null}
-                </View>
-              )}
+              ) : null}
+              <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
+                <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} />
+                {session.enjoyment ? <ZeldaMini emoji="❤️" value={session.enjoyment} /> : null}
+              </View>
             </View>
           </View>
           {(techNames.length > 0 || pieceNames.length > 0) && (
