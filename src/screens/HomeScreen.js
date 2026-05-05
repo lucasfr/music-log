@@ -58,9 +58,18 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
                   {fmtDate(session.date)}
                 </Text>
               )}
-              <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: showDate ? 1 : 0 }}>
-                {session.duration ? `${session.duration} min · ` : ''}⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}{session.enjoyment ? `  ❤️ ${session.enjoyment}/5` : ''}
-              </Text>
+              {showDate ? (
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
+                  {session.duration ? `${session.duration} min · ` : ''}⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}{session.enjoyment ? `  ❤️ ${session.enjoyment}/5` : ''}
+                </Text>
+              ) : (
+                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
+                  {session.duration ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>{session.duration} min</Text> : null}
+                  {session.duration ? <Text style={{ color: COLOURS.textDim, fontSize: 12 }}>·</Text> : null}
+                  <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} />
+                  {session.enjoyment ? <ZeldaMini emoji="❤️" value={session.enjoyment} /> : null}
+                </View>
+              )}
             </View>
           </View>
           {(techNames.length > 0 || pieceNames.length > 0) && (
@@ -223,75 +232,17 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </View>
 
         {/* Today card */}
-        <BlurView intensity={50} tint="light" style={{
-          borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 24,
-          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 22, elevation: 6,
-        }}>
-          <View style={{ backgroundColor: COLOURS.glass, padding: 16 }}>
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
+        <View style={{ marginBottom: 16 }}>
+          <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
 
             {hasToday ? (
               <View style={{ gap: 10 }}>
                 {todayLessons.map(l => (
-                  <TouchableOpacity key={l.id} activeOpacity={0.8} onPress={() => setDetailLesson(l)}>
-                    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-                      <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.14)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Lesson · {l.duration} min</Text>
-                      </View>
-                    </View>
-                    {(l.pieces || []).length > 0 && (
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                        {l.pieces.map(p => {
-                          const name = p.compositionId ? (compositions.find(c => c.id === p.compositionId) || {}).title : p.pieceName;
-                          return name ? (
-                            <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                              <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{name}</Text>
-                            </View>
-                          ) : null;
-                        })}
-                      </View>
-                    )}
-                  </TouchableOpacity>
+                  <LessonEntry key={l.id} lesson={l} compositions={compositions} onPress={() => setDetailLesson(l)} showDate={false} />
                 ))}
-
-                {todaySessions.map(s => {
-                  const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
-                  const techNames  = [...new Set((s.segments || []).filter(seg => seg.type === 'technique').map(seg => seg.group || seg.title).filter(Boolean))];
-                  const pieceNames = [...new Set((s.segments || []).filter(seg => seg.type === 'repertoire').map(seg => seg.compositionId ? compName(seg.compositionId) : seg.title).filter(Boolean))];
-                  return (
-                    <TouchableOpacity key={s.id} activeOpacity={0.8} onPress={() => setDetailSession(s)}>
-                      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: (techNames.length || pieceNames.length) ? 6 : 0 }}>
-                        {s.duration ? (
-                          <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.10)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>{s.duration} min</Text>
-                          </View>
-                        ) : null}
-                        <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                          <ZeldaMini emoji="⚡" value={energyToBar(s.energy)} />
-                        </View>
-                        {s.enjoyment ? (
-                          <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                            <ZeldaMini emoji="❤️" value={s.enjoyment} />
-                          </View>
-                        ) : null}
-                      </View>
-                      {(techNames.length > 0 || pieceNames.length > 0) && (
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                          {techNames.map(t => (
-                            <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                              <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
-                            </View>
-                          ))}
-                          {pieceNames.map(p => (
-                            <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                              <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
-                            </View>
-                          ))}
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
+                {todaySessions.map(s => (
+                  <PracticeEntry key={s.id} session={s} compositions={compositions} onPress={() => setDetailSession(s)} showDate={false} />
+                ))}
               </View>
             ) : (
               <View>
@@ -309,7 +260,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               </View>
             )}
           </View>
-        </BlurView>
+        </View>
 
         {/* Feed */}
         {feedItems.length > 0 && (
