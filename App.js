@@ -87,15 +87,18 @@ export default function App() {
   }
 
   const content = (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
+      {/* Background sits absolutely behind everything */}
       <AppBackground />
+
+      {/* Navigator sits on top — transparent background so dot grid shows through each screen */}
       <NavigationContainer
         theme={{
           dark: false,
           colors: {
             primary:      COLOURS.navy,
-            background:   'transparent',
-            card:         'rgba(234,240,245,0.85)',
+            background:   COLOURS.bg,   // solid — stops screens bleeding through each other
+            card:         'rgba(234,240,245,0.92)',
             text:         COLOURS.text,
             border:       COLOURS.glassBorder,
             notification: COLOURS.pink,
@@ -103,12 +106,13 @@ export default function App() {
         }}
       >
         <Tab.Navigator
+          sceneContainerStyle={{ backgroundColor: 'transparent' }} // each screen is transparent so bg shows through
           screenOptions={({ route }) => ({
             headerShown: false,
             tabBarActiveTintColor:   COLOURS.navy,
             tabBarInactiveTintColor: COLOURS.textDim,
             tabBarStyle: {
-              backgroundColor: 'rgba(234,240,245,0.88)',
+              backgroundColor: 'rgba(234,240,245,0.92)',
               borderTopColor:  COLOURS.glassBorder,
               borderTopWidth:  1,
               paddingBottom:   Platform.OS === 'ios' ? 2 : 4,

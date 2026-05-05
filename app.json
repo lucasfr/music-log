@@ -36,6 +36,10 @@
       "orientation": "portrait",
       "scope": "/",
       "startUrl": "/"
-    }
+    },
+    "plugins": [
+      "expo-sqlite",
+      "expo-font"
+    ]
   }
 }
