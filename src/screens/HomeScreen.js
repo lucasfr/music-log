@@ -11,6 +11,19 @@ import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate } from '../utils';
 
+// Energy: DB stores -2..+2, Zelda bar is 1..5
+function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
+
+function ZeldaMini({ emoji, value, total = 5 }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
+      {Array.from({ length: total }, (_, i) => (
+        <Text key={i} style={{ fontSize: 16, opacity: i < value ? 1 : 0.18, transform: [{ scale: i < value ? 1 : 0.88 }] }}>{emoji}</Text>
+      ))}
+    </View>
+  );
+}
+
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
 
 function todayISO() { return new Date().toISOString().slice(0, 10); }
@@ -268,14 +281,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                       <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>{todaySession.duration} min</Text>
                     </View>
                   ) : null}
-                  <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>
-                      ⚡ {todaySession.energy > 0 ? `+${todaySession.energy}` : todaySession.energy} · {ENERGY_LABELS[String(todaySession.energy)]}
-                    </Text>
+                  <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                    <ZeldaMini emoji="⚡" value={energyToBar(todaySession.energy)} />
                   </View>
                   {todaySession.enjoyment ? (
-                    <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>❤️ {todaySession.enjoyment}/5</Text>
+                    <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                      <ZeldaMini emoji="❤️" value={todaySession.enjoyment} />
                     </View>
                   ) : null}
                 </View>
