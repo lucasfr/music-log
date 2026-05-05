@@ -53,8 +53,8 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
         shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
       }}>
         <View style={{ backgroundColor: COLOURS.accentLight, padding: 14 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <View style={{ width: 3, height: 36, borderRadius: 2, backgroundColor: energyDotColour(session.energy) }} />
+          <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: 10, marginBottom: 8 }}>
+            <View style={{ width: 4, borderRadius: 2, backgroundColor: energyDotColour(session.energy), alignSelf: 'stretch' }} />
             <View style={{ flex: 1 }}>
               {showDate && (
                 <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
@@ -118,8 +118,8 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
         shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
       }}>
         <View style={{ backgroundColor: COLOURS.accent2Light, padding: 14 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <View style={{ width: 3, height: 36, borderRadius: 2, backgroundColor: COLOURS.amber }} />
+          <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: 10, marginBottom: 8 }}>
+            <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 {showDate && (
