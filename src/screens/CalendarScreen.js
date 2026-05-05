@@ -268,19 +268,21 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                         {day}
                       </Text>
 
-                      {/* Score number below day */}
+                      {/* Score numbers below day */}
                       {daySessions.length > 0 && (() => {
                         const e = daySessions[0].energy;
+                        const joy = daySessions[0].enjoyment;
                         return (
-                          <Text style={{
-                            fontFamily: 'SourceSans3-Bold',
-                            fontSize: 8,
-                            color: COLOURS.red,
-                            opacity: energyOpacity(e),
-                            lineHeight: 10,
-                          }}>
-                            {e > 0 ? `+${e}` : e}
-                          </Text>
+                          <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 8, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: 10 }}>
+                              {e > 0 ? `+${e}` : e}
+                            </Text>
+                            {joy ? (
+                              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 8, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: 10 }}>
+                                {joy}
+                              </Text>
+                            ) : null}
+                          </View>
                         );
                       })()}
 
