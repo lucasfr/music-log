@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Modal,
-  Alert, KeyboardAvoidingView, Platform,
+  Alert, KeyboardAvoidingView, Platform, PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -12,51 +12,64 @@ import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate } from '../utils';
 
 // ─── Zelda-style 🎹 difficulty ───────────────────────────────────────────────
+// No boxes — tightly packed emoji row, hold + slide to adjust
 
-function PianoCell({ filled, onPress }) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.75}
-      hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
-      style={{
-        width: 38,
-        height: 38,
-        borderRadius: RADIUS.sm,
-        borderWidth: 1.5,
-        borderColor: filled ? COLOURS.navy : COLOURS.glassBorder,
-        backgroundColor: filled ? COLOURS.navy : 'rgba(255,255,255,0.35)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: filled ? COLOURS.navy : 'transparent',
-        shadowOffset: { width: 0, height: filled ? 3 : 0 },
-        shadowOpacity: filled ? 0.35 : 0,
-        shadowRadius: filled ? 6 : 0,
-        elevation: filled ? 3 : 0,
-      }}
-    >
-      <Text style={{ fontSize: 18, opacity: filled ? 1 : 0.22 }}>🎹</Text>
-    </TouchableOpacity>
-  );
-}
+const CELL_W = 36;
+const TOTAL_CELLS = 5;
 
 function DifficultyPicker({ value, onChange }) {
+  const containerRef = useRef(null);
+  const containerX   = useRef(0);
+
+  function valueFromX(x) {
+    const raw = Math.ceil((x - containerX.current) / CELL_W);
+    return Math.max(0, Math.min(TOTAL_CELLS, raw));
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder:  () => true,
+      onPanResponderGrant: (e) => {
+        onChange(valueFromX(e.nativeEvent.pageX));
+      },
+      onPanResponderMove: (e) => {
+        onChange(valueFromX(e.nativeEvent.pageX));
+      },
+    })
+  ).current;
+
   return (
     <Field label="Difficulty">
-      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-        {[1, 2, 3, 4, 5].map(n => (
-          <PianoCell
-            key={n}
-            filled={n <= value}
-            onPress={() => onChange(value === n ? 0 : n)}
-          />
-        ))}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View
+          ref={containerRef}
+          onLayout={() => {
+            containerRef.current?.measure((_x, _y, _w, _h, pageX) => {
+              containerX.current = pageX;
+            });
+          }}
+          {...panResponder.panHandlers}
+          style={{ flexDirection: 'row', gap: 2 }}
+        >
+          {[1, 2, 3, 4, 5].map(n => (
+            <Text
+              key={n}
+              style={{
+                fontSize: 26,
+                opacity: n <= value ? 1 : 0.18,
+                transform: [{ scale: n <= value ? 1 : 0.88 }],
+              }}
+            >
+              🎹
+            </Text>
+          ))}
+        </View>
         {value > 0 && (
           <TouchableOpacity
             onPress={() => onChange(0)}
             activeOpacity={0.7}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={{ marginLeft: 4 }}
           >
             <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
           </TouchableOpacity>
@@ -295,23 +308,18 @@ function CompModal({ comp, onSave, onClose }) {
 function DifficultyDisplay({ value }) {
   if (!value) return null;
   return (
-    <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+    <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
       {[1, 2, 3, 4, 5].map(n => (
-        <View
+        <Text
           key={n}
           style={{
-            width: 22,
-            height: 22,
-            borderRadius: 5,
-            borderWidth: 1.5,
-            borderColor: n <= value ? COLOURS.navy : COLOURS.glassBorder,
-            backgroundColor: n <= value ? COLOURS.navy : 'rgba(255,255,255,0.35)',
-            alignItems: 'center',
-            justifyContent: 'center',
+            fontSize: 14,
+            opacity: n <= value ? 1 : 0.18,
+            transform: [{ scale: n <= value ? 1 : 0.88 }],
           }}
         >
-          <Text style={{ fontSize: 11, opacity: n <= value ? 1 : 0.2 }}>🎹</Text>
-        </View>
+          🎹
+        </Text>
       ))}
     </View>
   );
