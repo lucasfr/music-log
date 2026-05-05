@@ -118,6 +118,63 @@ function TagInput({ value = [], onChange }) {
   );
 }
 
+// ─── Autocomplete field ───────────────────────────────────────────────────────
+
+function AutocompleteField({ label, value, onChange, placeholder, suggestions }) {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const filtered = suggestions.filter(s =>
+    s.toLowerCase().includes(value.toLowerCase()) && s.toLowerCase() !== value.toLowerCase()
+  );
+  const showList = showSuggestions && value.length > 0 && filtered.length > 0;
+
+  return (
+    <Field label={label}>
+      <View>
+        <TextF
+          value={value}
+          onChange={v => { onChange(v); setShowSuggestions(true); }}
+          placeholder={placeholder}
+          style={showList ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderBottomWidth: 0 } : undefined}
+        />
+        {showList && (
+          <View style={{
+            borderWidth: 1,
+            borderTopWidth: 0,
+            borderColor: COLOURS.glassBorder,
+            borderBottomLeftRadius: RADIUS.sm,
+            borderBottomRightRadius: RADIUS.sm,
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            overflow: 'hidden',
+            shadowColor: COLOURS.glassShadow,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 1,
+            shadowRadius: 8,
+            elevation: 4,
+            zIndex: 100,
+          }}>
+            {filtered.slice(0, 5).map((s, i) => (
+              <TouchableOpacity
+                key={s}
+                onPress={() => { onChange(s); setShowSuggestions(false); }}
+                activeOpacity={0.75}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                  borderTopWidth: i > 0 ? 1 : 0,
+                  borderTopColor: COLOURS.glassBorder,
+                }}
+              >
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.text }}>{s}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
+    </Field>
+  );
+}
+
 // ─── Section divider ─────────────────────────────────────────────────────────
 
 function SectionDivider({ label }) {
@@ -132,7 +189,7 @@ function SectionDivider({ label }) {
 
 // ─── Composition modal ────────────────────────────────────────────────────────
 
-function CompModal({ comp, onSave, onClose }) {
+function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSuggestions }) {
   const [data, setData] = useState({ ...comp });
   const f = (k, v) => setData(d => ({ ...d, [k]: v }));
 
@@ -169,17 +226,25 @@ function CompModal({ comp, onSave, onClose }) {
                 </Field>
               </View>
               <View style={{ flex: 2 }}>
-                <Field label="Composer">
-                  <TextF value={data.composer || ''} onChange={v => f('composer', v)} placeholder="e.g. Satie" />
-                </Field>
+                <AutocompleteField
+                  label="Composer"
+                  value={data.composer || ''}
+                  onChange={v => f('composer', v)}
+                  placeholder="e.g. Satie"
+                  suggestions={composerSuggestions}
+                />
               </View>
             </View>
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1 }}>
-                <Field label="Arrangement / arrangers">
-                  <TextF value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Rachmaninoff" />
-                </Field>
+                <AutocompleteField
+                  label="Arrangement / arrangers"
+                  value={data.arrangement || ''}
+                  onChange={v => f('arrangement', v)}
+                  placeholder="e.g. Rachmaninoff"
+                  suggestions={arrangementSuggestions}
+                />
               </View>
               <View style={{ flex: 1 }}>
                 <Field label="Collection">
@@ -473,6 +538,18 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
+  // Autocomplete suggestion lists derived from existing entries
+  const composerSuggestions = [...new Set(
+    compositions.map(c => c.composer).filter(Boolean).sort()
+  )];
+  const arrangementSuggestions = [...new Set(
+    compositions
+      .map(c => c.arrangement).filter(Boolean)
+      .flatMap(a => a.split(',').map(s => s.trim()))
+      .filter(Boolean)
+      .sort()
+  )];
+
   const blank = () => ({
     id: uid(), title: '', composer: '', arrangement: '', collection: '',
     status: 'learning', grade: '', keyRoot: '', keyMode: '', timeSig: '',
@@ -523,7 +600,13 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
       </ScrollView>
 
       {modal && (
-        <CompModal comp={modal} onSave={c => { onSave(c); setModal(null); }} onClose={() => setModal(null)} />
+        <CompModal
+          comp={modal}
+          onSave={c => { onSave(c); setModal(null); }}
+          onClose={() => setModal(null)}
+          composerSuggestions={composerSuggestions}
+          arrangementSuggestions={arrangementSuggestions}
+        />
       )}
     </SafeAreaView>
   );
