@@ -276,12 +276,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                 </View>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
                   {todayTech.map(t => (
-                    <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.accentMid }}>
+                    <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                       <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
                     </View>
                   ))}
                   {todayPieces.map(p => (
-                    <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.accentMid }}>
+                    <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                       <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
                     </View>
                   ))}
