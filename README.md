@@ -19,13 +19,16 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 
 ## ✨ Features
 
-- 📋 **Session logging** — date, energy level (−2 to +2), total duration, and unlimited segments
-- 🎼 **Segment types** — technique (Hanon, Scales, Arpeggios, Sight-reading, Technical exercise) and repertoire, each with notes, challenge tags, and progress tags
-- 🗂️ **Composition library** — per-piece tracking of status (learning / consolidating / performance-ready), key, time signature, grade estimate, teacher notes, personal notes, and full practice session history
+- 🏠 **Home screen** — today's session summary card and a scrollable journal feed of past sessions, each expandable into full detail
+- 📅 **Calendar view** — monthly grid with practiced-day markers, month stats (sessions, minutes, avg energy), and current streak; tap any day to log or review
+- ⚡ **Zelda-style rating bars** — energy (⚡) and enjoyment (❤️) rated 1–5 by tap or hold-and-slide, per session; felt difficulty (🎵) rated per segment
+- 🎼 **Segment types** — technique (Hanon, Scales, Arpeggios, Sight-reading, Technical exercise) and repertoire, each with notes, felt difficulty, challenge tags, and progress tags
+- 🗂️ **Composition library** — per-piece tracking of status, 🎹 difficulty (Zelda-style, tap or slide), key, time signature, grade, arrangement, collection, year, tags, dates, teacher notes, study notes (technical challenges, musical focus, practice notes), teacher feedback, resources, and full session history across five tabs
 - 📊 **Stats** — 30-day totals, day streak, 14-day activity chart, most-practiced pieces, and library breakdown by status
-- 📤 **JSON export** — share any session as a structured JSON file via the native share sheet or browser download
-- 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; no network required after install
-- 🌐 **PWA-ready** — installable from any browser, service worker caching, Netlify deploy
+- 📤 **JSON export** — share any session as a structured JSON file via the native share sheet (iOS/Android) or browser download (web)
+- 🔍 **Autocomplete** — composer and arranger fields suggest names from existing entries as you type
+- 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; no account or network required
+- 🌐 **PWA-ready** — installable from any browser including iOS Safari, service worker caching, Netlify deploy
 
 ---
 
@@ -37,17 +40,21 @@ music-log/
 ├── app.json                      # Expo config + PWA metadata
 ├── netlify.toml                  # Netlify build config
 ├── web/
+│   ├── index.html                # Custom HTML template with Apple touch icon tags
 │   └── service-worker.js         # PWA cache-first service worker
 ├── assets/
 │   ├── icon.png                  # App icon (1024×1024, crotchet on navy)
 │   ├── adaptive-icon.png         # Android adaptive icon
 │   ├── splash-icon.png           # Splash screen
-│   └── favicon.png               # Web favicon
+│   ├── favicon.png               # Web favicon
+│   ├── apple-touch-icon.png      # iOS PWA home screen icon (180×180)
+│   ├── apple-touch-icon-152.png  # iOS PWA icon (152×152)
+│   └── apple-touch-icon-120.png  # iOS PWA icon (120×120)
 └── src/
     ├── constants.js              # Tag lists, keys, grades, status options
     ├── utils.js                  # uid, date helpers
     ├── theme/
-    │   └── index.js              # Colour tokens, radius, status colours
+    │   └── index.js              # Colour tokens (#213C51 navy palette), radius
     ├── db/
     │   ├── index.js              # SQLite (native) + IndexedDB (web) data layer
     │   └── hooks.js              # useSessions, useCompositions React hooks
@@ -55,12 +62,14 @@ music-log/
     │   ├── Background.js         # Dot-grid SVG background
     │   ├── UI.js                 # GlassCard, Btn, TagCloud, StatusPill, etc.
     │   ├── Form.js               # TextF, NumberF, SelectF (platform-adaptive picker)
-    │   └── SegmentEditor.js      # Collapsible technique / repertoire segment editor
+    │   ├── SegmentEditor.js      # Collapsible technique / repertoire segment editor
+    │   ├── LogModal.js           # Session log form (pageSheet modal)
+    │   └── SessionDetailModal.js # Read-only session detail with export + delete
     ├── screens/
-    │   ├── LogScreen.js          # Session logging
-    │   ├── CompositionsScreen.js # Piece library
-    │   ├── HistoryScreen.js      # Past sessions + JSON export
-    │   └── StatsScreen.js        # Overview and charts
+    │   ├── HomeScreen.js         # Journal feed + today summary + FAB
+    │   ├── CalendarScreen.js     # Monthly calendar with streak and month stats
+    │   ├── CompositionsScreen.js # Piece library with full composition template
+    │   └── StatsScreen.js        # Overview, charts, and library breakdown
     └── utils/
         └── export.js             # JSON export: Blob download (web) / share sheet (native)
 ```
