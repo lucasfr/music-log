@@ -62,7 +62,7 @@ async function getDB() {
     CREATE TABLE IF NOT EXISTS segments (
       id TEXT PRIMARY KEY, session_id TEXT NOT NULL, type TEXT NOT NULL,
       title TEXT, group_name TEXT, composition_id TEXT, section TEXT,
-      duration INTEGER, notes TEXT, challenges TEXT, progress TEXT,
+      duration INTEGER, notes TEXT, challenges TEXT, progress TEXT, felt_difficulty INTEGER,
       FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
     );
 
@@ -76,6 +76,7 @@ async function getDB() {
 
   // Migrations for sessions
   try { await _db.execAsync('ALTER TABLE sessions ADD COLUMN enjoyment INTEGER'); } catch (_) {}
+  try { await _db.execAsync('ALTER TABLE segments ADD COLUMN felt_difficulty INTEGER'); } catch (_) {}
 
   // Migrations for compositions — add new columns safely (catch errors for existing columns)
   const newCols = [
@@ -125,6 +126,7 @@ export async function getAllSessions() {
         group: seg.group_name,
         compositionId: seg.composition_id,
         challenges: seg.challenges ? JSON.parse(seg.challenges) : [],
+        feltDifficulty: seg.felt_difficulty ?? null,
         progress:   seg.progress   ? JSON.parse(seg.progress)   : [],
       })),
     });
@@ -151,12 +153,13 @@ export async function saveSession(session) {
   for (const seg of session.segments || []) {
     await db.runAsync(
       `INSERT INTO segments (id, session_id, type, title, group_name, composition_id,
-        section, duration, notes, challenges, progress)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        section, duration, notes, challenges, progress, felt_difficulty)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [seg.id, session.id, seg.type, seg.title || null, seg.group || null,
        seg.compositionId || null, seg.section || null,
        seg.duration ? Number(seg.duration) : null, seg.notes || null,
-       JSON.stringify(seg.challenges || []), JSON.stringify(seg.progress || [])]
+       JSON.stringify(seg.challenges || []), JSON.stringify(seg.progress || []),
+       seg.feltDifficulty || null]
     );
   }
 }

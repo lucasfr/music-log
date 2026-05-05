@@ -1,10 +1,58 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, PanResponder } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
 import { TECH_GROUPS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
+
+// ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
+
+const CELL_W = 36;
+const CELLS  = 5;
+
+function ZeldaBar({ label, emoji, value, onChange }) {
+  const containerRef = useRef(null);
+  const containerX   = useRef(0);
+
+  function valueFromX(x) {
+    const raw = Math.ceil((x - containerX.current) / CELL_W);
+    return Math.max(1, Math.min(CELLS, raw));
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder:  () => true,
+      onPanResponderGrant: e => onChange(valueFromX(e.nativeEvent.pageX)),
+      onPanResponderMove:  e => onChange(valueFromX(e.nativeEvent.pageX)),
+    })
+  ).current;
+
+  return (
+    <View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View
+          ref={containerRef}
+          onLayout={() => containerRef.current?.measure((_x, _y, _w, _h, pageX) => { containerX.current = pageX; })}
+          {...panResponder.panHandlers}
+          style={{ flexDirection: 'row', gap: 2 }}
+        >
+          {[1, 2, 3, 4, 5].map(n => (
+            <Text key={n} style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>
+              {emoji}
+            </Text>
+          ))}
+        </View>
+        {value > 0 && (
+          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
 
 export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
   const [open, setOpen] = useState(true);
@@ -138,6 +186,10 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
 
           <Field label="Notes">
             <TextF value={segment.notes || ''} onChange={v => field('notes', v)} placeholder="Observations, what clicked, what to work on…" multiline />
+          </Field>
+
+          <Field label="Felt difficulty">
+            <ZeldaBar emoji="🎵" value={segment.feltDifficulty || 0} onChange={v => field('feltDifficulty', v)} />
           </Field>
 
           <Field label="Challenge tags">
