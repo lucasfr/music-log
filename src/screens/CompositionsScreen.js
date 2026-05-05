@@ -11,30 +11,53 @@ import { Field, TextF, SelectF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate } from '../utils';
 
-// ─── Difficulty picker ────────────────────────────────────────────────────────
+// ─── Zelda-style 🎹 difficulty ───────────────────────────────────────────────
+
+function PianoCell({ filled, onPress }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.75}
+      hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: RADIUS.sm,
+        borderWidth: 1.5,
+        borderColor: filled ? COLOURS.navy : COLOURS.glassBorder,
+        backgroundColor: filled ? COLOURS.navy : 'rgba(255,255,255,0.35)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: filled ? COLOURS.navy : 'transparent',
+        shadowOffset: { width: 0, height: filled ? 3 : 0 },
+        shadowOpacity: filled ? 0.35 : 0,
+        shadowRadius: filled ? 6 : 0,
+        elevation: filled ? 3 : 0,
+      }}
+    >
+      <Text style={{ fontSize: 18, opacity: filled ? 1 : 0.22 }}>🎹</Text>
+    </TouchableOpacity>
+  );
+}
 
 function DifficultyPicker({ value, onChange }) {
   return (
     <Field label="Difficulty">
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
         {[1, 2, 3, 4, 5].map(n => (
-          <TouchableOpacity
+          <PianoCell
             key={n}
+            filled={n <= value}
             onPress={() => onChange(value === n ? 0 : n)}
-            activeOpacity={0.7}
-            style={{
-              paddingHorizontal: 10, paddingVertical: 8,
-              borderRadius: RADIUS.sm, borderWidth: 1,
-              borderColor: n <= value ? COLOURS.navy : COLOURS.glassBorder,
-              backgroundColor: n <= value ? COLOURS.accentLight : 'rgba(255,255,255,0.50)',
-            }}
-          >
-            <Text style={{ fontSize: 16 }}>🎹</Text>
-          </TouchableOpacity>
+          />
         ))}
         {value > 0 && (
-          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7}
-            style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center' }}>
+          <TouchableOpacity
+            onPress={() => onChange(0)}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{ marginLeft: 4 }}
+          >
             <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
           </TouchableOpacity>
         )}
@@ -272,9 +295,25 @@ function CompModal({ comp, onSave, onClose }) {
 function DifficultyDisplay({ value }) {
   if (!value) return null;
   return (
-    <Text style={{ fontSize: 12, letterSpacing: 1 }}>
-      {'🎹'.repeat(value)}
-    </Text>
+    <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+      {[1, 2, 3, 4, 5].map(n => (
+        <View
+          key={n}
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: 5,
+            borderWidth: 1.5,
+            borderColor: n <= value ? COLOURS.navy : COLOURS.glassBorder,
+            backgroundColor: n <= value ? COLOURS.navy : 'rgba(255,255,255,0.35)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 11, opacity: n <= value ? 1 : 0.2 }}>🎹</Text>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -336,7 +375,6 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
       {expanded && (
         <View style={{ borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
-          {/* Tabs — scrollable row */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row' }}>
               {TABS.map(t => (
