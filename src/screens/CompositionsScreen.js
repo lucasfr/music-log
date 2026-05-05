@@ -6,10 +6,95 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
-import { GlassCard, Card, SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState } from '../components/UI';
+import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState } from '../components/UI';
 import { Field, TextF, SelectF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate } from '../utils';
+
+// ─── Difficulty picker ────────────────────────────────────────────────────────
+
+function DifficultyPicker({ value, onChange }) {
+  return (
+    <Field label="Difficulty">
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <TouchableOpacity
+            key={n}
+            onPress={() => onChange(value === n ? 0 : n)}
+            activeOpacity={0.7}
+            style={{
+              paddingHorizontal: 10, paddingVertical: 8,
+              borderRadius: RADIUS.sm, borderWidth: 1,
+              borderColor: n <= value ? COLOURS.navy : COLOURS.glassBorder,
+              backgroundColor: n <= value ? COLOURS.accentLight : 'rgba(255,255,255,0.50)',
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>🎹</Text>
+          </TouchableOpacity>
+        ))}
+        {value > 0 && (
+          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7}
+            style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center' }}>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </Field>
+  );
+}
+
+// ─── Tag input ────────────────────────────────────────────────────────────────
+
+function TagInput({ value = [], onChange }) {
+  const [input, setInput] = useState('');
+
+  function addTag() {
+    const tag = input.trim().toLowerCase().replace(/\s+/g, '-');
+    if (tag && !value.includes(tag)) onChange([...value, tag]);
+    setInput('');
+  }
+
+  return (
+    <Field label="Tags">
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+        {value.map(t => (
+          <TouchableOpacity
+            key={t}
+            onPress={() => onChange(value.filter(x => x !== t))}
+            activeOpacity={0.75}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accentLight, borderWidth: 1, borderColor: COLOURS.glassBorder }}
+          >
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.navy }}>{t}</Text>
+            <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <TextF value={input} onChange={setInput} placeholder="Add tag…" />
+        </View>
+        <TouchableOpacity onPress={addTag} activeOpacity={0.8}
+          style={{ paddingHorizontal: 14, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: COLOURS.navy, justifyContent: 'center' }}>
+          <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#fff' }}>Add</Text>
+        </TouchableOpacity>
+      </View>
+    </Field>
+  );
+}
+
+// ─── Section divider ─────────────────────────────────────────────────────────
+
+function SectionDivider({ label }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14, marginTop: 8 }}>
+      <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorder }} />
+      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>{label}</Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorder }} />
+    </View>
+  );
+}
+
+// ─── Composition modal ────────────────────────────────────────────────────────
 
 function CompModal({ comp, onSave, onClose }) {
   const [data, setData] = useState({ ...comp });
@@ -23,8 +108,7 @@ function CompModal({ comp, onSave, onClose }) {
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet">
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
-        {/* Header */}
-        <SafeAreaView edges={['top']} style={{ backgroundColor: COLOURS.glass }}>
+        <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>
@@ -38,20 +122,61 @@ function CompModal({ comp, onSave, onClose }) {
         </SafeAreaView>
 
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+
+            {/* ── Identity ── */}
+            <SectionDivider label="Identity" />
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 3 }}>
                 <Field label="Title *">
                   <TextF value={data.title} onChange={v => f('title', v)} placeholder="e.g. Gymnopédie No. 1" />
                 </Field>
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 2 }}>
                 <Field label="Composer">
                   <TextF value={data.composer || ''} onChange={v => f('composer', v)} placeholder="e.g. Satie" />
                 </Field>
               </View>
             </View>
 
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Field label="Arrangement / arrangers">
+                  <TextF value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Kerrin Tatwood" />
+                </Field>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Field label="Collection">
+                  <TextF value={data.collection || ''} onChange={v => f('collection', v)} placeholder="e.g. For Children Vol. 1" />
+                </Field>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Field label="Year">
+                  <TextF value={data.year || ''} onChange={v => f('year', v)} placeholder="e.g. 1888" />
+                </Field>
+              </View>
+              <View style={{ flex: 2 }}>
+                <SelectF label="Grade estimate" value={data.grade || ''} onChange={v => f('grade', v)} options={GRADES} placeholder="— Unknown —" />
+              </View>
+            </View>
+
+            <TagInput value={data.tags || []} onChange={v => f('tags', v)} />
+
+            {/* ── Musical properties ── */}
+            <SectionDivider label="Musical properties" />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flex: 1 }}><SelectF label="Key"      value={data.keyRoot || ''} onChange={v => f('keyRoot', v)} options={KEYS}      placeholder="—" /></View>
+              <View style={{ flex: 1 }}><SelectF label="Mode"     value={data.keyMode || ''} onChange={v => f('keyMode', v)} options={MODES}     placeholder="—" /></View>
+              <View style={{ flex: 1 }}><SelectF label="Time sig" value={data.timeSig || ''} onChange={v => f('timeSig', v)} options={TIME_SIGS} placeholder="—" /></View>
+            </View>
+
+            <DifficultyPicker value={data.difficulty || 0} onChange={v => f('difficulty', v)} />
+
+            {/* ── Status & dates ── */}
+            <SectionDivider label="Status" />
             <Field label="Status">
               <View style={{ flexDirection: 'row', gap: 7, flexWrap: 'wrap' }}>
                 {STATUS_OPTIONS.map(s => {
@@ -76,31 +201,90 @@ function CompModal({ comp, onSave, onClose }) {
               </View>
             </Field>
 
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <View style={{ flex: 1 }}><SelectF label="Key"      value={data.keyRoot || ''} onChange={v => f('keyRoot', v)} options={KEYS}      placeholder="—" /></View>
-              <View style={{ flex: 1 }}><SelectF label="Mode"     value={data.keyMode || ''} onChange={v => f('keyMode', v)} options={MODES}     placeholder="—" /></View>
-              <View style={{ flex: 1 }}><SelectF label="Time sig" value={data.timeSig || ''} onChange={v => f('timeSig', v)} options={TIME_SIGS} placeholder="—" /></View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Field label="Date started">
+                  <TextF value={data.dateStarted || ''} onChange={v => f('dateStarted', v)} placeholder="YYYY-MM-DD" />
+                </Field>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Field label="Date completed">
+                  <TextF value={data.dateCompleted || ''} onChange={v => f('dateCompleted', v)} placeholder="YYYY-MM-DD" />
+                </Field>
+              </View>
             </View>
 
-            <SelectF label="Grade estimate" value={data.grade || ''} onChange={v => f('grade', v)} options={GRADES} placeholder="— Unknown —" />
-
+            {/* ── About ── */}
+            <SectionDivider label="About" />
             <Field label="About this piece">
-              <TextF value={data.info || ''} onChange={v => f('info', v)} placeholder="Style, context, why you're learning it…" multiline />
+              <TextF value={data.info || ''} onChange={v => f('info', v)} placeholder="Style, context, history, why you're learning it…" multiline />
             </Field>
 
+            {/* ── Study notes ── */}
+            <SectionDivider label="Study notes" />
+            <Field label="Technical challenges">
+              <TextF value={data.technicalChallenges || ''} onChange={v => f('technicalChallenges', v)} placeholder="Hand coordination, fingering, rhythm…" multiline />
+            </Field>
+            <Field label="Musical focus areas">
+              <TextF value={data.musicalFocus || ''} onChange={v => f('musicalFocus', v)} placeholder="Phrasing, dynamics, character…" multiline />
+            </Field>
+            <Field label="Practice notes">
+              <TextF value={data.practiceNotes || ''} onChange={v => f('practiceNotes', v)} placeholder="Approaches, methods, what works…" multiline />
+            </Field>
+
+            {/* ── Teacher & feedback ── */}
+            <SectionDivider label="Teacher" />
             <Field label="Teacher's notes / assignment">
               <TextF value={data.kerrinNotes || ''} onChange={v => f('kerrinNotes', v)} placeholder="Teacher feedback, what to focus on…" multiline />
             </Field>
+            <Field label="Teacher feedback log">
+              <TextF value={data.teacherFeedback || ''} onChange={v => f('teacherFeedback', v)} placeholder="Feedback from lessons over time…" multiline />
+            </Field>
 
+            {/* ── My notes ── */}
+            <SectionDivider label="My notes" />
             <Field label="My notes" style={{ marginBottom: 0 }}>
               <TextF value={data.myNotes || ''} onChange={v => f('myNotes', v)} placeholder="Your own observations, discoveries…" multiline />
             </Field>
 
-            <Btn label="Save piece" variant="primary" onPress={handleSave} style={{ marginTop: 20 }} />
+            {/* ── Resources ── */}
+            <SectionDivider label="Resources" />
+            <Field label="Sheet music source">
+              <TextF value={data.resourceSheet || ''} onChange={v => f('resourceSheet', v)} placeholder="Where the score is from…" />
+            </Field>
+            <Field label="Recording references">
+              <TextF value={data.resourceRecordings || ''} onChange={v => f('resourceRecordings', v)} placeholder="Reference recordings, performers…" multiline />
+            </Field>
+            <Field label="Tutorial videos" style={{ marginBottom: 0 }}>
+              <TextF value={data.resourceTutorials || ''} onChange={v => f('resourceTutorials', v)} placeholder="YouTube links, tutorial notes…" multiline />
+            </Field>
+
+            <Btn label="Save piece" variant="primary" onPress={handleSave} style={{ marginTop: 24 }} />
           </ScrollView>
         </KeyboardAvoidingView>
       </View>
     </Modal>
+  );
+}
+
+// ─── Composition card ─────────────────────────────────────────────────────────
+
+function DifficultyDisplay({ value }) {
+  if (!value) return null;
+  return (
+    <Text style={{ fontSize: 12, letterSpacing: 1 }}>
+      {'🎹'.repeat(value)}
+    </Text>
+  );
+}
+
+function NoteSection({ label, value }) {
+  if (!value) return null;
+  return (
+    <View style={{ marginBottom: 14 }}>
+      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>{label}</Text>
+      <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22 }}>{value}</Text>
+    </View>
   );
 }
 
@@ -110,60 +294,61 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
   const compSessions = sessions
     .filter(s => (s.segments || []).some(sg => sg.compositionId === comp.id))
-    .slice(0, 8);
+    .slice(0, 10);
+
+  const TABS = ['details', 'notes', 'study', 'resources', 'sessions'];
 
   return (
-    <BlurView
-      intensity={32}
-      tint="light"
-      style={{
-        borderRadius: RADIUS.md,
-        borderWidth: 1,
-        borderColor: COLOURS.glassBorder,
-        overflow: 'hidden',
-        marginBottom: 12,
-        shadowColor: COLOURS.glassShadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 1,
-        shadowRadius: 14,
-        elevation: 4,
-      }}
-    >
-      <TouchableOpacity
-        onPress={() => setExpanded(e => !e)}
-        activeOpacity={0.8}
-        style={{ padding: 14, backgroundColor: COLOURS.glass }}
-      >
+    <BlurView intensity={32} tint="light" style={{
+      borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder,
+      overflow: 'hidden', marginBottom: 12,
+      shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 14, elevation: 4,
+    }}>
+      <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.8} style={{ padding: 14, backgroundColor: COLOURS.glass }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 18, color: COLOURS.text, marginBottom: 3 }}>{comp.title}</Text>
+            <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 18, color: COLOURS.text, marginBottom: 2 }}>{comp.title}</Text>
             {comp.composer ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.textMuted }}>{comp.composer}</Text> : null}
+            {comp.arrangement ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>arr. {comp.arrangement}</Text> : null}
           </View>
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginLeft: 10 }}>
+          <View style={{ alignItems: 'flex-end', gap: 6, marginLeft: 10 }}>
             <StatusPill status={comp.status} />
             <Text style={{ fontSize: 11, color: COLOURS.textDim }}>{expanded ? '▲' : '▼'}</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, alignItems: 'center' }}>
+          {comp.difficulty > 0 && <DifficultyDisplay value={comp.difficulty} />}
           {comp.grade   ? <MetaChip label={comp.grade} /> : null}
           {comp.keyRoot ? <MetaChip label={`${comp.keyRoot} ${comp.keyMode || ''}`.trim()} /> : null}
           {comp.timeSig ? <MetaChip label={comp.timeSig} /> : null}
+          {comp.collection ? <MetaChip label={comp.collection} /> : null}
+          {(comp.tags || []).map(t => <MetaChip key={t} label={t} />)}
         </View>
+
+        {(comp.dateStarted || comp.dateCompleted) && (
+          <View style={{ flexDirection: 'row', gap: 16, marginTop: 8 }}>
+            {comp.dateStarted ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Started {comp.dateStarted}</Text> : null}
+            {comp.dateCompleted ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Completed {comp.dateCompleted}</Text> : null}
+          </View>
+        )}
       </TouchableOpacity>
 
       {expanded && (
         <View style={{ borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
-          {/* Tabs */}
-          <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
-            {['details', 'notes', 'sessions'].map(t => (
-              <TouchableOpacity key={t} onPress={() => setTab(t)}
-                style={{ flex: 1, paddingVertical: 11, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: tab === t ? COLOURS.navy : 'transparent' }}>
-                <Text style={{ fontFamily: tab === t ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 13, color: tab === t ? COLOURS.navy : COLOURS.textMuted }}>
-                  {t}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {/* Tabs — scrollable row */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
+            <View style={{ flexDirection: 'row' }}>
+              {TABS.map(t => (
+                <TouchableOpacity key={t} onPress={() => setTab(t)}
+                  style={{ paddingVertical: 11, paddingHorizontal: 16, borderBottomWidth: 2, borderBottomColor: tab === t ? COLOURS.navy : 'transparent' }}>
+                  <Text style={{ fontFamily: tab === t ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 13, color: tab === t ? COLOURS.navy : COLOURS.textMuted }}>
+                    {t}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
 
           <View style={{ padding: 14 }}>
             {tab === 'details' && (
@@ -181,25 +366,34 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
             {tab === 'notes' && (
               <>
-                {comp.kerrinNotes ? (
-                  <View style={{ marginBottom: 14 }}>
-                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>
-                      Teacher's notes
-                    </Text>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22 }}>{comp.kerrinNotes}</Text>
-                  </View>
-                ) : null}
-                {comp.myNotes ? (
-                  <View>
-                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>
-                      My notes
-                    </Text>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22 }}>{comp.myNotes}</Text>
-                  </View>
-                ) : null}
-                {!comp.kerrinNotes && !comp.myNotes ? (
-                  <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 13 }}>No notes yet. Edit this piece to add them.</Text>
-                ) : null}
+                <NoteSection label="Teacher's notes" value={comp.kerrinNotes} />
+                <NoteSection label="Teacher feedback" value={comp.teacherFeedback} />
+                <NoteSection label="My notes" value={comp.myNotes} />
+                {!comp.kerrinNotes && !comp.teacherFeedback && !comp.myNotes &&
+                  <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 13 }}>No notes yet.</Text>
+                }
+              </>
+            )}
+
+            {tab === 'study' && (
+              <>
+                <NoteSection label="Technical challenges" value={comp.technicalChallenges} />
+                <NoteSection label="Musical focus areas" value={comp.musicalFocus} />
+                <NoteSection label="Practice notes" value={comp.practiceNotes} />
+                {!comp.technicalChallenges && !comp.musicalFocus && !comp.practiceNotes &&
+                  <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 13 }}>No study notes yet.</Text>
+                }
+              </>
+            )}
+
+            {tab === 'resources' && (
+              <>
+                <NoteSection label="Sheet music" value={comp.resourceSheet} />
+                <NoteSection label="Recording references" value={comp.resourceRecordings} />
+                <NoteSection label="Tutorial videos" value={comp.resourceTutorials} />
+                {!comp.resourceSheet && !comp.resourceRecordings && !comp.resourceTutorials &&
+                  <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 13 }}>No resources added yet.</Text>
+                }
               </>
             )}
 
@@ -226,15 +420,28 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
   );
 }
 
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
 export default function CompositionsScreen({ compositions, sessions, onSave, onDelete }) {
   const [modal, setModal] = useState(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const blank = () => ({ id: uid(), title: '', composer: '', status: 'learning', grade: '', keyRoot: '', keyMode: '', timeSig: '', info: '', kerrinNotes: '', myNotes: '', createdAt: new Date().toISOString() });
+  const blank = () => ({
+    id: uid(), title: '', composer: '', arrangement: '', collection: '',
+    status: 'learning', grade: '', keyRoot: '', keyMode: '', timeSig: '',
+    difficulty: 0, year: '', tags: [],
+    dateStarted: '', dateCompleted: '',
+    info: '', technicalChallenges: '', musicalFocus: '', practiceNotes: '',
+    kerrinNotes: '', teacherFeedback: '', myNotes: '',
+    resourceSheet: '', resourceRecordings: '', resourceTutorials: '',
+    createdAt: new Date().toISOString(),
+  });
 
   const filtered = compositions.filter(c => {
-    const ms = c.title.toLowerCase().includes(search.toLowerCase()) || (c.composer || '').toLowerCase().includes(search.toLowerCase());
+    const ms = c.title.toLowerCase().includes(search.toLowerCase())
+      || (c.composer || '').toLowerCase().includes(search.toLowerCase())
+      || (c.tags || []).some(t => t.includes(search.toLowerCase()));
     return ms && (filterStatus === 'all' || c.status === filterStatus);
   });
 
@@ -247,7 +454,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
         </View>
 
         <Field label="">
-          <TextF value={search} onChange={setSearch} placeholder="Search by title or composer…" />
+          <TextF value={search} onChange={setSearch} placeholder="Search title, composer, or tag…" />
         </Field>
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 16 }}>
