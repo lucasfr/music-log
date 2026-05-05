@@ -51,10 +51,10 @@ function energyOpacity(energy) {
 }
 
 const ind = StyleSheet.create({
-  wrap:   { flexDirection: 'row', justifyContent: 'center', gap: 1, marginTop: 1 },
-  emoji:  { fontSize: 9, lineHeight: 12 },
-  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 3, alignSelf: 'center' },
-  dot:    { width: 4, height: 4, borderRadius: 2 },
+  wrap:   { flexDirection: 'row', justifyContent: 'center', gap: 2, marginTop: 1 },
+  emoji:  { fontSize: 11, lineHeight: 13 },
+  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 2, alignSelf: 'center' },
+  dot:    { width: 5, height: 5, borderRadius: 3 },
 });
 
 // ─── Day indicators (BearWithMe style) ────────────────────────────────────────
@@ -155,7 +155,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   }
 
   const W        = Dimensions.get('window').width;
-  const cellSize = Math.floor((Math.min(W, 520) - 32) / 7);
+  const cellW     = Math.floor((Math.min(W, 520) - 32) / 7);
+  const cellH     = 58; // fixed height — compact regardless of screen width
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
@@ -218,7 +219,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             {/* Day headers */}
             <View style={{ flexDirection: 'row', marginBottom: 4 }}>
               {DAYS.map((d, i) => (
-                <View key={i} style={{ width: cellSize, alignItems: 'center' }}>
+                <View key={i} style={{ width: cellW, alignItems: 'center' }}>
                   <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>{d}</Text>
                 </View>
               ))}
@@ -228,7 +229,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             {Array.from({ length: cells.length / 7 }, (_, row) => (
               <View key={row} style={{ flexDirection: 'row' }}>
                 {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
-                  if (!day) return <View key={col} style={{ width: cellSize, height: cellSize + 24 }} />;
+                  if (!day) return <View key={col} style={{ width: cellW, height: cellH }} />;
 
                   const iso        = isoFor(viewYear, viewMonth, day);
                   const daySessions = sessionsByDate[iso] || [];
@@ -243,11 +244,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       onPress={() => !isFuture && handleDayPress(day)}
                       activeOpacity={isFuture ? 1 : 0.7}
                       style={{
-                        width: cellSize,
-                        height: cellSize + 24,
+                        width: cellW,
+                        height: cellH,
                         alignItems: 'center',
                         justifyContent: 'flex-start',
-                        paddingTop: 10,
+                        paddingTop: 8,
                         borderRadius: RADIUS.sm,
                         position: 'relative',
                         backgroundColor: isToday ? 'rgba(9,99,126,0.08)' : 'transparent',
@@ -259,7 +260,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       {/* Day number */}
                       <Text style={{
                         fontFamily: isToday ? 'SourceSans3-Bold' : 'SourceSans3',
-                        fontSize: SIZES.bodySmall,
+                        fontSize: SIZES.body,
                         color: isFuture ? COLOURS.textDim
                           : isToday ? COLOURS.navy
                           : hasData  ? COLOURS.text
@@ -274,11 +275,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                         const joy = daySessions[0].enjoyment;
                         return (
                           <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: SIZES.tiny + 3 }}>
+                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.label, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: SIZES.label + 2 }}>
                               {e > 0 ? `+${e}` : e}
                             </Text>
                             {joy ? (
-                              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: SIZES.tiny + 3 }}>
+                              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.label, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: SIZES.label + 2 }}>
                                 {joy}
                               </Text>
                             ) : null}
