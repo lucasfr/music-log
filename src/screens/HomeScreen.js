@@ -235,9 +235,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </View>
 
         {/* Today card */}
-        <BlurView intensity={36} tint="light" style={{
-          borderRadius: RADIUS.md, borderWidth: 1,
-        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 24,
+        <BlurView intensity={50} tint="light" style={{
+          borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 24,
           shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 22, elevation: 6,
         }}>
           <View style={{ backgroundColor: todayLesson ? COLOURS.accent2Light : COLOURS.glass, padding: 16 }}>
