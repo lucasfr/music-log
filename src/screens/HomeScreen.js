@@ -58,6 +58,11 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
                   {fmtDate(session.date)}
                 </Text>
               )}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: '#8A1010' }}>🎹 practice</Text>
+                </View>
+              </View>
               {showDate ? (
                 <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 1 }}>
                   {session.duration ? `${session.duration} min · ` : ''}⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}{session.enjoyment ? `  ❤️ ${session.enjoyment}/5` : ''}
