@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Alert,
-  KeyboardAvoidingView, Platform, Modal,
+  KeyboardAvoidingView, Platform, Modal, PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -9,22 +9,85 @@ import { COLOURS, RADIUS } from '../theme';
 import { GlassCard, SectionTitle, Btn, Label } from '../components/UI';
 import { Field, TextF, NumberF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
-import { ENERGY_LABELS } from '../constants';
 import { uid } from '../utils';
 
-export function LogModal({ visible, onClose, onSave, compositions, initialDate }) {
-  const [date, setDate]         = useState(initialDate || '');
-  const [energy, setEnergy]     = useState(null);
-  const [duration, setDuration] = useState('');
-  const [segments, setSegments] = useState([]);
-  const [wins, setWins]         = useState('');
-  const [focus, setFocus]       = useState('');
+// ─── Zelda-style rating bar ───────────────────────────────────────────────────
+// Shared by energy (⚡, 1–5 mapped from -2..+2) and enjoyment (❤️, 1–5)
 
-  // Reset form when modal opens with a new date
+const ZELDA_CELL_W = 40;
+const ZELDA_CELLS  = 5;
+
+function ZeldaBar({ label, emoji, value, onChange }) {
+  const containerRef = useRef(null);
+  const containerX   = useRef(0);
+
+  function valueFromX(x) {
+    const raw = Math.ceil((x - containerX.current) / ZELDA_CELL_W);
+    return Math.max(1, Math.min(ZELDA_CELLS, raw));
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder:  () => true,
+      onPanResponderGrant: e => onChange(valueFromX(e.nativeEvent.pageX)),
+      onPanResponderMove:  e => onChange(valueFromX(e.nativeEvent.pageX)),
+    })
+  ).current;
+
+  return (
+    <View style={{ marginBottom: 0 }}>
+      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+        {label}
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View
+          ref={containerRef}
+          onLayout={() => containerRef.current?.measure((_x, _y, _w, _h, pageX) => { containerX.current = pageX; })}
+          {...panResponder.panHandlers}
+          style={{ flexDirection: 'row', gap: 2 }}
+        >
+          {[1, 2, 3, 4, 5].map(n => (
+            <Text
+              key={n}
+              style={{
+                fontSize: 26,
+                opacity: n <= value ? 1 : 0.18,
+                transform: [{ scale: n <= value ? 1 : 0.88 }],
+              }}
+            >
+              {emoji}
+            </Text>
+          ))}
+        </View>
+        {value > 0 && (
+          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// Energy maps: 1=Very low(-2), 2=Low(-1), 3=Neutral(0), 4=Good(+1), 5=High(+2)
+function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
+export function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
+
+export function LogModal({ visible, onClose, onSave, compositions, initialDate }) {
+  const [date, setDate]           = useState(initialDate || '');
+  const [energyBar, setEnergyBar] = useState(0);   // 1–5, 0=unset
+  const [enjoyment, setEnjoyment] = useState(0);   // 1–5, 0=unset
+  const [duration, setDuration]   = useState('');
+  const [segments, setSegments]   = useState([]);
+  const [wins, setWins]           = useState('');
+  const [focus, setFocus]         = useState('');
+
   useEffect(() => {
     if (visible) {
       setDate(initialDate || '');
-      setEnergy(null);
+      setEnergyBar(0);
+      setEnjoyment(0);
       setDuration('');
       setSegments([]);
       setWins('');
@@ -39,10 +102,11 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
   function removeSegment(id)      { setSegments(s => s.filter(seg => seg.id !== id)); }
 
   function handleSave() {
-    if (energy === null) { Alert.alert('Energy required', 'Please set an energy level before saving.'); return; }
+    if (energyBar === 0) { Alert.alert('Energy required', 'Please set an energy level before saving.'); return; }
     const totalFromSegs = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
     const session = {
-      id: uid(), date, energy: Number(energy),
+      id: uid(), date, energy: energyBarToValue(energyBar),
+      enjoyment: enjoyment || null,
       duration: Number(duration) || totalFromSegs || null,
       segments, wins, tomorrowFocus: focus,
       createdAt: new Date().toISOString(),
@@ -56,7 +120,6 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
-        {/* Header */}
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
@@ -71,12 +134,9 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
         </SafeAreaView>
 
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView
-            contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
-            keyboardShouldPersistTaps="handled"
-          >
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
             <GlassCard>
-              <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
                 <View style={{ flex: 1 }}>
                   <Field label="Date">
                     <TextF value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
@@ -89,36 +149,13 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
                 </View>
               </View>
 
-              <Label>Energy level</Label>
-              <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
-                {['-2', '-1', '0', '1', '2'].map(v => {
-                  const active = String(energy) === v;
-                  return (
-                    <TouchableOpacity
-                      key={v}
-                      onPress={() => setEnergy(v)}
-                      activeOpacity={0.75}
-                      style={{
-                        flex: 1, paddingVertical: 10, alignItems: 'center',
-                        borderRadius: RADIUS.sm, borderWidth: 1,
-                        borderColor: active ? COLOURS.navy : COLOURS.glassBorder,
-                        backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.50)',
-                        shadowColor: active ? COLOURS.navy : 'transparent',
-                        shadowOffset: { width: 0, height: 3 },
-                        shadowOpacity: active ? 0.35 : 0,
-                        shadowRadius: 8,
-                        elevation: active ? 4 : 0,
-                      }}
-                    >
-                      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: active ? '#fff' : COLOURS.textMuted }}>
-                        {Number(v) > 0 ? `+${v}` : v}
-                      </Text>
-                      <Text style={{ fontFamily: 'SourceSans3', fontSize: 10, color: active ? 'rgba(255,255,255,0.75)' : COLOURS.textDim, marginTop: 2 }}>
-                        {ENERGY_LABELS[v]}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+              <View style={{ flexDirection: 'row', gap: 20 }}>
+                <View style={{ flex: 1 }}>
+                  <ZeldaBar label="Energy" emoji="⚡" value={energyBar} onChange={setEnergyBar} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <ZeldaBar label="Enjoyment" emoji="❤️" value={enjoyment} onChange={setEnjoyment} />
+                </View>
               </View>
             </GlassCard>
 

@@ -56,7 +56,7 @@ async function getDB() {
 
     CREATE TABLE IF NOT EXISTS sessions (
       id TEXT PRIMARY KEY, date TEXT NOT NULL, energy INTEGER NOT NULL,
-      duration INTEGER, wins TEXT, tomorrow_focus TEXT, created_at TEXT NOT NULL
+      duration INTEGER, wins TEXT, tomorrow_focus TEXT, enjoyment INTEGER, created_at TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS segments (
@@ -74,8 +74,10 @@ async function getDB() {
     );
   `);
 
-  // Migrations — add new columns safely (ALTER TABLE IF NOT EXISTS column is not
-  // supported in SQLite; we catch errors instead)
+  // Migrations for sessions
+  try { await _db.execAsync('ALTER TABLE sessions ADD COLUMN enjoyment INTEGER'); } catch (_) {}
+
+  // Migrations for compositions — add new columns safely (catch errors for existing columns)
   const newCols = [
     'ALTER TABLE compositions ADD COLUMN difficulty INTEGER DEFAULT 0',
     'ALTER TABLE compositions ADD COLUMN arrangement TEXT',
@@ -116,6 +118,7 @@ export async function getAllSessions() {
     result.push({
       ...s,
       tomorrowFocus: s.tomorrow_focus,
+      enjoyment: s.enjoyment ?? null,
       createdAt: s.created_at,
       segments: segments.map(seg => ({
         ...seg,
@@ -137,10 +140,11 @@ export async function saveSession(session) {
 
   const db = await getDB();
   await db.runAsync(
-    `INSERT OR REPLACE INTO sessions (id, date, energy, duration, wins, tomorrow_focus, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO sessions (id, date, energy, duration, wins, tomorrow_focus, enjoyment, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [session.id, session.date, session.energy, session.duration || null,
      session.wins || null, session.tomorrowFocus || null,
+     session.enjoyment || null,
      session.createdAt || new Date().toISOString()]
   );
   await db.runAsync('DELETE FROM segments WHERE session_id = ?', [session.id]);
