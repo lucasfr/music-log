@@ -88,19 +88,21 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
     return (
       <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.8}
         style={[{
-          backgroundColor: COLOURS.navy,
+          backgroundColor: 'rgba(255,255,255,0.55)',
           borderRadius: RADIUS.sm,
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.80)',
           paddingVertical: 12,
           paddingHorizontal: 20,
           alignItems: 'center',
-          shadowColor: COLOURS.navy,
+          shadowColor: 'rgba(44,100,160,0.15)',
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.35,
+          shadowOpacity: 1,
           shadowRadius: 12,
-          elevation: 5,
+          elevation: 4,
           opacity: disabled ? 0.4 : 1,
         }, style]}>
-        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#fff' }}>{label}</Text>
+        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>{label}</Text>
       </TouchableOpacity>
     );
   }
@@ -166,7 +168,7 @@ export function TagCloud({ tags, selected, onToggle }) {
               borderRadius: RADIUS.pill,
               borderWidth: 1,
               borderColor: active ? COLOURS.steel : COLOURS.glassBorder,
-              backgroundColor: active ? COLOURS.accent2Light : COLOURS.glass,
+              backgroundColor: active ? COLOURS.accent2Light : 'rgba(255,255,255,0.62)',
             }}
           >
             <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>

@@ -54,7 +54,7 @@ export function NumberF({ value, onChange, placeholder, style }) {
       placeholderTextColor={COLOURS.textDim}
       keyboardType="number-pad"
       style={[{
-        backgroundColor: 'rgba(255,255,255,0.65)',
+        backgroundColor: 'rgba(255,255,255,0.78)',
         borderWidth: 1,
         borderColor: COLOURS.glassBorder,
         borderRadius: RADIUS.sm,

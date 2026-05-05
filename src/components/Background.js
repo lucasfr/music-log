@@ -11,7 +11,7 @@ export function AppBackground() {
         <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
           <Defs>
             <Pattern id="dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
-              <Circle cx="1" cy="1" r="1" fill="rgba(33,60,81,0.12)" />
+              <Circle cx="1" cy="1" r="1" fill="rgba(8,131,149,0.18)" />
             </Pattern>
           </Defs>
           <Rect x="0" y="0" width="100%" height="100%" fill="url(#dots)" />

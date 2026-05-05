@@ -181,11 +181,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       activeOpacity={isFuture ? 1 : 0.7}
                       style={{ width: cellSize, height: cellSize + 6, alignItems: 'center', justifyContent: 'center' }}
                     >
-                      {session && !lesson && (
-                        <View style={{ position: 'absolute', width: cellSize - 6, height: cellSize - 6, borderRadius: (cellSize - 6) / 2, backgroundColor: colour, opacity: 0.15 }} />
+            {colour && !lesson && (
+                        <View style={{ position: 'absolute', width: cellSize - 6, height: cellSize - 6, borderRadius: (cellSize - 6) / 2, backgroundColor: COLOURS.red, opacity: 0.12 }} />
                       )}
                       {lesson && (
-                        <View style={{ position: 'absolute', width: cellSize - 6, height: cellSize - 6, borderRadius: (cellSize - 6) / 2, backgroundColor: COLOURS.pink, opacity: 0.25 }} />
+                        <View style={{ position: 'absolute', width: cellSize - 6, height: cellSize - 6, borderRadius: (cellSize - 6) / 2, backgroundColor: COLOURS.amber, opacity: 0.18 }} />
                       )}
                       {isToday && (
                         <View style={{ position: 'absolute', width: cellSize - 4, height: cellSize - 4, borderRadius: (cellSize - 4) / 2, borderWidth: 1.5, borderColor: COLOURS.navy }} />
@@ -203,7 +203,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                         <View style={{
                           position: 'absolute', bottom: 2,
                           width: 4, height: 4, borderRadius: 2,
-                          backgroundColor: lesson ? COLOURS.pink : colour,
+                          backgroundColor: lesson ? COLOURS.amber : COLOURS.red,
                         }} />
                       )}
                     </TouchableOpacity>
@@ -216,11 +216,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
         <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLOURS.navy }} />
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLOURS.red }} />
             <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>Practice</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLOURS.pink }} />
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLOURS.amber }} />
             <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>Lesson</Text>
           </View>
         </View>
@@ -231,9 +231,13 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         <TouchableOpacity
           onPress={() => setLogModalDate(today)}
           activeOpacity={0.85}
-          style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: COLOURS.navy, alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.navy, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.40, shadowRadius: 16, elevation: 8 }}
+          style={{ width: 58, height: 58, borderRadius: 29,
+            backgroundColor: 'rgba(255,255,255,0.55)',
+            borderWidth: 1, borderColor: COLOURS.glassBorder,
+            alignItems: 'center', justifyContent: 'center',
+            shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 16, elevation: 8 }}
         >
-          <Text style={{ fontSize: 28, color: '#fff', lineHeight: 32, marginTop: -2 }}>+</Text>
+          <Text style={{ fontSize: 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
         </TouchableOpacity>
       </View>
 
