@@ -205,6 +205,8 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
   const [date, setDate]               = useState(initialDate || '');
   const [teacher, setTeacher]         = useState('');
   const [duration, setDuration]       = useState('60');
+  const [energy, setEnergy]           = useState(0);
+  const [enjoyment, setEnjoyment]     = useState(0);
   const [pieces, setPieces]           = useState([]);
   const [overallNotes, setOverallNotes] = useState('');
   const [wins, setWins]               = useState('');
@@ -215,6 +217,8 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
       setDate(initialDate || '');
       setTeacher('');
       setDuration('60');
+      setEnergy(0);
+      setEnjoyment(0);
       setPieces([]);
       setOverallNotes('');
       setWins('');
@@ -233,6 +237,8 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
     onSave({
       id: uid(), type: 'lesson', date, teacher,
       duration: Number(duration) || 60,
+      energy: energy || null,
+      enjoyment: enjoyment || null,
       pieces, overallNotes, wins, nextFocus,
       createdAt: new Date().toISOString(),
     });
@@ -274,6 +280,15 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
               </View>
               <Field label="Teacher" style={{ marginBottom: 0 }}>
                 <TextF value={teacher} onChange={setTeacher} placeholder="Teacher name" />
+              </Field>
+            </GlassCard>
+
+            <GlassCard>
+              <Field label="Energy">
+                <ZeldaBar emoji="⚡" value={energy} onChange={setEnergy} />
+              </Field>
+              <Field label="Enjoyment" style={{ marginBottom: 0 }}>
+                <ZeldaBar emoji="❤️" value={enjoyment} onChange={setEnjoyment} />
               </Field>
             </GlassCard>
 

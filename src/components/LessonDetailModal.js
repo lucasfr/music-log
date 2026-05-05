@@ -33,13 +33,27 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
 
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
 
-          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
-            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight, borderWidth: 1, borderColor: 'rgba(221,174,211,0.40)' }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#5C2D6E' }}>🎓 lesson</Text>
+          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accent2Light }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 lesson</Text>
             </View>
-            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accentLight, borderWidth: 1, borderColor: COLOURS.glassBorder }}>
+            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{lesson.duration} min</Text>
             </View>
+            {lesson.energy ? (
+              <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                <Text style={{ fontSize: 16 }}>
+                  {[...Array(5)].map((_, i) => i < (lesson.energy + 3) ? '⚡' : '').join('')}
+                </Text>
+              </View>
+            ) : null}
+            {lesson.enjoyment ? (
+              <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                <Text style={{ fontSize: 16 }}>
+                  {[...Array(5)].map((_, i) => i < lesson.enjoyment ? '❤️' : '').join('')}
+                </Text>
+              </View>
+            ) : null}
           </View>
 
           {(lesson.pieces || []).length > 0 && (

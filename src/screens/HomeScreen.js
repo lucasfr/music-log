@@ -134,6 +134,12 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
               <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
                 {lesson.duration} min · {lesson.teacher}
               </Text>
+              {(lesson.energy || lesson.enjoyment) ? (
+                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 4 }}>
+                  {lesson.energy ? <ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} /> : null}
+                  {lesson.enjoyment ? <ZeldaMini emoji="❤️" value={lesson.enjoyment} /> : null}
+                </View>
+              ) : null}
             </View>
           </View>
           {pieceNames.length > 0 && (

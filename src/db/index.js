@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 
 function openIDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('musiclog', 2);
+    const req = indexedDB.open('musiclog', 3);
     req.onupgradeneeded = e => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('sessions'))     db.createObjectStore('sessions',     { keyPath: 'id' });
@@ -70,7 +70,7 @@ async function getDB() {
     CREATE TABLE IF NOT EXISTS lessons (
       id TEXT PRIMARY KEY, date TEXT NOT NULL, teacher TEXT,
       duration INTEGER, pieces TEXT, overall_notes TEXT,
-      wins TEXT, next_focus TEXT, created_at TEXT NOT NULL
+      wins TEXT, next_focus TEXT, energy INTEGER, enjoyment INTEGER, created_at TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS compositions (
@@ -84,6 +84,8 @@ async function getDB() {
   // Migrations
   try { await _db.execAsync('ALTER TABLE sessions ADD COLUMN enjoyment INTEGER'); } catch (_) {}
   try { await _db.execAsync('ALTER TABLE segments ADD COLUMN felt_difficulty INTEGER'); } catch (_) {}
+  try { await _db.execAsync('ALTER TABLE lessons ADD COLUMN energy INTEGER'); } catch (_) {}
+  try { await _db.execAsync('ALTER TABLE lessons ADD COLUMN enjoyment INTEGER'); } catch (_) {}
 
   const newCols = [
     'ALTER TABLE compositions ADD COLUMN difficulty INTEGER DEFAULT 0',
@@ -263,6 +265,8 @@ export async function getAllLessons() {
     pieces: r.pieces ? JSON.parse(r.pieces) : [],
     nextFocus: r.next_focus,
     overallNotes: r.overall_notes,
+    energy: r.energy ?? null,
+    enjoyment: r.enjoyment ?? null,
     createdAt: r.created_at,
   }));
 }
@@ -276,8 +280,8 @@ export async function saveLesson(lesson) {
   const db = await getDB();
   await db.runAsync(
     `INSERT OR REPLACE INTO lessons
-       (id, date, teacher, duration, pieces, overall_notes, wins, next_focus, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, date, teacher, duration, pieces, overall_notes, wins, next_focus, energy, enjoyment, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       lesson.id, lesson.date, lesson.teacher || null,
       lesson.duration || null,
@@ -285,6 +289,8 @@ export async function saveLesson(lesson) {
       lesson.overallNotes || null,
       lesson.wins || null,
       lesson.nextFocus || null,
+      lesson.energy ?? null,
+      lesson.enjoyment ?? null,
       lesson.createdAt || new Date().toISOString(),
     ]
   );
