@@ -15,6 +15,22 @@ export function Field({ label, children, style }) {
   );
 }
 
+// Shared input surface — frosted, no border, shadow lift
+const inputStyle = {
+  backgroundColor: 'rgba(255,255,255,0.62)',
+  borderRadius: RADIUS.sm,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  fontSize: 15,
+  fontFamily: 'SourceSans3',
+  color: COLOURS.text,
+  shadowColor: COLOURS.glassShadow,
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 1,
+  shadowRadius: 10,
+  elevation: 2,
+};
+
 export function TextF({ value, onChange, placeholder, multiline, style }) {
   return (
     <TextInput
@@ -23,23 +39,9 @@ export function TextF({ value, onChange, placeholder, multiline, style }) {
       placeholder={placeholder}
       placeholderTextColor={COLOURS.textDim}
       multiline={multiline}
-      style={[{
-        backgroundColor: 'rgba(255,255,255,0.65)',
-        borderWidth: 1,
-        borderColor: COLOURS.glassBorder,
-        borderRadius: RADIUS.sm,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        fontSize: 15,
-        fontFamily: 'SourceSans3',
-        color: COLOURS.text,
+      style={[inputStyle, {
         minHeight: multiline ? 76 : undefined,
         textAlignVertical: multiline ? 'top' : 'auto',
-        shadowColor: COLOURS.glassShadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 6,
-        elevation: 2,
       }, style]}
     />
   );
@@ -53,29 +55,15 @@ export function NumberF({ value, onChange, placeholder, style }) {
       placeholder={placeholder || '0'}
       placeholderTextColor={COLOURS.textDim}
       keyboardType="number-pad"
-      style={[{
-        backgroundColor: 'rgba(255,255,255,0.78)',
-        borderWidth: 1,
-        borderColor: COLOURS.glassBorder,
-        borderRadius: RADIUS.sm,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        fontSize: 15,
-        fontFamily: 'SourceSans3',
-        color: COLOURS.text,
-        shadowColor: COLOURS.glassShadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 6,
-        elevation: 2,
-      }, style]}
+      style={[inputStyle, style]}
     />
   );
 }
 
 export function SelectF({ label, value, onChange, options, placeholder }) {
   const [open, setOpen] = React.useState(false);
-  const display = options.find(o => (o.value ?? o) === value)?.label ?? (typeof value === 'string' && value) ? value : (placeholder || '—');
+  const display = options.find(o => (o.value ?? o) === value)?.label
+    ?? (typeof value === 'string' && value ? value : (placeholder || '—'));
 
   if (Platform.OS === 'ios') {
     return (
@@ -84,22 +72,12 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
           <TouchableOpacity
             onPress={() => setOpen(true)}
             activeOpacity={0.8}
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.65)',
-              borderWidth: 1,
-              borderColor: COLOURS.glassBorder,
-              borderRadius: RADIUS.sm,
-              paddingHorizontal: 12,
-              paddingVertical: 11,
+            style={[inputStyle, {
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              shadowColor: COLOURS.glassShadow,
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 1,
-              shadowRadius: 6,
-              elevation: 2,
-            }}
+              paddingVertical: 11,
+            }]}
           >
             <Text style={{ fontSize: 15, fontFamily: 'SourceSans3', color: value ? COLOURS.text : COLOURS.textDim }}>
               {display}
@@ -111,18 +89,23 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
           <TouchableOpacity style={{ flex: 1 }} onPress={() => setOpen(false)} activeOpacity={1}>
             <View style={{
               position: 'absolute', bottom: 0, left: 0, right: 0,
-              backgroundColor: 'rgba(234,240,245,0.97)',
-              borderTopWidth: 1, borderTopColor: COLOURS.glassBorder,
-              borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl,
+              backgroundColor: 'rgba(235,244,246,0.97)',
+              borderTopLeftRadius: RADIUS.xl,
+              borderTopRightRadius: RADIUS.xl,
+              shadowColor: COLOURS.glassShadowMd,
+              shadowOffset: { width: 0, height: -8 },
+              shadowOpacity: 1,
+              shadowRadius: 24,
+              elevation: 20,
             }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 14, borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 14, borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
                 <TouchableOpacity onPress={() => setOpen(false)}>
                   <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
                 </TouchableOpacity>
               </View>
               <Picker
                 selectedValue={value || ''}
-                onValueChange={v => { onChange(v); }}
+                onValueChange={v => onChange(v)}
                 style={{ backgroundColor: 'transparent' }}
               >
                 <Picker.Item label={placeholder || '—'} value="" color={COLOURS.textDim} />
@@ -141,10 +124,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
 
   return (
     <Field label={label}>
-      <View style={{
-        backgroundColor: 'rgba(255,255,255,0.65)', borderWidth: 1, borderColor: COLOURS.glassBorder,
-        borderRadius: RADIUS.sm, overflow: 'hidden',
-      }}>
+      <View style={[inputStyle, { overflow: 'hidden', paddingHorizontal: 0, paddingVertical: 0 }]}>
         <Picker selectedValue={value || ''} onValueChange={onChange} style={{ color: COLOURS.text, height: 44 }}>
           <Picker.Item label={placeholder || '—'} value="" />
           {options.map(o => {

@@ -33,10 +33,9 @@ function PracticeEntry({ session, compositions, onPress }) {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <BlurView intensity={28} tint="light" style={{
-        borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.accentMid,
-        overflow: 'hidden', marginBottom: 10,
-        shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 3,
+      <BlurView intensity={36} tint="light" style={{
+        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
+        shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
       }}>
         <View style={{ backgroundColor: COLOURS.accentLight, padding: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
@@ -55,12 +54,12 @@ function PracticeEntry({ session, compositions, onPress }) {
           {(techNames.length > 0 || pieceNames.length > 0) && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
               {techNames.map(t => (
-                <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.accentMid }}>
+                <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                   <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
                 </View>
               ))}
               {pieceNames.map(p => (
-                <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.accentMid }}>
+                <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                   <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
                 </View>
               ))}
@@ -89,10 +88,9 @@ function LessonEntry({ lesson, compositions, onPress }) {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <BlurView intensity={28} tint="light" style={{
-        borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.accent2Mid,
-        overflow: 'hidden', marginBottom: 10,
-        shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 3,
+      <BlurView intensity={36} tint="light" style={{
+        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
+        shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
       }}>
         <View style={{ backgroundColor: COLOURS.accent2Light, padding: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
@@ -102,7 +100,7 @@ function LessonEntry({ lesson, compositions, onPress }) {
                 <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
                   {isToday ? 'Today' : fmtDate(lesson.date)}
                 </Text>
-                <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accent2Light, borderWidth: 1, borderColor: COLOURS.accent2Mid }}>
+                <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.12)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                   <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#7A3A00' }}>🎓 lesson</Text>
                 </View>
               </View>
@@ -114,14 +112,14 @@ function LessonEntry({ lesson, compositions, onPress }) {
           {pieceNames.length > 0 && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
               {pieceNames.map(p => (
-                <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accent2Light, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.accent2Mid }}>
+                <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                   <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{p}</Text>
                 </View>
               ))}
               {newPieces.map(p => {
                 const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
                 return name ? (
-                  <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.yellowLight, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.yellowMid }}>
+                  <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill, shadowColor: COLOURS.yellowMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                     <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: '#5A3A00' }}>✦ {name}</Text>
                   </View>
                 ) : null;
@@ -154,8 +152,8 @@ function FAB({ onPractice, onLesson }) {
             style={{
               flexDirection: 'row', alignItems: 'center', gap: 10,
               paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill,
-              backgroundColor: COLOURS.accent2Light, borderWidth: 1, borderColor: COLOURS.accent2Mid,
-              shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 12, elevation: 5,
+              backgroundColor: 'rgba(255,255,255,0.50)',
+          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4,
             }}
           >
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#7A3A00' }}>🎓 Log lesson</Text>
@@ -166,8 +164,8 @@ function FAB({ onPractice, onLesson }) {
             style={{
               flexDirection: 'row', alignItems: 'center', gap: 10,
               paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill,
-              backgroundColor: COLOURS.accentLight, borderWidth: 1, borderColor: COLOURS.accentMid,
-              shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 12, elevation: 5,
+              backgroundColor: 'rgba(255,255,255,0.50)',
+          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4,
             }}
           >
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#8A1010' }}>🎹 Log practice</Text>
@@ -239,9 +237,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         {/* Today card */}
         <BlurView intensity={36} tint="light" style={{
           borderRadius: RADIUS.md, borderWidth: 1,
-          borderColor: todayLesson ? COLOURS.accent2Mid : COLOURS.glassBorder,
-          overflow: 'hidden', marginBottom: 24,
-          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 4,
+        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 24,
+          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 22, elevation: 6,
         }}>
           <View style={{ backgroundColor: todayLesson ? COLOURS.accent2Light : COLOURS.glass, padding: 16 }}>
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
@@ -249,7 +246,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             {todayLesson ? (
               <TouchableOpacity activeOpacity={0.8} onPress={() => setDetailLesson(todayLesson)}>
                 <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-                  <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accent2Light, borderWidth: 1, borderColor: COLOURS.accent2Mid }}>
+                  <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.14)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Lesson · {todayLesson.duration} min</Text>
                   </View>
                 </View>
@@ -258,7 +255,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                     {todayLesson.pieces.map(p => {
                       const name = p.compositionId ? (compositions.find(c => c.id === p.compositionId) || {}).title : p.pieceName;
                       return name ? (
-                        <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accent2Light, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.accent2Mid }}>
+                <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                           <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{name}</Text>
                         </View>
                       ) : null;
@@ -270,11 +267,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               <TouchableOpacity activeOpacity={0.8} onPress={() => setDetailSession(todaySession)}>
                 <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: todayPieces.length || todayTech.length ? 10 : 0 }}>
                   {todaySession.duration ? (
-                    <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accentLight, borderWidth: 1, borderColor: COLOURS.accentMid }}>
+                    <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.10)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                       <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>{todaySession.duration} min</Text>
                     </View>
                   ) : null}
-                  <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.glass, borderWidth: 1, borderColor: COLOURS.glassBorder }}>
+                  <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>
                       {todaySession.energy > 0 ? `+${todaySession.energy}` : todaySession.energy} · {ENERGY_LABELS[String(todaySession.energy)]}
                     </Text>
@@ -298,11 +295,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                 <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
-                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accentLight, borderWidth: 1, borderColor: COLOURS.accentMid }}>
+                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                     <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>🎹 Log practice</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
-                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accent2Light, borderWidth: 1, borderColor: COLOURS.accent2Mid }}>
+                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                     <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Log lesson</Text>
                   </TouchableOpacity>
                 </View>

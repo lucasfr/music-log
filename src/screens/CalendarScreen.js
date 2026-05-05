@@ -114,8 +114,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
         {(monthSessions.length > 0 || monthLessons.length > 0) && (
           <BlurView intensity={28} tint="light" style={{
-            borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder,
-            overflow: 'hidden', marginBottom: 16,
+          borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 16,
+          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 14, elevation: 4,
           }}>
             <View style={{ backgroundColor: COLOURS.glass, padding: 12, flexDirection: 'row' }}>
               {[
@@ -137,9 +137,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         )}
 
         <BlurView intensity={32} tint="light" style={{
-          borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder,
-          overflow: 'hidden',
-          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 14, elevation: 4,
+          borderRadius: RADIUS.md, overflow: 'hidden',
+          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 6,
         }}>
           <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>

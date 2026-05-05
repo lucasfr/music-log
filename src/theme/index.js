@@ -24,13 +24,14 @@ export const COLOURS = {
   textDim:   '#7AB2B2',
 
   // Glass
-  glass:        'rgba(255,255,255,0.58)',
-  glassHover:   'rgba(255,255,255,0.78)',
-  glassBorder:  'rgba(255,255,255,0.75)',
-  glassShadow:  'rgba(9,99,126,0.10)',
-  glassShadowMd:'rgba(9,99,126,0.16)',
-  entryBg:      'rgba(255,255,255,0.70)',
-  modalBg:      'rgba(255,255,255,0.68)',
+  glass:        'rgba(255,255,255,0.55)',
+  glassHover:   'rgba(255,255,255,0.75)',
+  glassBorder:  'rgba(255,255,255,0.0)',   // invisible — no hard outlines
+  glassBorderSubtle: 'rgba(9,99,126,0.08)', // only used where a hint is needed
+  glassShadow:  'rgba(9,99,126,0.12)',
+  glassShadowMd:'rgba(9,99,126,0.18)',
+  entryBg:      'rgba(255,255,255,0.68)',
+  modalBg:      'rgba(255,255,255,0.65)',
   backdropColor:'rgba(0,48,73,0.45)',
 
   // Practice accents (red)
