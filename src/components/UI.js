@@ -210,8 +210,8 @@ export function TagCloud({ tags, selected, onToggle }) {
               paddingHorizontal: 11,
               paddingVertical: 5,
               borderRadius: RADIUS.pill,
-              backgroundColor: active ? COLOURS.accentLight : 'rgba(255,255,255,0.55)',
-              shadowColor: active ? COLOURS.accentMid : COLOURS.glassShadow,
+              backgroundColor: active ? 'rgba(247,127,0,0.14)' : 'rgba(255,255,255,0.55)',
+              shadowColor: active ? COLOURS.accent2Mid : COLOURS.glassShadow,
               shadowOffset: { width: 0, height: active ? 3 : 1 },
               shadowOpacity: 1,
               shadowRadius: active ? 8 : 4,
@@ -221,7 +221,7 @@ export function TagCloud({ tags, selected, onToggle }) {
             <Text style={{
               fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3',
               fontSize: 12,
-              color: active ? '#8A1010' : COLOURS.textMuted,
+              color: active ? '#7A3A00' : COLOURS.textMuted,
             }}>
               {t}
             </Text>
