@@ -17,7 +17,7 @@ import {
 } from '@expo-google-fonts/source-sans-3';
 
 import { useSessions, useCompositions } from './src/db/hooks';
-import LogScreen from './src/screens/LogScreen';
+import HomeScreen from './src/screens/HomeScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import StatsScreen from './src/screens/StatsScreen';
@@ -26,7 +26,7 @@ import { COLOURS } from './src/theme';
 
 const Tab = createBottomTabNavigator();
 
-const ICONS = { Log: '✎', Pieces: '♩', History: '◷', Stats: '▦' };
+const ICONS = { Home: '◈', Pieces: '♩', History: '◷', Stats: '▦' };
 
 function TabIcon({ name, color, size }) {
   return (
@@ -88,16 +88,13 @@ export default function App() {
 
   const content = (
     <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
-      {/* Background sits absolutely behind everything */}
       <AppBackground />
-
-      {/* Navigator sits on top — transparent background so dot grid shows through each screen */}
       <NavigationContainer
         theme={{
           dark: false,
           colors: {
             primary:      COLOURS.navy,
-            background:   COLOURS.bg,   // solid — stops screens bleeding through each other
+            background:   COLOURS.bg,
             card:         'rgba(234,240,245,0.92)',
             text:         COLOURS.text,
             border:       COLOURS.glassBorder,
@@ -106,7 +103,7 @@ export default function App() {
         }}
       >
         <Tab.Navigator
-          sceneContainerStyle={{ backgroundColor: 'transparent' }} // each screen is transparent so bg shows through
+          sceneContainerStyle={{ backgroundColor: 'transparent' }}
           screenOptions={({ route }) => ({
             headerShown: false,
             tabBarActiveTintColor:   COLOURS.navy,
@@ -125,8 +122,15 @@ export default function App() {
             ),
           })}
         >
-          <Tab.Screen name="Log">
-            {() => <LogScreen sessions={sessions} compositions={compositions} onSave={saveSession} />}
+          <Tab.Screen name="Home">
+            {() => (
+              <HomeScreen
+                sessions={sessions}
+                compositions={compositions}
+                onSave={saveSession}
+                onDelete={deleteSession}
+              />
+            )}
           </Tab.Screen>
           <Tab.Screen name="Pieces">
             {() => <CompositionsScreen compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} />}
