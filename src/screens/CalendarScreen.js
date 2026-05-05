@@ -50,6 +50,13 @@ function energyOpacity(energy) {
   return 0.20 + (bar / 5) * 0.80;
 }
 
+const ind = StyleSheet.create({
+  wrap:   { flexDirection: 'row', justifyContent: 'center', gap: 1, marginTop: 1 },
+  emoji:  { fontSize: 9, lineHeight: 12 },
+  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 3, alignSelf: 'center' },
+  dot:    { width: 4, height: 4, borderRadius: 2 },
+});
+
 // ─── Day indicators (BearWithMe style) ────────────────────────────────────────
 // Dots above the number (practice = red, lesson = amber)
 // Emojis below: ⚡ at energy opacity, ❤️ at enjoyment opacity, 🎓 for lessons
@@ -58,8 +65,7 @@ function DayIndicators({ sessions, lessons }) {
   const hasPractice = sessions.length > 0;
   const hasLesson   = lessons.length > 0;
 
-  // aggregate: best energy, avg enjoyment
-  const maxEnergy   = hasPractice ? Math.max(...sessions.map(s => (s.energy ?? 0) + 3)) : 0;
+  const maxEnergy    = hasPractice ? Math.max(...sessions.map(s => (s.energy ?? 0) + 3)) : 0;
   const avgEnjoyment = hasPractice
     ? sessions.filter(s => s.enjoyment).reduce((a, s, _, arr) => a + s.enjoyment / arr.length, 0)
     : 0;
@@ -68,16 +74,11 @@ function DayIndicators({ sessions, lessons }) {
 
   return (
     <View style={ind.wrap}>
-      {/* Dots above number — rendered separately via DayDots */}
-      {/* Emojis below number */}
       {hasPractice && (
         <Text style={[ind.emoji, { opacity: energyOpacity(sessions[0].energy) }]}>⚡</Text>
       )}
       {hasPractice && avgEnjoyment > 0 && (
         <Text style={[ind.emoji, { opacity: 0.25 + (avgEnjoyment / 5) * 0.75 }]}>❤️</Text>
-      )}
-      {hasLesson && (
-        <Text style={ind.emoji}>🎓</Text>
       )}
     </View>
   );
@@ -92,13 +93,6 @@ function DayDots({ hasPractice, hasLesson }) {
     </View>
   );
 }
-
-const ind = StyleSheet.create({
-  wrap:   { flexDirection: 'row', justifyContent: 'center', gap: 1, marginTop: 1 },
-  emoji:  { fontSize: 9, lineHeight: 12 },
-  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 3, alignSelf: 'center' },
-  dot:    { width: 4, height: 4, borderRadius: 2 },
-});
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -234,7 +228,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             {Array.from({ length: cells.length / 7 }, (_, row) => (
               <View key={row} style={{ flexDirection: 'row' }}>
                 {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
-                  if (!day) return <View key={col} style={{ width: cellSize, height: cellSize + 10 }} />;
+                  if (!day) return <View key={col} style={{ width: cellSize, height: cellSize + 18 }} />;
 
                   const iso        = isoFor(viewYear, viewMonth, day);
                   const daySessions = sessionsByDate[iso] || [];
@@ -250,11 +244,12 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       activeOpacity={isFuture ? 1 : 0.7}
                       style={{
                         width: cellSize,
-                        height: cellSize + 10,
+                        height: cellSize + 18,
                         alignItems: 'center',
                         justifyContent: 'flex-start',
                         paddingTop: 10,
                         borderRadius: RADIUS.sm,
+                        position: 'relative',
                         backgroundColor: isToday ? 'rgba(9,99,126,0.08)' : 'transparent',
                       }}
                     >
@@ -272,6 +267,22 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       }}>
                         {day}
                       </Text>
+
+                      {/* Score number below day */}
+                      {daySessions.length > 0 && (() => {
+                        const e = daySessions[0].energy;
+                        return (
+                          <Text style={{
+                            fontFamily: 'SourceSans3-Bold',
+                            fontSize: 8,
+                            color: COLOURS.red,
+                            opacity: energyOpacity(e),
+                            lineHeight: 10,
+                          }}>
+                            {e > 0 ? `+${e}` : e}
+                          </Text>
+                        );
+                      })()}
 
                       {/* Indicators below number */}
                       <DayIndicators sessions={daySessions} lessons={dayLessons} />
@@ -294,8 +305,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <Text style={{ fontSize: 10 }}>⚡</Text>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Energy</Text>
+            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: COLOURS.red }}>+1</Text>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Energy score</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Text style={{ fontSize: 10 }}>❤️</Text>
