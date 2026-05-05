@@ -1,35 +1,105 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Alert,
-  KeyboardAvoidingView, Platform, Modal,
+  KeyboardAvoidingView, Platform, Modal, PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
-import { GlassCard, SectionTitle, Btn } from '../components/UI';
+import { GlassCard, SectionTitle, Btn, TagCloud } from '../components/UI';
 import { Field, TextF, NumberF, SelectF } from '../components/Form';
+import { TECH_GROUPS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
 import { uid } from '../utils';
 
-// ─── Per-piece feedback block ─────────────────────────────────────────────────
+// ─── Zelda bar ────────────────────────────────────────────────────────────────
 
-function PieceFeedbackEditor({ item, onChange, onRemove, compositions }) {
+const CELL_W = 36;
+const CELLS  = 5;
+
+function ZeldaBar({ emoji, value, onChange }) {
+  const containerRef = useRef(null);
+  const containerX   = useRef(0);
+  function valueFromX(x) {
+    return Math.max(1, Math.min(CELLS, Math.ceil((x - containerX.current) / CELL_W)));
+  }
+  const pan = useRef(PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder:  () => true,
+    onPanResponderGrant: e => onChange(valueFromX(e.nativeEvent.pageX)),
+    onPanResponderMove:  e => onChange(valueFromX(e.nativeEvent.pageX)),
+  })).current;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <View
+        ref={containerRef}
+        onLayout={() => containerRef.current?.measure((_x, _y, _w, _h, px) => { containerX.current = px; })}
+        {...pan.panHandlers}
+        style={{ flexDirection: 'row', gap: 2 }}
+      >
+        {[1,2,3,4,5].map(n => (
+          <Text key={n} style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>{emoji}</Text>
+        ))}
+      </View>
+      {value > 0 && (
+        <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top:8, bottom:8, left:8, right:8 }}>
+          <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
+// ─── Lesson segment editor ───────────────────────────────────────────────────
+// Same structure as SegmentEditor but with lesson-specific fields added:
+// teacher feedback, assignment, new piece toggle.
+
+function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
   const [open, setOpen] = useState(true);
   const f = (k, v) => onChange({ ...item, [k]: v });
+  const toggleTag = (key, tag) => {
+    const cur = item[key] || [];
+    f(key, cur.includes(tag) ? cur.filter(t => t !== tag) : [...cur, tag]);
+  };
+
+  const isTech     = item.type === 'technique';
   const linkedComp = compositions.find(c => c.id === item.compositionId);
-  const displayName = linkedComp ? linkedComp.title : (item.pieceName || 'Piece');
+  const accentColor = isTech ? COLOURS.steel : COLOURS.navy;
+
+  const displayName = isTech
+    ? (item.group || item.title || 'Technical work')
+    : (linkedComp ? linkedComp.title : (item.pieceName || 'Piece'));
 
   return (
     <BlurView intensity={28} tint="light" style={{
       borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder,
       overflow: 'hidden', marginBottom: 10,
+      shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 3,
     }}>
+      {/* Header */}
       <TouchableOpacity
         onPress={() => setOpen(o => !o)}
         activeOpacity={0.75}
         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 13, backgroundColor: COLOURS.glass }}
       >
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.text }}>{displayName}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {/* Type toggle pills */}
+            <TouchableOpacity
+              onPress={() => onChange({ ...item, type: 'technique', compositionId: '', pieceName: '' })}
+              activeOpacity={0.75}
+              style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : 'transparent', borderWidth: 1, borderColor: isTech ? COLOURS.steel : COLOURS.glassBorder }}
+            >
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: isTech ? COLOURS.navy : COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>technique</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onChange({ ...item, type: 'repertoire', group: '' })}
+              activeOpacity={0.75}
+              style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: !isTech ? COLOURS.accentLight : 'transparent', borderWidth: 1, borderColor: !isTech ? COLOURS.navy : COLOURS.glassBorder }}
+            >
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: !isTech ? COLOURS.navy : COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>repertoire</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text, marginTop: 4 }}>{displayName}</Text>
           {item.isNew && (
             <View style={{ marginTop: 3, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight, borderWidth: 1, borderColor: 'rgba(221,174,211,0.40)' }}>
               <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#5C2D6E' }}>new piece</Text>
@@ -46,51 +116,82 @@ function PieceFeedbackEditor({ item, onChange, onRemove, compositions }) {
 
       {open && (
         <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <View style={{ flex: 1 }}>
-              <SelectF
-                label="Piece"
-                value={item.compositionId || ''}
-                onChange={id => {
-                  const comp = compositions.find(c => c.id === id);
-                  onChange({ ...item, compositionId: id, pieceName: comp ? comp.title : item.pieceName });
-                }}
-                options={compositions.map(c => ({ value: c.id, label: c.title }))}
-                placeholder="— Select or type —"
-              />
-            </View>
-            <View style={{ width: 80 }}>
-              <Field label="New piece?">
-                <TouchableOpacity
-                  onPress={() => f('isNew', !item.isNew)}
-                  activeOpacity={0.75}
-                  style={{
-                    paddingVertical: 10, paddingHorizontal: 10, borderRadius: RADIUS.sm, borderWidth: 1,
-                    borderColor: item.isNew ? COLOURS.navy : COLOURS.glassBorder,
-                    backgroundColor: item.isNew ? COLOURS.accentLight : 'rgba(255,255,255,0.50)',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: item.isNew ? COLOURS.navy : COLOURS.textMuted }}>
-                    {item.isNew ? 'Yes ✓' : 'No'}
-                  </Text>
-                </TouchableOpacity>
-              </Field>
-            </View>
-          </View>
 
-          {!linkedComp && (
-            <Field label="Piece name (if not in library)">
-              <TextF value={item.pieceName || ''} onChange={v => f('pieceName', v)} placeholder="Title" />
-            </Field>
+          {isTech ? (
+            <>
+              <Field label="Technique group">
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+                  {TECH_GROUPS.map(g => {
+                    const active = item.group === g;
+                    return (
+                      <TouchableOpacity key={g} onPress={() => f('group', g)} activeOpacity={0.75}
+                        style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: active ? COLOURS.steel : COLOURS.glassBorder, backgroundColor: active ? COLOURS.accent2Light : COLOURS.glass }}>
+                        <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </Field>
+              <Field label="Label (optional)">
+                <TextF value={item.title || ''} onChange={v => f('title', v)} placeholder="e.g. Hanon No. 1" />
+              </Field>
+            </>
+          ) : (
+            <>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <SelectF
+                    label="Piece"
+                    value={item.compositionId || ''}
+                    onChange={id => {
+                      const comp = compositions.find(c => c.id === id);
+                      onChange({ ...item, compositionId: id, pieceName: comp ? comp.title : item.pieceName });
+                    }}
+                    options={compositions.map(c => ({ value: c.id, label: c.title }))}
+                    placeholder="— Select or type —"
+                  />
+                </View>
+                <View style={{ width: 80 }}>
+                  <Field label="New piece?">
+                    <TouchableOpacity
+                      onPress={() => f('isNew', !item.isNew)}
+                      activeOpacity={0.75}
+                      style={{ paddingVertical: 10, paddingHorizontal: 10, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: item.isNew ? COLOURS.navy : COLOURS.glassBorder, backgroundColor: item.isNew ? COLOURS.accentLight : 'rgba(255,255,255,0.50)', alignItems: 'center' }}
+                    >
+                      <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: item.isNew ? COLOURS.navy : COLOURS.textMuted }}>{item.isNew ? 'Yes ✓' : 'No'}</Text>
+                    </TouchableOpacity>
+                  </Field>
+                </View>
+              </View>
+              {!linkedComp && (
+                <Field label="Piece name (if not in library)">
+                  <TextF value={item.pieceName || ''} onChange={v => f('pieceName', v)} placeholder="Title" />
+                </Field>
+              )}
+              <Field label="Section worked on">
+                <TextF value={item.section || ''} onChange={v => f('section', v)} placeholder="e.g. Bars 1–16, full piece…" />
+              </Field>
+            </>
           )}
 
           <Field label="Teacher feedback">
             <TextF value={item.feedback || ''} onChange={v => f('feedback', v)} placeholder="What the teacher said about this piece…" multiline />
           </Field>
 
-          <Field label="Assignment for next lesson" style={{ marginBottom: 0 }}>
+          <Field label="Assignment for next lesson">
             <TextF value={item.assignment || ''} onChange={v => f('assignment', v)} placeholder="What to practise before next lesson…" multiline />
+          </Field>
+
+          <Field label="Felt difficulty">
+            <ZeldaBar emoji="🎵" value={item.feltDifficulty || 0} onChange={v => f('feltDifficulty', v)} />
+          </Field>
+
+          <Field label="Challenge tags">
+            <TagCloud tags={CHALLENGE_TAGS} selected={item.challenges || []} onToggle={t => toggleTag('challenges', t)} />
+          </Field>
+
+          <Field label="Progress tags" style={{ marginBottom: 0 }}>
+            <TagCloud tags={PROGRESS_TAGS} selected={item.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
         </View>
       )}
@@ -121,8 +222,8 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
     }
   }, [visible, initialDate]);
 
-  function addPiece() {
-    setPieces(p => [...p, { id: uid(), compositionId: '', pieceName: '', feedback: '', assignment: '', isNew: false }]);
+  function addPiece(type = 'repertoire') {
+    setPieces(p => [...p, { id: uid(), type, compositionId: '', pieceName: '', title: '', group: '', feedback: '', assignment: '', isNew: false, section: '', feltDifficulty: 0, challenges: [], progress: [] }]);
   }
   function updatePiece(id, val) { setPieces(p => p.map(x => x.id === id ? val : x)); }
   function removePiece(id)      { setPieces(p => p.filter(x => x.id !== id)); }
@@ -177,21 +278,27 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             </GlassCard>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 }}>
-              <SectionTitle style={{ marginBottom: 0 }}>Pieces worked on</SectionTitle>
-              <TouchableOpacity onPress={addPiece} activeOpacity={0.75}
-                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.navy, backgroundColor: COLOURS.accentLight }}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Add piece</Text>
-              </TouchableOpacity>
+              <SectionTitle style={{ marginBottom: 0 }}>Segments</SectionTitle>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity onPress={() => addPiece('technique')} activeOpacity={0.75}
+                  style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.steel, backgroundColor: COLOURS.accent2Light }}>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Technique</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => addPiece('repertoire')} activeOpacity={0.75}
+                  style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.navy, backgroundColor: COLOURS.accentLight }}>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Repertoire</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {pieces.length === 0 && (
               <View style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: COLOURS.glassBorder, borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.25)' }}>
-                <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 14 }}>Add pieces to log teacher feedback per piece</Text>
+                <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments worked on in this lesson</Text>
               </View>
             )}
 
             {pieces.map(item => (
-              <PieceFeedbackEditor
+              <LessonSegmentEditor
                 key={item.id}
                 item={item}
                 compositions={compositions}
