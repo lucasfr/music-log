@@ -36,13 +36,12 @@ function energyDotColour(energy) {
 
 // ─── Practice entry ───────────────────────────────────────────────────────────
 
-function PracticeEntry({ session, compositions, onPress }) {
+function PracticeEntry({ session, compositions, onPress, showDate = true }) {
   const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
   const techSegs  = (session.segments || []).filter(s => s.type === 'technique');
   const repSegs   = (session.segments || []).filter(s => s.type === 'repertoire');
   const techNames  = [...new Set(techSegs.map(s => s.group || s.title).filter(Boolean))];
   const pieceNames = [...new Set(repSegs.map(s => s.compositionId ? compName(s.compositionId) : s.title).filter(Boolean))];
-  const isToday = session.date === todayISO();
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
@@ -54,10 +53,12 @@ function PracticeEntry({ session, compositions, onPress }) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <View style={{ width: 3, height: 36, borderRadius: 2, backgroundColor: energyDotColour(session.energy) }} />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
-                {isToday ? 'Today' : fmtDate(session.date)}
-              </Text>
-              <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
+              {showDate && (
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
+                  {fmtDate(session.date)}
+                </Text>
+              )}
+              <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: showDate ? 1 : 0 }}>
                 {session.duration ? `${session.duration} min · ` : ''}⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}{session.enjoyment ? `  ❤️ ${session.enjoyment}/5` : ''}
               </Text>
             </View>
@@ -89,13 +90,12 @@ function PracticeEntry({ session, compositions, onPress }) {
 
 // ─── Lesson entry ─────────────────────────────────────────────────────────────
 
-function LessonEntry({ lesson, compositions, onPress }) {
+function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
   const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
   const pieceNames = [...new Set((lesson.pieces || []).map(p =>
     p.compositionId ? compName(p.compositionId) : p.pieceName
   ).filter(Boolean))];
   const newPieces = (lesson.pieces || []).filter(p => p.isNew);
-  const isToday = lesson.date === todayISO();
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
@@ -108,9 +108,11 @@ function LessonEntry({ lesson, compositions, onPress }) {
             <View style={{ width: 3, height: 36, borderRadius: 2, backgroundColor: COLOURS.amber }} />
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
-                  {isToday ? 'Today' : fmtDate(lesson.date)}
-                </Text>
+                {showDate && (
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
+                    {fmtDate(lesson.date)}
+                  </Text>
+                )}
                 <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.12)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
                   <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#7A3A00' }}>🎓 lesson</Text>
                 </View>
@@ -160,24 +162,14 @@ function FAB({ onPractice, onLesson }) {
           <TouchableOpacity
             onPress={() => { setExpanded(false); onLesson(); }}
             activeOpacity={0.85}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 10,
-              paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill,
-              backgroundColor: 'rgba(255,255,255,0.50)',
-          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4,
-            }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#7A3A00' }}>🎓 Log lesson</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => { setExpanded(false); onPractice(); }}
             activeOpacity={0.85}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 10,
-              paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill,
-              backgroundColor: 'rgba(255,255,255,0.50)',
-          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4,
-            }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#8A1010' }}>🎹 Log practice</Text>
           </TouchableOpacity>
@@ -186,13 +178,7 @@ function FAB({ onPractice, onLesson }) {
       <TouchableOpacity
         onPress={() => setExpanded(e => !e)}
         activeOpacity={0.85}
-        style={{
-          width: 58, height: 58, borderRadius: 29,
-          backgroundColor: 'rgba(255,255,255,0.58)',
-          borderWidth: 1, borderColor: COLOURS.glassBorder,
-          alignItems: 'center', justifyContent: 'center',
-          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 16, elevation: 8,
-        }}
+        style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(255,255,255,0.58)', alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 16, elevation: 8 }}
       >
         <Text style={{ fontSize: expanded ? 22 : 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>
           {expanded ? '✕' : '+'}
@@ -211,28 +197,19 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
 
-  const sessionMap = useMemo(() => {
-    const m = {};
-    sessions.forEach(s => { m[s.date] = s; });
-    return m;
-  }, [sessions]);
+  // All today's entries (can be multiple sessions + multiple lessons)
+  const todaySessions = useMemo(() => sessions.filter(s => s.date === today), [sessions, today]);
+  const todayLessons  = useMemo(() => (lessons || []).filter(l => l.date === today), [lessons, today]);
+  const hasToday = todaySessions.length > 0 || todayLessons.length > 0;
 
-  const todaySession = sessionMap[today];
-  const todayLesson  = (lessons || []).find(l => l.date === today);
-
+  // Feed = everything sorted by date desc, all entries (not filtered by today)
   const feedItems = useMemo(() => {
     const s = sessions.filter(s => s.date !== today).map(s => ({ ...s, _type: 'practice' }));
     const l = (lessons || []).filter(l => l.date !== today).map(l => ({ ...l, _type: 'lesson' }));
-    return [...s, ...l].sort((a, b) => b.date.localeCompare(a.date));
+    return [...s, ...l].sort((a, b) =>
+      b.date.localeCompare(a.date) || (b.createdAt || '').localeCompare(a.createdAt || '')
+    );
   }, [sessions, lessons, today]);
-
-  const todayPieces = todaySession ? [...new Set((todaySession.segments || [])
-    .filter(s => s.type === 'repertoire')
-    .map(s => s.compositionId ? (compositions.find(c => c.id === s.compositionId) || {}).title || s.title : s.title)
-    .filter(Boolean))] : [];
-  const todayTech = todaySession ? [...new Set(
-    (todaySession.segments || []).filter(s => s.type === 'technique').map(s => s.group || s.title).filter(Boolean)
-  )] : [];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
@@ -250,59 +227,72 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 24,
           shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 22, elevation: 6,
         }}>
-          <View style={{ backgroundColor: todayLesson ? COLOURS.accent2Light : COLOURS.glass, padding: 16 }}>
+          <View style={{ backgroundColor: COLOURS.glass, padding: 16 }}>
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
 
-            {todayLesson ? (
-              <TouchableOpacity activeOpacity={0.8} onPress={() => setDetailLesson(todayLesson)}>
-                <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-                  <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.14)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Lesson · {todayLesson.duration} min</Text>
-                  </View>
-                </View>
-                {(todayLesson.pieces || []).length > 0 && (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                    {todayLesson.pieces.map(p => {
-                      const name = p.compositionId ? (compositions.find(c => c.id === p.compositionId) || {}).title : p.pieceName;
-                      return name ? (
-                <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                          <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{name}</Text>
+            {hasToday ? (
+              <View style={{ gap: 10 }}>
+                {todayLessons.map(l => (
+                  <TouchableOpacity key={l.id} activeOpacity={0.8} onPress={() => setDetailLesson(l)}>
+                    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+                      <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.14)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Lesson · {l.duration} min</Text>
+                      </View>
+                    </View>
+                    {(l.pieces || []).length > 0 && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+                        {l.pieces.map(p => {
+                          const name = p.compositionId ? (compositions.find(c => c.id === p.compositionId) || {}).title : p.pieceName;
+                          return name ? (
+                            <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                              <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{name}</Text>
+                            </View>
+                          ) : null;
+                        })}
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
+
+                {todaySessions.map(s => {
+                  const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
+                  const techNames  = [...new Set((s.segments || []).filter(seg => seg.type === 'technique').map(seg => seg.group || seg.title).filter(Boolean))];
+                  const pieceNames = [...new Set((s.segments || []).filter(seg => seg.type === 'repertoire').map(seg => seg.compositionId ? compName(seg.compositionId) : seg.title).filter(Boolean))];
+                  return (
+                    <TouchableOpacity key={s.id} activeOpacity={0.8} onPress={() => setDetailSession(s)}>
+                      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: (techNames.length || pieceNames.length) ? 6 : 0 }}>
+                        {s.duration ? (
+                          <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.10)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>{s.duration} min</Text>
+                          </View>
+                        ) : null}
+                        <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                          <ZeldaMini emoji="⚡" value={energyToBar(s.energy)} />
                         </View>
-                      ) : null;
-                    })}
-                  </View>
-                )}
-              </TouchableOpacity>
-            ) : todaySession ? (
-              <TouchableOpacity activeOpacity={0.8} onPress={() => setDetailSession(todaySession)}>
-                <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: todayPieces.length || todayTech.length ? 10 : 0 }}>
-                  {todaySession.duration ? (
-                    <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.10)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>{todaySession.duration} min</Text>
-                    </View>
-                  ) : null}
-                  <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                    <ZeldaMini emoji="⚡" value={energyToBar(todaySession.energy)} />
-                  </View>
-                  {todaySession.enjoyment ? (
-                    <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                      <ZeldaMini emoji="❤️" value={todaySession.enjoyment} />
-                    </View>
-                  ) : null}
-                </View>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                  {todayTech.map(t => (
-                    <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                      <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
-                    </View>
-                  ))}
-                  {todayPieces.map(p => (
-                    <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                      <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
-                    </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
+                        {s.enjoyment ? (
+                          <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                            <ZeldaMini emoji="❤️" value={s.enjoyment} />
+                          </View>
+                        ) : null}
+                      </View>
+                      {(techNames.length > 0 || pieceNames.length > 0) && (
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+                          {techNames.map(t => (
+                            <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                              <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
+                            </View>
+                          ))}
+                          {pieceNames.map(p => (
+                            <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.10)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                              <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             ) : (
               <View>
                 <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
@@ -321,6 +311,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           </View>
         </BlurView>
 
+        {/* Feed */}
         {feedItems.length > 0 && (
           <>
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
