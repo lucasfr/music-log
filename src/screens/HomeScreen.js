@@ -45,9 +45,7 @@ function PracticeEntry({ session, compositions, onPress }) {
                 {isToday ? 'Today' : fmtDate(session.date)}
               </Text>
               <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
-                {session.duration ? `${session.duration} min · ` : ''}
-                Energy {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}
-                {session.enjoyment ? ` · ❤️ ${session.enjoyment}/5` : ''}
+                {session.duration ? `${session.duration} min · ` : ''}⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {ENERGY_LABELS[String(session.energy)]}{session.enjoyment ? `  ❤️ ${session.enjoyment}/5` : ''}
               </Text>
             </View>
           </View>
@@ -272,7 +270,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                   ) : null}
                   <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>
-                      {todaySession.energy > 0 ? `+${todaySession.energy}` : todaySession.energy} · {ENERGY_LABELS[String(todaySession.energy)]}
+                      ⚡ {todaySession.energy > 0 ? `+${todaySession.energy}` : todaySession.energy} · {ENERGY_LABELS[String(todaySession.energy)]}{todaySession.enjoyment ? `   ❤️ ${todaySession.enjoyment}/5` : ''}
                     </Text>
                   </View>
                 </View>
