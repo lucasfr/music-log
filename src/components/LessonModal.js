@@ -175,27 +175,27 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
             </>
           )}
 
-          <Field label="Teacher feedback">
+          <Field label="💬 Teacher feedback">
             <TextF value={item.feedback || ''} onChange={v => f('feedback', v)} placeholder="What the teacher said about this piece…" multiline />
           </Field>
 
-          <Field label="Assignment for next lesson">
+          <Field label="📚 Assignment for next lesson">
             <TextF value={item.assignment || ''} onChange={v => f('assignment', v)} placeholder="What to practise before next lesson…" multiline />
           </Field>
 
-          <Field label="Felt difficulty">
+          <Field label="🎵 Felt difficulty">
             <ZeldaBar emoji="🎵" value={item.feltDifficulty || 0} onChange={v => f('feltDifficulty', v)} />
           </Field>
 
-          <Field label="Liking" style={{ marginBottom: 0 }}>
+          <Field label="⭐ Liking" style={{ marginBottom: 0 }}>
             <ZeldaBar emoji="⭐" value={item.liking || 0} onChange={v => f('liking', v)} />
           </Field>
 
-          <Field label="Challenge tags">
+          <Field label="🚧 Challenge tags">
             <TagCloud tags={CHALLENGE_TAGS} selected={item.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
 
-          <Field label="Progress tags" style={{ marginBottom: 0 }}>
+          <Field label="✅ Progress tags" style={{ marginBottom: 0 }}>
             <TagCloud tags={PROGRESS_TAGS} selected={item.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
         </View>
@@ -257,7 +257,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <View>
-                <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>Log lesson</Text>
+                <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>🎓 Log lesson</Text>
                 <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>with {teacher}</Text>
               </View>
               <TouchableOpacity onPress={onClose}>
@@ -273,17 +273,17 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             <GlassCard>
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}>
-                  <Field label="Date">
+                  <Field label="📅 Date">
                     <TextF value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
                   </Field>
                 </View>
                 <View style={{ width: 100 }}>
-                  <Field label="Duration (min)">
+                  <Field label="⏱ Duration (min)">
                     <NumberF value={duration} onChange={setDuration} />
                   </Field>
                 </View>
               </View>
-              <Field label="Teacher" style={{ marginBottom: 0 }}>
+              <Field label="🎼 Teacher" style={{ marginBottom: 0 }}>
                 <TextF value={teacher} onChange={setTeacher} placeholder="Teacher name" />
               </Field>
             </GlassCard>
@@ -328,13 +328,13 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             ))}
 
             <GlassCard>
-              <Field label="Overall lesson notes">
+              <Field label="✨ Overall lesson notes">
                 <TextF value={overallNotes} onChange={setOverallNotes} placeholder="General observations from the lesson…" multiline />
               </Field>
-              <Field label="Wins / breakthroughs">
+              <Field label="🌟 Wins / breakthroughs">
                 <TextF value={wins} onChange={setWins} placeholder="What clicked or was confirmed today…" multiline />
               </Field>
-              <Field label="Focus before next lesson" style={{ marginBottom: 0 }}>
+              <Field label="🎯 Focus before next lesson" style={{ marginBottom: 0 }}>
                 <TextF value={nextFocus} onChange={setNextFocus} placeholder="Overall priority until next lesson…" multiline />
               </Field>
             </GlassCard>

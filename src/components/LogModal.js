@@ -124,7 +124,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>
-                Log session
+                🎹 Log session
               </Text>
               <TouchableOpacity onPress={onClose}>
                 <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
@@ -138,12 +138,12 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
             <GlassCard>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
                 <View style={{ flex: 1 }}>
-                  <Field label="Date">
+                  <Field label="📅 Date">
                     <TextF value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
                   </Field>
                 </View>
                 <View style={{ width: 120 }}>
-                  <Field label={totalMin ? `Duration (~${totalMin}m)` : 'Duration (min)'}>
+                  <Field label={totalMin ? `⏱ Duration (~${totalMin}m)` : '⏱ Duration (min)'}>
                     <NumberF value={duration} onChange={setDuration} placeholder={totalMin ? String(totalMin) : ''} />
                   </Field>
                 </View>
@@ -197,10 +197,10 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
             ))}
 
             <GlassCard>
-              <Field label="Wins today">
+              <Field label="✨ Wins today">
                 <TextF value={wins} onChange={setWins} placeholder="What went well? Any breakthroughs?" multiline />
               </Field>
-              <Field label="Tomorrow's focus" style={{ marginBottom: 0 }}>
+              <Field label="🎯 Tomorrow's focus" style={{ marginBottom: 0 }}>
                 <TextF value={focus} onChange={setFocus} placeholder="What to prioritise next session?" multiline />
               </Field>
             </GlassCard>

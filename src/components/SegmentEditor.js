@@ -115,7 +115,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
         <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
           {isTech ? (
             <>
-              <Field label="Technique group">
+              <Field label="🎹 Technique group">
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   {TECH_GROUPS.map(g => {
                     const active = segment.group === g;
@@ -141,12 +141,12 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
               </Field>
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}>
-                  <Field label="Label (optional)">
+                  <Field label="🏷️ Label (optional)">
                     <TextF value={segment.title || ''} onChange={v => field('title', v)} placeholder="e.g. Hanon No. 1" />
                   </Field>
                 </View>
                 <View style={{ width: 90 }}>
-                  <Field label="Duration (min)">
+                  <Field label="⏱ Duration (min)">
                     <NumberF value={segment.duration || ''} onChange={v => field('duration', v)} />
                   </Field>
                 </View>
@@ -168,7 +168,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                   />
                 </View>
                 <View style={{ width: 90 }}>
-                  <Field label="Duration (min)">
+                  <Field label="⏱ Duration (min)">
                     <NumberF value={segment.duration || ''} onChange={v => field('duration', v)} />
                   </Field>
                 </View>
@@ -178,25 +178,25 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                   <TextF value={segment.title || ''} onChange={v => field('title', v)} placeholder="Title" />
                 </Field>
               )}
-              <Field label="Section practiced">
+              <Field label="🎼 Section practiced">
                 <TextF value={segment.section || ''} onChange={v => field('section', v)} placeholder="e.g. Bars 1–16, full piece…" />
               </Field>
             </>
           )}
 
-          <Field label="Notes">
+          <Field label="📝 Notes">
             <TextF value={segment.notes || ''} onChange={v => field('notes', v)} placeholder="Observations, what clicked, what to work on…" multiline />
           </Field>
 
-          <Field label="Felt difficulty">
+          <Field label="🎵 Felt difficulty">
             <ZeldaBar emoji="🎵" value={segment.feltDifficulty || 0} onChange={v => field('feltDifficulty', v)} />
           </Field>
 
-          <Field label="Challenge tags">
+          <Field label="🚧 Challenge tags">
             <TagCloud tags={CHALLENGE_TAGS} selected={segment.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
 
-          <Field label="Progress tags" style={{ marginBottom: 0 }}>
+          <Field label="✅ Progress tags" style={{ marginBottom: 0 }}>
             <TagCloud tags={PROGRESS_TAGS} selected={segment.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
         </View>
