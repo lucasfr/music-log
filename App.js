@@ -16,7 +16,7 @@ import {
   SourceSans3_700Bold,
 } from '@expo-google-fonts/source-sans-3';
 
-import { useSessions, useCompositions } from './src/db/hooks';
+import { useSessions, useCompositions, useLessons } from './src/db/hooks';
 import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
@@ -74,7 +74,8 @@ export default function App() {
   }, [fontsLoaded]);
 
   const { sessions, save: saveSession, remove: deleteSession } = useSessions();
-  const { compositions, save: saveComp, remove: deleteComp } = useCompositions();
+  const { compositions, save: saveComp, remove: deleteComp }   = useCompositions();
+  const { lessons, save: saveLesson, remove: deleteLesson }    = useLessons();
 
   if (!fontsLoaded || !ready) {
     return (
@@ -123,10 +124,30 @@ export default function App() {
           })}
         >
           <Tab.Screen name="Home">
-            {() => <HomeScreen sessions={sessions} compositions={compositions} onSave={saveSession} onDelete={deleteSession} />}
+            {() => (
+              <HomeScreen
+                sessions={sessions}
+                lessons={lessons}
+                compositions={compositions}
+                onSave={saveSession}
+                onSaveLesson={saveLesson}
+                onDelete={deleteSession}
+                onDeleteLesson={deleteLesson}
+              />
+            )}
           </Tab.Screen>
           <Tab.Screen name="Calendar">
-            {() => <CalendarScreen sessions={sessions} compositions={compositions} onSave={saveSession} onDelete={deleteSession} />}
+            {() => (
+              <CalendarScreen
+                sessions={sessions}
+                lessons={lessons}
+                compositions={compositions}
+                onSave={saveSession}
+                onSaveLesson={saveLesson}
+                onDelete={deleteSession}
+                onDeleteLesson={deleteLesson}
+              />
+            )}
           </Tab.Screen>
           <Tab.Screen name="Pieces">
             {() => <CompositionsScreen compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} />}

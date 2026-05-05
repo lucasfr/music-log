@@ -9,6 +9,7 @@ function openIDB() {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('sessions'))     db.createObjectStore('sessions',     { keyPath: 'id' });
       if (!db.objectStoreNames.contains('compositions')) db.createObjectStore('compositions', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('lessons'))      db.createObjectStore('lessons',      { keyPath: 'id' });
     };
     req.onsuccess = e => resolve(e.target.result);
     req.onerror   = ()  => reject(req.error);
@@ -66,6 +67,12 @@ async function getDB() {
       FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS lessons (
+      id TEXT PRIMARY KEY, date TEXT NOT NULL, teacher TEXT,
+      duration INTEGER, pieces TEXT, overall_notes TEXT,
+      wins TEXT, next_focus TEXT, created_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS compositions (
       id TEXT PRIMARY KEY, title TEXT NOT NULL, composer TEXT,
       status TEXT NOT NULL DEFAULT 'learning',
@@ -74,11 +81,10 @@ async function getDB() {
     );
   `);
 
-  // Migrations for sessions
+  // Migrations
   try { await _db.execAsync('ALTER TABLE sessions ADD COLUMN enjoyment INTEGER'); } catch (_) {}
   try { await _db.execAsync('ALTER TABLE segments ADD COLUMN felt_difficulty INTEGER'); } catch (_) {}
 
-  // Migrations for compositions — add new columns safely (catch errors for existing columns)
   const newCols = [
     'ALTER TABLE compositions ADD COLUMN difficulty INTEGER DEFAULT 0',
     'ALTER TABLE compositions ADD COLUMN arrangement TEXT',
@@ -97,7 +103,7 @@ async function getDB() {
   ];
 
   for (const sql of newCols) {
-    try { await _db.execAsync(sql); } catch (_) { /* column already exists */ }
+    try { await _db.execAsync(sql); } catch (_) {}
   }
 
   return _db;
@@ -127,7 +133,7 @@ export async function getAllSessions() {
         compositionId: seg.composition_id,
         challenges: seg.challenges ? JSON.parse(seg.challenges) : [],
         feltDifficulty: seg.felt_difficulty ?? null,
-        progress:   seg.progress   ? JSON.parse(seg.progress)   : [],
+        progress: seg.progress ? JSON.parse(seg.progress) : [],
       })),
     });
   }
@@ -239,4 +245,53 @@ export async function deleteComposition(id) {
   if (Platform.OS === 'web') { await idbDelete('compositions', id); return; }
   const db = await getDB();
   await db.runAsync('DELETE FROM compositions WHERE id = ?', [id]);
+}
+
+// ─── LESSONS ─────────────────────────────────────────────────────────────────
+
+export async function getAllLessons() {
+  if (Platform.OS === 'web') {
+    const rows = await idbGetAll('lessons');
+    return rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  }
+
+  const db = await getDB();
+  const rows = await db.getAllAsync('SELECT * FROM lessons ORDER BY date DESC, created_at DESC');
+  return rows.map(r => ({
+    ...r,
+    type: 'lesson',
+    pieces: r.pieces ? JSON.parse(r.pieces) : [],
+    nextFocus: r.next_focus,
+    overallNotes: r.overall_notes,
+    createdAt: r.created_at,
+  }));
+}
+
+export async function saveLesson(lesson) {
+  if (Platform.OS === 'web') {
+    await idbPut('lessons', lesson);
+    return;
+  }
+
+  const db = await getDB();
+  await db.runAsync(
+    `INSERT OR REPLACE INTO lessons
+       (id, date, teacher, duration, pieces, overall_notes, wins, next_focus, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      lesson.id, lesson.date, lesson.teacher || null,
+      lesson.duration || null,
+      JSON.stringify(lesson.pieces || []),
+      lesson.overallNotes || null,
+      lesson.wins || null,
+      lesson.nextFocus || null,
+      lesson.createdAt || new Date().toISOString(),
+    ]
+  );
+}
+
+export async function deleteLesson(id) {
+  if (Platform.OS === 'web') { await idbDelete('lessons', id); return; }
+  const db = await getDB();
+  await db.runAsync('DELETE FROM lessons WHERE id = ?', [id]);
 }

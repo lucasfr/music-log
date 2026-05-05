@@ -1,0 +1,221 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, Alert,
+  KeyboardAvoidingView, Platform, Modal,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import { COLOURS, RADIUS } from '../theme';
+import { GlassCard, SectionTitle, Btn } from '../components/UI';
+import { Field, TextF, NumberF, SelectF } from '../components/Form';
+import { uid } from '../utils';
+
+// ─── Per-piece feedback block ─────────────────────────────────────────────────
+
+function PieceFeedbackEditor({ item, onChange, onRemove, compositions }) {
+  const [open, setOpen] = useState(true);
+  const f = (k, v) => onChange({ ...item, [k]: v });
+  const linkedComp = compositions.find(c => c.id === item.compositionId);
+  const displayName = linkedComp ? linkedComp.title : (item.pieceName || 'Piece');
+
+  return (
+    <BlurView intensity={28} tint="light" style={{
+      borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder,
+      overflow: 'hidden', marginBottom: 10,
+    }}>
+      <TouchableOpacity
+        onPress={() => setOpen(o => !o)}
+        activeOpacity={0.75}
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 13, backgroundColor: COLOURS.glass }}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.text }}>{displayName}</Text>
+          {item.isNew && (
+            <View style={{ marginTop: 3, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight, borderWidth: 1, borderColor: 'rgba(221,174,211,0.40)' }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#5C2D6E' }}>new piece</Text>
+            </View>
+          )}
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={{ fontSize: 16, color: COLOURS.danger }}>✕</Text>
+          </TouchableOpacity>
+          <Text style={{ fontSize: 11, color: COLOURS.textDim }}>{open ? '▲' : '▼'}</Text>
+        </View>
+      </TouchableOpacity>
+
+      {open && (
+        <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <SelectF
+                label="Piece"
+                value={item.compositionId || ''}
+                onChange={id => {
+                  const comp = compositions.find(c => c.id === id);
+                  onChange({ ...item, compositionId: id, pieceName: comp ? comp.title : item.pieceName });
+                }}
+                options={compositions.map(c => ({ value: c.id, label: c.title }))}
+                placeholder="— Select or type —"
+              />
+            </View>
+            <View style={{ width: 80 }}>
+              <Field label="New piece?">
+                <TouchableOpacity
+                  onPress={() => f('isNew', !item.isNew)}
+                  activeOpacity={0.75}
+                  style={{
+                    paddingVertical: 10, paddingHorizontal: 10, borderRadius: RADIUS.sm, borderWidth: 1,
+                    borderColor: item.isNew ? COLOURS.navy : COLOURS.glassBorder,
+                    backgroundColor: item.isNew ? COLOURS.accentLight : 'rgba(255,255,255,0.50)',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: item.isNew ? COLOURS.navy : COLOURS.textMuted }}>
+                    {item.isNew ? 'Yes ✓' : 'No'}
+                  </Text>
+                </TouchableOpacity>
+              </Field>
+            </View>
+          </View>
+
+          {!linkedComp && (
+            <Field label="Piece name (if not in library)">
+              <TextF value={item.pieceName || ''} onChange={v => f('pieceName', v)} placeholder="Title" />
+            </Field>
+          )}
+
+          <Field label="Teacher feedback">
+            <TextF value={item.feedback || ''} onChange={v => f('feedback', v)} placeholder="What the teacher said about this piece…" multiline />
+          </Field>
+
+          <Field label="Assignment for next lesson" style={{ marginBottom: 0 }}>
+            <TextF value={item.assignment || ''} onChange={v => f('assignment', v)} placeholder="What to practise before next lesson…" multiline />
+          </Field>
+        </View>
+      )}
+    </BlurView>
+  );
+}
+
+// ─── Lesson modal ─────────────────────────────────────────────────────────────
+
+export function LessonModal({ visible, onClose, onSave, compositions, initialDate }) {
+  const [date, setDate]               = useState(initialDate || '');
+  const [teacher, setTeacher]         = useState('');
+  const [duration, setDuration]       = useState('60');
+  const [pieces, setPieces]           = useState([]);
+  const [overallNotes, setOverallNotes] = useState('');
+  const [wins, setWins]               = useState('');
+  const [nextFocus, setNextFocus]     = useState('');
+
+  useEffect(() => {
+    if (visible) {
+      setDate(initialDate || '');
+      setTeacher('');
+      setDuration('60');
+      setPieces([]);
+      setOverallNotes('');
+      setWins('');
+      setNextFocus('');
+    }
+  }, [visible, initialDate]);
+
+  function addPiece() {
+    setPieces(p => [...p, { id: uid(), compositionId: '', pieceName: '', feedback: '', assignment: '', isNew: false }]);
+  }
+  function updatePiece(id, val) { setPieces(p => p.map(x => x.id === id ? val : x)); }
+  function removePiece(id)      { setPieces(p => p.filter(x => x.id !== id)); }
+
+  function handleSave() {
+    if (!date) { Alert.alert('Date required'); return; }
+    onSave({
+      id: uid(), type: 'lesson', date, teacher,
+      duration: Number(duration) || 60,
+      pieces, overallNotes, wins, nextFocus,
+      createdAt: new Date().toISOString(),
+    });
+    onClose();
+  }
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
+        <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
+          <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
+              <View>
+                <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>Log lesson</Text>
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>with {teacher}</Text>
+              </View>
+              <TouchableOpacity onPress={onClose}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
+        </SafeAreaView>
+
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+
+            <GlassCard>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <Field label="Date">
+                    <TextF value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
+                  </Field>
+                </View>
+                <View style={{ width: 100 }}>
+                  <Field label="Duration (min)">
+                    <NumberF value={duration} onChange={setDuration} />
+                  </Field>
+                </View>
+              </View>
+              <Field label="Teacher" style={{ marginBottom: 0 }}>
+                <TextF value={teacher} onChange={setTeacher} placeholder="Teacher name" />
+              </Field>
+            </GlassCard>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 }}>
+              <SectionTitle style={{ marginBottom: 0 }}>Pieces worked on</SectionTitle>
+              <TouchableOpacity onPress={addPiece} activeOpacity={0.75}
+                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.navy, backgroundColor: COLOURS.accentLight }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Add piece</Text>
+              </TouchableOpacity>
+            </View>
+
+            {pieces.length === 0 && (
+              <View style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: COLOURS.glassBorder, borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.25)' }}>
+                <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 14 }}>Add pieces to log teacher feedback per piece</Text>
+              </View>
+            )}
+
+            {pieces.map(item => (
+              <PieceFeedbackEditor
+                key={item.id}
+                item={item}
+                compositions={compositions}
+                onChange={val => updatePiece(item.id, val)}
+                onRemove={() => removePiece(item.id)}
+              />
+            ))}
+
+            <GlassCard>
+              <Field label="Overall lesson notes">
+                <TextF value={overallNotes} onChange={setOverallNotes} placeholder="General observations from the lesson…" multiline />
+              </Field>
+              <Field label="Wins / breakthroughs">
+                <TextF value={wins} onChange={setWins} placeholder="What clicked or was confirmed today…" multiline />
+              </Field>
+              <Field label="Focus before next lesson" style={{ marginBottom: 0 }}>
+                <TextF value={nextFocus} onChange={setNextFocus} placeholder="Overall priority until next lesson…" multiline />
+              </Field>
+            </GlassCard>
+
+            <Btn label="Save lesson" variant="primary" onPress={handleSave} style={{ marginTop: 4 }} />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
+  );
+}

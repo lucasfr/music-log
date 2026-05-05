@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   getAllSessions, saveSession, deleteSession,
   getAllCompositions, saveComposition, deleteComposition,
+  getAllLessons, saveLesson, deleteLesson,
 } from '../db';
 
 export function useSessions() {
@@ -52,4 +53,29 @@ export function useCompositions() {
   }, [reload]);
 
   return { compositions, loading, save, remove, reload };
+}
+
+export function useLessons() {
+  const [lessons, setLessons] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    const data = await getAllLessons();
+    setLessons(data);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { reload(); }, [reload]);
+
+  const save = useCallback(async (lesson) => {
+    await saveLesson(lesson);
+    await reload();
+  }, [reload]);
+
+  const remove = useCallback(async (id) => {
+    await deleteLesson(id);
+    await reload();
+  }, [reload]);
+
+  return { lessons, loading, save, remove, reload };
 }
