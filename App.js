@@ -40,7 +40,7 @@ const TAB_ICONS = {
 function TabIcon({ name, focused, size }) {
   const icons  = TAB_ICONS[name] || { active: 'ellipse', inactive: 'ellipse-outline' };
   const icon   = focused ? icons.active : icons.inactive;
-  const bgSize = size + 8;
+  const bgSize = 44;
   return (
     <View style={{
       width: bgSize, height: bgSize,
@@ -48,7 +48,7 @@ function TabIcon({ name, focused, size }) {
       backgroundColor: focused ? COLOURS.navy : 'rgba(9,99,126,0.12)',
       alignItems: 'center', justifyContent: 'center',
     }}>
-      <Ionicons name={icon} size={size * 0.82} color="#ffffff" />
+      <Ionicons name={icon} size={24} color="#ffffff" />
     </View>
   );
 }
@@ -56,10 +56,11 @@ function TabIcon({ name, focused, size }) {
 function TabLabel({ label, focused }) {
   return (
     <Text style={{
-      fontSize: 11,
+      fontSize: 12,
       fontFamily: 'Lato-Bold',
       color: focused ? COLOURS.navy : COLOURS.textDim,
       marginBottom: 2,
+      marginTop: 2,
     }}>
       {label}
     </Text>
@@ -141,8 +142,8 @@ export default function App() {
               backgroundColor: 'rgba(234,240,245,0.95)',
               borderTopWidth: 0,
               position: 'absolute',
-              height: Platform.OS === 'web' ? 92 : 72 + (Platform.OS === 'ios' ? 20 : 0),
-              paddingTop: 10,
+              height: Platform.OS === 'web' ? 106 : 86 + (Platform.OS === 'ios' ? 20 : 0),
+              paddingTop: 8,
               paddingBottom: Platform.OS === 'web' ? 20 : Platform.OS === 'ios' ? 20 : 8,
               shadowColor: COLOURS.glassShadow,
               shadowOffset: { width: 0, height: -4 },
