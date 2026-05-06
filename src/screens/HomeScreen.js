@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Platform,
+  View, Text, ScrollView, TouchableOpacity, Platform, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -235,11 +235,17 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
 
-        <View style={{ marginBottom: 20, marginTop: 4 }}>
-          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>music.log</Text>
-          <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
-            {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
-          </Text>
+        <View style={{ marginBottom: 20, marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Image
+            source={require('../../assets/icon.png')}
+            style={{ width: 44, height: 44, borderRadius: 10 }}
+          />
+          <View>
+            <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>music.log</Text>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
+              {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </Text>
+          </View>
         </View>
 
         {/* Today card */}
