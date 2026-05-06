@@ -12,7 +12,7 @@ const STATUS_TEXT_COLOURS = {
   'performance-ready': COLOURS.success,
 };
 
-export default function StatsScreen({ sessions, compositions }) {
+export default function StatsScreen({ sessions, compositions, isDesktop }) {
 
   const last30 = sessions.filter(s => {
     const d = new Date(s.date + 'T12:00:00');

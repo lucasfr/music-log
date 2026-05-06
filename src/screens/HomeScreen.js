@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Platform, Image,
+  View, Text, ScrollView, TouchableOpacity, Platform, Image, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -10,30 +10,30 @@ import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate } from '../utils';
+import { exportSessionJSON } from '../utils/export';
 
-// Energy: DB stores -2..+2, Zelda bar is 1..5
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
-function ZeldaMini({ emoji, value, total = 5 }) {
+const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
+
+function ZeldaMini({ emoji, value, total = 5, size = 16 }) {
   return (
     <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
       {Array.from({ length: total }, (_, i) => (
-        <Text key={i} style={{ fontSize: 16, opacity: i < value ? 1 : 0.18, transform: [{ scale: i < value ? 1 : 0.88 }] }}>{emoji}</Text>
+        <Text key={i} style={{ fontSize: size, opacity: i < value ? 1 : 0.18, transform: [{ scale: i < value ? 1 : 0.88 }] }}>{emoji}</Text>
       ))}
     </View>
   );
 }
-
-const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
 
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-// ─── Practice entry ───────────────────────────────────────────────────────────
+// ─── Practice entry card ──────────────────────────────────────────────────────
 
-function PracticeEntry({ session, compositions, onPress, showDate = true }) {
+function PracticeEntry({ session, compositions, onPress, showDate = true, isSelected = false }) {
   const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
   const techSegs  = (session.segments || []).filter(s => s.type === 'technique');
   const repSegs   = (session.segments || []).filter(s => s.type === 'repertoire');
@@ -45,6 +45,7 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
       <BlurView intensity={36} tint="light" style={{
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
         shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
+        borderWidth: isSelected ? 2 : 0, borderColor: isSelected ? COLOURS.navy : 'transparent',
       }}>
         <View style={{ backgroundColor: COLOURS.accentLight, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
@@ -55,7 +56,7 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.practiceText }}>🎹 practice</Text>
               </View>
               {session.duration ? (
@@ -69,12 +70,12 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
             {(techNames.length > 0 || pieceNames.length > 0) && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
                 {techNames.map(t => (
-                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill }}>
                     <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.practiceText }}>{t}</Text>
                   </View>
                 ))}
                 {pieceNames.map(p => (
-                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill }}>
                     <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.practiceText }}>{p}</Text>
                   </View>
                 ))}
@@ -92,9 +93,9 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
   );
 }
 
-// ─── Lesson entry ─────────────────────────────────────────────────────────────
+// ─── Lesson entry card ────────────────────────────────────────────────────────
 
-function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
+function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelected = false }) {
   const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
   const pieceNames = [...new Set((lesson.pieces || []).map(p =>
     p.compositionId ? compName(p.compositionId) : p.pieceName
@@ -106,6 +107,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
       <BlurView intensity={36} tint="light" style={{
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
         shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
+        borderWidth: isSelected ? 2 : 0, borderColor: isSelected ? COLOURS.navy : 'transparent',
       }}>
         <View style={{ backgroundColor: COLOURS.accent2Light, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
@@ -116,7 +118,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.lessonText }}>🎓 lesson</Text>
               </View>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{lesson.duration} min · {lesson.teacher}</Text>
@@ -130,14 +132,14 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
             {pieceNames.length > 0 && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
                 {pieceNames.map(p => (
-                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.lessonBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.lessonBg, borderRadius: RADIUS.pill }}>
                     <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.lessonText }}>{p}</Text>
                   </View>
                 ))}
                 {newPieces.map(p => {
                   const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
                   return name ? (
-                    <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill, shadowColor: COLOURS.yellowMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                    <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill }}>
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#5A3A00' }}>✦ {name}</Text>
                     </View>
                   ) : null;
@@ -160,32 +162,22 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
 
 function FAB({ onPractice, onLesson }) {
   const [expanded, setExpanded] = useState(false);
-
   return (
     <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
       {expanded && (
         <>
-          <TouchableOpacity
-            onPress={() => { setExpanded(false); onLesson(); }}
-            activeOpacity={0.85}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
-          >
+          <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => { setExpanded(false); onPractice(); }}
-            activeOpacity={0.85}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
-          >
+          <TouchableOpacity onPress={() => { setExpanded(false); onPractice(); }} activeOpacity={0.85}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>🎹 Log practice</Text>
           </TouchableOpacity>
         </>
       )}
-      <TouchableOpacity
-        onPress={() => setExpanded(e => !e)}
-        activeOpacity={0.85}
-        style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(255,255,255,0.58)', alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 16, elevation: 8 }}
-      >
+      <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.85}
+        style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(255,255,255,0.58)', alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 16, elevation: 8 }}>
         <Text style={{ fontSize: expanded ? 22 : 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>
           {expanded ? '✕' : '+'}
         </Text>
@@ -194,9 +186,184 @@ function FAB({ onPractice, onLesson }) {
   );
 }
 
+// ─── Desktop detail panel ─────────────────────────────────────────────────────
+
+function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onCloseLesson, onDeleteSession, onDeleteLesson, onEditSession }) {
+  const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
+
+  if (session) {
+    const techSegs = (session.segments || []).filter(s => s.type === 'technique');
+    const repSegs  = (session.segments || []).filter(s => s.type === 'repertoire');
+    const energyLabel = ENERGY_LABELS[String(session.energy)] || '';
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>{fmtDate(session.date)}</Text>
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+            {onEditSession && (
+              <TouchableOpacity onPress={() => onEditSession(session)}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>Edit</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={onCloseSession}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.textDim }}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {/* Summary chips */}
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+          <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 practice</Text>
+          </View>
+          {session.duration ? (
+            <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {session.duration} min</Text>
+            </View>
+          ) : null}
+        </View>
+        {/* Zelda bars */}
+        <View style={{ flexDirection: 'row', gap: 24, marginBottom: 20 }}>
+          <View style={{ gap: 6 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+              ⚡ Energy · {session.energy > 0 ? `+${session.energy}` : session.energy} {energyLabel}
+            </Text>
+            <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} size={20} />
+          </View>
+          {session.enjoyment ? (
+            <View style={{ gap: 6 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>❤️ Enjoyment</Text>
+              <ZeldaMini emoji="❤️" value={session.enjoyment} size={20} />
+            </View>
+          ) : null}
+        </View>
+        {/* Segments */}
+        {techSegs.length > 0 && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>🎹 Technique</Text>
+            {techSegs.map(seg => (
+              <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
+                  {seg.duration ? <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text> : null}
+                </View>
+                {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.join(' · ')}</Text>}
+                {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+              </View>
+            ))}
+          </View>
+        )}
+        {repSegs.length > 0 && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>📜 Repertoire</Text>
+            {repSegs.map(seg => {
+              const name = seg.compositionId ? compName(seg.compositionId) : seg.title;
+              return (
+                <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginBottom: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
+                    {seg.duration ? <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text> : null}
+                  </View>
+                  {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                  {seg.feltDifficulty ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Difficulty</Text>
+                      <View style={{ flexDirection: 'row', gap: 2 }}>
+                        {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}
+                      </View>
+                    </View>
+                  ) : null}
+                  {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+                  {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                      {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>{t}</Text></View>)}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        )}
+        {session.wins ? (
+          <View style={{ padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 12 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.wins}</Text>
+          </View>
+        ) : null}
+        {session.tomorrowFocus ? (
+          <View style={{ padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 20 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text>
+          </View>
+        ) : null}
+        <TouchableOpacity onPress={() => Alert.alert('Delete session?', fmtDate(session.date), [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: () => onDeleteSession(session.id) },
+        ])}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.danger }}>Delete session</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (lesson) {
+    const compNames = [...new Set((lesson.pieces || []).map(p =>
+      p.compositionId ? compName(p.compositionId) : p.pieceName
+    ).filter(Boolean))];
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <View>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>{fmtDate(lesson.date)}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>🎓 {lesson.duration} min · {lesson.teacher}</Text>
+          </View>
+          <TouchableOpacity onPress={onCloseLesson}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.textDim }}>✕</Text>
+          </TouchableOpacity>
+        </View>
+        {(lesson.energy || lesson.enjoyment) ? (
+          <View style={{ flexDirection: 'row', gap: 24, marginBottom: 20 }}>
+            {lesson.energy ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy</Text><ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} size={20} /></View> : null}
+            {lesson.enjoyment ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>❤️ Enjoyment</Text><ZeldaMini emoji="❤️" value={lesson.enjoyment} size={20} /></View> : null}
+          </View>
+        ) : null}
+        {compNames.length > 0 && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>📜 Pieces</Text>
+            {(lesson.pieces || []).map((item, i) => {
+              const name = item.compositionId ? compName(item.compositionId) : item.pieceName;
+              return (
+                <View key={i} style={{ padding: 12, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 8 }}>
+                  <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, marginBottom: 4 }}>📜 {name || 'Piece'}</Text>
+                  {item.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>💬 {item.feedback}</Text> : null}
+                  {item.assignment ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20, marginTop: 4 }}>📚 {item.assignment}</Text> : null}
+                </View>
+              );
+            })}
+          </View>
+        )}
+        {lesson.wins ? (
+          <View style={{ padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 12 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.wins}</Text>
+          </View>
+        ) : null}
+        <TouchableOpacity onPress={() => Alert.alert('Delete lesson?', fmtDate(lesson.date), [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: () => onDeleteLesson(lesson.id) },
+        ])}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.danger }}>Delete lesson</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return null;
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function HomeScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onDelete, onDeleteLesson }) {
+export default function HomeScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onDelete, onDeleteLesson, isDesktop }) {
   const today = todayISO();
   const [logModalDate,    setLogModalDate]    = useState(null);
   const [logModalSession, setLogModalSession] = useState(null);
@@ -216,84 +383,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     );
   }, [sessions, lessons, today]);
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-
-        <View style={{ marginBottom: 20, marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Image
-            source={require('../../assets/icon.png')}
-            style={{ width: 44, height: 44, borderRadius: 10 }}
-          />
-          <View>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
-              music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
-            </Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
-              {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </Text>
-          </View>
-        </View>
-
-        {/* Today */}
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
-          {hasToday ? (
-            <View style={{ gap: 10 }}>
-              {todayLessons.map(l => (
-                <LessonEntry key={l.id} lesson={l} compositions={compositions} onPress={() => setDetailLesson(l)} showDate={false} />
-              ))}
-              {todaySessions.map(s => (
-                <PracticeEntry key={s.id} session={s} compositions={compositions} onPress={() => setDetailSession(s)} showDate={false} />
-              ))}
-            </View>
-          ) : (
-            <View>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-                <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
-                  style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 Log practice</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
-                  style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-        </View>
-
-        {/* Feed */}
-        {feedItems.length > 0 && (
-          <>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
-              Previous sessions
-            </Text>
-            {feedItems.map(item =>
-              item._type === 'lesson' ? (
-                <LessonEntry key={item.id} lesson={item} compositions={compositions} onPress={() => setDetailLesson(item)} />
-              ) : (
-                <PracticeEntry key={item.id} session={item} compositions={compositions} onPress={() => setDetailSession(item)} />
-              )
-            )}
-          </>
-        )}
-
-        {sessions.length === 0 && (lessons || []).length === 0 && (
-          <View style={{ alignItems: 'center', padding: 32 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textDim, textAlign: 'center', lineHeight: 24 }}>
-              Your practice journal starts here.{'\n'}Log your first session above.
-            </Text>
-          </View>
-        )}
-      </ScrollView>
-
-      <FAB
-        onPractice={() => setLogModalDate(today)}
-        onLesson={() => setLessonModalDate(today)}
-      />
-
+  const modals = (
+    <>
       <LogModal
         visible={!!logModalDate || !!logModalSession}
         initialDate={logModalSession?.date || logModalDate || ''}
@@ -309,21 +400,162 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         onSave={l => { onSaveLesson(l); setLessonModalDate(null); }}
         onClose={() => setLessonModalDate(null)}
       />
-      <SessionDetailModal
-        visible={!!detailSession}
-        session={detailSession}
-        compositions={compositions}
-        onClose={() => setDetailSession(null)}
-        onDelete={id => { onDelete(id); setDetailSession(null); }}
-        onEdit={s => { setDetailSession(null); setLogModalSession(s); }}
-      />
-      <LessonDetailModal
-        visible={!!detailLesson}
-        lesson={detailLesson}
-        compositions={compositions}
-        onClose={() => setDetailLesson(null)}
-        onDelete={id => { onDeleteLesson(id); setDetailLesson(null); }}
-      />
+      {!isDesktop && (
+        <>
+          <SessionDetailModal
+            visible={!!detailSession}
+            session={detailSession}
+            compositions={compositions}
+            onClose={() => setDetailSession(null)}
+            onDelete={id => { onDelete(id); setDetailSession(null); }}
+            onEdit={s => { setDetailSession(null); setLogModalSession(s); }}
+          />
+          <LessonDetailModal
+            visible={!!detailLesson}
+            lesson={detailLesson}
+            compositions={compositions}
+            onClose={() => setDetailLesson(null)}
+            onDelete={id => { onDeleteLesson(id); setDetailLesson(null); }}
+          />
+        </>
+      )}
+    </>
+  );
+
+  // Feed column (shared between desktop and mobile)
+  const feedContent = (
+    <>
+      {/* Today */}
+      <View style={{ marginBottom: 16 }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
+        {hasToday ? (
+          <View style={{ gap: 10 }}>
+            {todayLessons.map(l => (
+              <LessonEntry key={l.id} lesson={l} compositions={compositions}
+                isSelected={isDesktop && detailLesson?.id === l.id}
+                onPress={() => { if (isDesktop) { setDetailLesson(l); setDetailSession(null); } else setDetailLesson(l); }}
+                showDate={false} />
+            ))}
+            {todaySessions.map(s => (
+              <PracticeEntry key={s.id} session={s} compositions={compositions}
+                isSelected={isDesktop && detailSession?.id === s.id}
+                onPress={() => { if (isDesktop) { setDetailSession(s); setDetailLesson(null); } else setDetailSession(s); }}
+                showDate={false} />
+            ))}
+          </View>
+        ) : (
+          <View>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
+                style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 Log practice</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
+                style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
+
+      {/* Feed */}
+      {feedItems.length > 0 && (
+        <>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
+            Previous sessions
+          </Text>
+          {feedItems.map(item =>
+            item._type === 'lesson' ? (
+              <LessonEntry key={item.id} lesson={item} compositions={compositions}
+                isSelected={isDesktop && detailLesson?.id === item.id}
+                onPress={() => { if (isDesktop) { setDetailLesson(item); setDetailSession(null); } else setDetailLesson(item); }} />
+            ) : (
+              <PracticeEntry key={item.id} session={item} compositions={compositions}
+                isSelected={isDesktop && detailSession?.id === item.id}
+                onPress={() => { if (isDesktop) { setDetailSession(item); setDetailLesson(null); } else setDetailSession(item); }} />
+            )
+          )}
+        </>
+      )}
+
+      {sessions.length === 0 && (lessons || []).length === 0 && (
+        <View style={{ alignItems: 'center', padding: 32 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textDim, textAlign: 'center', lineHeight: 24 }}>
+            Your practice journal starts here.{'\n'}Log your first session above.
+          </Text>
+        </View>
+      )}
+    </>
+  );
+
+  // ── Desktop two-column layout ───────────────────────────────────────────────
+  if (isDesktop) {
+    return (
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        {/* Left: feed */}
+        <View style={{ width: 360, borderRightWidth: 1, borderRightColor: 'rgba(9,99,126,0.08)' }}>
+          <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>Home</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>
+                {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </Text>
+            </View>
+            {feedContent}
+          </ScrollView>
+          <FAB onPractice={() => setLogModalDate(today)} onLesson={() => setLessonModalDate(today)} />
+        </View>
+
+        {/* Right: detail panel */}
+        <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.25)' }}>
+          {(detailSession || detailLesson) ? (
+            <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
+              <DesktopDetailPanel
+                session={detailSession}
+                lesson={detailLesson}
+                compositions={compositions}
+                onCloseSession={() => setDetailSession(null)}
+                onCloseLesson={() => setDetailLesson(null)}
+                onDeleteSession={id => { onDelete(id); setDetailSession(null); }}
+                onDeleteLesson={id => { onDeleteLesson(id); setDetailLesson(null); }}
+                onEditSession={s => { setDetailSession(null); setLogModalSession(s); }}
+              />
+            </ScrollView>
+          ) : (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.textDim, opacity: 0.5 }}>
+                Select an entry to view details
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {modals}
+      </View>
+    );
+  }
+
+  // ── Mobile single-column layout ─────────────────────────────────────────────
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <View style={{ marginBottom: 20, marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Image source={require('../../assets/icon.png')} style={{ width: 44, height: 44, borderRadius: 10 }} />
+          <View>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
+              music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
+            </Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
+              {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </Text>
+          </View>
+        </View>
+        {feedContent}
+      </ScrollView>
+      <FAB onPractice={() => setLogModalDate(today)} onLesson={() => setLessonModalDate(today)} />
+      {modals}
     </SafeAreaView>
   );
 }

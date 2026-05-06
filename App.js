@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import {
@@ -24,11 +24,11 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import { AppBackground } from './src/components/Background';
+import { Sidebar } from './src/components/Sidebar';
+import { useLayout } from './src/utils/useLayout';
 import { COLOURS } from './src/theme';
 
 const Tab = createBottomTabNavigator();
-
-// ─── Tab icons — Ionicons on navy rounded square ───────────────────────────
 
 const TAB_ICONS = {
   Home:     { active: 'home',          inactive: 'home-outline' },
@@ -37,33 +37,17 @@ const TAB_ICONS = {
   Stats:    { active: 'bar-chart',     inactive: 'bar-chart-outline' },
 };
 
-function TabIcon({ name, focused, size }) {
-  const icons  = TAB_ICONS[name] || { active: 'ellipse', inactive: 'ellipse-outline' };
-  const icon   = focused ? icons.active : icons.inactive;
-  const bgSize = 44;
+function TabIcon({ name, focused }) {
+  const icons = TAB_ICONS[name] || { active: 'ellipse', inactive: 'ellipse-outline' };
   return (
     <View style={{
-      width: bgSize, height: bgSize,
-      borderRadius: bgSize * 0.28,
+      width: 44, height: 44,
+      borderRadius: 12,
       backgroundColor: focused ? COLOURS.navy : 'rgba(9,99,126,0.12)',
       alignItems: 'center', justifyContent: 'center',
     }}>
-      <Ionicons name={icon} size={24} color="#ffffff" />
+      <Ionicons name={focused ? icons.active : icons.inactive} size={24} color="#ffffff" />
     </View>
-  );
-}
-
-function TabLabel({ label, focused }) {
-  return (
-    <Text style={{
-      fontSize: 12,
-      fontFamily: 'Lato-Bold',
-      color: focused ? COLOURS.navy : COLOURS.textDim,
-      marginBottom: 2,
-      marginTop: 4,
-    }}>
-      {label}
-    </Text>
   );
 }
 
@@ -77,13 +61,13 @@ const isStandalone =
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'CormorantGaramond':             CormorantGaramond_400Regular,
-    'CormorantGaramond-Italic':      CormorantGaramond_400Regular_Italic,
-    'CormorantGaramond-Bold':        CormorantGaramond_600SemiBold,
-    'CormorantGaramond-BoldItalic':  CormorantGaramond_600SemiBold_Italic,
-    'Lato-Light':                    Lato_300Light,
-    'Lato':                          Lato_400Regular,
-    'Lato-Bold':                     Lato_700Bold,
+    'CormorantGaramond':            CormorantGaramond_400Regular,
+    'CormorantGaramond-Italic':     CormorantGaramond_400Regular_Italic,
+    'CormorantGaramond-Bold':       CormorantGaramond_600SemiBold,
+    'CormorantGaramond-BoldItalic': CormorantGaramond_600SemiBold_Italic,
+    'Lato-Light':                   Lato_300Light,
+    'Lato':                         Lato_400Regular,
+    'Lato-Bold':                    Lato_700Bold,
   });
 
   const [ready, setReady] = useState(false);
@@ -105,19 +89,60 @@ export default function App() {
   const { sessions, save: saveSession, remove: deleteSession } = useSessions();
   const { compositions, save: saveComp, remove: deleteComp }   = useCompositions();
   const { lessons, save: saveLesson, remove: deleteLesson }    = useLessons();
+  const { width, onLayout, isDesktop }                         = useLayout();
+
+  // Desktop: manage active tab ourselves (no React Navigation tab bar)
+  const [activeTab, setActiveTab] = useState('Home');
 
   if (!fontsLoaded || !ready) {
     return (
       <View style={{ flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ fontFamily: 'serif', fontSize: 28, color: COLOURS.navy, fontStyle: 'italic', letterSpacing: -0.5 }}>
-          music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
+          music<Text style={{ color: COLOURS.practiceText }}>.</Text>
+          <Text style={{ color: COLOURS.lessonText }}>log</Text>
         </Text>
       </View>
     );
   }
 
-  const content = (
-    <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
+  const screenProps = {
+    sessions, lessons, compositions,
+    onSave: saveSession, onSaveLesson: saveLesson,
+    onDelete: deleteSession, onDeleteLesson: deleteLesson,
+    isDesktop,
+  };
+
+  // ── Desktop layout: sidebar + content ──────────────────────────────────────
+  if (Platform.OS === 'web' && isDesktop) {
+    const renderScreen = () => {
+      switch (activeTab) {
+        case 'Home':     return <HomeScreen     key="home"     {...screenProps} />;
+        case 'Calendar': return <CalendarScreen key="calendar" {...screenProps} />;
+        case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
+        case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} isDesktop={isDesktop} />;
+        default:         return <HomeScreen     key="home"     {...screenProps} />;
+      }
+    };
+
+    return (
+      <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+        <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
+        <View style={styles.desktopOuter} onLayout={onLayout}>
+          <AppBackground />
+          <View style={styles.desktopLayout}>
+            <Sidebar activeTab={activeTab} onNavigate={setActiveTab} />
+            <View style={styles.desktopContent}>
+              {renderScreen()}
+            </View>
+          </View>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
+  // ── Mobile layout: bottom tab navigator ────────────────────────────────────
+  const mobileContent = (
+    <View style={{ flex: 1, backgroundColor: COLOURS.bg }} onLayout={onLayout}>
       <AppBackground />
       <NavigationContainer
         theme={{
@@ -158,36 +183,16 @@ export default function App() {
           })}
         >
           <Tab.Screen name="Home">
-            {() => (
-              <HomeScreen
-                sessions={sessions}
-                lessons={lessons}
-                compositions={compositions}
-                onSave={saveSession}
-                onSaveLesson={saveLesson}
-                onDelete={deleteSession}
-                onDeleteLesson={deleteLesson}
-              />
-            )}
+            {() => <HomeScreen     {...screenProps} />}
           </Tab.Screen>
           <Tab.Screen name="Calendar">
-            {() => (
-              <CalendarScreen
-                sessions={sessions}
-                lessons={lessons}
-                compositions={compositions}
-                onSave={saveSession}
-                onSaveLesson={saveLesson}
-                onDelete={deleteSession}
-                onDeleteLesson={deleteLesson}
-              />
-            )}
+            {() => <CalendarScreen {...screenProps} />}
           </Tab.Screen>
           <Tab.Screen name="Pieces">
-            {() => <CompositionsScreen compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} />}
+            {() => <CompositionsScreen compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Stats">
-            {() => <StatsScreen sessions={sessions} compositions={compositions} />}
+            {() => <StatsScreen sessions={sessions} compositions={compositions} isDesktop={false} />}
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>
@@ -199,19 +204,24 @@ export default function App() {
       <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
       {Platform.OS === 'web' ? (
         isStandalone ? (
-          <View style={styles.webStandalone}>{content}</View>
+          <View style={styles.webStandalone}>{mobileContent}</View>
         ) : (
-          <View style={styles.webOuter}>
-            <View style={styles.webInner}>{content}</View>
+          <View style={styles.webOuter} onLayout={onLayout}>
+            <View style={styles.webInner}>{mobileContent}</View>
           </View>
         )
-      ) : content}
+      ) : mobileContent}
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  webOuter:      { flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center' },
-  webInner:      { flex: 1, width: '100%', maxWidth: 520, overflow: 'hidden' },
-  webStandalone: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', backgroundColor: COLOURS.bg },
+  // Mobile web
+  webOuter:       { flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center' },
+  webInner:       { flex: 1, width: '100%', maxWidth: 520, overflow: 'hidden' },
+  webStandalone:  { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', backgroundColor: COLOURS.bg },
+  // Desktop
+  desktopOuter:   { flex: 1, backgroundColor: COLOURS.bg },
+  desktopLayout:  { flex: 1, flexDirection: 'row' },
+  desktopContent: { flex: 1, overflow: 'hidden' },
 });

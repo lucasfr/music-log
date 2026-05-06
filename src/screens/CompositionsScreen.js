@@ -585,10 +585,11 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function CompositionsScreen({ compositions, sessions, onSave, onDelete }) {
+export default function CompositionsScreen({ compositions, sessions, onSave, onDelete, isDesktop }) {
   const [modal, setModal] = useState(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedComp, setSelectedComp] = useState(null);
 
   const composerSuggestions = [...new Set(
     compositions.map(c => c.composer).filter(Boolean).sort()
