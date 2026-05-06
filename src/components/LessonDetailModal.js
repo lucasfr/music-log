@@ -34,8 +34,8 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
 
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accent2Light }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 lesson</Text>
+            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 lesson</Text>
             </View>
             <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{lesson.duration} min</Text>

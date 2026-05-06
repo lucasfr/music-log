@@ -35,16 +35,22 @@ export const COLOURS = {
   backdropColor:'rgba(0,48,73,0.45)',
 
   // Practice accents (red)
-  accent:       '#D62828',
-  accentLight:  'rgba(214,40,40,0.10)',
-  accentMid:    'rgba(214,40,40,0.28)',
+  accent:           '#D62828',
+  accentLight:      'rgba(214,40,40,0.10)',
+  accentMid:        'rgba(214,40,40,0.28)',
+  practiceText:     '#8A1010',
+  practiceBg:       'rgba(214,40,40,0.10)',
+  practiceBorder:   'rgba(214,40,40,0.28)',
 
   // Lesson accents (amber)
-  accent2:      '#F77F00',
-  accent2Light: 'rgba(247,127,0,0.10)',
-  accent2Mid:   'rgba(247,127,0,0.28)',
-  pinkLight:    'rgba(247,127,0,0.10)',
-  pinkMid:      'rgba(247,127,0,0.30)',
+  accent2:          '#F77F00',
+  accent2Light:     'rgba(247,127,0,0.10)',
+  accent2Mid:       'rgba(247,127,0,0.28)',
+  lessonText:       '#7A3A00',
+  lessonBg:         'rgba(247,127,0,0.10)',
+  lessonBorder:     'rgba(247,127,0,0.28)',
+  pinkLight:        'rgba(247,127,0,0.10)',
+  pinkMid:          'rgba(247,127,0,0.30)',
 
   // Piece accents (gold)
   yellowLight:  'rgba(252,191,73,0.15)',

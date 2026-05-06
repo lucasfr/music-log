@@ -55,8 +55,8 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: '#8A1010' }}>🎹 practice</Text>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.practiceText }}>🎹 practice</Text>
               </View>
               {session.duration ? (
                 <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim }}>{session.duration} min</Text>
@@ -69,13 +69,13 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
             {(techNames.length > 0 || pieceNames.length > 0) && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
                 {techNames.map(t => (
-                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
+                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.practiceText }}>{t}</Text>
                   </View>
                 ))}
                 {pieceNames.map(p => (
-                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.practiceText }}>{p}</Text>
                   </View>
                 ))}
               </View>
@@ -116,8 +116,8 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.12)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: '#7A3A00' }}>🎓 lesson</Text>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.lessonText }}>🎓 lesson</Text>
               </View>
               <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim }}>{lesson.duration} min · {lesson.teacher}</Text>
             </View>
@@ -130,8 +130,8 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
             {pieceNames.length > 0 && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
                 {pieceNames.map(p => (
-                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{p}</Text>
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.lessonBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.lessonText }}>{p}</Text>
                   </View>
                 ))}
                 {newPieces.map(p => {
@@ -170,14 +170,14 @@ function FAB({ onPractice, onLesson }) {
             activeOpacity={0.85}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#7A3A00' }}>🎓 Log lesson</Text>
+            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => { setExpanded(false); onPractice(); }}
             activeOpacity={0.85}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: '#8A1010' }}>🎹 Log practice</Text>
+            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.practiceText }}>🎹 Log practice</Text>
           </TouchableOpacity>
         </>
       )}
@@ -226,7 +226,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           />
           <View>
             <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
-              music<Text style={{ color: '#7A3A00' }}>.</Text>log
+              music<Text style={{ color: COLOURS.lessonText }}>.</Text>log
             </Text>
             <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
               {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -252,11 +252,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                 <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
                   style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>🎹 Log practice</Text>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 Log practice</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
                   style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Log lesson</Text>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
                 </TouchableOpacity>
               </View>
             </View>
