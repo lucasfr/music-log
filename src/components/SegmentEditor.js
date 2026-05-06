@@ -24,31 +24,29 @@ function ZeldaBar({ label, emoji, value, onChange }) {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder:  () => true,
-      onPanResponderGrant: e => onChange(valueFromX(e.nativeEvent.pageX)),
-      onPanResponderMove:  e => onChange(valueFromX(e.nativeEvent.pageX)),
+      onPanResponderGrant: e => {
+        const v = valueFromX(e.nativeEvent.pageX);
+        onChange(v === value ? 0 : v);
+      },
+      onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.pageX)),
     })
   ).current;
 
   return (
     <View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View
           ref={containerRef}
           onLayout={() => containerRef.current?.measure((_x, _y, _w, _h, pageX) => { containerX.current = pageX; })}
           {...panResponder.panHandlers}
-          style={{ flexDirection: 'row', gap: 2 }}
+          style={{ flexDirection: 'row', gap: 2, cursor: 'default' }}
         >
           {[1, 2, 3, 4, 5].map(n => (
-            <Text key={n} style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>
+            <Text key={n} style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none' }}>
               {emoji}
             </Text>
           ))}
         </View>
-        {value > 0 && (
-          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
@@ -195,7 +193,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
       </TouchableOpacity>
 
       {open && (
-        <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
+        <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()} style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
           {isTech ? (
             <>
               <Field label="🎹 Technique group">
@@ -293,7 +291,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
           <Field label="✅ Progress tags" style={{ marginBottom: 0 }}>
             <TagCloud tags={PROGRESS_TAGS} selected={segment.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
-        </View>
+        </TouchableOpacity>
       )}
     </BlurView>
   );

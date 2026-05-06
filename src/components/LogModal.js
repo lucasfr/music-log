@@ -30,8 +30,11 @@ function ZeldaBar({ label, emoji, value, onChange }) {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder:  () => true,
-      onPanResponderGrant: e => onChange(valueFromX(e.nativeEvent.pageX)),
-      onPanResponderMove:  e => onChange(valueFromX(e.nativeEvent.pageX)),
+      onPanResponderGrant: e => {
+        const v = valueFromX(e.nativeEvent.pageX);
+        onChange(v === value ? 0 : v);
+      },
+      onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.pageX)),
     })
   ).current;
 
@@ -40,12 +43,12 @@ function ZeldaBar({ label, emoji, value, onChange }) {
       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
         {label}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View
           ref={containerRef}
           onLayout={() => containerRef.current?.measure((_x, _y, _w, _h, pageX) => { containerX.current = pageX; })}
           {...panResponder.panHandlers}
-          style={{ flexDirection: 'row', gap: 2 }}
+          style={{ flexDirection: 'row', gap: 2, cursor: 'default' }}
         >
           {[1, 2, 3, 4, 5].map(n => (
             <Text
@@ -54,17 +57,13 @@ function ZeldaBar({ label, emoji, value, onChange }) {
                 fontSize: 26,
                 opacity: n <= value ? 1 : 0.18,
                 transform: [{ scale: n <= value ? 1 : 0.88 }],
+                userSelect: 'none',
               }}
             >
               {emoji}
             </Text>
           ))}
         </View>
-        {value > 0 && (
-          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
