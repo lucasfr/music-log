@@ -487,11 +487,85 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
                   <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 13 }}>No sessions logged yet for this piece.</Text>
                 ) : compSessions.map(s => {
                   const seg = (s.segments || []).find(sg => sg.compositionId === comp.id);
+                  const energyBar = (s.energy ?? 0) + 3;
                   return (
-                    <View key={s.id} style={{ padding: 10, borderRadius: RADIUS.sm, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 6, elevation: 2, marginBottom: 8 }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{fmtDate(s.date)}</Text>
-                      {seg?.section ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>Section: {seg.section}</Text> : null}
-                      {seg?.notes  ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 19 }}>{seg.notes}</Text> : null}
+                    <View key={s.id} style={{ padding: 12, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 6, elevation: 2, marginBottom: 10 }}>
+
+                      {/* Header row: date + duration */}
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{fmtDate(s.date)}</Text>
+                        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                          {seg?.duration ? (
+                            <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
+                              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>⏱ {seg.duration} min</Text>
+                            </View>
+                          ) : null}
+                          {s.duration ? (
+                            <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.6)' }}>
+                              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{s.duration} min total</Text>
+                            </View>
+                          ) : null}
+                        </View>
+                      </View>
+
+                      {/* Energy + enjoyment */}
+                      <View style={{ flexDirection: 'row', gap: 16, marginBottom: 8 }}>
+                        <View style={{ flexDirection: 'row', gap: 2 }}>
+                          {[1,2,3,4,5].map(n => (
+                            <Text key={n} style={{ fontSize: 14, opacity: n <= energyBar ? 1 : 0.18 }}>⚡</Text>
+                          ))}
+                        </View>
+                        {s.enjoyment ? (
+                          <View style={{ flexDirection: 'row', gap: 2 }}>
+                            {[1,2,3,4,5].map(n => (
+                              <Text key={n} style={{ fontSize: 14, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>
+                            ))}
+                          </View>
+                        ) : null}
+                      </View>
+
+                      {/* Section */}
+                      {seg?.section ? (
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 4 }}>📍 {seg.section}</Text>
+                      ) : null}
+
+                      {/* Felt difficulty */}
+                      {seg?.feltDifficulty ? (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Difficulty</Text>
+                          <View style={{ flexDirection: 'row', gap: 2 }}>
+                            {[1,2,3,4,5].map(n => (
+                              <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
+                            ))}
+                          </View>
+                        </View>
+                      ) : null}
+
+                      {/* Notes */}
+                      {seg?.notes ? (
+                        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 19 }}>{seg.notes}</Text>
+                      ) : null}
+
+                      {/* Challenge + progress tags */}
+                      {((seg?.challenges || []).length > 0 || (seg?.progress || []).length > 0) && (
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                          {(seg?.challenges || []).map(t => (
+                            <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}>
+                              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>🚧 {t}</Text>
+                            </View>
+                          ))}
+                          {(seg?.progress || []).map(t => (
+                            <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
+                              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>✅ {t}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+
+                      {/* Session-level wins */}
+                      {s.wins ? (
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 6, fontStyle: 'italic' }}>✨ {s.wins}</Text>
+                      ) : null}
                     </View>
                   );
                 })}
