@@ -42,10 +42,13 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <BlurView intensity={36} tint="light" style={{
+      <BlurView intensity={isSelected ? 50 : 36} tint="light" style={{
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
-        shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
-        borderWidth: isSelected ? 2 : 0, borderColor: isSelected ? COLOURS.navy : 'transparent',
+        shadowColor: isSelected ? COLOURS.navy : COLOURS.glassShadow,
+        shadowOffset: { width: 0, height: isSelected ? 8 : 5 },
+        shadowOpacity: isSelected ? 0.18 : 1,
+        shadowRadius: isSelected ? 24 : 18,
+        elevation: isSelected ? 8 : 5,
       }}>
         <View style={{ backgroundColor: COLOURS.accentLight, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
@@ -104,10 +107,13 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <BlurView intensity={36} tint="light" style={{
+      <BlurView intensity={isSelected ? 50 : 36} tint="light" style={{
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
-        shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
-        borderWidth: isSelected ? 2 : 0, borderColor: isSelected ? COLOURS.navy : 'transparent',
+        shadowColor: isSelected ? COLOURS.navy : COLOURS.glassShadow,
+        shadowOffset: { width: 0, height: isSelected ? 8 : 5 },
+        shadowOpacity: isSelected ? 0.18 : 1,
+        shadowRadius: isSelected ? 24 : 18,
+        elevation: isSelected ? 8 : 5,
       }}>
         <View style={{ backgroundColor: COLOURS.accent2Light, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
