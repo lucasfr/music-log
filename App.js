@@ -142,18 +142,16 @@ export default function App() {
               backgroundColor: 'rgba(234,240,245,0.95)',
               borderTopWidth: 0,
               position: 'absolute',
-              height: Platform.OS === 'web' ? 106 : 86 + (Platform.OS === 'ios' ? 20 : 0),
-              paddingTop: 14,
-              paddingBottom: Platform.OS === 'web' ? 20 : Platform.OS === 'ios' ? 24 : 12,
+              height: Platform.OS === 'web' ? 76 : 62 + (Platform.OS === 'ios' ? 20 : 0),
+              paddingTop: 8,
+              paddingBottom: Platform.OS === 'web' ? 12 : Platform.OS === 'ios' ? 16 : 8,
               shadowColor: COLOURS.glassShadow,
               shadowOffset: { width: 0, height: -4 },
               shadowOpacity: 1,
               shadowRadius: 16,
               elevation: 10,
             },
-            tabBarLabel: ({ focused }) => (
-              <TabLabel label={route.name} focused={focused} />
-            ),
+            tabBarShowLabel: false,
             tabBarIcon: ({ focused, size }) => (
               <TabIcon name={route.name} focused={focused} size={size} />
             ),
