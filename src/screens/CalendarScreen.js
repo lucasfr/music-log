@@ -143,7 +143,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
 
       {/* Header */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16, marginTop: 4 }}>
-        <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>📅 Calendar</Text>
+        <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>Calendar</Text>
         {streak > 0 && (
           <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{streak} day streak 🔥</Text>

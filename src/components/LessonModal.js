@@ -292,7 +292,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>🎓 Log lesson</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>Log lesson</Text>
               <TouchableOpacity onPress={onClose} activeOpacity={0.75}
                 style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
@@ -315,7 +315,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
                   </Field>
                 </View>
               </View>
-              <Field label="🎼 Teacher" style={{ marginBottom: 0 }}>
+              <Field label="Teacher" style={{ marginBottom: 0 }}>
                 <TextF value={teacher} onChange={setTeacher} placeholder="Teacher name" />
               </Field>
             </GlassCard>
@@ -364,13 +364,13 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             ))}
 
             <GlassCard>
-              <Field label="✨ Lesson notes">
+              <Field label="Lesson notes">
                 <TextF value={overallNotes} onChange={setOverallNotes} placeholder="General observations from the lesson…" multiline />
               </Field>
-              <Field label="🌟 Wins / breakthroughs">
+              <Field label="Wins / breakthroughs">
                 <TextF value={wins} onChange={setWins} placeholder="What clicked or was confirmed today…" multiline />
               </Field>
-              <Field label="🎯 Focus before next lesson" style={{ marginBottom: 0 }}>
+              <Field label="Focus before next lesson" style={{ marginBottom: 0 }}>
                 <TextF value={nextFocus} onChange={setNextFocus} placeholder="Overall priority until next lesson…" multiline />
               </Field>
             </GlassCard>

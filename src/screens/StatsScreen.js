@@ -73,7 +73,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 40 }}>
-        <SectionTitle style={{ marginTop: 4 }}>📊 Overview</SectionTitle>
+        <SectionTitle style={{ marginTop: 4 }}>Overview</SectionTitle>
 
         {/* Stat row — 4 equal tiles */}
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
@@ -90,7 +90,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
           ))}
         </View>
 
-        <SectionTitle>📅 Last 14 days</SectionTitle>
+        <SectionTitle>Last 14 days</SectionTitle>
         <GlassCard style={{ paddingBottom: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barH + 18, gap: 3 }}>
             {last14.map(d => (
@@ -109,7 +109,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
 
         {topPieces.length > 0 && (
           <>
-            <SectionTitle style={{ marginTop: 8 }}>📜 Most practised (30 days)</SectionTitle>
+            <SectionTitle style={{ marginTop: 8 }}>Most practised (30 days)</SectionTitle>
             {topPieces.map(([name, count]) => (
               <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
@@ -124,7 +124,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
           </>
         )}
 
-        <SectionTitle style={{ marginTop: 8 }}>🎧 Library</SectionTitle>
+        <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           {STATUS_OPTIONS.map(s => (
             <BlurView

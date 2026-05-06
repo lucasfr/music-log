@@ -110,9 +110,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>
-                🎹 Log session
-              </Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>Log session</Text>
               <TouchableOpacity onPress={onClose} activeOpacity={0.75}
                 style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
@@ -183,10 +181,10 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
             ))}
 
             <GlassCard>
-              <Field label="✨ Wins today">
+              <Field label="Wins today">
                 <TextF value={wins} onChange={setWins} placeholder="What went well? Any breakthroughs?" multiline />
               </Field>
-              <Field label="🎯 Tomorrow's focus" style={{ marginBottom: 0 }}>
+              <Field label="Tomorrow's focus" style={{ marginBottom: 0 }}>
                 <TextF value={focus} onChange={setFocus} placeholder="What to prioritise next session?" multiline />
               </Field>
             </GlassCard>

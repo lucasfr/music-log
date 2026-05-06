@@ -275,7 +275,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>
-                {comp.title ? '📜 Edit piece' : '📜 Add piece'}
+                {comp.title ? 'Edit piece' : 'Add piece'}
               </Text>
               <TouchableOpacity onPress={onClose}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
@@ -287,24 +287,24 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
 
-            <SectionDivider label="🏷️ Identity" />
+            <SectionDivider label="Identity" />
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 3 }}>
-                <Field label="📜 Title *">
+                <Field label="Title *">
                   <TextF value={data.title} onChange={v => f('title', v)} placeholder="e.g. Gymnopédie No. 1" />
                 </Field>
               </View>
               <View style={{ flex: 2 }}>
-                <AutocompleteField label="🎤 Composer" value={data.composer || ''} onChange={v => f('composer', v)} placeholder="e.g. Satie" suggestions={composerSuggestions} />
+                <AutocompleteField label="Composer" value={data.composer || ''} onChange={v => f('composer', v)} placeholder="e.g. Satie" suggestions={composerSuggestions} />
               </View>
             </View>
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1 }}>
-                <AutocompleteField label="🎻 Arrangement / arrangers" value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Rachmaninoff" suggestions={arrangementSuggestions} />
+                <AutocompleteField label="Arrangement / arrangers" value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Rachmaninoff" suggestions={arrangementSuggestions} />
               </View>
               <View style={{ flex: 1 }}>
-                <Field label="📚 Collection">
+                <Field label="Collection">
                   <TextF value={data.collection || ''} onChange={v => f('collection', v)} placeholder="e.g. For Children Vol. 1" />
                 </Field>
               </View>
@@ -312,18 +312,18 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1 }}>
-                <Field label="📅 Year">
+                <Field label="Year">
                   <TextF value={data.year || ''} onChange={v => f('year', v)} placeholder="e.g. 1888" />
                 </Field>
               </View>
               <View style={{ flex: 2 }}>
-                <SelectF label="🎓 Grade estimate" value={data.grade || ''} onChange={v => f('grade', v)} options={GRADES} placeholder="— Unknown —" />
+                <SelectF label="Grade estimate" value={data.grade || ''} onChange={v => f('grade', v)} options={GRADES} placeholder="— Unknown —" />
               </View>
             </View>
 
             <TagInput value={data.tags || []} onChange={v => f('tags', v)} />
 
-            <SectionDivider label="🎵 Musical properties" />
+            <SectionDivider label="Musical properties" />
             <KeysPicker
               value={data.keys || (data.keyRoot ? [{ root: data.keyRoot, mode: data.keyMode || 'major' }] : [])}
               onChange={v => f('keys', v)}
@@ -352,7 +352,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
               </View>
             </Field>
 
-            <SectionDivider label="📊 Status" />
+            <SectionDivider label="Status" />
             <Field label="Status">
               <View style={{ flexDirection: 'row', gap: 7, flexWrap: 'wrap' }}>
                 {STATUS_OPTIONS.map(s => {
@@ -394,43 +394,43 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
               </View>
             </View>
 
-            <SectionDivider label="ℹ️ About" />
-            <Field label="📝 About this piece">
+            <SectionDivider label="About" />
+            <Field label="About this piece">
               <TextF value={data.info || ''} onChange={v => f('info', v)} placeholder="Style, context, history, why you're learning it…" multiline />
             </Field>
 
-            <SectionDivider label="📖 Study notes" />
-            <Field label="🚧 Technical challenges">
+            <SectionDivider label="Study notes" />
+            <Field label="Technical challenges">
               <TextF value={data.technicalChallenges || ''} onChange={v => f('technicalChallenges', v)} placeholder="Hand coordination, fingering, rhythm…" multiline />
             </Field>
-            <Field label="🎶 Musical focus areas">
+            <Field label="Musical focus areas">
               <TextF value={data.musicalFocus || ''} onChange={v => f('musicalFocus', v)} placeholder="Phrasing, dynamics, character…" multiline />
             </Field>
-            <Field label="🔄 Practice notes">
+            <Field label="Practice notes">
               <TextF value={data.practiceNotes || ''} onChange={v => f('practiceNotes', v)} placeholder="Approaches, methods, what works…" multiline />
             </Field>
 
-            <SectionDivider label="🎓 Teacher" />
-            <Field label="💬 Teacher's notes / assignment">
+            <SectionDivider label="Teacher" />
+            <Field label="Teacher's notes / assignment">
               <TextF value={data.kerrinNotes || ''} onChange={v => f('kerrinNotes', v)} placeholder="Teacher feedback, what to focus on…" multiline />
             </Field>
-            <Field label="📚 Teacher feedback log">
+            <Field label="Teacher feedback log">
               <TextF value={data.teacherFeedback || ''} onChange={v => f('teacherFeedback', v)} placeholder="Feedback from lessons over time…" multiline />
             </Field>
 
-            <SectionDivider label="💡 My notes" />
-            <Field label="💡 My notes" style={{ marginBottom: 0 }}>
+            <SectionDivider label="My notes" />
+            <Field label="My notes" style={{ marginBottom: 0 }}>
               <TextF value={data.myNotes || ''} onChange={v => f('myNotes', v)} placeholder="Your own observations, discoveries…" multiline />
             </Field>
 
-            <SectionDivider label="🔗 Resources" />
-            <Field label="🎼 Sheet music source">
+            <SectionDivider label="Resources" />
+            <Field label="Sheet music source">
               <TextF value={data.resourceSheet || ''} onChange={v => f('resourceSheet', v)} placeholder="Where the score is from…" />
             </Field>
-            <Field label="🎧 Recording references">
+            <Field label="Recording references">
               <TextF value={data.resourceRecordings || ''} onChange={v => f('resourceRecordings', v)} placeholder="Reference recordings, performers…" multiline />
             </Field>
-            <Field label="🎥 Tutorial videos" style={{ marginBottom: 0 }}>
+            <Field label="Tutorial videos" style={{ marginBottom: 0 }}>
               <TextF value={data.resourceTutorials || ''} onChange={v => f('resourceTutorials', v)} placeholder="YouTube links, tutorial notes…" multiline />
             </Field>
 
