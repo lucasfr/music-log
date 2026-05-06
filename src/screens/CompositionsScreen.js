@@ -216,6 +216,37 @@ function KeysPicker({ value = [], onChange }) {
   );
 }
 
+// ─── Time sig picker ─────────────────────────────────────────────────────────
+
+function TimeSigPicker({ value = [], onChange }) {
+  function toggle(sig) {
+    onChange(value.includes(sig) ? value.filter(s => s !== sig) : [...value, sig]);
+  }
+  return (
+    <Field label="⏱ Time signatures">
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+        {TIME_SIGS.map(sig => {
+          const active = value.includes(sig);
+          return (
+            <TouchableOpacity key={sig} onPress={() => toggle(sig)} activeOpacity={0.75}
+              style={{
+                paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
+                backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+                shadowOffset: { width: 0, height: active ? 3 : 1 },
+                shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+              }}>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 14, color: active ? COLOURS.navy : COLOURS.textMuted }}>{sig}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </Field>
+  );
+}
+
+// ─── Section divider ─────────────────────────────────────────────────────────
+
 function SectionDivider({ label }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14, marginTop: 8 }}>
@@ -297,9 +328,10 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
               value={data.keys || (data.keyRoot ? [{ root: data.keyRoot, mode: data.keyMode || 'major' }] : [])}
               onChange={v => f('keys', v)}
             />
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <View style={{ flex: 1 }}><SelectF label="⏱ Time sig" value={data.timeSig || ''} onChange={v => f('timeSig', v)} options={TIME_SIGS} placeholder="—" /></View>
-            </View>
+            <TimeSigPicker
+              value={data.timeSigs || (data.timeSig ? [data.timeSig] : [])}
+              onChange={v => f('timeSigs', v)}
+            />
 
             <DifficultyPicker value={data.difficulty || 0} onChange={v => f('difficulty', v)} />
 
@@ -475,7 +507,10 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
             ? comp.keys
             : comp.keyRoot ? [{ root: comp.keyRoot, mode: comp.keyMode }] : []
           ).map((k, i) => k.root ? <MetaChip key={i} label={`${k.root} ${k.mode || ''}`.trim()} /> : null)}
-          {comp.timeSig ? <MetaChip label={comp.timeSig} /> : null}
+          {(comp.timeSigs && comp.timeSigs.length > 0
+            ? comp.timeSigs
+            : comp.timeSig ? [comp.timeSig] : []
+          ).map((s, i) => <MetaChip key={i} label={s} />)}
           {comp.collection ? <MetaChip label={comp.collection} /> : null}
           {(comp.tags || []).map(t => <MetaChip key={t} label={t} />)}
         </View>
@@ -673,7 +708,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
 
   const blank = () => ({
     id: uid(), title: '', composer: '', arrangement: '', collection: '',
-    status: 'learning', grade: '', keys: [], timeSig: '',
+    status: 'learning', grade: '', keys: [], timeSigs: [],
     difficulty: 0, liking: 0, year: '', tags: [],
     dateStarted: '', dateCompleted: '',
     info: '', technicalChallenges: '', musicalFocus: '', practiceNotes: '',
