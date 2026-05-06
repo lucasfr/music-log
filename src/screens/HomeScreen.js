@@ -517,7 +517,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         {/* Two-column layout on top */}
         <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* Left: feed */}
-        <View style={{ width: 360, marginTop: 12, marginBottom: 12 }}>
+        <View style={{ width: 440, marginTop: 12, marginBottom: 12 }}>
           <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 226, paddingRight: 20 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>Home</Text>
@@ -531,7 +531,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </View>
 
         {/* Right: detail panel */}
-        <View style={{ flex: 1, marginLeft: 12, marginTop: 12, marginBottom: 12, marginRight: 12 }}>
+        <View style={{ flex: 1, minWidth: 0, maxWidth: 520, marginLeft: 12, marginTop: 12, marginBottom: 12, marginRight: 12 }}>
           {(detailSession || detailLesson) ? (
             <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
               <DesktopDetailPanel
