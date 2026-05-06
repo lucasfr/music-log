@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS } from '../theme';
 
@@ -14,7 +15,7 @@ const NAV_ITEMS = [
 
 export function Sidebar({ activeTab, onNavigate }) {
   return (
-    <View style={styles.sidebar}>
+    <BlurView intensity={15} tint="light" style={styles.sidebar}>
       {/* Logo */}
       <View style={styles.logoRow}>
         <Image
@@ -28,7 +29,7 @@ export function Sidebar({ activeTab, onNavigate }) {
       </View>
 
       {/* Nav items */}
-      <View style={styles.nav}>
+      <View style={styles.navContainer}>
         {NAV_ITEMS.map(item => {
           const active = activeTab === item.name;
           return (
@@ -52,10 +53,8 @@ export function Sidebar({ activeTab, onNavigate }) {
           );
         })}
       </View>
-
-      {/* Bottom spacer */}
       <View style={{ flex: 1 }} />
-    </View>
+    </BlurView>
   );
 }
 
@@ -64,9 +63,17 @@ export { SIDEBAR_W };
 const styles = StyleSheet.create({
   sidebar: {
     width: SIDEBAR_W,
-    backgroundColor: 'rgba(9,99,126,0.06)',
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(9,99,126,0.10)',
+    margin: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    shadowColor: 'rgba(9,99,126,0.08)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 4,
+    overflow: 'hidden',
     paddingTop: Platform.OS === 'web' ? 24 : 48,
     paddingBottom: 24,
     paddingHorizontal: 12,
@@ -92,6 +99,19 @@ const styles = StyleSheet.create({
   nav: {
     gap: 4,
   },
+  navContainer: {
+    gap: 2,
+    backgroundColor: 'rgba(255,255,255,0.50)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.70)',
+    padding: 6,
+    shadowColor: 'rgba(9,99,126,0.10)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 3,
+  },
   navItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -101,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   navItemActive: {
-    backgroundColor: 'rgba(9,99,126,0.08)',
+    backgroundColor: 'rgba(9,99,126,0.12)',
   },
   iconWrap: {
     width: 36,
