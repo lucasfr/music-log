@@ -226,7 +226,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
         {[{ dot: COLOURS.red, label: 'Practice' }, { dot: COLOURS.amber, label: 'Lesson' }].map(({ dot, label }) => (
           <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: dot }} />
+            <View style={{ width: 11, height: 11, borderRadius: 6, backgroundColor: dot }} />
             <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{label}</Text>
           </View>
         ))}
