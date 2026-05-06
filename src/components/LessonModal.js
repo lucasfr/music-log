@@ -149,7 +149,7 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
         <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
           {isTech ? (
             <>
-              <Field label="🎹 Technique group">
+              <Field label="Technique group">
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   {TECH_GROUPS.map(g => {
                     const active = item.group === g;
@@ -166,11 +166,11 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
                 </View>
               </Field>
               {(item.group === 'Scales' || item.group === 'Arpeggios') && (
-                <Field label={`🎵 ${item.group} practised`}>
+                <Field label={`${item.group} practised`}>
                   <ScalesPicker selected={item.scales || []} onChange={v => f('scales', v)} />
                 </Field>
               )}
-              <Field label="🏷️ Label (optional)">
+              <Field label="Label (optional)">
                 <TextF value={item.title || ''} onChange={v => f('title', v)} placeholder="e.g. Hanon No. 1" />
               </Field>
             </>
@@ -210,28 +210,28 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
                   <TextF value={item.pieceName || ''} onChange={v => f('pieceName', v)} placeholder="Title" />
                 </Field>
               )}
-              <Field label="🎼 Section worked on">
+              <Field label="Section worked on">
                 <TextF value={item.section || ''} onChange={v => f('section', v)} placeholder="e.g. Bars 1–16, full piece…" />
               </Field>
             </>
           )}
 
-          <Field label="💬 Teacher feedback">
+          <Field label="Teacher feedback">
             <TextF value={item.feedback || ''} onChange={v => f('feedback', v)} placeholder="What the teacher said about this piece…" multiline />
           </Field>
-          <Field label="📚 Assignment">
+          <Field label="Assignment">
             <TextF value={item.assignment || ''} onChange={v => f('assignment', v)} placeholder="What to practise before next lesson…" multiline />
           </Field>
-          <Field label="🎵 Felt difficulty">
+          <Field label="Felt difficulty">
             <ZeldaBar emoji="🎵" value={item.feltDifficulty || 0} onChange={v => f('feltDifficulty', v)} />
           </Field>
-          <Field label="⭐ Liking">
+          <Field label="Liking">
             <ZeldaBar emoji="⭐" value={item.liking || 0} onChange={v => f('liking', v)} />
           </Field>
-          <Field label="🚧 Challenges">
+          <Field label="Challenges">
             <TagCloud tags={CHALLENGE_TAGS} selected={item.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
-          <Field label="✅ Progress" style={{ marginBottom: 0 }}>
+          <Field label="Progress" style={{ marginBottom: 0 }}>
             <TagCloud tags={PROGRESS_TAGS} selected={item.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
         </View>
