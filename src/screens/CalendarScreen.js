@@ -360,41 +360,53 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         <View style={{ flex: 1, marginLeft: 12, marginTop: 12, marginBottom: 12, marginRight: 12 }}>
           {selectedDate ? (
             <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
+              {/* Header */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>{fmtDate(selectedDate)}</Text>
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <TouchableOpacity onPress={() => setLogModalDate(selectedDate)} activeOpacity={0.8}
-                    style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>{fmtDate(selectedDate)}</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity onPress={() => setLogModalDate(selectedDate)} activeOpacity={0.75} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: 'rgba(214,40,40,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.practiceText }}>🎹 Log practice</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setLessonModalDate(selectedDate)} activeOpacity={0.8}
-                    style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg }}>
+                  <TouchableOpacity onPress={() => setLessonModalDate(selectedDate)} activeOpacity={0.75} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: 'rgba(247,127,0,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
                   </TouchableOpacity>
                 </View>
               </View>
+
               {selSessions.length === 0 && selLessons.length === 0 && (
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No sessions on this day. Use the buttons above to log one.</Text>
               )}
+
               {selLessons.map(l => (
-                <View key={l.id} style={{ padding: 14, backgroundColor: COLOURS.accent2Light, borderRadius: RADIUS.md, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: COLOURS.amber }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 4 }}>🎓 Lesson · {l.duration} min · {l.teacher}</Text>
-                  {(l.pieces || []).map((p, i) => { const n = p.compositionId ? compName(p.compositionId) : p.pieceName; return n ? <Text key={i} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted }}>📜 {n}</Text> : null; })}
-                  {l.wins ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 6, fontStyle: 'italic' }}>✨ {l.wins}</Text> : null}
-                </View>
+                <BlurView key={l.id} intensity={40} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: 'rgba(9,99,126,0.08)', shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
+                  <View style={{ backgroundColor: 'rgba(255,255,255,0.45)', padding: 14, borderLeftWidth: 4, borderLeftColor: COLOURS.amber }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 6 }}>🎓 Lesson · {l.duration} min · {l.teacher}</Text>
+                    {(l.pieces || []).map((p, i) => { const n = p.compositionId ? compName(p.compositionId) : p.pieceName; return n ? <Text key={i} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted }}>📜 {n}</Text> : null; })}
+                    {l.wins ? <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted, marginTop: 6 }}>✨ {l.wins}</Text> : null}
+                  </View>
+                </BlurView>
               ))}
+
               {selSessions.map(s => {
                 const pieces = (s.segments || []).filter(sg => sg.type === 'repertoire').map(sg => sg.compositionId ? compName(sg.compositionId) : sg.title).filter(Boolean);
+                const energyBar = (s.energy ?? 0) + 3;
                 return (
-                  <View key={s.id} style={{ padding: 14, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.md, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: COLOURS.red }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 6 }}>🎹 Practice · {s.duration} min</Text>
-                    <View style={{ flexDirection: 'row', gap: 4, marginBottom: 6 }}>
-                      {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 14, opacity: n <= (s.energy+3) ? 1 : 0.18 }}>⚡</Text>)}
-                      {s.enjoyment ? [1,2,3,4,5].map(n => <Text key={`h${n}`} style={{ fontSize: 14, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>) : null}
+                  <BlurView key={s.id} intensity={40} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: 'rgba(9,99,126,0.08)', shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
+                    <View style={{ backgroundColor: 'rgba(255,255,255,0.45)', padding: 14, borderLeftWidth: 4, borderLeftColor: COLOURS.red }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                        <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.practiceText }}>🎹 practice</Text>
+                        </View>
+                        {s.duration ? <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.65)' }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>⏱ {s.duration} min</Text></View> : null}
+                      </View>
+                      <View style={{ flexDirection: 'row', gap: 4, marginBottom: 8 }}>
+                        {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 16, opacity: n <= energyBar ? 1 : 0.18 }}>⚡</Text>)}
+                        {s.enjoyment ? [1,2,3,4,5].map(n => <Text key={`h${n}`} style={{ fontSize: 16, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>) : null}
+                      </View>
+                      {pieces.map(p => <Text key={p} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted }}>📜 {p}</Text>)}
+                      {s.wins ? <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted, marginTop: 6 }}>✨ {s.wins}</Text> : null}
                     </View>
-                    {pieces.map(p => <Text key={p} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted }}>📜 {p}</Text>)}
-                    {s.wins ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 6, fontStyle: 'italic' }}>✨ {s.wins}</Text> : null}
-                  </View>
+                  </BlurView>
                 );
               })}
             </ScrollView>
