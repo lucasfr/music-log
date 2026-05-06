@@ -18,54 +18,30 @@ const ZELDA_CELL_W = 40;
 const ZELDA_CELLS  = 5;
 
 function ZeldaBar({ label, emoji, value, onChange }) {
-  const containerRef = useRef(null);
-  const lastValue    = useRef(value);
-
-  // Keep lastValue in sync with prop
-  lastValue.current = value;
-
-  function valueFromX(x) {
-    const raw = Math.floor(x / ZELDA_CELL_W) + 1;
-    return Math.max(1, Math.min(ZELDA_CELLS, raw));
-  }
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder:  () => true,
-      onPanResponderGrant: e => {
-        const v = valueFromX(e.nativeEvent.locationX);
-        onChange(v === lastValue.current ? 0 : v);
-      },
-      onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.locationX)),
-    })
-  ).current;
-
   return (
     <View style={{ marginBottom: 0 }}>
       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
         {label}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View
-          ref={containerRef}
-          {...panResponder.panHandlers}
-          style={{ flexDirection: 'row', gap: 2, cursor: 'default' }}
-        >
-          {[1, 2, 3, 4, 5].map(n => (
-            <Text
-              key={n}
-              style={{
-                fontSize: 26,
-                opacity: n <= value ? 1 : 0.18,
-                transform: [{ scale: n <= value ? 1 : 0.88 }],
-                userSelect: 'none',
-              }}
-            >
+      <View style={{ flexDirection: 'row', gap: 2 }}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <TouchableOpacity
+            key={n}
+            onPress={() => onChange(n === value ? 0 : n)}
+            activeOpacity={0.7}
+            hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}
+          >
+            <Text style={{
+              fontSize: 26,
+              opacity: n <= value ? 1 : 0.18,
+              transform: [{ scale: n <= value ? 1 : 0.88 }],
+              userSelect: 'none',
+              cursor: 'pointer',
+            }}>
               {emoji}
             </Text>
-          ))}
-        </View>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );

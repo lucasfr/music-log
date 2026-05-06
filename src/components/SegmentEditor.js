@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, PanResponder } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
@@ -12,40 +12,21 @@ const CELL_W = 36;
 const CELLS  = 5;
 
 function ZeldaBar({ label, emoji, value, onChange }) {
-  const lastValue = useRef(value);
-
-  lastValue.current = value;
-
-  function valueFromX(x) {
-    const raw = Math.floor(x / CELL_W) + 1;
-    return Math.max(1, Math.min(CELLS, raw));
-  }
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder:  () => true,
-      onPanResponderGrant: e => {
-        const v = valueFromX(e.nativeEvent.locationX);
-        onChange(v === lastValue.current ? 0 : v);
-      },
-      onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.locationX)),
-    })
-  ).current;
-
   return (
     <View>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View
-          {...panResponder.panHandlers}
-          style={{ flexDirection: 'row', gap: 2, cursor: 'default' }}
-        >
-          {[1, 2, 3, 4, 5].map(n => (
-            <Text key={n} style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none' }}>
+      <View style={{ flexDirection: 'row', gap: 2 }}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <TouchableOpacity
+            key={n}
+            onPress={() => onChange(n === value ? 0 : n)}
+            activeOpacity={0.7}
+            hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}
+          >
+            <Text style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
               {emoji}
             </Text>
-          ))}
-        </View>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
