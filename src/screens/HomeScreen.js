@@ -31,12 +31,6 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function energyDotColour(energy) {
-  if (energy >= 1)  return COLOURS.red;
-  if (energy === 0) return COLOURS.tealLight;
-  return 'rgba(214,40,40,0.35)';
-}
-
 // ─── Practice entry ───────────────────────────────────────────────────────────
 
 function PracticeEntry({ session, compositions, onPress, showDate = true }) {
@@ -52,50 +46,46 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
         shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
       }}>
-        <View style={{ backgroundColor: COLOURS.accentLight, padding: 14 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: 10, marginBottom: 8 }}>
-            <View style={{ width: 4, borderRadius: 2, backgroundColor: energyDotColour(session.energy), alignSelf: 'stretch' }} />
-            <View style={{ flex: 1 }}>
-              {showDate && (
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
-                  {fmtDate(session.date)}
-                </Text>
-              )}
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: '#8A1010' }}>🎹 practice</Text>
-                </View>
+        <View style={{ backgroundColor: COLOURS.accentLight, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+          <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
+          <View style={{ flex: 1 }}>
+            {showDate && (
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
+                {fmtDate(session.date)}
+              </Text>
+            )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: '#8A1010' }}>🎹 practice</Text>
               </View>
-              {showDate && session.duration ? (
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 1 }}>
-                  {session.duration} min
-                </Text>
+              {session.duration ? (
+                <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim }}>{session.duration} min</Text>
               ) : null}
-              <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
-                <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} />
-                {session.enjoyment ? <ZeldaMini emoji="❤️" value={session.enjoyment} /> : null}
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} />
+              {session.enjoyment ? <ZeldaMini emoji="❤️" value={session.enjoyment} /> : null}
+            </View>
+            {(techNames.length > 0 || pieceNames.length > 0) && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
+                {techNames.map(t => (
+                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
+                  </View>
+                ))}
+                {pieceNames.map(p => (
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
+                  </View>
+                ))}
               </View>
-            </View>
+            )}
+            {session.wins ? (
+              <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
+                "{session.wins}"
+              </Text>
+            ) : null}
           </View>
-          {(techNames.length > 0 || pieceNames.length > 0) && (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-              {techNames.map(t => (
-                <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{t}</Text>
-                </View>
-              ))}
-              {pieceNames.map(p => (
-                <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(214,40,40,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#8A1010' }}>{p}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-          {session.wins ? (
-            <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
-              "{session.wins}"
-            </Text>
-          ) : null}
         </View>
       </BlurView>
     </TouchableOpacity>
@@ -117,53 +107,49 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
         shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 18, elevation: 5,
       }}>
-        <View style={{ backgroundColor: COLOURS.accent2Light, padding: 14 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: 10, marginBottom: 8 }}>
-            <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                {showDate && (
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
-                    {fmtDate(lesson.date)}
-                  </Text>
-                )}
-                <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.12)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#7A3A00' }}>🎓 lesson</Text>
-                </View>
-              </View>
-              <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
-                {lesson.duration} min · {lesson.teacher}
+        <View style={{ backgroundColor: COLOURS.accent2Light, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+          <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
+          <View style={{ flex: 1 }}>
+            {showDate && (
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
+                {fmtDate(lesson.date)}
               </Text>
-              {(lesson.energy || lesson.enjoyment) ? (
-                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 4 }}>
-                  {lesson.energy ? <ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} /> : null}
-                  {lesson.enjoyment ? <ZeldaMini emoji="❤️" value={lesson.enjoyment} /> : null}
-                </View>
-              ) : null}
+            )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: 'rgba(247,127,0,0.12)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: '#7A3A00' }}>🎓 lesson</Text>
+              </View>
+              <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim }}>{lesson.duration} min · {lesson.teacher}</Text>
             </View>
-          </View>
-          {pieceNames.length > 0 && (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-              {pieceNames.map(p => (
-                <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{p}</Text>
-                </View>
-              ))}
-              {newPieces.map(p => {
-                const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
-                return name ? (
-                  <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill, shadowColor: COLOURS.yellowMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: '#5A3A00' }}>✦ {name}</Text>
+            {(lesson.energy || lesson.enjoyment) ? (
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                {lesson.energy ? <ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} /> : null}
+                {lesson.enjoyment ? <ZeldaMini emoji="❤️" value={lesson.enjoyment} /> : null}
+              </View>
+            ) : null}
+            {pieceNames.length > 0 && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+                {pieceNames.map(p => (
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(247,127,0,0.12)', borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: '#7A3A00' }}>{p}</Text>
                   </View>
-                ) : null;
-              })}
-            </View>
-          )}
-          {lesson.wins ? (
-            <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
-              "{lesson.wins}"
-            </Text>
-          ) : null}
+                ))}
+                {newPieces.map(p => {
+                  const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
+                  return name ? (
+                    <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill, shadowColor: COLOURS.yellowMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+                      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: '#5A3A00' }}>✦ {name}</Text>
+                    </View>
+                  ) : null;
+                })}
+              </View>
+            )}
+            {lesson.wins ? (
+              <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
+                "{lesson.wins}"
+              </Text>
+            ) : null}
+          </View>
         </View>
       </BlurView>
     </TouchableOpacity>
@@ -217,12 +203,10 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
 
-  // All today's entries (can be multiple sessions + multiple lessons)
   const todaySessions = useMemo(() => sessions.filter(s => s.date === today), [sessions, today]);
   const todayLessons  = useMemo(() => (lessons || []).filter(l => l.date === today), [lessons, today]);
   const hasToday = todaySessions.length > 0 || todayLessons.length > 0;
 
-  // Feed = everything sorted by date desc, all entries (not filtered by today)
   const feedItems = useMemo(() => {
     const s = sessions.filter(s => s.date !== today).map(s => ({ ...s, _type: 'practice' }));
     const l = (lessons || []).filter(l => l.date !== today).map(l => ({ ...l, _type: 'lesson' }));
@@ -248,35 +232,34 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           </View>
         </View>
 
-        {/* Today card */}
+        {/* Today */}
         <View style={{ marginBottom: 16 }}>
           <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
-
-            {hasToday ? (
-              <View style={{ gap: 10 }}>
-                {todayLessons.map(l => (
-                  <LessonEntry key={l.id} lesson={l} compositions={compositions} onPress={() => setDetailLesson(l)} showDate={false} />
-                ))}
-                {todaySessions.map(s => (
-                  <PracticeEntry key={s.id} session={s} compositions={compositions} onPress={() => setDetailSession(s)} showDate={false} />
-                ))}
+          {hasToday ? (
+            <View style={{ gap: 10 }}>
+              {todayLessons.map(l => (
+                <LessonEntry key={l.id} lesson={l} compositions={compositions} onPress={() => setDetailLesson(l)} showDate={false} />
+              ))}
+              {todaySessions.map(s => (
+                <PracticeEntry key={s.id} session={s} compositions={compositions} onPress={() => setDetailSession(s)} showDate={false} />
+              ))}
+            </View>
+          ) : (
+            <View>
+              <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
+                  style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>🎹 Log practice</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
+                  style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Log lesson</Text>
+                </TouchableOpacity>
               </View>
-            ) : (
-              <View>
-                <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
-                <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-                  <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
-                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>🎹 Log practice</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
-                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                    <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#7A3A00' }}>🎓 Log lesson</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
+            </View>
+          )}
+        </View>
 
         {/* Feed */}
         {feedItems.length > 0 && (
