@@ -301,14 +301,14 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         </BlurView>
 
         {/* Legend */}
-          <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
+        <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: COLOURS.red }} />
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>🎹 Practice</Text>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: COLOURS.practiceText }} />
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Practice</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: COLOURS.amber }} />
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>🎓 Lesson</Text>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: COLOURS.lessonText }} />
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Text style={{ fontSize: 10 }}>⚡</Text>
