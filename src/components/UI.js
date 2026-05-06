@@ -85,21 +85,21 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
 
   if (isPrimary) {
     return (
-      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75}
+      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.85}
         style={[{
-          backgroundColor: 'rgba(255,255,255,0.60)',
-          borderRadius: RADIUS.sm,
-          paddingVertical: 13,
+          backgroundColor: COLOURS.navy,
+          borderRadius: RADIUS.pill,
+          paddingVertical: 16,
           paddingHorizontal: 20,
           alignItems: 'center',
-          shadowColor: COLOURS.glassShadowMd,
-          shadowOffset: { width: 0, height: 5 },
+          shadowColor: 'rgba(9,99,126,0.35)',
+          shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 16,
-          elevation: 5,
+          elevation: 6,
           opacity: disabled ? 0.4 : 1,
         }, style]}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.text }}>{label}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: '#fff', letterSpacing: 0.3 }}>{label}</Text>
       </TouchableOpacity>
     );
   }
