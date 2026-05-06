@@ -207,15 +207,15 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
 
             {/* Nav */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4, paddingVertical: 8 }}>
               <TouchableOpacity onPress={prevMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-                <Text style={{ fontSize: 24, color: COLOURS.navy, fontWeight: '300', lineHeight: 28 }}>‹</Text>
+                <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
               </TouchableOpacity>
-              <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 17, color: COLOURS.text }}>
+              <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 20, color: COLOURS.text }}>
                 {MONTHS[viewMonth]} {viewYear}
               </Text>
               <TouchableOpacity onPress={nextMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-                <Text style={{ fontSize: 24, color: COLOURS.navy, fontWeight: '300', lineHeight: 28 }}>›</Text>
+                <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
               </TouchableOpacity>
             </View>
 
