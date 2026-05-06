@@ -214,7 +214,8 @@ const glass = {
 function GlassBtn({ label, onPress, color, danger, small }) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.75} style={{
-      paddingHorizontal: small ? 10 : 16, paddingVertical: small ? 5 : 8,
+      paddingHorizontal: small ? 10 : 16, paddingVertical: 8,
+      alignSelf: small ? 'flex-start' : 'auto',
       borderRadius: RADIUS.pill,
       backgroundColor: danger ? 'rgba(214,40,40,0.07)' : 'rgba(255,255,255,0.55)',
       shadowColor: danger ? 'rgba(214,40,40,0.10)' : 'rgba(9,99,126,0.08)',
