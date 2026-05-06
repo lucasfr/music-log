@@ -123,8 +123,14 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
     const cur = segment[key] || [];
     field(key, cur.includes(tag) ? cur.filter(t => t !== tag) : [...cur, tag]);
   };
-  const linkedComp = compositions.find(c => c.id === segment.compositionId);
-  const accentColor = isTech ? COLOURS.steel : COLOURS.navy;
+  const linkedComp    = compositions.find(c => c.id === segment.compositionId);
+  const techLinked    = isTech && linkedComp;
+  const accentColor   = isTech ? COLOURS.steel : COLOURS.navy;
+
+  // Header display name: for tech, prefer linked comp title, then manual title
+  const headerName = isTech
+    ? (techLinked ? linkedComp.title : segment.title || 'Technical work')
+    : (linkedComp ? linkedComp.title : segment.title || 'Piece');
 
   return (
     <BlurView
@@ -157,7 +163,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
               </Text>
             </View>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
-              {segment.title || (isTech ? 'Technical work' : 'Piece')}
+              {headerName}
             </Text>
           </View>
           {segment.duration ? (
@@ -251,6 +257,32 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                   </Field>
                 </View>
               </View>
+
+              {/* Optional library link */}
+              <Field label="📚 Link to library piece (optional)">
+                {techLinked ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: 'rgba(255,255,255,0.62)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text }}>{linkedComp.title}</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => field('compositionId', '')}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                    >
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>✕ Unlink</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <SelectF
+                    label=""
+                    value={segment.compositionId || ''}
+                    onChange={id => field('compositionId', id)}
+                    options={compositions.map(c => ({ value: c.id, label: c.title }))}
+                    placeholder="— None —"
+                  />
+                )}
+              </Field>
             </>
           ) : (
             <>
