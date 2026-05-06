@@ -246,7 +246,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                   </Field>
                 </View>
                 <View style={{ width: 90 }}>
-                  <Field label="⏱ Duration (min)">
+                  <Field label="⏱ Min">
                     <NumberF value={segment.duration || ''} onChange={v => field('duration', v)} />
                   </Field>
                 </View>
@@ -268,7 +268,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                   />
                 </View>
                 <View style={{ width: 90 }}>
-                  <Field label="⏱ Duration (min)">
+                  <Field label="⏱ Min">
                     <NumberF value={segment.duration || ''} onChange={v => field('duration', v)} />
                   </Field>
                 </View>
