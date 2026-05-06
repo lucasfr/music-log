@@ -204,12 +204,40 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
               </Field>
 
               {(segment.group === 'Scales' || segment.group === 'Arpeggios') && (
-                <Field label={`🎵 ${segment.group} practiced`}>
-                  <ScalesPicker
-                    selected={segment.scales || []}
-                    onChange={v => field('scales', v)}
-                  />
-                </Field>
+                <>
+                  <Field label={`🎵 ${segment.group} practiced`}>
+                    <ScalesPicker
+                      selected={segment.scales || []}
+                      onChange={v => field('scales', v)}
+                    />
+                  </Field>
+                  <Field label="🎼 Octaves">
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {[1, 2].map(n => {
+                        const active = (segment.octaves || 1) === n;
+                        return (
+                          <TouchableOpacity
+                            key={n}
+                            onPress={() => field('octaves', n)}
+                            activeOpacity={0.75}
+                            style={{
+                              paddingHorizontal: 20, paddingVertical: 8,
+                              borderRadius: RADIUS.pill,
+                              backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                              shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+                              shadowOffset: { width: 0, height: active ? 3 : 1 },
+                              shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+                            }}
+                          >
+                            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>
+                              {n} oct{n > 1 ? 's' : ''}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </Field>
+                </>
               )}
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}>
