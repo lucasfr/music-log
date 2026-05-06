@@ -97,6 +97,43 @@ function DayDots({ hasPractice, hasLesson }) {
   );
 }
 
+// ─── FAB ─────────────────────────────────────────────────────────────────────
+
+function FAB({ onPractice, onLesson }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
+      {expanded && (
+        <>
+          <TouchableOpacity
+            onPress={() => { setExpanded(false); onLesson(); }}
+            activeOpacity={0.85}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
+          >
+            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => { setExpanded(false); onPractice(); }}
+            activeOpacity={0.85}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
+          >
+            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.practiceText }}>🎹 Log practice</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      <TouchableOpacity
+        onPress={() => setExpanded(e => !e)}
+        activeOpacity={0.85}
+        style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(255,255,255,0.58)', alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 16, elevation: 8 }}
+      >
+        <Text style={{ fontSize: expanded ? 22 : 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>
+          {expanded ? '✕' : '+'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function CalendarScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onDelete, onDeleteLesson }) {
@@ -323,15 +360,10 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
       </ScrollView>
 
       {/* FAB */}
-      <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 140 : 120, right: 20 }}>
-        <TouchableOpacity
-          onPress={() => setLogModalDate(today)}
-          activeOpacity={0.85}
-          style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: 'rgba(255,255,255,0.58)', alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 16, elevation: 8 }}
-        >
-          <Text style={{ fontSize: 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
-        </TouchableOpacity>
-      </View>
+      <FAB
+        onPractice={() => setLogModalDate(today)}
+        onLesson={() => setLessonModalDate(today)}
+      />
 
       <LogModal
         visible={!!logModalDate}
