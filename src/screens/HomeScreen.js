@@ -169,7 +169,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
 function FAB({ onPractice, onLesson }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
+    <View style={{ position: 'absolute', bottom: Platform.OS === 'web' ? 24 : Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
       {expanded && (
         <>
           <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
