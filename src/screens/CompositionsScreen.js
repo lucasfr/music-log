@@ -623,9 +623,8 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, marginTop: 4 }}>
+        <View style={{ marginBottom: 14, marginTop: 4 }}>
           <SectionTitle style={{ marginBottom: 0 }}>Compositions</SectionTitle>
-          <Btn label="+ Add piece" variant="primary" onPress={() => setModal(blank())} />
         </View>
 
         <Field label="">
@@ -658,6 +657,23 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
           <CompCard key={comp.id} comp={comp} sessions={sessions} onEdit={c => setModal({ ...c })} onDelete={onDelete} />
         ))}
       </ScrollView>
+
+      <TouchableOpacity
+        onPress={() => setModal(blank())}
+        activeOpacity={0.85}
+        style={{
+          position: 'absolute',
+          bottom: Platform.OS === 'web' ? 24 : Platform.OS === 'ios' ? 140 : 120,
+          right: 20,
+          width: 58, height: 58, borderRadius: 29,
+          backgroundColor: 'rgba(255,255,255,0.58)',
+          alignItems: 'center', justifyContent: 'center',
+          shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 1, shadowRadius: 16, elevation: 8,
+        }}
+      >
+        <Text style={{ fontSize: 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
+      </TouchableOpacity>
 
       {modal && (
         <CompModal
