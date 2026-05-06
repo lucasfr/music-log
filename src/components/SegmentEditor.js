@@ -205,7 +205,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
 
               {(segment.group === 'Scales' || segment.group === 'Arpeggios') && (
                 <>
-                  <Field label={`🎵 ${segment.group} practiced`}>
+                  <Field label={`🎵 ${segment.group} practised`}>
                     <ScalesPicker
                       selected={segment.scales || []}
                       onChange={v => field('scales', v)}
