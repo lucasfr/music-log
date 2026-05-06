@@ -60,7 +60,7 @@ function TabLabel({ label, focused }) {
       fontFamily: 'Lato-Bold',
       color: focused ? COLOURS.navy : COLOURS.textDim,
       marginBottom: 2,
-      marginTop: 2,
+      marginTop: 4,
     }}>
       {label}
     </Text>
@@ -143,8 +143,8 @@ export default function App() {
               borderTopWidth: 0,
               position: 'absolute',
               height: Platform.OS === 'web' ? 106 : 86 + (Platform.OS === 'ios' ? 20 : 0),
-              paddingTop: 8,
-              paddingBottom: Platform.OS === 'web' ? 20 : Platform.OS === 'ios' ? 20 : 8,
+              paddingTop: 14,
+              paddingBottom: Platform.OS === 'web' ? 20 : Platform.OS === 'ios' ? 24 : 12,
               shadowColor: COLOURS.glassShadow,
               shadowOffset: { width: 0, height: -4 },
               shadowOpacity: 1,
