@@ -14,9 +14,13 @@ const CELLS  = 5;
 function ZeldaBar({ label, emoji, value, onChange }) {
   const containerRef = useRef(null);
   const containerX   = useRef(0);
+  const lastValue    = useRef(value);
+
+  lastValue.current = value;
 
   function valueFromX(x) {
-    const raw = Math.ceil((x - containerX.current) / CELL_W);
+    const offset = x - containerX.current;
+    const raw    = Math.floor(offset / CELL_W) + 1;
     return Math.max(1, Math.min(CELLS, raw));
   }
 
@@ -26,7 +30,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
       onMoveShouldSetPanResponder:  () => true,
       onPanResponderGrant: e => {
         const v = valueFromX(e.nativeEvent.pageX);
-        onChange(v === value ? 0 : v);
+        onChange(v === lastValue.current ? 0 : v);
       },
       onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.pageX)),
     })

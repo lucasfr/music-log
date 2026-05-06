@@ -20,9 +20,14 @@ const ZELDA_CELLS  = 5;
 function ZeldaBar({ label, emoji, value, onChange }) {
   const containerRef = useRef(null);
   const containerX   = useRef(0);
+  const lastValue    = useRef(value);
+
+  // Keep lastValue in sync with prop
+  lastValue.current = value;
 
   function valueFromX(x) {
-    const raw = Math.ceil((x - containerX.current) / ZELDA_CELL_W);
+    const offset = x - containerX.current;
+    const raw    = Math.floor(offset / ZELDA_CELL_W) + 1;
     return Math.max(1, Math.min(ZELDA_CELLS, raw));
   }
 
@@ -32,7 +37,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
       onMoveShouldSetPanResponder:  () => true,
       onPanResponderGrant: e => {
         const v = valueFromX(e.nativeEvent.pageX);
-        onChange(v === value ? 0 : v);
+        onChange(v === lastValue.current ? 0 : v);
       },
       onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.pageX)),
     })
