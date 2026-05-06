@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -14,7 +14,11 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.lucasfranca.musiclog"
+      "bundleIdentifier": "com.lucasfranca.musiclog",
+      "infoPlist": {
+        "UIStatusBarStyle": "UIStatusBarStyleDarkContent",
+        "UIViewControllerBasedStatusBarAppearance": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +34,7 @@
       "name": "music.log",
       "shortName": "music.log",
       "description": "Piano practice session logger",
-      "themeColor": "#213C51",
+      "themeColor": "#EBF4F6",
       "backgroundColor": "#EAF0F5",
       "display": "standalone",
       "orientation": "portrait",
