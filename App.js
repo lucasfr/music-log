@@ -102,7 +102,7 @@ export default function App() {
     return (
       <View style={{ flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ fontFamily: 'serif', fontSize: 28, color: COLOURS.navy, fontStyle: 'italic', letterSpacing: -0.5 }}>
-          music.log
+          music<Text style={{ color: '#7A3A00' }}>.</Text>log
         </Text>
       </View>
     );
