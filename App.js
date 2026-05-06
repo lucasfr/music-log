@@ -24,7 +24,7 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import { AppBackground } from './src/components/Background';
-import { Sidebar } from './src/components/Sidebar';
+import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
 import { useLayout } from './src/utils/useLayout';
 import { COLOURS } from './src/theme';
 
@@ -222,6 +222,6 @@ const styles = StyleSheet.create({
   webStandalone:  { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', backgroundColor: COLOURS.bg },
   // Desktop
   desktopOuter:   { flex: 1, backgroundColor: COLOURS.bg },
-  desktopLayout:  { flex: 1, flexDirection: 'row', alignItems: 'stretch' },
-  desktopContent: { flex: 1, overflow: 'hidden', margin: 12, marginLeft: 0 },
+  desktopLayout:  { flex: 1, flexDirection: 'row', alignItems: 'stretch', position: 'relative' },
+  desktopContent: { flex: 1, overflow: 'hidden' },
 });

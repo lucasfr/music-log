@@ -500,11 +500,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   if (isDesktop) {
     return (
       <View style={{ flex: 1, flexDirection: 'row' }}>
-        {/* Left: feed */}
+        {/* Left: feed — starts at left edge, behind sidebar */}
         <View style={{
           width: 360,
-          margin: 12,
-          marginLeft: 0,
+          marginTop: 12,
+          marginBottom: 12,
           borderRadius: 20,
           overflow: 'hidden',
           backgroundColor: 'rgba(255,255,255,0.28)',
@@ -514,9 +514,9 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 24,
-          elevation: 6,
+          elevation: 2,
         }}>
-          <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+          <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 224, paddingRight: 20 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>Home</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>
@@ -529,7 +529,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </View>
 
         {/* Right: detail panel */}
-        <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.25)' }}>
+        <View style={{ flex: 1, marginLeft: 12, marginTop: 12, marginBottom: 12, marginRight: 12 }}>
           {(detailSession || detailLesson) ? (
             <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
               <DesktopDetailPanel

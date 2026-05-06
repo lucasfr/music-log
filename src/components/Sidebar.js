@@ -63,6 +63,10 @@ export { SIDEBAR_W };
 const styles = StyleSheet.create({
   sidebar: {
     width: SIDEBAR_W,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
     margin: 12,
     borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.28)',
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'web' ? 24 : 48,
     paddingBottom: 24,
     paddingHorizontal: 12,
+    zIndex: 10,
   },
   logoRow: {
     flexDirection: 'row',

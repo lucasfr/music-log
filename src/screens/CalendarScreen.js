@@ -327,11 +327,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
     return (
       <View style={{ flex: 1, flexDirection: 'row' }}>
-        {/* Left: calendar */}
+        {/* Left: calendar — full height card starting at left edge */}
         <View style={{
           width: 420,
-          margin: 12,
-          marginLeft: 0,
+          marginTop: 12,
+          marginBottom: 12,
           borderRadius: 20,
           overflow: 'hidden',
           backgroundColor: 'rgba(255,255,255,0.28)',
@@ -341,9 +341,9 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 24,
-          elevation: 6,
+          elevation: 2,
         }}>
-          <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+          <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 224, paddingRight: 20 }}>
             {navBar}
             <CalendarGrid
               sessions={sessions} lessons={lessons}
@@ -357,7 +357,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         </View>
 
         {/* Right: day detail */}
-        <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.25)' }}>
+        <View style={{ flex: 1, marginLeft: 12, marginTop: 12, marginBottom: 12, marginRight: 12 }}>
           {selectedDate ? (
             <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
