@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    marginTop: 12,
+    marginTop: 24,
     marginLeft: 12,
     marginRight: 12,
     marginBottom: 24,
