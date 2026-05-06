@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -13,7 +13,6 @@ const STATUS_TEXT_COLOURS = {
 };
 
 export default function StatsScreen({ sessions, compositions }) {
-  const [contentW, setContentW] = useState(320);
 
   const last30 = sessions.filter(s => {
     const d = new Date(s.date + 'T12:00:00');
@@ -73,49 +72,23 @@ export default function StatsScreen({ sessions, compositions }) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
-        onLayout={e => setContentW(e.nativeEvent.layout.width - 32)}
-      >
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <SectionTitle style={{ marginTop: 4 }}>📊 Overview</SectionTitle>
 
-        {/* Stat grid — 2×2 square tiles */}
-        {(() => {
-          const tileSize = (contentW - 10) / 2;
-          const rows = [[statItems[0], statItems[1]], [statItems[2], statItems[3]]];
-          return (
-            <View style={{ gap: 10, marginBottom: 20 }}>
-              {rows.map((row, ri) => (
-                <View key={ri} style={{ flexDirection: 'row', gap: 10 }}>
-                  {row.map((item, ci) => (
-                    <View
-                      key={ci}
-                      style={{
-                        width: tileSize,
-                        height: tileSize,
-                        borderRadius: RADIUS.md,
-                        overflow: 'hidden',
-                        shadowColor: COLOURS.glassShadow,
-                        shadowOffset: { width: 0, height: 3 },
-                        shadowOpacity: 1,
-                        shadowRadius: 10,
-                        elevation: 3,
-                      }}
-                    >
-                      <BlurView intensity={36} tint="light" style={{ flex: 1 }}>
-                        <View style={{ flex: 1, backgroundColor: COLOURS.glass, padding: 20, justifyContent: 'flex-end' }}>
-                          <Text style={{ fontSize: 26, marginBottom: 8 }}>{item.emoji}</Text>
-                          <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 36, color: COLOURS.navy, lineHeight: 40 }}>{item.value}</Text>
-                          <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 4 }}>{item.label}</Text>
-                        </View>
-                      </BlurView>
-                    </View>
-                  ))}
+        {/* Stat row — 4 equal tiles */}
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+          {statItems.map((item, i) => (
+            <View key={i} style={{ flex: 1 }}>
+              <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
+                <View style={{ backgroundColor: COLOURS.glass, padding: 12, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 16, marginBottom: 6 }}>{item.emoji}</Text>
+                  <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 22, color: COLOURS.navy, lineHeight: 26 }}>{item.value}</Text>
+                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 10, color: COLOURS.textDim, marginTop: 3, textAlign: 'center' }}>{item.label}</Text>
                 </View>
-              ))}
+              </BlurView>
             </View>
-          );
-        })()}
+          ))}
+        </View>
 
         <SectionTitle>📅 Last 14 days</SectionTitle>
         <GlassCard style={{ paddingBottom: 8 }}>
