@@ -110,14 +110,14 @@ function FAB({ onPractice, onLesson }) {
             activeOpacity={0.85}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => { setExpanded(false); onPractice(); }}
             activeOpacity={0.85}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.practiceText }}>🎹 Log practice</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>🎹 Log practice</Text>
           </TouchableOpacity>
         </>
       )}
@@ -204,10 +204,10 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20, marginTop: 4 }}>
-          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>📅 Calendar</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>📅 Calendar</Text>
           {streak > 0 && (
             <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:4 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>{streak} day streak 🔥</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{streak} day streak 🔥</Text>
             </View>
           )}
         </View>
@@ -228,8 +228,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                     : '—', label: '⚡ avg energy' },
               ].map((stat, i) => (
                 <View key={i} style={{ flex: 1, alignItems: 'center', borderRightWidth: i < 3 ? 1 : 0, borderRightColor: COLOURS.glassBorderSubtle }}>
-                  <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 20, color: COLOURS.navy }}>{stat.value}</Text>
-                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim, marginTop: 1 }}>{stat.label}</Text>
+                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.navy }}>{stat.value}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 1 }}>{stat.label}</Text>
                 </View>
               ))}
             </View>
@@ -248,7 +248,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
               <TouchableOpacity onPress={prevMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                 <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
               </TouchableOpacity>
-              <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 20, color: COLOURS.text }}>
+              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>
                 {MONTHS[viewMonth]} {viewYear}
               </Text>
               <TouchableOpacity onPress={nextMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
@@ -260,7 +260,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             <View style={{ flexDirection: 'row', marginBottom: 4 }}>
               {DAYS.map((d, i) => (
                 <View key={i} style={{ width: cellW, alignItems: 'center' }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>{d}</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>{d}</Text>
                 </View>
               ))}
             </View>
@@ -299,7 +299,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
                       {/* Day number */}
                       <Text style={{
-                        fontFamily: isToday ? 'SourceSans3-Bold' : 'SourceSans3',
+                        fontFamily: isToday ? 'Lato-Bold' : 'Lato',
                         fontSize: SIZES.body,
                         color: isFuture ? COLOURS.textDim
                           : isToday ? COLOURS.navy
@@ -315,11 +315,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                         const joy = daySessions[0].enjoyment;
                         return (
                           <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
-                            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.label, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: SIZES.label + 2 }}>
+                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: SIZES.label + 2 }}>
                               {e > 0 ? `+${e}` : e}
                             </Text>
                             {joy ? (
-                              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.label, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: SIZES.label + 2 }}>
+                              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: SIZES.label + 2 }}>
                                 {joy}
                               </Text>
                             ) : null}
@@ -341,19 +341,19 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: COLOURS.practiceText }} />
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Practice</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Practice</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: COLOURS.lessonText }} />
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Text style={{ fontSize: 10 }}>⚡</Text>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Energy</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Energy</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Text style={{ fontSize: 10 }}>❤️</Text>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Enjoyment</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Enjoyment</Text>
           </View>
         </View>
 

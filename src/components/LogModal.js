@@ -37,7 +37,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
 
   return (
     <View style={{ marginBottom: 0 }}>
-      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
         {label}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -62,7 +62,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
         </View>
         {value > 0 && (
           <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -123,11 +123,11 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>
                 🎹 Log session
               </Text>
               <TouchableOpacity onPress={onClose}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -168,21 +168,21 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
                   activeOpacity={0.75}
                   style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.steel, backgroundColor: COLOURS.accent2Light }}
                 >
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Technique</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ Technique</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => addSegment('repertoire')}
                   activeOpacity={0.75}
                   style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.navy, backgroundColor: COLOURS.accentLight }}
                 >
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Repertoire</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ Repertoire</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             {segments.length === 0 && (
               <View style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: COLOURS.glassBorder, borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.25)' }}>
-                <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments above</Text>
+                <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments above</Text>
               </View>
             )}
 

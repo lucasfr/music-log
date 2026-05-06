@@ -42,7 +42,7 @@ function ZeldaBar({ emoji, value, onChange }) {
       </View>
       {value > 0 && (
         <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top:8, bottom:8, left:8, right:8 }}>
-          <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -75,7 +75,7 @@ function ScalesPicker({ selected = [], onChange }) {
           {selected.map(s => (
             <TouchableOpacity key={s} onPress={() => toggle(s)} activeOpacity={0.75}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)', shadowColor: COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{s}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{s}</Text>
               <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
             </TouchableOpacity>
           ))}
@@ -91,14 +91,14 @@ function ScalesPicker({ selected = [], onChange }) {
                 backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
                 shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
                 shadowOffset: { width: 0, height: active ? 3 : 1 }, shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1 }}>
-              <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
             </TouchableOpacity>
           );
         })}
         {hasMore && (
           <TouchableOpacity onPress={() => setShowAll(true)} activeOpacity={0.75}
             style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -147,20 +147,20 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
               activeOpacity={0.75}
               style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : 'transparent', borderWidth: 1, borderColor: isTech ? COLOURS.steel : COLOURS.glassBorder }}
             >
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: isTech ? COLOURS.navy : COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>technique</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: isTech ? COLOURS.navy : COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>technique</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => onChange({ ...item, type: 'repertoire', group: '' })}
               activeOpacity={0.75}
               style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: !isTech ? COLOURS.accentLight : 'transparent', borderWidth: 1, borderColor: !isTech ? COLOURS.navy : COLOURS.glassBorder }}
             >
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: !isTech ? COLOURS.navy : COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>repertoire</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: !isTech ? COLOURS.navy : COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>repertoire</Text>
             </TouchableOpacity>
           </View>
-          <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text, marginTop: 4 }}>{displayName}</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginTop: 4 }}>{displayName}</Text>
           {item.isNew && (
             <View style={{ marginTop: 3, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight, borderWidth: 1, borderColor: 'rgba(221,174,211,0.40)' }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#5C2D6E' }}>new piece</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: '#5C2D6E' }}>new piece</Text>
             </View>
           )}
         </View>
@@ -187,7 +187,7 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
                           backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
                           shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
                           shadowOffset: { width: 0, height: active ? 3 : 1 }, shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1 }}>
-                        <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
+                        <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -225,7 +225,7 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
                       activeOpacity={0.75}
                       style={{ paddingVertical: 10, paddingHorizontal: 10, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: item.isNew ? COLOURS.navy : COLOURS.glassBorder, backgroundColor: item.isNew ? COLOURS.accentLight : 'rgba(255,255,255,0.50)', alignItems: 'center' }}
                     >
-                      <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: item.isNew ? COLOURS.navy : COLOURS.textMuted }}>{item.isNew ? 'Yes ✓' : 'No'}</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: item.isNew ? COLOURS.navy : COLOURS.textMuted }}>{item.isNew ? 'Yes ✓' : 'No'}</Text>
                     </TouchableOpacity>
                   </Field>
                 </View>
@@ -323,11 +323,11 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <View>
-                <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>🎓 Log lesson</Text>
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>with {teacher}</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>🎓 Log lesson</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>with {teacher}</Text>
               </View>
               <TouchableOpacity onPress={onClose}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -368,18 +368,18 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity onPress={() => addPiece('technique')} activeOpacity={0.75}
                   style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.steel, backgroundColor: COLOURS.accent2Light }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Technique</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ Technique</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => addPiece('repertoire')} activeOpacity={0.75}
                   style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: COLOURS.navy, backgroundColor: COLOURS.accentLight }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ Repertoire</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ Repertoire</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             {pieces.length === 0 && (
               <View style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: COLOURS.glassBorder, borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.25)' }}>
-                <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments worked on in this lesson</Text>
+                <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments worked on in this lesson</Text>
               </View>
             )}
 

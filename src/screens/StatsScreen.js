@@ -82,8 +82,8 @@ export default function StatsScreen({ sessions, compositions }) {
               <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                 <View style={{ backgroundColor: COLOURS.glass, padding: 12, alignItems: 'center' }}>
                   <Text style={{ fontSize: 16, marginBottom: 6 }}>{item.emoji}</Text>
-                  <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 22, color: COLOURS.navy, lineHeight: 26 }}>{item.value}</Text>
-                  <Text style={{ fontFamily: 'SourceSans3', fontSize: 10, color: COLOURS.textDim, marginTop: 3, textAlign: 'center' }}>{item.label}</Text>
+                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy, lineHeight: 26 }}>{item.value}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginTop: 3, textAlign: 'center' }}>{item.label}</Text>
                 </View>
               </BlurView>
             </View>
@@ -101,7 +101,7 @@ export default function StatsScreen({ sessions, compositions }) {
                   backgroundColor: d.practiced ? COLOURS.navy : COLOURS.glassBorder,
                   borderRadius: 4,
                 }} />
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: 9, color: COLOURS.textDim, marginTop: 4 }}>{d.label}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginTop: 4 }}>{d.label}</Text>
               </View>
             ))}
           </View>
@@ -113,12 +113,12 @@ export default function StatsScreen({ sessions, compositions }) {
             {topPieces.map(([name, count]) => (
               <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 5 }}>📜 {name}</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 5 }}>📜 {name}</Text>
                   <View style={{ height: 5, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3 }}>
                     <View style={{ height: '100%', width: `${(count / topPieces[0][1]) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
                   </View>
                 </View>
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.textDim, minWidth: 24, textAlign: 'right' }}>{count}×</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, minWidth: 24, textAlign: 'right' }}>{count}×</Text>
               </View>
             ))}
           </>
@@ -142,10 +142,10 @@ export default function StatsScreen({ sessions, compositions }) {
                 <Text style={{ fontSize: 18, marginBottom: 4 }}>
                   {s === 'learning' ? '🌱' : s === 'consolidating' ? '💧' : '✨'}
                 </Text>
-                <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 30, color: STATUS_TEXT_COLOURS[s] || COLOURS.navy }}>
+                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 30, color: STATUS_TEXT_COLOURS[s] || COLOURS.navy }}>
                   {compositions.filter(c => c.status === s).length}
                 </Text>
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{s}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{s}</Text>
               </View>
             </BlurView>
           ))}

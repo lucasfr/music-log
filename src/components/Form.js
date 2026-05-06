@@ -22,7 +22,7 @@ const inputStyle = {
   paddingHorizontal: 12,
   paddingVertical: 10,
   fontSize: SIZES.body,
-  fontFamily: 'SourceSans3',
+  fontFamily: 'Lato',
   color: COLOURS.text,
   shadowColor: COLOURS.glassShadow,
   shadowOffset: { width: 0, height: 3 },
@@ -79,7 +79,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
               paddingVertical: 11,
             }]}
           >
-            <Text style={{ fontSize: SIZES.body, fontFamily: 'SourceSans3', color: value ? COLOURS.text : COLOURS.textDim }}>
+            <Text style={{ fontSize: SIZES.body, fontFamily: 'Lato', color: value ? COLOURS.text : COLOURS.textDim }}>
               {display}
             </Text>
             <Text style={{ fontSize: 12, color: COLOURS.textDim }}>▾</Text>
@@ -100,7 +100,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
             }}>
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 14, borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
                 <TouchableOpacity onPress={() => setOpen(false)}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
                 </TouchableOpacity>
               </View>
               <Picker

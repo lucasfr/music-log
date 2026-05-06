@@ -19,13 +19,13 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <View>
-                <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 19, color: COLOURS.text }}>{fmtDate(lesson.date)}</Text>
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>{fmtDate(lesson.date)}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
                 🎓 Lesson · {lesson.duration} min · {lesson.teacher}
                 </Text>
               </View>
               <TouchableOpacity onPress={onClose}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -35,10 +35,10 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
 
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
             <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 lesson</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 lesson</Text>
             </View>
             <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{lesson.duration} min</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{lesson.duration} min</Text>
             </View>
             {lesson.energy ? (
               <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
@@ -58,7 +58,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
 
           {(lesson.pieces || []).length > 0 && (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
                 📜 Pieces
               </Text>
               {lesson.pieces.map((item, i) => {
@@ -71,23 +71,23 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2,
                   }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: item.feedback ? 10 : 0 }}>
-                      <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name || 'Piece'}</Text>
+                      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name || 'Piece'}</Text>
                       {item.isNew && (
                         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}>
-                          <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#5C2D6E' }}>new</Text>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: '#5C2D6E' }}>new</Text>
                         </View>
                       )}
                     </View>
                     {item.feedback ? (
                       <View style={{ paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: item.assignment ? 10 : 0 }}>
-                        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>💬 Feedback</Text>
-                        <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{item.feedback}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>💬 Feedback</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{item.feedback}</Text>
                       </View>
                     ) : null}
                     {item.assignment ? (
                       <View style={{ paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginTop: item.feedback ? 10 : 0 }}>
-                        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>📚 Assignment</Text>
-                        <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{item.assignment}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>📚 Assignment</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{item.assignment}</Text>
                       </View>
                     ) : null}
                     {(item.feltDifficulty || item.liking) ? (
@@ -116,22 +116,22 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
 
           {lesson.overallNotes ? (
             <View style={{ marginBottom: 14, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Overall notes</Text>
-              <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Overall notes</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text>
             </View>
           ) : null}
 
           {lesson.wins ? (
             <View style={{ marginBottom: 14, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
-              <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.wins}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.wins}</Text>
             </View>
           ) : null}
 
           {lesson.nextFocus ? (
             <View style={{ marginBottom: 20, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
-              <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text>
             </View>
           ) : null}
 

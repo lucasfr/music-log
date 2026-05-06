@@ -50,16 +50,16 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
           <View style={{ flex: 1 }}>
             {showDate && (
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
                 {fmtDate(session.date)}
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.practiceText }}>🎹 practice</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.practiceText }}>🎹 practice</Text>
               </View>
               {session.duration ? (
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim }}>{session.duration} min</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{session.duration} min</Text>
               ) : null}
             </View>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
@@ -70,18 +70,18 @@ function PracticeEntry({ session, compositions, onPress, showDate = true }) {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
                 {techNames.map(t => (
                   <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.practiceText }}>{t}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.practiceText }}>{t}</Text>
                   </View>
                 ))}
                 {pieceNames.map(p => (
                   <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.practiceText }}>{p}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.practiceText }}>{p}</Text>
                   </View>
                 ))}
               </View>
             )}
             {session.wins ? (
-              <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
                 "{session.wins}"
               </Text>
             ) : null}
@@ -111,15 +111,15 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
           <View style={{ flex: 1 }}>
             {showDate && (
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
                 {fmtDate(lesson.date)}
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.lessonText }}>🎓 lesson</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.lessonText }}>🎓 lesson</Text>
               </View>
-              <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textDim }}>{lesson.duration} min · {lesson.teacher}</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{lesson.duration} min · {lesson.teacher}</Text>
             </View>
             {(lesson.energy || lesson.enjoyment) ? (
               <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 8 }}>
@@ -131,21 +131,21 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true }) {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
                 {pieceNames.map(p => (
                   <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.lessonBg, borderRadius: RADIUS.pill, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                    <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.lessonText }}>{p}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.lessonText }}>{p}</Text>
                   </View>
                 ))}
                 {newPieces.map(p => {
                   const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
                   return name ? (
                     <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill, shadowColor: COLOURS.yellowMid, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
-                      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: '#5A3A00' }}>✦ {name}</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#5A3A00' }}>✦ {name}</Text>
                     </View>
                   ) : null;
                 })}
               </View>
             )}
             {lesson.wins ? (
-              <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
                 "{lesson.wins}"
               </Text>
             ) : null}
@@ -170,14 +170,14 @@ function FAB({ onPractice, onLesson }) {
             activeOpacity={0.85}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => { setExpanded(false); onPractice(); }}
             activeOpacity={0.85}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.50)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4 }}
           >
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.practiceText }}>🎹 Log practice</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>🎹 Log practice</Text>
           </TouchableOpacity>
         </>
       )}
@@ -225,10 +225,10 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             style={{ width: 44, height: 44, borderRadius: 10 }}
           />
           <View>
-            <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
               music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
             </Text>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
               {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
             </Text>
           </View>
@@ -236,7 +236,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
 
         {/* Today */}
         <View style={{ marginBottom: 16 }}>
-          <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
           {hasToday ? (
             <View style={{ gap: 10 }}>
               {todayLessons.map(l => (
@@ -248,15 +248,15 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             </View>
           ) : (
             <View>
-              <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                 <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
                   style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 Log practice</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 Log practice</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
                   style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -266,7 +266,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         {/* Feed */}
         {feedItems.length > 0 && (
           <>
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
               Previous sessions
             </Text>
             {feedItems.map(item =>
@@ -281,7 +281,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
 
         {sessions.length === 0 && (lessons || []).length === 0 && (
           <View style={{ alignItems: 'center', padding: 32 }}>
-            <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 16, color: COLOURS.textDim, textAlign: 'center', lineHeight: 24 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textDim, textAlign: 'center', lineHeight: 24 }}>
               Your practice journal starts here.{'\n'}Log your first session above.
             </Text>
           </View>

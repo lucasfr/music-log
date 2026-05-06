@@ -51,7 +51,7 @@ export function Card({ children, style }) {
 export function SectionTitle({ children, style }) {
   return (
     <Text style={[{
-      fontFamily: 'LibreBaskerville-Italic',
+      fontFamily: 'CormorantGaramond-Italic',
       fontSize: SIZES.sectionTitle,
       color: COLOURS.text,
       marginBottom: 14,
@@ -65,7 +65,7 @@ export function SectionTitle({ children, style }) {
 export function Label({ children, style }) {
   return (
     <Text style={[{
-      fontFamily: 'SourceSans3-Bold',
+      fontFamily: 'Lato-Bold',
       fontSize: SIZES.label,
       color: COLOURS.textDim,
       marginBottom: 6,
@@ -78,7 +78,6 @@ export function Label({ children, style }) {
 }
 
 // ─── Buttons ──────────────────────────────────────────────────────────────────
-// No borders — lift comes from shadow only. Frosted glass aesthetic.
 
 export function Btn({ onPress, label, variant = 'default', style, disabled }) {
   const isPrimary = variant === 'primary';
@@ -100,7 +99,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           elevation: 5,
           opacity: disabled ? 0.4 : 1,
         }, style]}>
-        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.body, color: COLOURS.text }}>{label}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.text }}>{label}</Text>
       </TouchableOpacity>
     );
   }
@@ -121,7 +120,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           elevation: 3,
           opacity: disabled ? 0.4 : 1,
         }, style]}>
-        <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.danger }}>{label}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.danger }}>{label}</Text>
       </TouchableOpacity>
     );
   }
@@ -141,7 +140,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
         elevation: 3,
         opacity: disabled ? 0.4 : 1,
       }, style]}>
-      <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -169,7 +168,7 @@ export function StatusPill({ status }) {
       shadowRadius: 6,
       elevation: 2,
     }}>
-      <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: SIZES.label, color: c.text }}>{status}</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: c.text }}>{status}</Text>
     </View>
   );
 }
@@ -189,7 +188,7 @@ export function MetaChip({ label }) {
       shadowRadius: 4,
       elevation: 1,
     }}>
-      <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.label, color: COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted }}>{label}</Text>
     </View>
   );
 }
@@ -219,7 +218,7 @@ export function TagCloud({ tags, selected, onToggle }) {
             }}
           >
             <Text style={{
-              fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3',
+              fontFamily: active ? 'Lato-Bold' : 'Lato',
               fontSize: SIZES.label,
               color: active ? '#7A3A00' : COLOURS.textMuted,
             }}>
@@ -240,7 +239,7 @@ export function EmptyState({ icon, text }) {
   return (
     <View style={{ alignItems: 'center', padding: 48 }}>
       <Text style={{ fontSize: 36, marginBottom: 12 }}>{icon}</Text>
-      <Text style={{ fontFamily: 'SourceSans3', fontSize: 15, color: COLOURS.textDim, textAlign: 'center', lineHeight: 22 }}>{text}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: 15, color: COLOURS.textDim, textAlign: 'center', lineHeight: 22 }}>{text}</Text>
     </View>
   );
 }

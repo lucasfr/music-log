@@ -46,7 +46,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
         </View>
         {value > 0 && (
           <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -86,7 +86,7 @@ function ScalesPicker({ selected = [], onChange }) {
               activeOpacity={0.75}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)', shadowColor: COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
             >
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{s}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{s}</Text>
               <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
             </TouchableOpacity>
           ))}
@@ -119,7 +119,7 @@ function ScalesPicker({ selected = [], onChange }) {
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
               }}
             >
-              <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
             </TouchableOpacity>
           );
         })}
@@ -129,7 +129,7 @@ function ScalesPicker({ selected = [], onChange }) {
             activeOpacity={0.75}
             style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
           >
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -174,16 +174,16 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.accentLight }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: accentColor, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: accentColor, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                 {isTech ? 'technique' : 'repertoire'}
               </Text>
             </View>
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
               {segment.title || (isTech ? 'Technical work' : 'Piece')}
             </Text>
           </View>
           {segment.duration ? (
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{segment.duration} min</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{segment.duration} min</Text>
           ) : null}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -216,7 +216,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                           shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
                         }}
                       >
-                        <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>
+                        <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>
                           {g}
                         </Text>
                       </TouchableOpacity>

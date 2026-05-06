@@ -6,15 +6,16 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import {
-  LibreBaskerville_400Regular,
-  LibreBaskerville_400Regular_Italic,
-  LibreBaskerville_700Bold,
-} from '@expo-google-fonts/libre-baskerville';
+  CormorantGaramond_400Regular,
+  CormorantGaramond_400Regular_Italic,
+  CormorantGaramond_600SemiBold,
+  CormorantGaramond_600SemiBold_Italic,
+} from '@expo-google-fonts/cormorant-garamond';
 import {
-  SourceSans3_400Regular,
-  SourceSans3_400Regular_Italic,
-  SourceSans3_700Bold,
-} from '@expo-google-fonts/source-sans-3';
+  Lato_300Light,
+  Lato_400Regular,
+  Lato_700Bold,
+} from '@expo-google-fonts/lato';
 
 import { useSessions, useCompositions, useLessons } from './src/db/hooks';
 import HomeScreen from './src/screens/HomeScreen';
@@ -51,7 +52,7 @@ function TabLabel({ label, focused }) {
   return (
     <Text style={{
       fontSize: 11,
-      fontFamily: 'SourceSans3-Bold',
+      fontFamily: 'Lato-Bold',
       color: focused ? COLOURS.navy : COLOURS.textDim,
       marginBottom: 2,
     }}>
@@ -70,12 +71,13 @@ const isStandalone =
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'LibreBaskerville':        LibreBaskerville_400Regular,
-    'LibreBaskerville-Italic': LibreBaskerville_400Regular_Italic,
-    'LibreBaskerville-Bold':   LibreBaskerville_700Bold,
-    'SourceSans3':             SourceSans3_400Regular,
-    'SourceSans3-Italic':      SourceSans3_400Regular_Italic,
-    'SourceSans3-Bold':        SourceSans3_700Bold,
+    'CormorantGaramond':             CormorantGaramond_400Regular,
+    'CormorantGaramond-Italic':      CormorantGaramond_400Regular_Italic,
+    'CormorantGaramond-Bold':        CormorantGaramond_600SemiBold,
+    'CormorantGaramond-BoldItalic':  CormorantGaramond_600SemiBold_Italic,
+    'Lato-Light':                    Lato_300Light,
+    'Lato':                          Lato_400Regular,
+    'Lato-Bold':                     Lato_700Bold,
   });
 
   const [ready, setReady] = useState(false);
