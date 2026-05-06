@@ -176,8 +176,8 @@ export default function App() {
   );
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
+    <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+      <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
       {Platform.OS === 'web' ? (
         <View style={styles.webOuter}>
           <View style={styles.webInner}>{content}</View>
