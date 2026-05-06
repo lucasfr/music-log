@@ -106,9 +106,9 @@ function FAB({ onPractice, onLesson }) {
   );
 }
 
-// ─── Calendar grid component ──────────────────────────────────────────────────
+// ─── Calendar grid ────────────────────────────────────────────────────────────
 
-function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, cellH, onDayPress, selectedDate }) {
+function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, cellH, onDayPress, selectedDate, onPrevMonth, onNextMonth }) {
   const sessionsByDate = useMemo(() => {
     const m = {};
     sessions.forEach(s => { if (!m[s.date]) m[s.date] = []; m[s.date].push(s); });
@@ -120,16 +120,29 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
     return m;
   }, [lessons]);
 
-  const cells = calendarDays(viewYear, viewMonth);
+  const cells         = calendarDays(viewYear, viewMonth);
   const monthPrefix   = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
   const monthSessions = sessions.filter(s => s.date.startsWith(monthPrefix));
   const monthLessons  = (lessons || []).filter(l => l.date.startsWith(monthPrefix));
-  const streak = currentStreak(sessions);
+  const streak        = currentStreak(sessions);
 
   return (
     <View>
+      {/* Month nav */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>
+        <TouchableOpacity onPress={onPrevMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
+        </TouchableOpacity>
+        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>
+          {MONTHS[viewMonth]} {viewYear}
+        </Text>
+        <TouchableOpacity onPress={onNextMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Header */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20, marginTop: 4 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16, marginTop: 4 }}>
         <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>📅 Calendar</Text>
         {streak > 0 && (
           <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:4 }}>
@@ -160,7 +173,6 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       {/* Calendar grid */}
       <BlurView intensity={32} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 6 }}>
         <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
-          {/* Day headers */}
           <View style={{ flexDirection: 'row', marginBottom: 4 }}>
             {DAYS.map((d, i) => (
               <View key={i} style={{ width: cellW, alignItems: 'center' }}>
@@ -168,7 +180,6 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
               </View>
             ))}
           </View>
-          {/* Grid */}
           {Array.from({ length: cells.length / 7 }, (_, row) => (
             <View key={row} style={{ flexDirection: 'row' }}>
               {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
@@ -213,10 +224,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
-        {[
-          { dot: COLOURS.practiceText, label: 'Practice' },
-          { dot: COLOURS.lessonText,   label: 'Lesson' },
-        ].map(({ dot, label }) => (
+        {[{ dot: COLOURS.practiceText, label: 'Practice' }, { dot: COLOURS.lessonText, label: 'Lesson' }].map(({ dot, label }) => (
           <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: dot }} />
             <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{label}</Text>
@@ -247,6 +255,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
   const [selectedDate,    setSelectedDate]    = useState(null);
+  const [leftColWidth,    setLeftColWidth]    = useState(480);
 
   const sessionsByDate = useMemo(() => {
     const m = {};
@@ -271,11 +280,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   function handleDayPress(day, iso) {
     const dayLessons  = lessonsByDate[iso]  || [];
     const daySessions = sessionsByDate[iso] || [];
-
-    if (isDesktop) {
-      setSelectedDate(iso);
-      return;
-    }
+    if (isDesktop) { setSelectedDate(iso); return; }
     if (dayLessons.length === 1 && daySessions.length === 0)      setDetailLesson(dayLessons[0]);
     else if (daySessions.length === 1 && dayLessons.length === 0) setDetailSession(daySessions[0]);
     else if (dayLessons.length === 0 && daySessions.length === 0) setLogModalDate(iso);
@@ -283,25 +288,10 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
     else                                                          setDetailSession(daySessions[0]);
   }
 
-  const [leftColWidth, setLeftColWidth] = useState(420);
-  const W     = isDesktop ? leftColWidth : Dimensions.get('window').width;
-  const cellW = Math.floor((Math.min(W, 800) - 32 - 224) / 7);
-  const cellH = 58;
-
-  // Nav bar rendered above the grid
-  const navBar = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4, paddingVertical: 8 }}>
-      <TouchableOpacity onPress={prevMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-        <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
-      </TouchableOpacity>
-      <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>
-        {MONTHS[viewMonth]} {viewYear}
-      </Text>
-      <TouchableOpacity onPress={nextMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-        <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  // cellW based on content area after sidebar padding
+  const contentW = isDesktop ? Math.max(leftColWidth - 224 - 20, 200) : Dimensions.get('window').width - 32;
+  const cellW    = Math.floor(Math.min(contentW, 460) / 7);
+  const cellH    = 58;
 
   const modals = (
     <>
@@ -328,6 +318,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
     return (
       <View style={{ flex: 1, flexDirection: 'row' }}>
+        {/* Left: calendar glass card */}
         <View onLayout={e => setLeftColWidth(e.nativeEvent.layout.width)} style={{
           flex: 1,
           marginTop: 12,
@@ -344,13 +335,13 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           elevation: 2,
         }}>
           <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 224, paddingRight: 20 }}>
-            {navBar}
             <CalendarGrid
               sessions={sessions} lessons={lessons}
               viewYear={viewYear} viewMonth={viewMonth}
               today={today} cellW={cellW} cellH={cellH}
               onDayPress={handleDayPress}
               selectedDate={selectedDate}
+              onPrevMonth={prevMonth} onNextMonth={nextMonth}
             />
           </ScrollView>
           <FAB onPractice={() => setLogModalDate(selectedDate || today)} onLesson={() => setLessonModalDate(selectedDate || today)} />
@@ -360,14 +351,15 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         <View style={{ flex: 1, marginLeft: 12, marginTop: 12, marginBottom: 12, marginRight: 12 }}>
           {selectedDate ? (
             <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
-              {/* Header */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>{fmtDate(selectedDate)}</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <TouchableOpacity onPress={() => setLogModalDate(selectedDate)} activeOpacity={0.75} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: 'rgba(214,40,40,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                  <TouchableOpacity onPress={() => setLogModalDate(selectedDate)} activeOpacity={0.75}
+                    style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: 'rgba(214,40,40,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.practiceText }}>🎹 Log practice</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setLessonModalDate(selectedDate)} activeOpacity={0.75} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: 'rgba(247,127,0,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                  <TouchableOpacity onPress={() => setLessonModalDate(selectedDate)} activeOpacity={0.75}
+                    style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: 'rgba(247,127,0,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
                   </TouchableOpacity>
                 </View>
@@ -381,14 +373,17 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                 <BlurView key={l.id} intensity={40} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: 'rgba(9,99,126,0.08)', shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
                   <View style={{ backgroundColor: 'rgba(255,255,255,0.45)', padding: 14, borderLeftWidth: 4, borderLeftColor: COLOURS.amber }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 6 }}>🎓 Lesson · {l.duration} min · {l.teacher}</Text>
-                    {(l.pieces || []).map((p, i) => { const n = p.compositionId ? compName(p.compositionId) : p.pieceName; return n ? <Text key={i} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted }}>📜 {n}</Text> : null; })}
+                    {(l.pieces || []).map((p, i) => {
+                      const n = p.compositionId ? compName(p.compositionId) : p.pieceName;
+                      return n ? <Text key={i} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted }}>📜 {n}</Text> : null;
+                    })}
                     {l.wins ? <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted, marginTop: 6 }}>✨ {l.wins}</Text> : null}
                   </View>
                 </BlurView>
               ))}
 
               {selSessions.map(s => {
-                const pieces = (s.segments || []).filter(sg => sg.type === 'repertoire').map(sg => sg.compositionId ? compName(sg.compositionId) : sg.title).filter(Boolean);
+                const pieces    = (s.segments || []).filter(sg => sg.type === 'repertoire').map(sg => sg.compositionId ? compName(sg.compositionId) : sg.title).filter(Boolean);
                 const energyBar = (s.energy ?? 0) + 3;
                 return (
                   <BlurView key={s.id} intensity={40} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: 'rgba(9,99,126,0.08)', shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
@@ -397,7 +392,11 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                         <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
                           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.practiceText }}>🎹 practice</Text>
                         </View>
-                        {s.duration ? <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.65)' }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>⏱ {s.duration} min</Text></View> : null}
+                        {s.duration ? (
+                          <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.65)' }}>
+                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>⏱ {s.duration} min</Text>
+                          </View>
+                        ) : null}
                       </View>
                       <View style={{ flexDirection: 'row', gap: 4, marginBottom: 8 }}>
                         {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 16, opacity: n <= energyBar ? 1 : 0.18 }}>⚡</Text>)}
@@ -425,13 +424,13 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-        {navBar}
         <CalendarGrid
           sessions={sessions} lessons={lessons}
           viewYear={viewYear} viewMonth={viewMonth}
           today={today} cellW={cellW} cellH={cellH}
           onDayPress={handleDayPress}
           selectedDate={null}
+          onPrevMonth={prevMonth} onNextMonth={nextMonth}
         />
       </ScrollView>
       <FAB onPractice={() => setLogModalDate(today)} onLesson={() => setLessonModalDate(today)} />
