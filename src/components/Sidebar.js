@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   logoText: {
     fontFamily: 'CormorantGaramond-Italic',
-    fontSize: 22,
+    fontSize: 28,
     color: COLOURS.text,
     letterSpacing: -0.5,
   },
