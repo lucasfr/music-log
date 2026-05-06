@@ -24,6 +24,7 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import { AppBackground } from './src/components/Background';
+import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
 import { useLayout } from './src/utils/useLayout';
 import { COLOURS } from './src/theme';
@@ -71,12 +72,23 @@ export default function App() {
   });
 
   const [ready, setReady] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   useEffect(() => {
     if (fontsLoaded) {
+      const done = Platform.OS === 'web'
+        ? localStorage.getItem('onboarding_done')
+        : null; // native: always show for now, can add AsyncStorage later
+      if (!done) setShowOnboarding(true);
       const t = setTimeout(() => setReady(true), 200);
       return () => clearTimeout(t);
     }
   }, [fontsLoaded]);
+
+  function completeOnboarding() {
+    if (Platform.OS === 'web') localStorage.setItem('onboarding_done', '1');
+    setShowOnboarding(false);
+  }
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -102,6 +114,18 @@ export default function App() {
           <Text style={{ color: COLOURS.lessonText }}>log</Text>
         </Text>
       </View>
+    );
+  }
+
+  if (showOnboarding && !(Platform.OS === 'web' && typeof window !== 'undefined' && window.innerWidth >= 768)) {
+    return (
+      <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+        <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
+        <View style={{ flex: 1 }}>
+          <AppBackground />
+          <OnboardingScreen onComplete={completeOnboarding} />
+        </View>
+      </SafeAreaProvider>
     );
   }
 
@@ -135,6 +159,7 @@ export default function App() {
               {renderScreen()}
             </View>
           </View>
+          {showOnboarding && <OnboardingScreen onComplete={completeOnboarding} />}
         </View>
       </SafeAreaProvider>
     );
