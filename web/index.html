@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
 
     <!-- PWA theme -->
-    <meta name="theme-color" content="#213C51" />
+    <meta name="theme-color" content="#EBF4F6" />
     <meta name="description" content="Piano practice session logger" />
 
     <!-- iOS PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="music.log" />
 
     <!-- Apple touch icons — iOS ignores manifest.json for home screen icon -->
@@ -20,9 +20,6 @@
     <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png" />
     <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120.png" />
 
-    <!-- iOS splash screens (optional but prevents white flash) -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
     <!-- Standard PWA -->
     <link rel="manifest" href="/manifest.json" />
     <link rel="shortcut icon" href="/favicon.png" />
@@ -30,7 +27,14 @@
     <title>music.log</title>
 
     <style>
-      html, body, #root { height: 100%; margin: 0; padding: 0; background: #EAF0F5; }
+      html, body, #root { height: 100%; margin: 0; padding: 0; background: #EBF4F6; }
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        background-color: #EBF4F6;
+      }
+      #root { height: 100vh; height: 100dvh; }
     </style>
   </head>
   <body>
