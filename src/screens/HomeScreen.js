@@ -499,14 +499,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   // ── Desktop two-column layout ───────────────────────────────────────────────
   if (isDesktop) {
     return (
-      <View style={{ flex: 1, flexDirection: 'row' }}>
-        {/* Left: feed — starts at left edge, behind sidebar */}
+      <View style={{ flex: 1 }}>
+        {/* Full-width glass card */}
         <View style={{
-          width: 360,
-          marginTop: 12,
-          marginBottom: 12,
+          position: 'absolute',
+          left: 0, right: 12, top: 12, bottom: 12,
           borderRadius: 20,
-          overflow: 'hidden',
           backgroundColor: 'rgba(255,255,255,0.28)',
           borderWidth: 1,
           borderColor: 'rgba(255,255,255,0.55)',
@@ -515,7 +513,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           shadowOpacity: 1,
           shadowRadius: 24,
           elevation: 2,
-        }}>
+        }} />
+        {/* Two-column layout on top */}
+        <View style={{ flex: 1, flexDirection: 'row' }}>
+        {/* Left: feed */}
+        <View style={{ width: 360, marginTop: 12, marginBottom: 12 }}>
           <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 224, paddingRight: 20 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>Home</Text>
@@ -553,6 +555,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </View>
 
         {modals}
+        </View>
       </View>
     );
   }
