@@ -501,7 +501,21 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     return (
       <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* Left: feed */}
-        <View style={{ width: 360, borderRightWidth: 1, borderRightColor: 'rgba(9,99,126,0.08)' }}>
+        <View style={{
+          width: 360,
+          margin: 12,
+          marginLeft: 0,
+          borderRadius: 20,
+          overflow: 'hidden',
+          backgroundColor: 'rgba(255,255,255,0.28)',
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.55)',
+          shadowColor: 'rgba(9,99,126,0.12)',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 1,
+          shadowRadius: 24,
+          elevation: 6,
+        }}>
           <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>Home</Text>

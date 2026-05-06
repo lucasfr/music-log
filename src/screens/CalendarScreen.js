@@ -328,7 +328,21 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
     return (
       <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* Left: calendar */}
-        <View style={{ width: 420, borderRightWidth: 1, borderRightColor: 'rgba(9,99,126,0.08)' }}>
+        <View style={{
+          width: 420,
+          margin: 12,
+          marginLeft: 0,
+          borderRadius: 20,
+          overflow: 'hidden',
+          backgroundColor: 'rgba(255,255,255,0.28)',
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.55)',
+          shadowColor: 'rgba(9,99,126,0.12)',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 1,
+          shadowRadius: 24,
+          elevation: 6,
+        }}>
           <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
             {navBar}
             <CalendarGrid
