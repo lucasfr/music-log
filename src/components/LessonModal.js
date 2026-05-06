@@ -15,26 +15,19 @@ import { uid } from '../utils';
 
 function ZeldaBar({ emoji, value, onChange }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-      <View style={{ flexDirection: 'row', gap: 2 }}>
-        {[1,2,3,4,5].map(n => (
-          <TouchableOpacity
-            key={n}
-            onPress={() => onChange(n === value ? 0 : n)}
-            activeOpacity={0.7}
-            hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}
-          >
-            <Text style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none' }}>
-              {emoji}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      {value > 0 && (
-        <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top:8, bottom:8, left:8, right:8 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {[1,2,3,4,5].map(n => (
+        <TouchableOpacity
+          key={n}
+          onPress={() => onChange(n === value ? 0 : n)}
+          activeOpacity={0.7}
+          hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}
+        >
+          <Text style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none' }}>
+            {emoji}
+          </Text>
         </TouchableOpacity>
-      )}
+      ))}
     </View>
   );
 }
