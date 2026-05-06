@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
@@ -13,7 +13,7 @@ const STATUS_TEXT_COLOURS = {
 };
 
 export default function StatsScreen({ sessions, compositions }) {
-  const W = Dimensions.get('window').width - 32;
+  const [contentW, setContentW] = useState(320);
 
   const last30 = sessions.filter(s => {
     const d = new Date(s.date + 'T12:00:00');
@@ -73,12 +73,15 @@ export default function StatsScreen({ sessions, compositions }) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        onLayout={e => setContentW(e.nativeEvent.layout.width - 32)}
+      >
         <SectionTitle style={{ marginTop: 4 }}>📊 Overview</SectionTitle>
 
         {/* Stat grid — 2×2 square tiles */}
         {(() => {
-          const tileSize = (W - 10) / 2;
+          const tileSize = (contentW - 10) / 2;
           const rows = [[statItems[0], statItems[1]], [statItems[2], statItems[3]]];
           return (
             <View style={{ gap: 10, marginBottom: 20 }}>
