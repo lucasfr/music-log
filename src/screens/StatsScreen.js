@@ -76,32 +76,43 @@ export default function StatsScreen({ sessions, compositions }) {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <SectionTitle style={{ marginTop: 4 }}>📊 Overview</SectionTitle>
 
-        {/* Stat grid */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
-          {statItems.map((item, i) => (
-            <BlurView
-              key={i}
-              intensity={36}
-              tint="light"
-              style={{
-                width: (W - 10) / 2,
-                borderRadius: RADIUS.md,
-                overflow: 'hidden',
-                shadowColor: COLOURS.glassShadow,
-                shadowOffset: { width: 0, height: 3 },
-                shadowOpacity: 1,
-                shadowRadius: 10,
-                elevation: 3,
-              }}
-            >
-              <View style={{ backgroundColor: COLOURS.glass, padding: 16 }}>
-                <Text style={{ fontSize: 22, marginBottom: 4 }}>{item.emoji}</Text>
-                <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 32, color: COLOURS.navy }}>{item.value}</Text>
-                <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{item.label}</Text>
-              </View>
-            </BlurView>
-          ))}
-        </View>
+        {/* Stat grid — 2×2 square tiles */}
+        {(() => {
+          const tileSize = (W - 10) / 2;
+          const rows = [[statItems[0], statItems[1]], [statItems[2], statItems[3]]];
+          return (
+            <View style={{ gap: 10, marginBottom: 20 }}>
+              {rows.map((row, ri) => (
+                <View key={ri} style={{ flexDirection: 'row', gap: 10 }}>
+                  {row.map((item, ci) => (
+                    <View
+                      key={ci}
+                      style={{
+                        width: tileSize,
+                        height: tileSize,
+                        borderRadius: RADIUS.md,
+                        overflow: 'hidden',
+                        shadowColor: COLOURS.glassShadow,
+                        shadowOffset: { width: 0, height: 3 },
+                        shadowOpacity: 1,
+                        shadowRadius: 10,
+                        elevation: 3,
+                      }}
+                    >
+                      <BlurView intensity={36} tint="light" style={{ flex: 1 }}>
+                        <View style={{ flex: 1, backgroundColor: COLOURS.glass, padding: 20, justifyContent: 'flex-end' }}>
+                          <Text style={{ fontSize: 26, marginBottom: 8 }}>{item.emoji}</Text>
+                          <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 36, color: COLOURS.navy, lineHeight: 40 }}>{item.value}</Text>
+                          <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 4 }}>{item.label}</Text>
+                        </View>
+                      </BlurView>
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </View>
+          );
+        })()}
 
         <SectionTitle>📅 Last 14 days</SectionTitle>
         <GlassCard style={{ paddingBottom: 8 }}>
