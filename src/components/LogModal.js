@@ -130,7 +130,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
                   </Field>
                 </View>
                 <View style={{ width: 120 }}>
-                  <Field label={totalMin ? `⏱ Duration (~${totalMin}m)` : '⏱ Duration (min)'}>
+                  <Field label={totalMin ? `⏱ ~${totalMin}m` : '⏱ Min'}>
                     <NumberF value={duration} onChange={setDuration} placeholder={totalMin ? String(totalMin) : ''} />
                   </Field>
                 </View>
