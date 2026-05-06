@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 
 export function Sidebar({ activeTab, onNavigate }) {
   return (
-    <BlurView intensity={15} tint="light" style={styles.sidebar}>
+    <BlurView intensity={40} tint="light" style={styles.sidebar}>
       {/* Logo */}
       <View style={styles.logoRow}>
         <Image
@@ -65,14 +65,14 @@ const styles = StyleSheet.create({
     width: SIDEBAR_W,
     margin: 12,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.28)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
-    shadowColor: 'rgba(9,99,126,0.08)',
-    shadowOffset: { width: 0, height: 4 },
+    borderColor: 'rgba(255,255,255,0.55)',
+    shadowColor: 'rgba(9,99,126,0.12)',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowRadius: 24,
+    elevation: 6,
     overflow: 'hidden',
     paddingTop: Platform.OS === 'web' ? 24 : 48,
     paddingBottom: 24,
