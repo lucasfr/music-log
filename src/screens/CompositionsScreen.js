@@ -150,7 +150,71 @@ function AutocompleteField({ label, value, onChange, placeholder, suggestions })
   );
 }
 
-// ─── Section divider ─────────────────────────────────────────────────────────
+// ─── Keys picker ─────────────────────────────────────────────────────────────
+// Manages an array of { root, mode } objects for pieces with multiple keys
+
+function KeysPicker({ value = [], onChange }) {
+  // Migrate legacy single-key data on first render
+  const keys = value;
+
+  function addKey() {
+    onChange([...keys, { root: '', mode: 'major' }]);
+  }
+  function updateKey(i, field, v) {
+    const updated = keys.map((k, idx) => idx === i ? { ...k, [field]: v } : k);
+    onChange(updated);
+  }
+  function removeKey(i) {
+    onChange(keys.filter((_, idx) => idx !== i));
+  }
+
+  return (
+    <Field label="🎹 Keys">
+      <View style={{ gap: 8 }}>
+        {keys.map((k, i) => (
+          <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <SelectF
+                label=""
+                value={k.root || ''}
+                onChange={v => updateKey(i, 'root', v)}
+                options={KEYS}
+                placeholder="Root"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <SelectF
+                label=""
+                value={k.mode || 'major'}
+                onChange={v => updateKey(i, 'mode', v)}
+                options={MODES}
+                placeholder="Mode"
+              />
+            </View>
+            <TouchableOpacity
+              onPress={() => removeKey(i)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={{ paddingBottom: 14 }}
+            >
+              <Text style={{ fontSize: 16, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+        <TouchableOpacity
+          onPress={addKey}
+          activeOpacity={0.75}
+          style={{
+            paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
+            backgroundColor: 'rgba(255,255,255,0.55)', alignSelf: 'flex-start',
+            shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2,
+          }}
+        >
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Add key</Text>
+        </TouchableOpacity>
+      </View>
+    </Field>
+  );
+}
 
 function SectionDivider({ label }) {
   return (
@@ -229,9 +293,11 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
             <TagInput value={data.tags || []} onChange={v => f('tags', v)} />
 
             <SectionDivider label="🎵 Musical properties" />
+            <KeysPicker
+              value={data.keys || (data.keyRoot ? [{ root: data.keyRoot, mode: data.keyMode || 'major' }] : [])}
+              onChange={v => f('keys', v)}
+            />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <View style={{ flex: 1 }}><SelectF label="🎹 Key"      value={data.keyRoot || ''} onChange={v => f('keyRoot', v)} options={KEYS}      placeholder="—" /></View>
-              <View style={{ flex: 1 }}><SelectF label="🌙 Mode"     value={data.keyMode || ''} onChange={v => f('keyMode', v)} options={MODES}     placeholder="—" /></View>
               <View style={{ flex: 1 }}><SelectF label="⏱ Time sig" value={data.timeSig || ''} onChange={v => f('timeSig', v)} options={TIME_SIGS} placeholder="—" /></View>
             </View>
 
@@ -405,7 +471,10 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
             </View>
           )}
           {comp.grade   ? <MetaChip label={comp.grade} /> : null}
-          {comp.keyRoot ? <MetaChip label={`${comp.keyRoot} ${comp.keyMode || ''}`.trim()} /> : null}
+          {(comp.keys && comp.keys.length > 0
+            ? comp.keys
+            : comp.keyRoot ? [{ root: comp.keyRoot, mode: comp.keyMode }] : []
+          ).map((k, i) => k.root ? <MetaChip key={i} label={`${k.root} ${k.mode || ''}`.trim()} /> : null)}
           {comp.timeSig ? <MetaChip label={comp.timeSig} /> : null}
           {comp.collection ? <MetaChip label={comp.collection} /> : null}
           {(comp.tags || []).map(t => <MetaChip key={t} label={t} />)}
@@ -604,7 +673,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
 
   const blank = () => ({
     id: uid(), title: '', composer: '', arrangement: '', collection: '',
-    status: 'learning', grade: '', keyRoot: '', keyMode: '', timeSig: '',
+    status: 'learning', grade: '', keys: [], timeSig: '',
     difficulty: 0, liking: 0, year: '', tags: [],
     dateStarted: '', dateCompleted: '',
     info: '', technicalChallenges: '', musicalFocus: '', practiceNotes: '',
