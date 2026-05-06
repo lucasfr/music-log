@@ -274,7 +274,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>
+              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 19, color: COLOURS.text }}>
                 {comp.title ? 'Edit piece' : 'Add piece'}
               </Text>
               <TouchableOpacity onPress={onClose}>

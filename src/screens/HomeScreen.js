@@ -593,7 +593,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         <View style={{ flex: 1, marginTop: 12, marginBottom: 12, overflow: 'hidden' }}>
           <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 226, paddingRight: 20 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>Home</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.text }}>Home</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>
                 {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
               </Text>

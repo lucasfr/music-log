@@ -51,7 +51,7 @@ export function Card({ children, style }) {
 export function SectionTitle({ children, style }) {
   return (
     <Text style={[{
-      fontFamily: 'CormorantGaramond-Italic',
+      fontFamily: 'CormorantGaramond',
       fontSize: SIZES.sectionTitle,
       color: COLOURS.text,
       marginBottom: 14,
