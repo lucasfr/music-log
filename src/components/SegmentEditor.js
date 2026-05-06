@@ -324,6 +324,12 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
             <ZeldaBar emoji="🎵" value={segment.feltDifficulty || 0} onChange={v => field('feltDifficulty', v)} />
           </Field>
 
+          {!isTech && (
+            <Field label="Liking">
+              <ZeldaBar emoji="⭐" value={segment.liking || 0} onChange={v => field('liking', v)} />
+            </Field>
+          )}
+
           <Field label="Challenges">
             <TagCloud tags={CHALLENGE_TAGS} selected={segment.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
