@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { GlassCard, SectionTitle, Btn, Label } from '../components/UI';
-import { Field, TextF, NumberF } from '../components/Form';
+import { Field, TextF, NumberF, DatePickerF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
 import { uid } from '../utils';
 
@@ -126,9 +126,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
             <GlassCard>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
                 <View style={{ flex: 1 }}>
-                  <Field label="📅 Date">
-                    <TextF value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
-                  </Field>
+                  <DatePickerF label="📅 Date" value={date} onChange={setDate} />
                 </View>
                 <View style={{ width: 120 }}>
                   <Field label={totalMin ? `⏱ ~${totalMin}m` : '⏱ Min'}>

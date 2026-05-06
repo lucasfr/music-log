@@ -2,9 +2,39 @@ import React from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Modal, Platform,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { Picker } from '@react-native-picker/picker';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { Label } from './UI';
+
+// ─── Helpers for DatePickerF ─────────────────────────────────────────────────────
+
+const DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const MONTHS_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function calDays(year, month) {
+  const offset = (new Date(year, month, 1).getDay() + 6) % 7;
+  const total  = new Date(year, month + 1, 0).getDate();
+  const cells  = Array(offset).fill(null);
+  for (let d = 1; d <= total; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+  return cells;
+}
+
+function isoFor(y, m, d) {
+  return `${y}-${String(m + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function fmtDisplay(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export function Field({ label, children, style }) {
   return (
@@ -134,6 +164,143 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
           })}
         </Picker>
       </View>
+    </Field>
+  );
+}
+
+// ─── Date picker ───────────────────────────────────────────────────────────────
+
+export function DatePickerF({ label, value, onChange }) {
+  const [open, setOpen] = React.useState(false);
+  const today = todayISO();
+
+  const initDate = value ? new Date(value + 'T12:00:00') : new Date();
+  const [viewYear,  setViewYear]  = React.useState(initDate.getFullYear());
+  const [viewMonth, setViewMonth] = React.useState(initDate.getMonth());
+
+  // Keep calendar in sync if value changes externally
+  React.useEffect(() => {
+    if (value) {
+      const d = new Date(value + 'T12:00:00');
+      setViewYear(d.getFullYear());
+      setViewMonth(d.getMonth());
+    }
+  }, [value]);
+
+  function prevMonth() {
+    if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
+    else setViewMonth(m => m - 1);
+  }
+  function nextMonth() {
+    if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
+    else setViewMonth(m => m + 1);
+  }
+
+  const cells = calDays(viewYear, viewMonth);
+  const CELL_W = 36;
+
+  const calendar = (
+    <BlurView intensity={60} tint="light" style={{
+      borderRadius: 20, overflow: 'hidden',
+      shadowColor: 'rgba(9,99,126,0.18)', shadowOffset:{width:0,height:12}, shadowOpacity:1, shadowRadius:32, elevation:16,
+    }}>
+      <View style={{ backgroundColor: 'rgba(255,255,255,0.65)', padding: 16 }}>
+        {/* Month nav */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <TouchableOpacity onPress={prevMonth} hitSlop={{top:10,bottom:10,left:10,right:10}}>
+            <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>‹</Text>
+          </TouchableOpacity>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>
+            {MONTHS_LONG[viewMonth]} {viewYear}
+          </Text>
+          <TouchableOpacity onPress={nextMonth} hitSlop={{top:10,bottom:10,left:10,right:10}}>
+            <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Day headers */}
+        <View style={{ flexDirection: 'row', marginBottom: 4 }}>
+          {DAYS_SHORT.map((d, i) => (
+            <View key={i} style={{ width: CELL_W, alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.5 }}>{d}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Grid */}
+        {Array.from({ length: cells.length / 7 }, (_, row) => (
+          <View key={row} style={{ flexDirection: 'row' }}>
+            {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
+              if (!day) return <View key={col} style={{ width: CELL_W, height: 36 }} />;
+              const iso = isoFor(viewYear, viewMonth, day);
+              const isSelected = iso === value;
+              const isToday    = iso === today;
+              const isFuture   = iso > today;
+              return (
+                <TouchableOpacity
+                  key={col}
+                  onPress={() => { if (!isFuture) { onChange(iso); setOpen(false); } }}
+                  activeOpacity={isFuture ? 1 : 0.7}
+                  style={{
+                    width: CELL_W, height: 36,
+                    alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 18,
+                    backgroundColor: isSelected
+                      ? COLOURS.navy
+                      : isToday
+                        ? 'rgba(9,99,126,0.10)'
+                        : 'transparent',
+                  }}
+                >
+                  <Text style={{
+                    fontFamily: isSelected || isToday ? 'Lato-Bold' : 'Lato',
+                    fontSize: 14,
+                    color: isSelected
+                      ? '#fff'
+                      : isFuture
+                        ? COLOURS.textDim
+                        : isToday
+                          ? COLOURS.navy
+                          : COLOURS.text,
+                  }}>{day}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ))}
+
+        {/* Today shortcut */}
+        <TouchableOpacity
+          onPress={() => { onChange(today); setOpen(false); }}
+          activeOpacity={0.75}
+          style={{ alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+        >
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Today</Text>
+        </TouchableOpacity>
+      </View>
+    </BlurView>
+  );
+
+  return (
+    <Field label={label}>
+      {/* Trigger button */}
+      <TouchableOpacity
+        onPress={() => setOpen(o => !o)}
+        activeOpacity={0.8}
+        style={[inputStyle, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 11 }]}
+      >
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.body, color: value ? COLOURS.text : COLOURS.textDim }}>
+          {value ? fmtDisplay(value) : 'Select date…'}
+        </Text>
+        <Text style={{ fontSize: 14, color: COLOURS.textDim }}>{open ? '▴' : '▾'}</Text>
+      </TouchableOpacity>
+
+      {/* Inline calendar dropdown */}
+      {open && (
+        <View style={{ marginTop: 6, zIndex: 100 }}>
+          {calendar}
+        </View>
+      )}
     </Field>
   );
 }

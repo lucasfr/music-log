@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { GlassCard, SectionTitle, Btn, TagCloud } from '../components/UI';
-import { Field, TextF, NumberF, SelectF } from '../components/Form';
+import { Field, TextF, NumberF, SelectF, DatePickerF } from '../components/Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
 import { uid } from '../utils';
 
@@ -314,9 +314,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             <GlassCard>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 0 }}>
                 <View style={{ flex: 1 }}>
-                  <Field label="📅 Date">
-                    <TextF value={date} onChange={setDate} placeholder="YYYY-MM-DD" />
-                  </Field>
+                  <DatePickerF label="📅 Date" value={date} onChange={setDate} />
                 </View>
                 <View style={{ width: 90 }}>
                   <Field label="⏱ Min">
