@@ -26,12 +26,23 @@ import { COLOURS } from './src/theme';
 
 const Tab = createBottomTabNavigator();
 
-const ICONS = { Home: '◈', Calendar: '◻', Pieces: '♩', Stats: '▦' };
+const ICONS = {
+  Home:     { active: '🎹', inactive: '🎹' },
+  Calendar: { active: '📅', inactive: '📅' },
+  Pieces:   { active: '📜', inactive: '📜' },
+  Stats:    { active: '📊', inactive: '📊' },
+};
 
-function TabIcon({ name, color, size }) {
+function TabIcon({ name, focused, size }) {
+  const icon = ICONS[name];
   return (
-    <Text style={{ fontSize: size * 0.82, color, lineHeight: size, textAlign: 'center' }}>
-      {ICONS[name] || '·'}
+    <Text style={{
+      fontSize: size * 0.78,
+      lineHeight: size,
+      textAlign: 'center',
+      opacity: focused ? 1 : 0.45,
+    }}>
+      {icon ? icon.active : '·'}
     </Text>
   );
 }
@@ -110,16 +121,20 @@ export default function App() {
             tabBarActiveTintColor:   COLOURS.navy,
             tabBarInactiveTintColor: COLOURS.textDim,
             tabBarStyle: {
-              backgroundColor: 'rgba(234,240,245,0.92)',
-              borderTopColor:  COLOURS.glassBorder,
-              borderTopWidth:  1,
-              paddingBottom:   Platform.OS === 'ios' ? 2 : 4,
+              backgroundColor: 'rgba(234,240,245,0.95)',
+              borderTopWidth: 0,
+              paddingBottom: Platform.OS === 'ios' ? 2 : 4,
+              shadowColor: COLOURS.glassShadow,
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 1,
+              shadowRadius: 16,
+              elevation: 10,
             },
             tabBarLabel: ({ focused }) => (
               <TabLabel label={route.name} focused={focused} />
             ),
-            tabBarIcon: ({ color, size }) => (
-              <TabIcon name={route.name} color={color} size={size} />
+            tabBarIcon: ({ focused, size }) => (
+              <TabIcon name={route.name} focused={focused} size={size} />
             ),
           })}
         >
