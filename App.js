@@ -222,6 +222,6 @@ const styles = StyleSheet.create({
   webStandalone:  { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', backgroundColor: COLOURS.bg },
   // Desktop
   desktopOuter:   { flex: 1, backgroundColor: COLOURS.bg },
-  desktopLayout:  { flex: 1, flexDirection: 'row' },
-  desktopContent: { flex: 1, overflow: 'hidden' },
+  desktopLayout:  { flex: 1, flexDirection: 'row', alignItems: 'stretch' },
+  desktopContent: { flex: 1, overflow: 'hidden', margin: 12, marginLeft: 0 },
 });
