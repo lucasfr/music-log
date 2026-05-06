@@ -51,7 +51,7 @@ function TabLabel({ label, focused }) {
   return (
     <Text style={{
       fontSize: 11,
-      fontWeight: focused ? '600' : '400',
+      fontFamily: 'SourceSans3-Bold',
       color: focused ? COLOURS.navy : COLOURS.textDim,
       marginBottom: 2,
     }}>
@@ -60,11 +60,13 @@ function TabLabel({ label, focused }) {
   );
 }
 
-if (Platform.OS === 'web' && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-  });
-}
+const isStandalone =
+  Platform.OS === 'web' &&
+  typeof window !== 'undefined' &&
+  (
+    window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches
+  );
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -83,6 +85,14 @@ export default function App() {
       return () => clearTimeout(t);
     }
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+      });
+    }
+  }, []);
 
   const { sessions, save: saveSession, remove: deleteSession } = useSessions();
   const { compositions, save: saveComp, remove: deleteComp }   = useCompositions();
@@ -123,7 +133,10 @@ export default function App() {
             tabBarStyle: {
               backgroundColor: 'rgba(234,240,245,0.95)',
               borderTopWidth: 0,
-              paddingBottom: Platform.OS === 'ios' ? 2 : 4,
+              position: 'absolute',
+              height: Platform.OS === 'web' ? 92 : 72 + (Platform.OS === 'ios' ? 20 : 0),
+              paddingTop: 10,
+              paddingBottom: Platform.OS === 'web' ? 20 : Platform.OS === 'ios' ? 20 : 8,
               shadowColor: COLOURS.glassShadow,
               shadowOffset: { width: 0, height: -4 },
               shadowOpacity: 1,
@@ -179,15 +192,20 @@ export default function App() {
     <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
       <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
       {Platform.OS === 'web' ? (
-        <View style={styles.webOuter}>
-          <View style={styles.webInner}>{content}</View>
-        </View>
+        isStandalone ? (
+          <View style={styles.webStandalone}>{content}</View>
+        ) : (
+          <View style={styles.webOuter}>
+            <View style={styles.webInner}>{content}</View>
+          </View>
+        )
       ) : content}
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  webOuter: { flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center', minHeight: '100dvh' },
-  webInner: { flex: 1, width: '100%', maxWidth: 520, overflow: 'hidden' },
+  webOuter:      { flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center' },
+  webInner:      { flex: 1, width: '100%', maxWidth: 520, overflow: 'hidden' },
+  webStandalone: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', backgroundColor: COLOURS.bg },
 });
