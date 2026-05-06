@@ -83,7 +83,7 @@ function DayDots({ hasPractice, hasLesson }) {
 function FAB({ onPractice, onLesson }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
+    <View style={{ position: 'absolute', bottom: Platform.OS === 'web' ? 24 : Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
       {expanded && (
         <>
           <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
@@ -283,8 +283,9 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
     else                                                          setDetailSession(daySessions[0]);
   }
 
-  const W     = isDesktop ? 380 : Dimensions.get('window').width;
-  const cellW = Math.floor((Math.min(W, 520) - 32) / 7);
+  const [leftColWidth, setLeftColWidth] = useState(420);
+  const W     = isDesktop ? leftColWidth : Dimensions.get('window').width;
+  const cellW = Math.floor((Math.min(W, 800) - 32 - 224) / 7);
   const cellH = 58;
 
   // Nav bar rendered above the grid
@@ -327,8 +328,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
     return (
       <View style={{ flex: 1, flexDirection: 'row' }}>
-        {/* Left: calendar — full height card starting at left edge */}
-        <View style={{
+        <View onLayout={e => setLeftColWidth(e.nativeEvent.layout.width)} style={{
           flex: 1,
           marginTop: 12,
           marginBottom: 12,
