@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:web": "expo export --platform web && cp web/service-worker.js dist/service-worker.js && cp assets/apple-touch-icon.png dist/apple-touch-icon.png && cp assets/apple-touch-icon-152.png dist/apple-touch-icon-152.png && cp assets/apple-touch-icon-120.png dist/apple-touch-icon-120.png"
+    "build:web": "expo export --platform web && node patch-dist.js && cp web/service-worker.js dist/service-worker.js && cp assets/apple-touch-icon.png dist/apple-touch-icon.png && cp assets/apple-touch-icon-152.png dist/apple-touch-icon-152.png && cp assets/apple-touch-icon-120.png dist/apple-touch-icon-120.png"
   },
   "dependencies": {
     "expo": "~54.0.33",
