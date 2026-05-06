@@ -500,10 +500,10 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   if (isDesktop) {
     return (
       <View style={{ flex: 1 }}>
-        {/* Full-width glass card */}
+        {/* Glass card — left column only */}
         <View style={{
           position: 'absolute',
-          left: 0, right: 12, top: 12, bottom: 12,
+          left: 0, right: '50%', top: 12, bottom: 12,
           borderRadius: 20,
           backgroundColor: 'rgba(255,255,255,0.28)',
           borderWidth: 1,
