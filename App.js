@@ -188,6 +188,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  webOuter: { flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center' },
+  webOuter: { flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center', minHeight: '100dvh' },
   webInner: { flex: 1, width: '100%', maxWidth: 520, overflow: 'hidden' },
 });
