@@ -421,17 +421,22 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
       {expanded && (
         <View style={{ backgroundColor: 'rgba(255,255,255,0.30)' }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: 'row' }}>
-              {TABS.map(t => (
-                <TouchableOpacity key={t} onPress={() => setTab(t)}
-                  style={{ paddingVertical: 11, paddingHorizontal: 16, borderBottomWidth: 2, borderBottomColor: tab === t ? COLOURS.navy : 'transparent' }}>
-                  <Text style={{ fontFamily: tab === t ? 'Lato-Bold' : 'Lato', fontSize: 13, color: tab === t ? COLOURS.navy : COLOURS.textMuted }}>
-                    {t}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ padding: 10, gap: 6, flexDirection: 'row' }}>
+            {TABS.map(t => (
+              <TouchableOpacity key={t} onPress={() => setTab(t)} activeOpacity={0.75}
+                style={{
+                  paddingVertical: 6, paddingHorizontal: 14,
+                  borderRadius: RADIUS.pill,
+                  backgroundColor: tab === t ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+                  shadowColor: tab === t ? 'rgba(9,99,126,0.3)' : COLOURS.glassShadow,
+                  shadowOffset: { width: 0, height: tab === t ? 3 : 1 },
+                  shadowOpacity: 1, shadowRadius: tab === t ? 8 : 4, elevation: tab === t ? 3 : 1,
+                }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: tab === t ? '#fff' : COLOURS.textMuted }}>
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </ScrollView>
 
           <View style={{ padding: 14 }}>
