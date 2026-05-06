@@ -40,22 +40,30 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
 
           {/* Summary chips */}
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#8A1010' }}>🎹 practice</Text>
+            </View>
             {session.duration ? (
-              <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accentLight, borderWidth: 1, borderColor: COLOURS.glassBorder }}>
-                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{session.duration} min</Text>
+              <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {session.duration} min</Text>
               </View>
             ) : null}
-            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: '#fff' }}>
-                {session.energy > 0 ? `+${session.energy}` : session.energy} · {energyLabel}
+            <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>
+                ⚡ {session.energy > 0 ? `+${session.energy}` : session.energy} · {energyLabel}
               </Text>
             </View>
+            {session.enjoyment ? (
+              <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>❤️ {session.enjoyment}/5</Text>
+              </View>
+            ) : null}
           </View>
 
           {/* Technique segments */}
           {techSegs.length > 0 && (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Technique</Text>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
               {techSegs.map(seg => (
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 12 }}>
                   <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}{seg.duration ? ` · ${seg.duration}m` : ''}</Text>
@@ -86,12 +94,12 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
           {/* Repertoire segments */}
           {repSegs.length > 0 && (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Repertoire</Text>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
               {repSegs.map(seg => {
                 const name = seg.compositionId ? compName(seg.compositionId) : seg.title;
                 return (
                   <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginBottom: 12 }}>
-                    <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.text }}>{name || 'Piece'}{seg.duration ? ` · ${seg.duration}m` : ''}</Text>
+                    <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 15, color: COLOURS.text }}>📜 {name || 'Piece'}{seg.duration ? ` · ${seg.duration}m` : ''}</Text>
                     {seg.section ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                     {seg.notes ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                     {(seg.challenges || []).length > 0 && (
@@ -120,15 +128,15 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
 
           {/* Wins + focus */}
           {session.wins ? (
-            <View style={{ marginBottom: 16, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Wins</Text>
+            <View style={{ marginBottom: 16, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
               <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.wins}</Text>
             </View>
           ) : null}
 
           {session.tomorrowFocus ? (
-            <View style={{ marginBottom: 20, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder }}>
-              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Next focus</Text>
+            <View style={{ marginBottom: 20, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
               <Text style={{ fontFamily: 'SourceSans3', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text>
             </View>
           ) : null}

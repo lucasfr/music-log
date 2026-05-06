@@ -65,16 +65,16 @@ export default function StatsScreen({ sessions, compositions }) {
   const barH = 72;
 
   const statItems = [
-    { value: Math.round(totalMin), label: 'minutes this month' },
-    { value: last30.length,        label: 'sessions this month' },
-    { value: streak,               label: 'day streak' },
-    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy' },
+    { value: Math.round(totalMin), label: 'minutes practised', emoji: '⏱' },
+    { value: last30.length,        label: 'sessions',           emoji: '🎹' },
+    { value: streak,               label: 'day streak',         emoji: '🔥' },
+    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy', emoji: '⚡' },
   ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        <SectionTitle style={{ marginTop: 4 }}>Overview</SectionTitle>
+        <SectionTitle style={{ marginTop: 4 }}>📊 Overview</SectionTitle>
 
         {/* Stat grid */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
@@ -86,8 +86,6 @@ export default function StatsScreen({ sessions, compositions }) {
               style={{
                 width: (W - 10) / 2,
                 borderRadius: RADIUS.md,
-                borderWidth: 1,
-                borderColor: COLOURS.glassBorder,
                 overflow: 'hidden',
                 shadowColor: COLOURS.glassShadow,
                 shadowOffset: { width: 0, height: 3 },
@@ -97,6 +95,7 @@ export default function StatsScreen({ sessions, compositions }) {
               }}
             >
               <View style={{ backgroundColor: COLOURS.glass, padding: 16 }}>
+                <Text style={{ fontSize: 22, marginBottom: 4 }}>{item.emoji}</Text>
                 <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 32, color: COLOURS.navy }}>{item.value}</Text>
                 <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{item.label}</Text>
               </View>
@@ -104,7 +103,7 @@ export default function StatsScreen({ sessions, compositions }) {
           ))}
         </View>
 
-        <SectionTitle>Last 14 days</SectionTitle>
+        <SectionTitle>📅 Last 14 days</SectionTitle>
         <GlassCard style={{ paddingBottom: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barH + 18, gap: 3 }}>
             {last14.map(d => (
@@ -123,12 +122,12 @@ export default function StatsScreen({ sessions, compositions }) {
 
         {topPieces.length > 0 && (
           <>
-            <SectionTitle style={{ marginTop: 8 }}>Most practiced (30 days)</SectionTitle>
+            <SectionTitle style={{ marginTop: 8 }}>📜 Most practised (30 days)</SectionTitle>
             {topPieces.map(([name, count]) => (
               <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 5 }}>{name}</Text>
-                  <View style={{ height: 5, backgroundColor: COLOURS.glassBorder, borderRadius: 3 }}>
+                  <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 5 }}>📜 {name}</Text>
+                  <View style={{ height: 5, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3 }}>
                     <View style={{ height: '100%', width: `${(count / topPieces[0][1]) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
                   </View>
                 </View>
@@ -138,7 +137,7 @@ export default function StatsScreen({ sessions, compositions }) {
           </>
         )}
 
-        <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
+        <SectionTitle style={{ marginTop: 8 }}>🎧 Library</SectionTitle>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           {STATUS_OPTIONS.map(s => (
             <BlurView
@@ -146,14 +145,16 @@ export default function StatsScreen({ sessions, compositions }) {
               intensity={32}
               tint="light"
               style={{
-                flex: 1, borderRadius: RADIUS.md, borderWidth: 1,
-                borderColor: COLOURS.glassBorder, overflow: 'hidden',
+                flex: 1, borderRadius: RADIUS.md, overflow: 'hidden',
                 shadowColor: COLOURS.glassShadow,
                 shadowOffset: { width: 0, height: 3 },
                 shadowOpacity: 1, shadowRadius: 8, elevation: 3,
               }}
             >
               <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
+                <Text style={{ fontSize: 18, marginBottom: 4 }}>
+                  {s === 'learning' ? '🌱' : s === 'consolidating' ? '💧' : '✨'}
+                </Text>
                 <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 30, color: STATUS_TEXT_COLOURS[s] || COLOURS.navy }}>
                   {compositions.filter(c => c.status === s).length}
                 </Text>
