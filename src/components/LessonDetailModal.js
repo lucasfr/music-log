@@ -70,7 +70,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLOURS.glassBorder,
                   }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: item.feedback ? 10 : 0 }}>
-                      <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>{name || 'Piece'}</Text>
+                      <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name || 'Piece'}</Text>
                       {item.isNew && (
                         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}>
                           <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: '#5C2D6E' }}>new</Text>
