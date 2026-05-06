@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const file = path.join(__dirname, '..', 'dist', 'index.html');
+const file = path.join(__dirname, 'dist', 'index.html');
 let html = fs.readFileSync(file, 'utf8');
 
 // 1. Fix viewport — add viewport-fit=cover
