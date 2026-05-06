@@ -622,7 +622,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, marginTop: 4 }}>
           <SectionTitle style={{ marginBottom: 0 }}>Compositions</SectionTitle>
           <Btn label="+ Add piece" variant="primary" onPress={() => setModal(blank())} />

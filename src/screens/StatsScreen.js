@@ -72,7 +72,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 40 }}>
         <SectionTitle style={{ marginTop: 4 }}>📊 Overview</SectionTitle>
 
         {/* Stat row — 4 equal tiles */}
