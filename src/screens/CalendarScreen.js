@@ -167,7 +167,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20, marginTop: 4 }}>
-          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>Calendar</Text>
+          <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>📅 Calendar</Text>
           {streak > 0 && (
             <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:4 }}>
               <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>{streak} day streak 🔥</Text>
@@ -183,12 +183,12 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           }}>
             <View style={{ backgroundColor: COLOURS.glass, padding: 12, flexDirection: 'row' }}>
               {[
-                { value: monthSessions.length, label: 'sessions' },
-                { value: monthLessons.length,  label: 'lessons' },
-                { value: `${Math.round(monthSessions.reduce((a, s) => a + (Number(s.duration) || 0), 0))}m`, label: 'practice' },
+                { value: monthSessions.length, label: '🎹 sessions' },
+                { value: monthLessons.length,  label: '🎓 lessons' },
+                { value: `${Math.round(monthSessions.reduce((a, s) => a + (Number(s.duration) || 0), 0))}m`, label: '⏱ practice' },
                 { value: monthSessions.length
                     ? (monthSessions.reduce((a, s) => a + Number(s.energy), 0) / monthSessions.length).toFixed(1)
-                    : '—', label: 'avg ⚡' },
+                    : '—', label: '⚡ avg energy' },
               ].map((stat, i) => (
                 <View key={i} style={{ flex: 1, alignItems: 'center', borderRightWidth: i < 3 ? 1 : 0, borderRightColor: COLOURS.glassBorderSubtle }}>
                   <Text style={{ fontFamily: 'LibreBaskerville', fontSize: 20, color: COLOURS.navy }}>{stat.value}</Text>
@@ -301,18 +301,18 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         </BlurView>
 
         {/* Legend */}
-        <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
+          <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: COLOURS.red }} />
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Practice</Text>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>🎹 Practice</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: COLOURS.amber }} />
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>🎓 Lesson</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: COLOURS.red }}>+1</Text>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Energy score</Text>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>⚡ Energy</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Text style={{ fontSize: 10 }}>❤️</Text>
