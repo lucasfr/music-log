@@ -225,9 +225,11 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
           <Field label="Felt difficulty">
             <ZeldaBar emoji="🎵" value={item.feltDifficulty || 0} onChange={v => f('feltDifficulty', v)} />
           </Field>
-          <Field label="Liking">
-            <ZeldaBar emoji="⭐" value={item.liking || 0} onChange={v => f('liking', v)} />
-          </Field>
+          {!isTech && (
+            <Field label="Liking">
+              <ZeldaBar emoji="⭐" value={item.liking || 0} onChange={v => f('liking', v)} />
+            </Field>
+          )}
           <Field label="Challenges">
             <TagCloud tags={CHALLENGE_TAGS} selected={item.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
