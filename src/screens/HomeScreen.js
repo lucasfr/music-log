@@ -199,6 +199,7 @@ function FAB({ onPractice, onLesson }) {
 export default function HomeScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onDelete, onDeleteLesson }) {
   const today = todayISO();
   const [logModalDate,    setLogModalDate]    = useState(null);
+  const [logModalSession, setLogModalSession] = useState(null);
   const [lessonModalDate, setLessonModalDate] = useState(null);
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
@@ -294,11 +295,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       />
 
       <LogModal
-        visible={!!logModalDate}
-        initialDate={logModalDate || ''}
+        visible={!!logModalDate || !!logModalSession}
+        initialDate={logModalSession?.date || logModalDate || ''}
+        initialSession={logModalSession}
         compositions={compositions}
-        onSave={s => { onSave(s); setLogModalDate(null); }}
-        onClose={() => setLogModalDate(null)}
+        onSave={s => { onSave(s); setLogModalDate(null); setLogModalSession(null); }}
+        onClose={() => { setLogModalDate(null); setLogModalSession(null); }}
       />
       <LessonModal
         visible={!!lessonModalDate}
@@ -313,6 +315,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         compositions={compositions}
         onClose={() => setDetailSession(null)}
         onDelete={id => { onDelete(id); setDetailSession(null); }}
+        onEdit={s => { setDetailSession(null); setLogModalSession(s); }}
       />
       <LessonDetailModal
         visible={!!detailLesson}

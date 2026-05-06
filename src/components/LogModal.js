@@ -51,10 +51,10 @@ function ZeldaBar({ label, emoji, value, onChange }) {
 function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
 export function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
-export function LogModal({ visible, onClose, onSave, compositions, initialDate }) {
+export function LogModal({ visible, onClose, onSave, compositions, initialDate, initialSession }) {
   const [date, setDate]           = useState(initialDate || '');
-  const [energyBar, setEnergyBar] = useState(0);   // 1–5, 0=unset
-  const [enjoyment, setEnjoyment] = useState(0);   // 1–5, 0=unset
+  const [energyBar, setEnergyBar] = useState(0);
+  const [enjoyment, setEnjoyment] = useState(0);
   const [duration, setDuration]   = useState('');
   const [segments, setSegments]   = useState([]);
   const [wins, setWins]           = useState('');
@@ -62,15 +62,25 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
 
   useEffect(() => {
     if (visible) {
-      setDate(initialDate || '');
-      setEnergyBar(0);
-      setEnjoyment(0);
-      setDuration('');
-      setSegments([]);
-      setWins('');
-      setFocus('');
+      if (initialSession) {
+        setDate(initialSession.date || '');
+        setEnergyBar(energyValueToBar(initialSession.energy));
+        setEnjoyment(initialSession.enjoyment || 0);
+        setDuration(initialSession.duration ? String(initialSession.duration) : '');
+        setSegments(initialSession.segments || []);
+        setWins(initialSession.wins || '');
+        setFocus(initialSession.tomorrowFocus || '');
+      } else {
+        setDate(initialDate || '');
+        setEnergyBar(0);
+        setEnjoyment(0);
+        setDuration('');
+        setSegments([]);
+        setWins('');
+        setFocus('');
+      }
     }
-  }, [visible, initialDate]);
+  }, [visible, initialDate, initialSession]);
 
   function addSegment(type) {
     setSegments(s => [...s, { id: uid(), type, title: '', notes: '', challenges: [], progress: [] }]);
@@ -82,11 +92,11 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate }
     if (energyBar === 0) { Alert.alert('Energy required', 'Please set an energy level before saving.'); return; }
     const totalFromSegs = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
     const session = {
-      id: uid(), date, energy: energyBarToValue(energyBar),
+      id: initialSession?.id || uid(), date, energy: energyBarToValue(energyBar),
       enjoyment: enjoyment || null,
       duration: Number(duration) || totalFromSegs || null,
       segments, wins, tomorrowFocus: focus,
-      createdAt: new Date().toISOString(),
+      createdAt: initialSession?.createdAt || new Date().toISOString(),
     };
     onSave(session);
     onClose();
