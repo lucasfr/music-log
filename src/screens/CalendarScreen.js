@@ -323,7 +323,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
       </ScrollView>
 
       {/* FAB */}
-      <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 100 : 80, right: 20 }}>
+      <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 140 : 120, right: 20 }}>
         <TouchableOpacity
           onPress={() => setLogModalDate(today)}
           activeOpacity={0.85}
