@@ -12,15 +12,12 @@ const CELL_W = 36;
 const CELLS  = 5;
 
 function ZeldaBar({ label, emoji, value, onChange }) {
-  const containerRef = useRef(null);
-  const containerX   = useRef(0);
-  const lastValue    = useRef(value);
+  const lastValue = useRef(value);
 
   lastValue.current = value;
 
   function valueFromX(x) {
-    const offset = x - containerX.current;
-    const raw    = Math.floor(offset / CELL_W) + 1;
+    const raw = Math.floor(x / CELL_W) + 1;
     return Math.max(1, Math.min(CELLS, raw));
   }
 
@@ -29,10 +26,10 @@ function ZeldaBar({ label, emoji, value, onChange }) {
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder:  () => true,
       onPanResponderGrant: e => {
-        const v = valueFromX(e.nativeEvent.pageX);
+        const v = valueFromX(e.nativeEvent.locationX);
         onChange(v === lastValue.current ? 0 : v);
       },
-      onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.pageX)),
+      onPanResponderMove: e => onChange(valueFromX(e.nativeEvent.locationX)),
     })
   ).current;
 
@@ -40,8 +37,6 @@ function ZeldaBar({ label, emoji, value, onChange }) {
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View
-          ref={containerRef}
-          onLayout={() => containerRef.current?.measure((_x, _y, _w, _h, pageX) => { containerX.current = pageX; })}
           {...panResponder.panHandlers}
           style={{ flexDirection: 'row', gap: 2, cursor: 'default' }}
         >
