@@ -8,7 +8,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { GlassCard, SectionTitle, Btn, TagCloud } from '../components/UI';
 import { Field, TextF, NumberF, SelectF } from '../components/Form';
-import { TECH_GROUPS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
+import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
 import { uid } from '../utils';
 
 // ─── Zelda bar ────────────────────────────────────────────────────────────────
@@ -45,6 +45,63 @@ function ZeldaBar({ emoji, value, onChange }) {
           <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
         </TouchableOpacity>
       )}
+    </View>
+  );
+}
+
+// ─── Scales picker (shared with SegmentEditor) ───────────────────────────────────────
+
+function ScalesPicker({ selected = [], onChange }) {
+  const [filter, setFilter] = useState('');
+  const [showAll, setShowAll] = useState(false);
+
+  const filtered = SCALE_OPTIONS.filter(s =>
+    filter.length === 0 || s.toLowerCase().includes(filter.toLowerCase())
+  );
+  const visible = showAll || filter.length > 0 ? filtered : filtered.slice(0, 16);
+  const hasMore = !showAll && filter.length === 0 && filtered.length > 16;
+
+  function toggle(scale) {
+    onChange(selected.includes(scale)
+      ? selected.filter(s => s !== scale)
+      : [...selected, scale]
+    );
+  }
+
+  return (
+    <View>
+      {selected.length > 0 && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+          {selected.map(s => (
+            <TouchableOpacity key={s} onPress={() => toggle(s)} activeOpacity={0.75}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)', shadowColor: COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{s}</Text>
+              <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+      <TextF value={filter} onChange={setFilter} placeholder="Search scales…" style={{ marginBottom: 8 }} />
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+        {visible.map(s => {
+          const active = selected.includes(s);
+          return (
+            <TouchableOpacity key={s} onPress={() => toggle(s)} activeOpacity={0.75}
+              style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill,
+                backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+                shadowOffset: { width: 0, height: active ? 3 : 1 }, shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1 }}>
+              <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
+            </TouchableOpacity>
+          );
+        })}
+        {hasMore && (
+          <TouchableOpacity onPress={() => setShowAll(true)} activeOpacity={0.75}
+            style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}>
+            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -120,19 +177,28 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
 
           {isTech ? (
             <>
-              <Field label="Technique group">
+              <Field label="🎹 Technique group">
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   {TECH_GROUPS.map(g => {
                     const active = item.group === g;
                     return (
                       <TouchableOpacity key={g} onPress={() => f('group', g)} activeOpacity={0.75}
-                        style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: active ? COLOURS.steel : COLOURS.glassBorder, backgroundColor: active ? COLOURS.accent2Light : COLOURS.glass }}>
+                        style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
+                          backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                          shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+                          shadowOffset: { width: 0, height: active ? 3 : 1 }, shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1 }}>
                         <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
                       </TouchableOpacity>
                     );
                   })}
                 </View>
               </Field>
+
+              {(item.group === 'Scales' || item.group === 'Arpeggios') && (
+                <Field label={`🎵 ${item.group} practiced`}>
+                  <ScalesPicker selected={item.scales || []} onChange={v => f('scales', v)} />
+                </Field>
+              )}
               <Field label="Label (optional)">
                 <TextF value={item.title || ''} onChange={v => f('title', v)} placeholder="e.g. Hanon No. 1" />
               </Field>

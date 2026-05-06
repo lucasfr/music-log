@@ -12,8 +12,32 @@ export const TECH_GROUPS = [
   'Hanon',
   'Scales',
   'Arpeggios',
+  'Chord work',
   'Sight-reading',
   'Technical exercise',
+];
+
+export const SCALE_OPTIONS = [
+  // Major
+  'C major', 'G major', 'D major', 'A major', 'E major', 'B major',
+  'F major', 'Bb major', 'Eb major', 'Ab major', 'Db major', 'F# major',
+  // Natural minor
+  'A minor', 'E minor', 'B minor', 'F# minor', 'C# minor', 'G# minor',
+  'D minor', 'G minor', 'C minor', 'F minor', 'Bb minor', 'Eb minor',
+  // Harmonic minor
+  'A harmonic minor', 'D harmonic minor', 'G harmonic minor',
+  'E harmonic minor', 'B harmonic minor', 'C harmonic minor',
+  // Melodic minor
+  'A melodic minor', 'D melodic minor', 'G melodic minor',
+  // Modes
+  'C Dorian', 'D Dorian', 'G Dorian',
+  'C Mixolydian', 'G Mixolydian', 'D Mixolydian',
+  'A Phrygian', 'E Phrygian',
+  // Pentatonic
+  'C pentatonic', 'G pentatonic', 'D pentatonic', 'A pentatonic',
+  'A minor pentatonic', 'D minor pentatonic', 'E minor pentatonic',
+  // Other
+  'C chromatic', 'Whole tone', 'Diminished', 'Augmented',
 ];
 
 export const CHALLENGE_TAGS = [

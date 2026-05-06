@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
-import { TECH_GROUPS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
+import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
 
 // ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
 
@@ -47,6 +47,89 @@ function ZeldaBar({ label, emoji, value, onChange }) {
         {value > 0 && (
           <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// ─── Scales / arpeggios picker ─────────────────────────────────────────────
+// Multi-select with search filter and + to add more
+
+function ScalesPicker({ selected = [], onChange }) {
+  const [filter, setFilter] = useState('');
+  const [showAll, setShowAll] = useState(false);
+
+  const filtered = SCALE_OPTIONS.filter(s =>
+    filter.length === 0 || s.toLowerCase().includes(filter.toLowerCase())
+  );
+  const visible = showAll || filter.length > 0 ? filtered : filtered.slice(0, 16);
+  const hasMore = !showAll && filter.length === 0 && filtered.length > 16;
+
+  function toggle(scale) {
+    onChange(selected.includes(scale)
+      ? selected.filter(s => s !== scale)
+      : [...selected, scale]
+    );
+  }
+
+  return (
+    <View>
+      {/* Selected chips */}
+      {selected.length > 0 && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+          {selected.map(s => (
+            <TouchableOpacity
+              key={s}
+              onPress={() => toggle(s)}
+              activeOpacity={0.75}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)', shadowColor: COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
+            >
+              <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.navy }}>{s}</Text>
+              <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* Search */}
+      <TextF
+        value={filter}
+        onChange={setFilter}
+        placeholder="Search scales…"
+        style={{ marginBottom: 8 }}
+      />
+
+      {/* Options grid */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+        {visible.map(s => {
+          const active = selected.includes(s);
+          return (
+            <TouchableOpacity
+              key={s}
+              onPress={() => toggle(s)}
+              activeOpacity={0.75}
+              style={{
+                paddingHorizontal: 10, paddingVertical: 5,
+                borderRadius: RADIUS.pill,
+                backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+                shadowOffset: { width: 0, height: active ? 3 : 1 },
+                shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+              }}
+            >
+              <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
+            </TouchableOpacity>
+          );
+        })}
+        {hasMore && (
+          <TouchableOpacity
+            onPress={() => setShowAll(true)}
+            activeOpacity={0.75}
+            style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
+          >
+            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -126,9 +209,11 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                         activeOpacity={0.75}
                         style={{
                           paddingHorizontal: 12, paddingVertical: 6,
-                          borderRadius: RADIUS.pill, borderWidth: 1,
-                          borderColor: active ? COLOURS.steel : COLOURS.glassBorder,
-                          backgroundColor: active ? COLOURS.accent2Light : COLOURS.glass,
+                          borderRadius: RADIUS.pill,
+                          backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                          shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+                          shadowOffset: { width: 0, height: active ? 3 : 1 },
+                          shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
                         }}
                       >
                         <Text style={{ fontFamily: active ? 'SourceSans3-Bold' : 'SourceSans3', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>
@@ -139,6 +224,15 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                   })}
                 </View>
               </Field>
+
+              {(segment.group === 'Scales' || segment.group === 'Arpeggios') && (
+                <Field label={`🎵 ${segment.group} practiced`}>
+                  <ScalesPicker
+                    selected={segment.scales || []}
+                    onChange={v => field('scales', v)}
+                  />
+                </Field>
+              )}
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}>
                   <Field label="🏷️ Label (optional)">
