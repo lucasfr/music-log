@@ -226,7 +226,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           />
           <View>
             <Text style={{ fontFamily: 'LibreBaskerville-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
-              music<Text style={{ color: COLOURS.lessonText }}>.</Text>log
+              music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
             </Text>
             <Text style={{ fontFamily: 'SourceSans3', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginTop: 2 }}>
               {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
