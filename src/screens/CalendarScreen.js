@@ -311,8 +311,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>🎓 Lesson</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 10, color: COLOURS.red }}>+1</Text>
-            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>⚡ Energy</Text>
+            <Text style={{ fontSize: 10 }}>⚡</Text>
+            <Text style={{ fontFamily: 'SourceSans3', fontSize: 11, color: COLOURS.textDim }}>Energy</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Text style={{ fontSize: 10 }}>❤️</Text>
