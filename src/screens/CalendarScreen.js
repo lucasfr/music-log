@@ -329,7 +329,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
       <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* Left: calendar — full height card starting at left edge */}
         <View style={{
-          width: 420,
+          flex: 1,
           marginTop: 12,
           marginBottom: 12,
           borderRadius: 20,
