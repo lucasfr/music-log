@@ -199,33 +199,29 @@ const glass = {
     borderRadius: RADIUS.md,
     overflow: 'hidden',
     marginBottom: 12,
-    shadowColor: 'rgba(9,99,126,0.10)',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: 'rgba(9,99,126,0.08)',
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowRadius: 10,
+    elevation: 2,
   },
   inner: {
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.80)',
+    backgroundColor: 'rgba(255,255,255,0.45)',
     padding: 14,
   },
 };
 
-function GlassBtn({ label, onPress, color, danger }) {
+function GlassBtn({ label, onPress, color, danger, small }) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.75} style={{
-      paddingHorizontal: 16, paddingVertical: 8,
+      paddingHorizontal: small ? 10 : 16, paddingVertical: small ? 5 : 8,
       borderRadius: RADIUS.pill,
-      backgroundColor: danger ? 'rgba(214,40,40,0.08)' : 'rgba(255,255,255,0.60)',
-      borderWidth: 1,
-      borderColor: danger ? 'rgba(214,40,40,0.20)' : 'rgba(255,255,255,0.80)',
-      shadowColor: danger ? 'rgba(214,40,40,0.12)' : 'rgba(9,99,126,0.10)',
+      backgroundColor: danger ? 'rgba(214,40,40,0.07)' : 'rgba(255,255,255,0.55)',
+      shadowColor: danger ? 'rgba(214,40,40,0.10)' : 'rgba(9,99,126,0.08)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 1, shadowRadius: 6, elevation: 2,
     }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: color || COLOURS.navy }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: small ? 11 : 13, color: color || COLOURS.navy }}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -361,7 +357,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
           </BlurView>
         ) : null}
 
-        <GlassBtn label="Delete session" danger onPress={() => Alert.alert('Delete session?', fmtDate(session.date), [
+        <GlassBtn label="Delete session" danger small onPress={() => Alert.alert('Delete session?', fmtDate(session.date), [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Delete', style: 'destructive', onPress: () => onDeleteSession(session.id) },
         ])} color={COLOURS.danger} />
@@ -425,7 +421,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
           </BlurView>
         ) : null}
 
-        <GlassBtn label="Delete lesson" danger onPress={() => Alert.alert('Delete lesson?', fmtDate(lesson.date), [
+        <GlassBtn label="Delete lesson" danger small onPress={() => Alert.alert('Delete lesson?', fmtDate(lesson.date), [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Delete', style: 'destructive', onPress: () => onDeleteLesson(lesson.id) },
         ])} color={COLOURS.danger} />
