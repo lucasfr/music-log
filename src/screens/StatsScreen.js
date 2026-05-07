@@ -82,7 +82,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
             <View key={i} style={{ flex: 1 }}>
               <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                 <View style={{ backgroundColor: COLOURS.glass, padding: 12, alignItems: 'center' }}>
-                  <Ionicons name={item.icon} size={18} color={COLOURS.steel} style={{ marginBottom: 6 }} />
+                  <Ionicons name={item.icon} size={44} color={COLOURS.steel} style={{ marginBottom: 8 }} />
                   <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy, lineHeight: 26 }}>{item.value}</Text>
                   <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginTop: 3, textAlign: 'center' }}>{item.label}</Text>
                 </View>
