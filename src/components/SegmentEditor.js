@@ -182,7 +182,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
         <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()} style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
           {isTech ? (
             <>
-              <Field label="Technique group">
+              <Field label="Technique group" icon="fitness-outline">
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   {TECH_GROUPS.map(g => {
                     const active = segment.group === g;
@@ -211,13 +211,13 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
 
               {(segment.group === 'Scales' || segment.group === 'Arpeggios') && (
                 <>
-                  <Field label={`${segment.group} practised`}>
+                  <Field label={`${segment.group} practised`} icon="musical-notes-outline">
                     <ScalesPicker
                       selected={segment.scales || []}
                       onChange={v => field('scales', v)}
                     />
                   </Field>
-                  <Field label="Octaves">
+                  <Field label="Octaves" icon="layers-outline">
                     <View style={{ flexDirection: 'row', gap: 8 }}>
                       {[1, 2].map(n => {
                         const active = (segment.octaves || 1) === n;
@@ -247,7 +247,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
               )}
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}>
-                  <Field label="Label (optional)">
+                  <Field label="Label (optional)" icon="pricetag-outline">
                     <TextF value={segment.title || ''} onChange={v => field('title', v)} placeholder="e.g. Hanon No. 1" />
                   </Field>
                 </View>
@@ -259,7 +259,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
               </View>
 
               {/* Optional library link */}
-              <Field label="Library piece (optional)">
+              <Field label="Library piece (optional)" icon="library-outline">
                 {techLinked ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: 'rgba(255,255,255,0.62)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
@@ -310,31 +310,31 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
                   <TextF value={segment.title || ''} onChange={v => field('title', v)} placeholder="Title" />
                 </Field>
               )}
-              <Field label="Section practised">
+              <Field label="Section practised" icon="git-branch-outline">
                 <TextF value={segment.section || ''} onChange={v => field('section', v)} placeholder="e.g. Bars 1–16, full piece…" />
               </Field>
             </>
           )}
 
-          <Field label="Notes">
+          <Field label="Notes" icon="create-outline">
             <TextF value={segment.notes || ''} onChange={v => field('notes', v)} placeholder="Observations, what clicked, what to work on…" multiline />
           </Field>
 
-          <Field label="Felt difficulty">
+          <Field label="Felt difficulty" icon="speedometer-outline">
             <ZeldaBar emoji="🎵" value={segment.feltDifficulty || 0} onChange={v => field('feltDifficulty', v)} />
           </Field>
 
           {!isTech && (
-            <Field label="Liking">
+            <Field label="Liking" icon="star-outline">
               <ZeldaBar emoji="⭐" value={segment.liking || 0} onChange={v => field('liking', v)} />
             </Field>
           )}
 
-          <Field label="Challenges">
+          <Field label="Challenges" icon="alert-circle-outline">
             <TagCloud tags={CHALLENGE_TAGS} selected={segment.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
 
-          <Field label="Progress" style={{ marginBottom: 0 }}>
+          <Field label="Progress" icon="checkmark-circle-outline" style={{ marginBottom: 0 }}>
             <TagCloud tags={PROGRESS_TAGS} selected={segment.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
         </TouchableOpacity>

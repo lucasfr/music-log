@@ -36,10 +36,10 @@ function fmtDisplay(iso) {
   return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function Field({ label, children, style }) {
+export function Field({ label, children, style, icon }) {
   return (
     <View style={[{ marginBottom: 14 }, style]}>
-      {label ? <Label>{label}</Label> : null}
+      {label ? <Label icon={icon}>{label}</Label> : null}
       {children}
     </View>
   );
@@ -170,7 +170,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
 
 // ─── Date picker ───────────────────────────────────────────────────────────────
 
-export function DatePickerF({ label, value, onChange }) {
+export function DatePickerF({ label, value, onChange, icon }) {
   const [open, setOpen] = React.useState(false);
   const today = todayISO();
 
@@ -282,8 +282,7 @@ export function DatePickerF({ label, value, onChange }) {
   );
 
   return (
-    <Field label={label}>
-      {/* Trigger button */}
+    <Field label={label} icon={icon}>
       <TouchableOpacity
         onPress={() => setOpen(o => !o)}
         activeOpacity={0.8}

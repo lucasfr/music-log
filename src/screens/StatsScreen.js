@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS } from '../theme';
 import { GlassCard, SectionTitle } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
@@ -64,10 +65,10 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
   const barH = 72;
 
   const statItems = [
-    { value: Math.round(totalMin), label: 'minutes practised', emoji: '⏱' },
-    { value: last30.length,        label: 'sessions',           emoji: '🎹' },
-    { value: streak,               label: 'day streak',         emoji: '🔥' },
-    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy', emoji: '⚡' },
+    { value: Math.round(totalMin), label: 'minutes practised', icon: 'time-outline' },
+    { value: last30.length,        label: 'sessions',           icon: 'musical-notes-outline' },
+    { value: streak,               label: 'day streak',         icon: 'flame-outline' },
+    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy', icon: 'flash-outline' },
   ];
 
   return (
@@ -81,7 +82,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
             <View key={i} style={{ flex: 1 }}>
               <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                 <View style={{ backgroundColor: COLOURS.glass, padding: 12, alignItems: 'center' }}>
-                  <Text style={{ fontSize: 16, marginBottom: 6 }}>{item.emoji}</Text>
+                  <Ionicons name={item.icon} size={18} color={COLOURS.steel} style={{ marginBottom: 6 }} />
                   <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy, lineHeight: 26 }}>{item.value}</Text>
                   <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginTop: 3, textAlign: 'center' }}>{item.label}</Text>
                 </View>

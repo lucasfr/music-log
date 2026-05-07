@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, SIZES, STATUS_COLOURS } from '../theme';
 
 // ─── Glass card ───────────────────────────────────────────────────────────────
@@ -62,7 +63,23 @@ export function SectionTitle({ children, style }) {
   );
 }
 
-export function Label({ children, style }) {
+export function Label({ children, style, icon }) {
+  if (icon) {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+        <Ionicons name={icon} size={12} color={COLOURS.textDim} />
+        <Text style={[{
+          fontFamily: 'Lato-Bold',
+          fontSize: SIZES.label,
+          color: COLOURS.textDim,
+          textTransform: 'uppercase',
+          letterSpacing: 0.8,
+        }, style]}>
+          {children}
+        </Text>
+      </View>
+    );
+  }
   return (
     <Text style={[{
       fontFamily: 'Lato-Bold',

@@ -124,10 +124,10 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
             <GlassCard>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
                 <View style={{ flex: 1 }}>
-                  <DatePickerF label="📅 Date" value={date} onChange={setDate} />
+                  <DatePickerF label="Date" icon="calendar-outline" value={date} onChange={setDate} />
                 </View>
                 <View style={{ width: 120 }}>
-                  <Field label={totalMin ? `⏱ ~${totalMin}m` : '⏱ Min'}>
+                  <Field label={totalMin ? `~${totalMin}m` : 'Min'} icon="time-outline">
                     <NumberF value={duration} onChange={setDuration} placeholder={totalMin ? String(totalMin) : ''} />
                   </Field>
                 </View>
@@ -181,10 +181,10 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
             ))}
 
             <GlassCard>
-              <Field label="Wins today">
+              <Field label="Wins today" icon="sparkles-outline">
                 <TextF value={wins} onChange={setWins} placeholder="What went well? Any breakthroughs?" multiline />
               </Field>
-              <Field label="Tomorrow's focus" style={{ marginBottom: 0 }}>
+              <Field label="Tomorrow's focus" icon="arrow-forward-circle-outline" style={{ marginBottom: 0 }}>
                 <TextF value={focus} onChange={setFocus} placeholder="What to prioritise next session?" multiline />
               </Field>
             </GlassCard>

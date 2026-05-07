@@ -149,7 +149,7 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
         <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
           {isTech ? (
             <>
-              <Field label="Technique group">
+              <Field label="Technique group" icon="fitness-outline">
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   {TECH_GROUPS.map(g => {
                     const active = item.group === g;
@@ -166,11 +166,11 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
                 </View>
               </Field>
               {(item.group === 'Scales' || item.group === 'Arpeggios') && (
-                <Field label={`${item.group} practised`}>
+                <Field label={`${item.group} practised`} icon="musical-notes-outline">
                   <ScalesPicker selected={item.scales || []} onChange={v => f('scales', v)} />
                 </Field>
               )}
-              <Field label="Label (optional)">
+              <Field label="Label (optional)" icon="pricetag-outline">
                 <TextF value={item.title || ''} onChange={v => f('title', v)} placeholder="e.g. Hanon No. 1" />
               </Field>
             </>
@@ -210,30 +210,30 @@ function LessonSegmentEditor({ item, onChange, onRemove, compositions }) {
                   <TextF value={item.pieceName || ''} onChange={v => f('pieceName', v)} placeholder="Title" />
                 </Field>
               )}
-              <Field label="Section worked on">
+              <Field label="Section worked on" icon="git-branch-outline">
                 <TextF value={item.section || ''} onChange={v => f('section', v)} placeholder="e.g. Bars 1–16, full piece…" />
               </Field>
             </>
           )}
 
-          <Field label="Teacher feedback">
+          <Field label="Teacher feedback" icon="chatbubble-outline">
             <TextF value={item.feedback || ''} onChange={v => f('feedback', v)} placeholder="What the teacher said about this piece…" multiline />
           </Field>
-          <Field label="Assignment">
+          <Field label="Assignment" icon="book-outline">
             <TextF value={item.assignment || ''} onChange={v => f('assignment', v)} placeholder="What to practise before next lesson…" multiline />
           </Field>
-          <Field label="Felt difficulty">
+          <Field label="Felt difficulty" icon="speedometer-outline">
             <ZeldaBar emoji="🎵" value={item.feltDifficulty || 0} onChange={v => f('feltDifficulty', v)} />
           </Field>
           {!isTech && (
-            <Field label="Liking">
+            <Field label="Liking" icon="star-outline">
               <ZeldaBar emoji="⭐" value={item.liking || 0} onChange={v => f('liking', v)} />
             </Field>
           )}
-          <Field label="Challenges">
+          <Field label="Challenges" icon="alert-circle-outline">
             <TagCloud tags={CHALLENGE_TAGS} selected={item.challenges || []} onToggle={t => toggleTag('challenges', t)} />
           </Field>
-          <Field label="Progress" style={{ marginBottom: 0 }}>
+          <Field label="Progress" icon="checkmark-circle-outline" style={{ marginBottom: 0 }}>
             <TagCloud tags={PROGRESS_TAGS} selected={item.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
         </View>
@@ -309,15 +309,15 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             <GlassCard>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 0 }}>
                 <View style={{ flex: 1 }}>
-                  <DatePickerF label="📅 Date" value={date} onChange={setDate} />
+                  <DatePickerF label="Date" icon="calendar-outline" value={date} onChange={setDate} />
                 </View>
                 <View style={{ width: 90 }}>
-                  <Field label="⏱ Min">
+                  <Field label="Min" icon="time-outline">
                     <NumberF value={duration} onChange={setDuration} />
                   </Field>
                 </View>
               </View>
-              <Field label="Teacher" style={{ marginBottom: 0 }}>
+              <Field label="Teacher" icon="person-outline" style={{ marginBottom: 0 }}>
                 <TextF value={teacher} onChange={setTeacher} placeholder="Teacher name" />
               </Field>
             </GlassCard>
@@ -366,13 +366,13 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             ))}
 
             <GlassCard>
-              <Field label="Lesson notes">
+              <Field label="Lesson notes" icon="create-outline">
                 <TextF value={overallNotes} onChange={setOverallNotes} placeholder="General observations from the lesson…" multiline />
               </Field>
-              <Field label="Wins / breakthroughs">
+              <Field label="Wins / breakthroughs" icon="sparkles-outline">
                 <TextF value={wins} onChange={setWins} placeholder="What clicked or was confirmed today…" multiline />
               </Field>
-              <Field label="Focus before next lesson" style={{ marginBottom: 0 }}>
+              <Field label="Focus before next lesson" icon="arrow-forward-circle-outline" style={{ marginBottom: 0 }}>
                 <TextF value={nextFocus} onChange={setNextFocus} placeholder="Overall priority until next lesson…" multiline />
               </Field>
             </GlassCard>
