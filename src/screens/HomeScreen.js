@@ -449,6 +449,19 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [lessonModalDate, setLessonModalDate] = useState(null);
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
+  const [rightPanel,      setRightPanel]      = useState(null); // 'detail-session' | 'detail-lesson' | 'log-session' | 'log-lesson'
+
+  function openSession(s)  { if (isDesktop) { setDetailSession(s); setDetailLesson(null); setRightPanel('detail-session'); } else setDetailSession(s); }
+  function openLesson(l)   { if (isDesktop) { setDetailLesson(l); setDetailSession(null); setRightPanel('detail-lesson'); } else setDetailLesson(l); }
+  function openLogSession(date, session) {
+    if (isDesktop) { setLogModalSession(session || null); setLogModalDate(date || today); setRightPanel('log-session'); }
+    else { setLogModalSession(session || null); setLogModalDate(date || today); }
+  }
+  function openLogLesson(date) {
+    if (isDesktop) { setLessonModalDate(date || today); setRightPanel('log-lesson'); }
+    else setLessonModalDate(date || today);
+  }
+  function closeRight() { setRightPanel(null); setDetailSession(null); setDetailLesson(null); setLogModalDate(null); setLogModalSession(null); setLessonModalDate(null); }
 
   const todaySessions = useMemo(() => sessions.filter(s => s.date === today), [sessions, today]);
   const todayLessons  = useMemo(() => (lessons || []).filter(l => l.date === today), [lessons, today]);
@@ -464,23 +477,23 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
 
   const modals = (
     <>
-      <LogModal
-        visible={!!logModalDate || !!logModalSession}
-        initialDate={logModalSession?.date || logModalDate || ''}
-        initialSession={logModalSession}
-        compositions={compositions}
-        onSave={s => { onSave(s); setLogModalDate(null); setLogModalSession(null); }}
-        onClose={() => { setLogModalDate(null); setLogModalSession(null); }}
-      />
-      <LessonModal
-        visible={!!lessonModalDate}
-        initialDate={lessonModalDate || ''}
-        compositions={compositions}
-        onSave={l => { onSaveLesson(l); setLessonModalDate(null); }}
-        onClose={() => setLessonModalDate(null)}
-      />
       {!isDesktop && (
         <>
+          <LogModal
+            visible={!!logModalDate || !!logModalSession}
+            initialDate={logModalSession?.date || logModalDate || ''}
+            initialSession={logModalSession}
+            compositions={compositions}
+            onSave={s => { onSave(s); setLogModalDate(null); setLogModalSession(null); }}
+            onClose={() => { setLogModalDate(null); setLogModalSession(null); }}
+          />
+          <LessonModal
+            visible={!!lessonModalDate}
+            initialDate={lessonModalDate || ''}
+            compositions={compositions}
+            onSave={l => { onSaveLesson(l); setLessonModalDate(null); }}
+            onClose={() => setLessonModalDate(null)}
+          />
           <SessionDetailModal
             visible={!!detailSession}
             session={detailSession}
@@ -511,14 +524,14 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           <View style={{ gap: 10 }}>
             {todayLessons.map(l => (
               <LessonEntry key={l.id} lesson={l} compositions={compositions}
-                isSelected={isDesktop && detailLesson?.id === l.id}
-                onPress={() => { if (isDesktop) { setDetailLesson(l); setDetailSession(null); } else setDetailLesson(l); }}
+                isSelected={isDesktop && rightPanel === 'detail-lesson' && detailLesson?.id === l.id}
+                onPress={() => openLesson(l)}
                 showDate={false} />
             ))}
             {todaySessions.map(s => (
               <PracticeEntry key={s.id} session={s} compositions={compositions}
-                isSelected={isDesktop && detailSession?.id === s.id}
-                onPress={() => { if (isDesktop) { setDetailSession(s); setDetailLesson(null); } else setDetailSession(s); }}
+                isSelected={isDesktop && rightPanel === 'detail-session' && detailSession?.id === s.id}
+                onPress={() => openSession(s)}
                 showDate={false} />
             ))}
           </View>
@@ -526,11 +539,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           <View>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-              <TouchableOpacity onPress={() => setLogModalDate(today)} activeOpacity={0.8}
+              <TouchableOpacity onPress={() => openLogSession(today)} activeOpacity={0.8}
                 style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 Log practice</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setLessonModalDate(today)} activeOpacity={0.8}
+              <TouchableOpacity onPress={() => openLogLesson(today)} activeOpacity={0.8}
                 style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
               </TouchableOpacity>
@@ -548,12 +561,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           {feedItems.map(item =>
             item._type === 'lesson' ? (
               <LessonEntry key={item.id} lesson={item} compositions={compositions}
-                isSelected={isDesktop && detailLesson?.id === item.id}
-                onPress={() => { if (isDesktop) { setDetailLesson(item); setDetailSession(null); } else setDetailLesson(item); }} />
+                isSelected={isDesktop && rightPanel === 'detail-lesson' && detailLesson?.id === item.id}
+                onPress={() => openLesson(item)} />
             ) : (
               <PracticeEntry key={item.id} session={item} compositions={compositions}
-                isSelected={isDesktop && detailSession?.id === item.id}
-                onPress={() => { if (isDesktop) { setDetailSession(item); setDetailLesson(null); } else setDetailSession(item); }} />
+                isSelected={isDesktop && rightPanel === 'detail-session' && detailSession?.id === item.id}
+                onPress={() => openSession(item)} />
             )
           )}
         </>
@@ -600,25 +613,45 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             </View>
             {feedContent}
           </ScrollView>
-          <FAB onPractice={() => setLogModalDate(today)} onLesson={() => setLessonModalDate(today)} />
+          <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} />
         </View>
 
-        {/* Right: detail panel */}
+        {/* Right: detail / inline form panel */}
         <View style={{ flex: 1, minWidth: 0, marginLeft: 12, marginTop: 12, marginBottom: 12, marginRight: 12 }}>
-          {(detailSession || detailLesson) ? (
+          {rightPanel === 'log-session' && (
+            <LogModal
+              inline
+              initialDate={logModalDate || today}
+              initialSession={logModalSession}
+              compositions={compositions}
+              onSave={s => { onSave(s); closeRight(); }}
+              onClose={closeRight}
+            />
+          )}
+          {rightPanel === 'log-lesson' && (
+            <LessonModal
+              inline
+              initialDate={lessonModalDate || today}
+              compositions={compositions}
+              onSave={l => { onSaveLesson(l); closeRight(); }}
+              onClose={closeRight}
+            />
+          )}
+          {(rightPanel === 'detail-session' || rightPanel === 'detail-lesson') && (
             <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
               <DesktopDetailPanel
-                session={detailSession}
-                lesson={detailLesson}
+                session={rightPanel === 'detail-session' ? detailSession : null}
+                lesson={rightPanel === 'detail-lesson' ? detailLesson : null}
                 compositions={compositions}
-                onCloseSession={() => setDetailSession(null)}
-                onCloseLesson={() => setDetailLesson(null)}
-                onDeleteSession={id => { onDelete(id); setDetailSession(null); }}
-                onDeleteLesson={id => { onDeleteLesson(id); setDetailLesson(null); }}
-                onEditSession={s => { setDetailSession(null); setLogModalSession(s); }}
+                onCloseSession={closeRight}
+                onCloseLesson={closeRight}
+                onDeleteSession={id => { onDelete(id); closeRight(); }}
+                onDeleteLesson={id => { onDeleteLesson(id); closeRight(); }}
+                onEditSession={s => openLogSession(s.date, s)}
               />
             </ScrollView>
-          ) : (
+          )}
+          {!rightPanel && (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.textDim, opacity: 0.5 }}>
                 Select an entry to view details
@@ -650,7 +683,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </View>
         {feedContent}
       </ScrollView>
-      <FAB onPractice={() => setLogModalDate(today)} onLesson={() => setLessonModalDate(today)} />
+      <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} />
       {modals}
     </SafeAreaView>
   );
