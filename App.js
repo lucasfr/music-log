@@ -23,6 +23,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import { AppBackground } from './src/components/Background';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
@@ -36,6 +37,7 @@ const TAB_ICONS = {
   Calendar: { active: 'calendar',      inactive: 'calendar-outline' },
   Pieces:   { active: 'musical-notes', inactive: 'musical-notes-outline' },
   Stats:    { active: 'bar-chart',     inactive: 'bar-chart-outline' },
+  Settings: { active: 'settings',      inactive: 'settings-outline' },
 };
 
 function TabIcon({ name, focused }) {
@@ -144,6 +146,7 @@ export default function App() {
         case 'Calendar': return <CalendarScreen key="calendar" {...screenProps} />;
         case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
         case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} isDesktop={isDesktop} />;
+        case 'Settings': return <SettingsScreen  key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} />;
         default:         return <HomeScreen     key="home"     {...screenProps} />;
       }
     };
@@ -218,6 +221,9 @@ export default function App() {
           </Tab.Screen>
           <Tab.Screen name="Stats">
             {() => <StatsScreen sessions={sessions} compositions={compositions} isDesktop={false} />}
+          </Tab.Screen>
+          <Tab.Screen name="Settings">
+            {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} />}
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>
