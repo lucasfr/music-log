@@ -24,6 +24,7 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import AboutScreen from './src/screens/AboutScreen';
 import { AppBackground } from './src/components/Background';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
@@ -33,11 +34,12 @@ import { COLOURS } from './src/theme';
 const Tab = createBottomTabNavigator();
 
 const TAB_ICONS = {
-  Home:     { active: 'home',          inactive: 'home-outline' },
-  Calendar: { active: 'calendar',      inactive: 'calendar-outline' },
-  Pieces:   { active: 'musical-notes', inactive: 'musical-notes-outline' },
-  Stats:    { active: 'bar-chart',     inactive: 'bar-chart-outline' },
-  Settings: { active: 'settings',      inactive: 'settings-outline' },
+  Home:     { active: 'home',                inactive: 'home-outline' },
+  Calendar: { active: 'calendar',            inactive: 'calendar-outline' },
+  Pieces:   { active: 'musical-notes',       inactive: 'musical-notes-outline' },
+  Stats:    { active: 'bar-chart',           inactive: 'bar-chart-outline' },
+  Settings: { active: 'settings',            inactive: 'settings-outline' },
+  About:    { active: 'information-circle',  inactive: 'information-circle-outline' },
 };
 
 function TabIcon({ name, focused }) {
@@ -147,6 +149,7 @@ export default function App() {
         case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
         case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} isDesktop={isDesktop} />;
         case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />;
+        case 'About':    return <AboutScreen    key="about"    isDesktop={isDesktop} />;
         default:         return <HomeScreen     key="home"     {...screenProps} />;
       }
     };
@@ -224,6 +227,9 @@ export default function App() {
           </Tab.Screen>
           <Tab.Screen name="Settings">
             {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />}
+          </Tab.Screen>
+          <Tab.Screen name="About">
+            {() => <AboutScreen isDesktop={false} />}
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>

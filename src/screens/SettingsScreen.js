@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -392,68 +392,6 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
             </GlassCard>
           </>
         )}
-
-        {/* About */}
-        <SectionHeader>About</SectionHeader>
-
-        {/* Hero */}
-        <View style={{ alignItems: 'center', paddingVertical: 28, gap: 4 }}>
-          <Image source={require('../../assets/icon.png')} style={{ width: 80, height: 80, borderRadius: 20 }} />
-          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 34, color: COLOURS.text, marginTop: 12, letterSpacing: -0.5 }}>
-            music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
-          </Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, letterSpacing: 1.2 }}>v1.0.0</Text>
-        </View>
-
-        {/* Why this exists */}
-        <GlassCard>
-          <View style={{ padding: 18 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 10 }}>Why this exists</Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 24 }}>
-              Starting piano as an adult is humbling. Progress is real but hard to see day to day — and practice without reflection tends to plateau. music.log is a quiet space to record what you worked on, how it felt, and watch the arc of improvement over weeks and months.
-            </Text>
-          </View>
-        </GlassCard>
-
-        {/* How it works */}
-        <GlassCard>
-          <View style={{ padding: 18 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 14 }}>How it works</Text>
-            {[
-              ['🎹', 'Log a session',    'Record duration, energy, pieces practised, and what you worked on in each segment.'],
-              ['🎓', 'Log lessons',       'Capture teacher feedback, assignments, and what was covered — before you forget.'],
-              ['📜', 'Build a library',   'Keep a catalogue of your repertoire with status, key, and time signature.'],
-              ['📊', 'Track over time',   'Charts, streaks, and monthly stats show you the bigger picture.'],
-            ].map(([icon, title, body]) => (
-              <View key={title} style={{ flexDirection: 'row', gap: 14, marginBottom: 14, alignItems: 'flex-start' }}>
-                <Text style={{ fontSize: 22, width: 28, textAlign: 'center', marginTop: 1 }}>{icon}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 2 }}>{title}</Text>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{body}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        </GlassCard>
-
-        {/* Built with */}
-        <GlassCard>
-          <View style={{ padding: 18, alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 14 }}>Made with ❤️ and 🎹</Text>
-            <View style={{ height: 1, backgroundColor: 'rgba(9,99,126,0.08)', width: '100%', marginBottom: 14 }} />
-            <View style={{ alignItems: 'center', gap: 8, marginBottom: 14 }}>
-              <View style={{ paddingVertical: 3, paddingHorizontal: 10, backgroundColor: COLOURS.navy, borderRadius: 6 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', letterSpacing: 0.5 }}>MIT</Text>
-              </View>
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, lineHeight: 18, textAlign: 'center' }}>
-                {`Licensed under the MIT Licence\nCopyright © ${new Date().getFullYear()} Lucas França\nOpen source, free to use and modify.`}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={() => { if (typeof window !== 'undefined') window.open('https://lfranca.uk', '_blank'); }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.steel, textDecorationLine: 'underline' }}>lfranca.uk</Text>
-            </TouchableOpacity>
-          </View>
-        </GlassCard>
 
       </ScrollView>
     </SafeAreaView>

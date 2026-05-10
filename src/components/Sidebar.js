@@ -11,6 +11,10 @@ const NAV_ITEMS = [
   { name: 'Calendar', icon: 'calendar',      iconOut: 'calendar-outline' },
   { name: 'Pieces',   icon: 'musical-notes', iconOut: 'musical-notes-outline' },
   { name: 'Stats',    icon: 'bar-chart',     iconOut: 'bar-chart-outline' },
+];
+
+const BOTTOM_ITEMS = [
+  { name: 'About',    icon: 'information-circle',         iconOut: 'information-circle-outline' },
   { name: 'Settings', icon: 'settings',      iconOut: 'settings-outline' },
 ];
 
@@ -29,9 +33,9 @@ export function Sidebar({ activeTab, onNavigate }) {
         </Text>
       </View>
 
-      {/* Nav items (exclude Settings — rendered separately at bottom) */}
+      {/* Nav items */}
       <View style={styles.navContainer}>
-        {NAV_ITEMS.slice(0, -1).map(item => {
+        {NAV_ITEMS.map(item => {
           const active = activeTab === item.name;
           return (
             <TouchableOpacity
@@ -55,24 +59,25 @@ export function Sidebar({ activeTab, onNavigate }) {
         })}
       </View>
       <View style={{ flex: 1 }} />
-      {/* Settings pinned to bottom */}
-      {(() => {
-        const item = NAV_ITEMS[NAV_ITEMS.length - 1];
-        const active = activeTab === item.name;
-        return (
-          <TouchableOpacity
-            key={item.name}
-            onPress={() => onNavigate(item.name)}
-            activeOpacity={0.75}
-            style={[styles.navItem, active && styles.navItemActive]}
-          >
-            <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
-              <Ionicons name={active ? item.icon : item.iconOut} size={20} color="#ffffff" />
-            </View>
-            <Text style={[styles.navLabel, active && styles.navLabelActive]}>{item.name}</Text>
-          </TouchableOpacity>
-        );
-      })()}
+      {/* About + Settings pinned to bottom */}
+      <View style={{ gap: 2 }}>
+        {BOTTOM_ITEMS.map(item => {
+          const active = activeTab === item.name;
+          return (
+            <TouchableOpacity
+              key={item.name}
+              onPress={() => onNavigate(item.name)}
+              activeOpacity={0.75}
+              style={[styles.navItem, active && styles.navItemActive]}
+            >
+              <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
+                <Ionicons name={active ? item.icon : item.iconOut} size={20} color="#ffffff" />
+              </View>
+              <Text style={[styles.navLabel, active && styles.navLabelActive]}>{item.name}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </BlurView>
   );
 }
