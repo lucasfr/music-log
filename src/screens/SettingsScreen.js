@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -398,8 +398,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
 
         {/* Hero */}
         <View style={{ alignItems: 'center', paddingVertical: 28, gap: 4 }}>
-          <Text style={{ fontSize: 72 }}>🎹</Text>
-          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 34, color: COLOURS.text, marginTop: 8, letterSpacing: -0.5 }}>
+          <Image source={require('../../assets/icon.png')} style={{ width: 80, height: 80, borderRadius: 20 }} />
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 34, color: COLOURS.text, marginTop: 12, letterSpacing: -0.5 }}>
             music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
           </Text>
           <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, letterSpacing: 1.2 }}>v1.0.0</Text>
