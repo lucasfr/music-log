@@ -15,6 +15,7 @@ import {
   signOut,
 } from '../lib/supabase';
 import { pushRecord } from '../db/sync';
+import { exportAllJSON } from '../utils/export';
 
 function Field({ label, value, onChangeText, placeholder, secureTextEntry, autoCapitalize, keyboardType }) {
   return (
@@ -262,11 +263,17 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                 {sessions.length} sessions · {lessons.length} lessons · {compositions.length} pieces
               </Text>
               <TouchableOpacity onPress={handleSyncAll} activeOpacity={0.8} disabled={phase === 'syncing'}
-                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
+                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center', marginBottom: 10 }}>
                 {phase === 'syncing'
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>⬆ Push all to Supabase</Text>
                 }
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => exportAllJSON(sessions, lessons, compositions).catch(() => {})}
+                activeOpacity={0.8}
+                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.10)', alignItems: 'center' }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>↓ Export all as JSON</Text>
               </TouchableOpacity>
               {syncResult && (
                 <Text style={{ fontFamily: 'Lato', fontSize: 13, marginTop: 10,
