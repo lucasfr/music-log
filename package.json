@@ -10,6 +10,13 @@
     "build:web": "expo export --platform web && node patch-dist.js && cp web/service-worker.js dist/service-worker.js && cp assets/apple-touch-icon.png dist/apple-touch-icon.png && cp assets/apple-touch-icon-152.png dist/apple-touch-icon-152.png && cp assets/apple-touch-icon-120.png dist/apple-touch-icon-120.png"
   },
   "dependencies": {
+    "@expo-google-fonts/cormorant-garamond": "~0.3.0",
+    "@expo-google-fonts/lato": "~0.3.0",
+    "@expo/metro-runtime": "~4.0.1",
+    "@react-native-picker/picker": "~2.11.0",
+    "@react-navigation/bottom-tabs": "^7.0.0",
+    "@react-navigation/native": "^7.0.0",
+    "@supabase/supabase-js": "^2.105.4",
     "expo": "~54.0.33",
     "expo-blur": "~14.0.3",
     "expo-file-system": "~18.0.7",
@@ -20,16 +27,10 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-web": "~0.20.0",
     "react-native-safe-area-context": "~5.2.0",
     "react-native-screens": "~4.10.0",
     "react-native-svg": "~15.8.0",
-    "@expo-google-fonts/cormorant-garamond": "~0.3.0",
-    "@expo-google-fonts/lato": "~0.3.0",
-    "@expo/metro-runtime": "~4.0.1",
-    "@react-navigation/native": "^7.0.0",
-    "@react-navigation/bottom-tabs": "^7.0.0",
-    "@react-native-picker/picker": "~2.11.0"
+    "react-native-web": "~0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
