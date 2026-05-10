@@ -11,7 +11,7 @@ import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate } from '../utils';
 
-const DAYS   = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const DAYS   = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function todayISO() {
@@ -173,13 +173,14 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       {/* Calendar grid */}
       <BlurView intensity={32} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 6 }}>
         <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
-          <View style={{ flexDirection: 'row', marginBottom: 4 }}>
+          <View style={{ flexDirection: 'row', marginBottom: 6 }}>
             {DAYS.map((d, i) => (
-              <View key={i} style={{ width: cellW, alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny + 1, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>{d}</Text>
+              <View key={i} style={{ width: cellW, height: 36, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy, opacity: 0.7, letterSpacing: 0.5 }}>{d}</Text>
               </View>
             ))}
           </View>
+          <View style={{ height: 1, backgroundColor: COLOURS.glassBorderSubtle, marginBottom: 6, opacity: 0.6 }} />
           {Array.from({ length: cells.length / 7 }, (_, row) => (
             <View key={row} style={{ flexDirection: 'row' }}>
               {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
