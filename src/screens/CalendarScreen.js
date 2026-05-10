@@ -154,16 +154,17 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       {/* Month stats */}
       {(monthSessions.length > 0 || monthLessons.length > 0) && (
         <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 16, shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 14, elevation: 4 }}>
-          <View style={{ backgroundColor: COLOURS.glass, padding: 12, flexDirection: 'row' }}>
+          <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 14, paddingHorizontal: 8, flexDirection: 'row' }}>
             {[
-              { value: monthSessions.length, label: '🎹 sessions' },
-              { value: monthLessons.length,  label: '🎓 lessons' },
-              { value: `${Math.round(monthSessions.reduce((a, s) => a + (Number(s.duration) || 0), 0))}m`, label: '⏱ practice' },
-              { value: monthSessions.length ? (monthSessions.reduce((a, s) => a + Number(s.energy), 0) / monthSessions.length).toFixed(1) : '—', label: '⚡ avg energy' },
+              { value: monthSessions.length, label: 'sessions', emoji: '🎹' },
+              { value: monthLessons.length,  label: 'lessons',  emoji: '🎓' },
+              { value: `${Math.round(monthSessions.reduce((a, s) => a + (Number(s.duration) || 0), 0))}m`, label: 'practice', emoji: '⏱' },
+              { value: monthSessions.length ? (monthSessions.reduce((a, s) => a + Number(s.energy), 0) / monthSessions.length).toFixed(1) : '—', label: 'avg energy', emoji: '⚡' },
             ].map((stat, i) => (
-              <View key={i} style={{ flex: 1, alignItems: 'center', borderRightWidth: i < 3 ? 1 : 0, borderRightColor: COLOURS.glassBorderSubtle }}>
-                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.navy }}>{stat.value}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 1 }}>{stat.label}</Text>
+              <View key={i} style={{ flex: 1, alignItems: 'center', borderRightWidth: i < 3 ? 1 : 0, borderRightColor: COLOURS.glassBorderSubtle, paddingVertical: 4 }}>
+                <Text style={{ fontSize: 24, lineHeight: 28, marginBottom: 4 }}>{stat.emoji}</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28 }}>{stat.value}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 3, letterSpacing: 0.2 }}>{stat.label}</Text>
               </View>
             ))}
           </View>
