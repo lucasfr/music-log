@@ -146,7 +146,7 @@ export default function App() {
         case 'Calendar': return <CalendarScreen key="calendar" {...screenProps} />;
         case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
         case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} isDesktop={isDesktop} />;
-        case 'Settings': return <SettingsScreen  key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} />;
+        case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />;
         default:         return <HomeScreen     key="home"     {...screenProps} />;
       }
     };
@@ -223,7 +223,7 @@ export default function App() {
             {() => <StatsScreen sessions={sessions} compositions={compositions} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Settings">
-            {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} />}
+            {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />}
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>

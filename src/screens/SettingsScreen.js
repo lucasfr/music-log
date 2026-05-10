@@ -15,7 +15,7 @@ import {
   signOut,
 } from '../lib/supabase';
 import { pushRecord } from '../db/sync';
-import { exportAllJSON } from '../utils/export';
+import { exportAllJSON, parseImportJSON, pickJSONFile } from '../utils/export';
 
 function Field({ label, value, onChangeText, placeholder, secureTextEntry, autoCapitalize, keyboardType }) {
   return (
@@ -78,15 +78,16 @@ function GlassSection({ children }) {
   );
 }
 
-export default function SettingsScreen({ isDesktop, sessions = [], lessons = [], compositions = [] }) {
+export default function SettingsScreen({ isDesktop, sessions = [], lessons = [], compositions = [], onSaveSession, onSaveLesson, onSaveComposition }) {
   const [url,        setUrl]        = useState('');
   const [anonKey,    setAnonKey]    = useState('');
   const [email,      setEmail]      = useState('');
   const [session,    setSession]    = useState(null);
   const [credsSaved, setCredsSaved] = useState(false);
   const [phase,      setPhase]      = useState('idle'); // idle | sending | sent | signing-out | syncing
-  const [syncResult, setSyncResult] = useState(null);  // null | { pushed, errors }
-  const [error,      setError]      = useState(null);
+  const [syncResult,  setSyncResult]  = useState(null);
+  const [importResult, setImportResult] = useState(null);
+  const [error,        setError]        = useState(null);
   const [savedBanner, setSavedBanner] = useState(false);
 
   const loadState = useCallback(async () => {
@@ -153,6 +154,28 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     await signOut();
     setSession(null);
     setPhase('idle');
+  }
+
+  async function handleImport() {
+    setError(null);
+    setImportResult(null);
+    try {
+      const json = await pickJSONFile();
+      const parsed = parseImportJSON(json);
+      let imported = { sessions: 0, lessons: 0, compositions: 0, errors: 0 };
+      for (const s of parsed.sessions) {
+        try { await onSaveSession(s); imported.sessions++; } catch { imported.errors++; }
+      }
+      for (const l of parsed.lessons) {
+        try { await onSaveLesson(l); imported.lessons++; } catch { imported.errors++; }
+      }
+      for (const c of parsed.compositions) {
+        try { await onSaveComposition(c); imported.compositions++; } catch { imported.errors++; }
+      }
+      setImportResult(imported);
+    } catch (e) {
+      setError(e.message || 'Import failed.');
+    }
   }
 
   async function handleSyncAll() {
@@ -272,9 +295,22 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
               <TouchableOpacity
                 onPress={() => exportAllJSON(sessions, lessons, compositions).catch(() => {})}
                 activeOpacity={0.8}
-                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.10)', alignItems: 'center' }}>
+                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.10)', alignItems: 'center', marginBottom: 10 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>↓ Export all as JSON</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={handleImport} activeOpacity={0.8}
+                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.10)', alignItems: 'center' }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>↑ Import from JSON</Text>
+              </TouchableOpacity>
+              {importResult && (
+                <Text style={{ fontFamily: 'Lato', fontSize: 13, marginTop: 10,
+                  color: importResult.errors > 0 ? COLOURS.red : '#00825A' }}>
+                  {importResult.errors > 0
+                    ? `✓ ${importResult.sessions}s / ${importResult.lessons}l / ${importResult.compositions}p · ✕ ${importResult.errors} failed`
+                    : `✓ ${importResult.sessions} sessions, ${importResult.lessons} lessons, ${importResult.compositions} pieces imported`
+                  }
+                </Text>
+              )}
               {syncResult && (
                 <Text style={{ fontFamily: 'Lato', fontSize: 13, marginTop: 10,
                   color: syncResult.errors > 0 ? COLOURS.red : '#00825A' }}>
