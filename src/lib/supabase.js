@@ -58,6 +58,17 @@ export async function signInWithMagicLink(email) {
   if (error) throw error;
 }
 
+export async function signInWithGitHub() {
+  const client = getClient();
+  if (!client) throw new Error('Supabase not configured');
+  const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined;
+  const { error } = await client.auth.signInWithOAuth({
+    provider: 'github',
+    options: { redirectTo },
+  });
+  if (error) throw error;
+}
+
 export async function signOut() {
   const client = getClient();
   if (!client) return;

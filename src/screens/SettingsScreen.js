@@ -11,6 +11,7 @@ import {
   getClient,
   getSession,
   signInWithMagicLink,
+  signInWithGitHub,
   signOut,
 } from '../lib/supabase';
 import { pushRecord } from '../db/sync';
@@ -124,6 +125,16 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     if (s?.user?.email) setEmail(s.user.email);
   }
 
+  async function handleGitHub() {
+    setError(null);
+    try {
+      await signInWithGitHub();
+      // Page will redirect to GitHub and back — nothing more to do here
+    } catch (e) {
+      setError(e.message || 'GitHub sign-in failed.');
+    }
+  }
+
   async function handleSendMagicLink() {
     setError(null);
     setPhase('sending');
@@ -209,12 +220,21 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
             <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.navy, marginBottom: 14 }}>Sign in</Text>
             {phase !== 'sent' ? (
               <>
+                <TouchableOpacity onPress={handleGitHub} activeOpacity={0.8}
+                  style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: '#24292e', alignItems: 'center', marginBottom: 10 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>🐙 Continue with GitHub</Text>
+                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorderSubtle }} />
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>or</Text>
+                  <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorderSubtle }} />
+                </View>
                 <Field label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" keyboardType="email-address" />
                 <TouchableOpacity onPress={handleSendMagicLink} activeOpacity={0.8} disabled={phase === 'sending'}
-                  style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
+                  style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(9,99,126,0.15)', alignItems: 'center' }}>
                   {phase === 'sending'
-                    ? <ActivityIndicator color="#fff" size="small" />
-                    : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Send magic link</Text>
+                    ? <ActivityIndicator color={COLOURS.navy} size="small" />
+                    : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>Send magic link</Text>
                   }
                 </TouchableOpacity>
               </>
