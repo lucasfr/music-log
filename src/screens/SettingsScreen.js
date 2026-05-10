@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS } from '../theme';
-import { SectionTitle } from '../components/UI';
 import {
   getSupabaseCredentials,
   saveSupabaseCredentials,
@@ -17,66 +17,139 @@ import {
 import { pushRecord } from '../db/sync';
 import { exportAllJSON, parseImportJSON, pickJSONFile } from '../utils/export';
 
-function Field({ label, value, onChangeText, placeholder, secureTextEntry, autoCapitalize, keyboardType }) {
-  return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, letterSpacing: 0.4, marginBottom: 6, textTransform: 'uppercase' }}>
-        {label}
-      </Text>
-      <BlurView intensity={30} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden' }}>
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={COLOURS.textDim}
-          secureTextEntry={secureTextEntry}
-          autoCapitalize={autoCapitalize || 'none'}
-          autoCorrect={false}
-          keyboardType={keyboardType}
-          style={{
-            fontFamily: 'Lato',
-            fontSize: 14,
-            color: COLOURS.text,
-            backgroundColor: 'rgba(255,255,255,0.55)',
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-            borderRadius: RADIUS.md,
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.70)',
-          }}
-        />
-      </BlurView>
-    </View>
-  );
-}
+// ─── Design primitives ────────────────────────────────────────────────────────
 
-function StatusBadge({ connected, email }) {
+function GlassCard({ children, style }) {
   return (
-    <View style={{
-      flexDirection: 'row', alignItems: 'center', gap: 8,
-      paddingHorizontal: 14, paddingVertical: 10,
-      borderRadius: RADIUS.pill,
-      backgroundColor: connected ? 'rgba(0,180,120,0.12)' : 'rgba(214,40,40,0.08)',
-      alignSelf: 'flex-start',
-      marginBottom: 20,
-    }}>
-      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: connected ? '#00B478' : COLOURS.red }} />
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: connected ? '#00825A' : COLOURS.red }}>
-        {connected ? `Signed in as ${email}` : 'Not signed in'}
-      </Text>
-    </View>
-  );
-}
-
-function GlassSection({ children }) {
-  return (
-    <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 16, shadowColor: 'rgba(9,99,126,0.10)', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 14, elevation: 4 }}>
-      <View style={{ backgroundColor: 'rgba(255,255,255,0.55)', padding: 16 }}>
+    <BlurView intensity={40} tint="light" style={[{
+      borderRadius: 18,
+      overflow: 'hidden',
+      marginBottom: 12,
+      shadowColor: 'rgba(9,99,126,0.10)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 16,
+      elevation: 4,
+    }, style]}>
+      <View style={{ backgroundColor: 'rgba(255,255,255,0.58)' }}>
         {children}
       </View>
     </BlurView>
   );
 }
+
+function SectionHeader({ children }) {
+  return (
+    <Text style={{
+      fontFamily: 'Lato-Bold',
+      fontSize: 11,
+      color: COLOURS.textDim,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+      marginTop: 24,
+      marginBottom: 8,
+      paddingHorizontal: 4,
+    }}>
+      {children}
+    </Text>
+  );
+}
+
+// A row inside a GlassCard — icon, label, right content
+function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBorder }) {
+  const radius = { borderTopLeftRadius: first ? 18 : 0, borderTopRightRadius: first ? 18 : 0, borderBottomLeftRadius: last ? 18 : 0, borderBottomRightRadius: last ? 18 : 0 };
+  const inner = (
+    <View style={[{
+      flexDirection: 'row', alignItems: 'center',
+      paddingHorizontal: 16, paddingVertical: 14,
+      borderBottomWidth: noBorder || last ? 0 : 1,
+      borderBottomColor: 'rgba(9,99,126,0.07)',
+    }, radius]}>
+      {icon && (
+        <View style={{
+          width: 34, height: 34, borderRadius: 10,
+          backgroundColor: danger ? 'rgba(214,40,40,0.10)' : 'rgba(9,99,126,0.10)',
+          alignItems: 'center', justifyContent: 'center',
+          marginRight: 12,
+        }}>
+          <Ionicons name={icon} size={18} color={danger ? COLOURS.red : COLOURS.navy} />
+        </View>
+      )}
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: danger ? COLOURS.red : COLOURS.text }}>
+          {label}
+        </Text>
+        {sublabel ? (
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>{sublabel}</Text>
+        ) : null}
+      </View>
+      {right ?? (onPress ? <Ionicons name="chevron-forward" size={16} color={COLOURS.textDim} /> : null)}
+    </View>
+  );
+
+  if (!onPress) return inner;
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      {inner}
+    </TouchableOpacity>
+  );
+}
+
+function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, keyboardType }) {
+  return (
+    <View style={{ paddingHorizontal: 16, paddingBottom: 14 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>
+        {label}
+      </Text>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={COLOURS.textDim}
+        secureTextEntry={secureTextEntry}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType={keyboardType}
+        style={{
+          fontFamily: 'Lato',
+          fontSize: 14,
+          color: COLOURS.text,
+          backgroundColor: 'rgba(9,99,126,0.06)',
+          paddingHorizontal: 14,
+          paddingVertical: 11,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: 'rgba(9,99,126,0.10)',
+        }}
+      />
+    </View>
+  );
+}
+
+function StatusDot({ connected }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: connected ? '#00B478' : COLOURS.textDim }} />
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: connected ? '#00825A' : COLOURS.textDim }}>
+        {connected ? 'Connected' : 'Not connected'}
+      </Text>
+    </View>
+  );
+}
+
+function ResultBanner({ result, errorKey = 'errors' }) {
+  if (!result) return null;
+  const hasErrors = result[errorKey] > 0;
+  return (
+    <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: hasErrors ? 'rgba(214,40,40,0.07)' : 'rgba(0,180,120,0.08)' }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: hasErrors ? COLOURS.red : '#00825A' }}>
+        {result.message}
+      </Text>
+    </View>
+  );
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function SettingsScreen({ isDesktop, sessions = [], lessons = [], compositions = [], onSaveSession, onSaveLesson, onSaveComposition }) {
   const [url,        setUrl]        = useState('');
@@ -84,11 +157,11 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   const [email,      setEmail]      = useState('');
   const [session,    setSession]    = useState(null);
   const [credsSaved, setCredsSaved] = useState(false);
-  const [phase,      setPhase]      = useState('idle'); // idle | sending | sent | signing-out | syncing
+  const [phase,      setPhase]      = useState('idle');
+  const [savedBanner, setSavedBanner] = useState(false);
   const [syncResult,  setSyncResult]  = useState(null);
   const [importResult, setImportResult] = useState(null);
   const [error,        setError]        = useState(null);
-  const [savedBanner, setSavedBanner] = useState(false);
 
   const loadState = useCallback(async () => {
     const { url: savedUrl, anonKey: savedKey } = getSupabaseCredentials();
@@ -102,7 +175,6 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
 
   useEffect(() => { loadState(); }, [loadState]);
 
-  // Listen for magic link redirect on web
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const handler = async () => {
@@ -129,24 +201,14 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
 
   async function handleGitHub() {
     setError(null);
-    try {
-      await signInWithGitHub();
-      // Page will redirect to GitHub and back — nothing more to do here
-    } catch (e) {
-      setError(e.message || 'GitHub sign-in failed.');
-    }
+    try { await signInWithGitHub(); } catch (e) { setError(e.message || 'GitHub sign-in failed.'); }
   }
 
   async function handleSendMagicLink() {
     setError(null);
     setPhase('sending');
-    try {
-      await signInWithMagicLink(email);
-      setPhase('sent');
-    } catch (e) {
-      setError(e.message || 'Failed to send magic link.');
-      setPhase('idle');
-    }
+    try { await signInWithMagicLink(email); setPhase('sent'); }
+    catch (e) { setError(e.message || 'Failed to send magic link.'); setPhase('idle'); }
   }
 
   async function handleSignOut() {
@@ -156,31 +218,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     setPhase('idle');
   }
 
-  async function handleImport() {
-    setError(null);
-    setImportResult(null);
-    try {
-      const json = await pickJSONFile();
-      const parsed = parseImportJSON(json);
-      let imported = { sessions: 0, lessons: 0, compositions: 0, errors: 0 };
-      for (const s of parsed.sessions) {
-        try { await onSaveSession(s); imported.sessions++; } catch { imported.errors++; }
-      }
-      for (const l of parsed.lessons) {
-        try { await onSaveLesson(l); imported.lessons++; } catch { imported.errors++; }
-      }
-      for (const c of parsed.compositions) {
-        try { await onSaveComposition(c); imported.compositions++; } catch { imported.errors++; }
-      }
-      setImportResult(imported);
-    } catch (e) {
-      setError(e.message || 'Import failed.');
-    }
-  }
-
   async function handleSyncAll() {
-    setPhase('syncing');
-    setSyncResult(null);
+    setPhase('syncing'); setSyncResult(null);
     let pushed = 0, errors = 0;
     const all = [
       ...sessions.map(r     => ({ table: 'sessions',     record: r })),
@@ -188,15 +227,23 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
       ...compositions.map(r => ({ table: 'compositions', record: r })),
     ];
     for (const { table, record } of all) {
-      try {
-        await pushRecord(table, record);
-        pushed++;
-      } catch {
-        errors++;
-      }
+      try { await pushRecord(table, record); pushed++; } catch { errors++; }
     }
-    setSyncResult({ pushed, errors });
+    setSyncResult({ pushed, errors, message: errors > 0 ? `${pushed} pushed · ${errors} failed` : `${pushed} records synced` });
     setPhase('idle');
+  }
+
+  async function handleImport() {
+    setError(null); setImportResult(null);
+    try {
+      const json = await pickJSONFile();
+      const parsed = parseImportJSON(json);
+      let s = 0, l = 0, c = 0, errors = 0;
+      for (const r of parsed.sessions)      { try { await onSaveSession(r);     s++; } catch { errors++; } }
+      for (const r of parsed.lessons)       { try { await onSaveLesson(r);      l++; } catch { errors++; } }
+      for (const r of parsed.compositions)  { try { await onSaveComposition(r); c++; } catch { errors++; } }
+      setImportResult({ errors, message: errors > 0 ? `${s}s / ${l}l / ${c}p imported · ${errors} failed` : `${s} sessions, ${l} lessons, ${c} pieces imported` });
+    } catch (e) { setError(e.message || 'Import failed.'); }
   }
 
   function handleClearCredentials() {
@@ -205,147 +252,158 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   }
 
   const isSignedIn = !!session;
+  const totalRecords = sessions.length + lessons.length + compositions.length;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 60 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingLeft: isDesktop ? 238 : 16, paddingTop: 8, paddingBottom: 60 }}>
 
-        <SectionTitle style={{ marginTop: 4 }}>Sync</SectionTitle>
-        <StatusBadge connected={isSignedIn} email={session?.user?.email} />
+        {/* Page title */}
+        <View style={{ marginBottom: 4, marginTop: 4 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 30, color: COLOURS.text, letterSpacing: -0.3 }}>Settings</Text>
+        </View>
+
+        {/* ── Sync section ─────────────────────────────────────────── */}
+        <SectionHeader>Sync</SectionHeader>
+
+        <GlassCard>
+          <Row
+            icon="cloud-outline"
+            label="Supabase"
+            sublabel="Device sync"
+            right={<StatusDot connected={isSignedIn} />}
+            first last noBorder
+          />
+        </GlassCard>
 
         {/* Credentials */}
-        <GlassSection>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.navy, marginBottom: 14 }}>
-            Supabase credentials
-          </Text>
-          <Field label="Project URL" value={url} onChangeText={setUrl} placeholder="https://xxxx.supabase.co" keyboardType="url" />
-          <Field label="Anon key" value={anonKey} onChangeText={setAnonKey} placeholder="eyJhbGci..." secureTextEntry />
-          {error && <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.red, marginBottom: 10 }}>{error}</Text>}
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+        <GlassCard>
+          <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 17, color: COLOURS.navy, marginBottom: 12 }}>Credentials</Text>
+          </View>
+          <GlassInput label="Project URL" value={url} onChangeText={setUrl} placeholder="https://xxxx.supabase.co" keyboardType="url" />
+          <GlassInput label="Anon key" value={anonKey} onChangeText={setAnonKey} placeholder="eyJhbGci…" secureTextEntry />
+          {error && (
+            <View style={{ marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: 'rgba(214,40,40,0.07)' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.red }}>{error}</Text>
+            </View>
+          )}
+          <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingBottom: 14 }}>
             <TouchableOpacity onPress={handleSaveCredentials} activeOpacity={0.8}
-              style={{ flex: 1, paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
+              style={{ flex: 1, paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Save</Text>
             </TouchableOpacity>
             {credsSaved && (
               <TouchableOpacity onPress={handleClearCredentials} activeOpacity={0.8}
-                style={{ paddingHorizontal: 16, paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.10)' }}>
+                style={{ paddingHorizontal: 18, paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.08)' }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.red }}>Clear</Text>
               </TouchableOpacity>
             )}
           </View>
           {savedBanner && (
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: '#00825A', marginTop: 10 }}>✓ Credentials saved</Text>
+            <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: 'rgba(0,180,120,0.08)' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: '#00825A' }}>✓ Credentials saved</Text>
+            </View>
           )}
-        </GlassSection>
+        </GlassCard>
 
         {/* Sign in */}
         {credsSaved && !isSignedIn && (
-          <GlassSection>
-            <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.navy, marginBottom: 14 }}>Sign in</Text>
-            {phase !== 'sent' ? (
-              <>
-                <TouchableOpacity onPress={handleGitHub} activeOpacity={0.8}
-                  style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: '#24292e', alignItems: 'center', marginBottom: 10 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>🐙 Continue with GitHub</Text>
-                </TouchableOpacity>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                  <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorderSubtle }} />
-                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>or</Text>
-                  <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorderSubtle }} />
+          <GlassCard>
+            <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 }}>
+              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 17, color: COLOURS.navy, marginBottom: 14 }}>Sign in</Text>
+              {phase !== 'sent' ? (
+                <>
+                  <TouchableOpacity onPress={handleGitHub} activeOpacity={0.8}
+                    style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: '#24292e', alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>🐙  Continue with GitHub</Text>
+                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(9,99,126,0.10)' }} />
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>or</Text>
+                    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(9,99,126,0.10)' }} />
+                  </View>
+                  <View style={{ marginBottom: 8 }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Email</Text>
+                    <TextInput
+                      value={email} onChangeText={setEmail}
+                      placeholder="you@example.com" placeholderTextColor={COLOURS.textDim}
+                      autoCapitalize="none" autoCorrect={false} keyboardType="email-address"
+                      style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, backgroundColor: 'rgba(9,99,126,0.06)', paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(9,99,126,0.10)', marginBottom: 10 }}
+                    />
+                    <TouchableOpacity onPress={handleSendMagicLink} activeOpacity={0.8} disabled={phase === 'sending'}
+                      style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: 'rgba(9,99,126,0.10)', alignItems: 'center' }}>
+                      {phase === 'sending'
+                        ? <ActivityIndicator color={COLOURS.navy} size="small" />
+                        : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>Send magic link</Text>
+                      }
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <View style={{ alignItems: 'center', paddingVertical: 8, gap: 8 }}>
+                  <Text style={{ fontSize: 32 }}>📬</Text>
+                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.navy }}>Check your email</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, textAlign: 'center', lineHeight: 20 }}>
+                    Click the link from Supabase, then come back here.
+                  </Text>
+                  <TouchableOpacity onPress={() => { setPhase('idle'); loadState(); }} style={{ marginTop: 4 }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>I've clicked the link ↗</Text>
+                  </TouchableOpacity>
                 </View>
-                <Field label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" keyboardType="email-address" />
-                <TouchableOpacity onPress={handleSendMagicLink} activeOpacity={0.8} disabled={phase === 'sending'}
-                  style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(9,99,126,0.15)', alignItems: 'center' }}>
-                  {phase === 'sending'
-                    ? <ActivityIndicator color={COLOURS.navy} size="small" />
-                    : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>Send magic link</Text>
-                  }
-                </TouchableOpacity>
-              </>
-            ) : (
-              <View style={{ alignItems: 'center', paddingVertical: 12, gap: 8 }}>
-                <Text style={{ fontSize: 28 }}>📬</Text>
-                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.navy }}>Check your email</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, textAlign: 'center' }}>
-                  Click the link in the email from Supabase, then come back here.
-                </Text>
-                <TouchableOpacity onPress={() => { setPhase('idle'); loadState(); }} style={{ marginTop: 8 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>I've clicked the link ↗</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </GlassSection>
+              )}
+            </View>
+          </GlassCard>
         )}
 
-        {/* Signed in */}
+        {/* Signed in — data + account */}
         {isSignedIn && (
           <>
-            <GlassSection>
-              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.navy, marginBottom: 14 }}>Data</Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 16 }}>
-                {sessions.length} sessions · {lessons.length} lessons · {compositions.length} pieces
-              </Text>
-              <TouchableOpacity onPress={handleSyncAll} activeOpacity={0.8} disabled={phase === 'syncing'}
-                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center', marginBottom: 10 }}>
-                {phase === 'syncing'
-                  ? <ActivityIndicator color="#fff" size="small" />
-                  : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>⬆ Push all to Supabase</Text>
-                }
-              </TouchableOpacity>
-              <TouchableOpacity
+            <SectionHeader>Data</SectionHeader>
+            <GlassCard>
+              <Row icon="cloud-upload-outline" label="Push all to Supabase"
+                sublabel={`${totalRecords} records`}
+                onPress={phase === 'syncing' ? null : handleSyncAll}
+                right={phase === 'syncing' ? <ActivityIndicator color={COLOURS.navy} size="small" /> : undefined}
+                first
+              />
+              <Row icon="arrow-down-outline" label="Export all as JSON"
                 onPress={() => exportAllJSON(sessions, lessons, compositions).catch(() => {})}
-                activeOpacity={0.8}
-                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.10)', alignItems: 'center', marginBottom: 10 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>↓ Export all as JSON</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleImport} activeOpacity={0.8}
-                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.10)', alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>↑ Import from JSON</Text>
-              </TouchableOpacity>
-              {importResult && (
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, marginTop: 10,
-                  color: importResult.errors > 0 ? COLOURS.red : '#00825A' }}>
-                  {importResult.errors > 0
-                    ? `✓ ${importResult.sessions}s / ${importResult.lessons}l / ${importResult.compositions}p · ✕ ${importResult.errors} failed`
-                    : `✓ ${importResult.sessions} sessions, ${importResult.lessons} lessons, ${importResult.compositions} pieces imported`
-                  }
-                </Text>
-              )}
-              {syncResult && (
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, marginTop: 10,
-                  color: syncResult.errors > 0 ? COLOURS.red : '#00825A' }}>
-                  {syncResult.errors > 0
-                    ? `✓ ${syncResult.pushed} pushed · ✕ ${syncResult.errors} failed`
-                    : `✓ ${syncResult.pushed} records pushed successfully`
-                  }
-                </Text>
-              )}
-            </GlassSection>
-            <GlassSection>
-              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.navy, marginBottom: 6 }}>Account</Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 16 }}>{session.user.email}</Text>
-              <TouchableOpacity onPress={handleSignOut} activeOpacity={0.8} disabled={phase === 'signing-out'}
-                style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.10)', alignItems: 'center' }}>
-                {phase === 'signing-out'
-                  ? <ActivityIndicator color={COLOURS.red} size="small" />
-                  : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.red }}>Sign out</Text>
-                }
-              </TouchableOpacity>
-            </GlassSection>
+              />
+              <Row icon="arrow-up-outline" label="Import from JSON"
+                onPress={handleImport}
+                last
+              />
+              <ResultBanner result={syncResult} />
+              <ResultBanner result={importResult} />
+            </GlassCard>
+
+            <SectionHeader>Account</SectionHeader>
+            <GlassCard>
+              <Row icon="person-outline" label={session.user.email}
+                sublabel="Signed in via GitHub / magic link"
+                first noBorder
+              />
+              <Row icon="log-out-outline" label="Sign out"
+                onPress={phase === 'signing-out' ? null : handleSignOut}
+                right={phase === 'signing-out' ? <ActivityIndicator color={COLOURS.red} size="small" /> : undefined}
+                danger last
+              />
+            </GlassCard>
           </>
         )}
 
         {/* About */}
-        <SectionTitle style={{ marginTop: 4 }}>About</SectionTitle>
-        <GlassSection>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>
-              music<Text style={{ color: COLOURS.practiceText }}>.</Text>
-              <Text style={{ color: COLOURS.lessonText }}>log</Text>
-            </Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>v1.0.0</Text>
-          </View>
-        </GlassSection>
+        <SectionHeader>About</SectionHeader>
+        <GlassCard>
+          <Row
+            icon="musical-notes-outline"
+            label="music.log"
+            sublabel="Your personal practice journal"
+            right={<Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>v1.0.0</Text>}
+            first last noBorder
+          />
+        </GlassCard>
 
       </ScrollView>
     </SafeAreaView>
