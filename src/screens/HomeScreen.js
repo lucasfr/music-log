@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Platform, Image, Alert,
+  View, Text, ScrollView, TouchableOpacity, Platform, Image, Alert, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -11,6 +11,7 @@ import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate } from '../utils';
 import { exportSessionJSON, exportAllJSON } from '../utils/export';
+import AboutScreen from './AboutScreen';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
@@ -453,6 +454,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
   const [rightPanel,      setRightPanel]      = useState(null); // 'detail-session' | 'detail-lesson' | 'log-session' | 'log-lesson'
+  const [showAbout,       setShowAbout]       = useState(false);
 
   function openSession(s)  { if (isDesktop) { setDetailSession(s); setDetailLesson(null); setRightPanel('detail-session'); } else setDetailSession(s); }
   function openLesson(l)   { if (isDesktop) { setDetailLesson(l); setDetailSession(null); setRightPanel('detail-lesson'); } else setDetailLesson(l); }
@@ -673,7 +675,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-        <View style={{ marginBottom: 20, marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <TouchableOpacity
+          onPress={() => setShowAbout(true)}
+          activeOpacity={0.7}
+          style={{ marginBottom: 20, marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+        >
           <Image source={require('../../assets/icon.png')} style={{ width: 44, height: 44, borderRadius: 10 }} />
           <View>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
@@ -683,11 +689,22 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
         {feedContent}
       </ScrollView>
       <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} />
       {modals}
+      <Modal visible={showAbout} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowAbout(false)}>
+        <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
+          <TouchableOpacity
+            onPress={() => setShowAbout(false)}
+            style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(9,99,126,0.12)', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 16, color: COLOURS.navy }}>✕</Text>
+          </TouchableOpacity>
+          <AboutScreen isDesktop={false} />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

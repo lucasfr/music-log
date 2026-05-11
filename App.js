@@ -24,7 +24,6 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
-import AboutScreen from './src/screens/AboutScreen';
 import { AppBackground } from './src/components/Background';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
@@ -39,7 +38,6 @@ const TAB_ICONS = {
   Pieces:   { active: 'musical-notes',       inactive: 'musical-notes-outline' },
   Stats:    { active: 'bar-chart',           inactive: 'bar-chart-outline' },
   Settings: { active: 'settings',            inactive: 'settings-outline' },
-  About:    { active: 'information-circle',  inactive: 'information-circle-outline' },
 };
 
 function TabIcon({ name, focused }) {
@@ -218,9 +216,6 @@ function AppInner({ fontsLoaded }) {
           </Tab.Screen>
           <Tab.Screen name="Settings">
             {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />}
-          </Tab.Screen>
-          <Tab.Screen name="About">
-            {() => <AboutScreen isDesktop={false} />}
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>
