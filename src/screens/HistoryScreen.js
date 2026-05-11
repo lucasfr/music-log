@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { SectionTitle, BtnRow, Btn, EmptyState } from '../components/UI';
 import { fmtDate } from '../utils';
-import { exportSessionJSON } from '../utils/export';
+import { exportSessionJSON, copySessionJSON } from '../utils/export';
 
 export default function HistoryScreen({ sessions, compositions, onDelete }) {
   const [expanded, setExpanded] = useState(null);
@@ -113,6 +113,14 @@ export default function HistoryScreen({ sessions, compositions, onDelete }) {
                           exportSessionJSON(s, compositions).catch(e =>
                             Alert.alert('Export failed', e.message)
                           )
+                        }
+                      />
+                      <Btn
+                        label="Copy JSON"
+                        onPress={() =>
+                          copySessionJSON(s, compositions)
+                            .then(() => Alert.alert('Copied', 'JSON copied to clipboard.'))
+                            .catch(e => Alert.alert('Copy failed', e.message))
                         }
                       />
                     </BtnRow>
