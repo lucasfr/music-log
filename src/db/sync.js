@@ -94,8 +94,9 @@ export async function pullTable(table) {
 
 // ─── Merge ────────────────────────────────────────────────────────────────────
 
-// Merges remote rows into local rows. Remote wins if updated_at is newer.
-// Returns the merged array.
+// Merges remote rows into local rows. When remote is newer, it wins — but
+// local-only fields (not present on the remote row) are always preserved.
+// This prevents stripped Supabase columns from erasing local-only data.
 export function mergeRows(localRows, remoteRows, keyField = 'id') {
   if (!remoteRows) return localRows;
   const map = new Map();
@@ -107,7 +108,11 @@ export function mergeRows(localRows, remoteRows, keyField = 'id') {
     } else {
       const localTs  = new Date(local.updated_at  || 0).getTime();
       const remoteTs = new Date(row.updated_at || 0).getTime();
-      if (remoteTs > localTs) map.set(row[keyField], row);
+      if (remoteTs > localTs) {
+        // Remote is newer: use remote as base but keep any local-only fields
+        // that the remote row doesn't carry (e.g. fields not in Supabase schema).
+        map.set(row[keyField], { ...local, ...row });
+      }
     }
   }
   return Array.from(map.values());
