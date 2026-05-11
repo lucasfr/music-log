@@ -180,7 +180,6 @@ function AppInner({ fontsLoaded }) {
       >
         <Tab.Navigator
           sceneContainerStyle={{ backgroundColor: 'transparent' }}
-          safeAreaInsets={{ bottom: 0 }}
           screenOptions={({ route }) => ({
             headerShown: false,
             tabBarActiveTintColor:   COLOURS.navy,
@@ -190,9 +189,6 @@ function AppInner({ fontsLoaded }) {
               backgroundColor: 'rgba(234,240,245,0.95)',
               borderTopWidth: 0,
               position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
               height: Platform.OS === 'web' ? 92 : (72 + insets.bottom),
               paddingTop: 18,
               paddingBottom: Platform.OS === 'web' ? 20 : (insets.bottom || 8),
