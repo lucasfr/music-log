@@ -199,7 +199,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
                     style={{ width: cellW, height: cellH, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 8, borderRadius: RADIUS.sm, position: 'relative',
                       backgroundColor: isSelected ? 'rgba(9,99,126,0.15)' : isToday ? 'rgba(9,99,126,0.08)' : 'transparent' }}>
                     <DayDots hasPractice={daySessions.length > 0} hasLesson={dayLessons.length > 0} />
-                    <Text style={{ fontFamily: isToday ? 'Lato-Bold' : 'Lato', fontSize: SIZES.body,
+                    <Text style={{ fontFamily: isToday ? 'Lato-Bold' : 'Lato', fontSize: Math.max(SIZES.body, Math.round(cellW * 0.28)),
                       color: isFuture ? COLOURS.textDim : isToday ? COLOURS.navy : hasData ? COLOURS.text : COLOURS.textMuted }}>
                       {day}
                     </Text>
@@ -291,9 +291,15 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   }
 
   // cellW based on content area after sidebar padding
-  const contentW = isDesktop ? Math.max(leftColWidth - 224 - 20, 200) : Dimensions.get('window').width - 32;
-  const cellW    = Math.floor(Math.min(contentW, 460) / 7);
-  const cellH    = 58;
+  // Sidebar is 200px + 24px left padding + 20px right padding = 244px total
+  const SIDEBAR_OFFSET = 244;
+  const contentW = isDesktop ? Math.max(leftColWidth - SIDEBAR_OFFSET, 200) : Dimensions.get('window').width - 32;
+  // Cap at 700 so the grid doesn't go absurdly wide on ultrawide monitors,
+  // but allow it to breathe well beyond the old 460 limit
+  const gridW   = Math.min(contentW, 700);
+  const cellW   = Math.floor(gridW / 7);
+  // Keep cells roughly square-ish — scale height with width
+  const cellH   = Math.max(58, Math.round(cellW * 0.85));
 
   const modals = (
     <>
@@ -336,7 +342,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           shadowRadius: 24,
           elevation: 2,
         }}>
-          <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 224, paddingRight: 20 }}>
+          <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 224, paddingRight: 24 }}>
             <CalendarGrid
               sessions={sessions} lessons={lessons}
               viewYear={viewYear} viewMonth={viewMonth}
