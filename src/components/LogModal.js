@@ -9,7 +9,7 @@ import { COLOURS, RADIUS } from '../theme';
 import { GlassCard, SectionTitle, Btn, Label } from '../components/UI';
 import { Field, TextF, NumberF, DatePickerF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
-import { uid } from '../utils';
+import { uid, confirmDelete } from '../utils';
 
 function ZeldaBar({ label, emoji, value, onChange }) {
   return (
@@ -67,7 +67,11 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   function removeSegment(id)      { setSegments(s => s.filter(seg => seg.id !== id)); }
 
   function handleSave() {
-    if (energyBar === 0) { Alert.alert('Energy required', 'Please set an energy level before saving.'); return; }
+    if (energyBar === 0) {
+      if (Platform.OS === 'web') { window.alert('Please set an energy level before saving.'); }
+      else { Alert.alert('Energy required', 'Please set an energy level before saving.'); }
+      return;
+    }
     const totalFromSegs = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
     onSave({
       id: initialSession?.id || uid(), date, energy: energyBarToValue(energyBar),
@@ -88,7 +92,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
           <View style={{ flex: 1 }}>
             <DatePickerF label="Date" icon="calendar-outline" value={date} onChange={setDate} />
           </View>
-          <View style={{ width: 120 }}>
+          <View style={{ width: 80 }}>
             <Field label={totalMin ? `~${totalMin}m` : 'Min'} icon="time-outline">
               <NumberF value={duration} onChange={setDuration} placeholder={totalMin ? String(totalMin) : ''} />
             </Field>
@@ -164,15 +168,13 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
-          <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 19, color: COLOURS.text }}>Log session</Text>
-              <TouchableOpacity onPress={onClose} activeOpacity={0.75}
-                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </BlurView>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Log session</Text>
+            <TouchableOpacity onPress={onClose} activeOpacity={0.75}
+              style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           {formBody}

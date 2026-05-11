@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate } from '../utils';
+import { fmtDate, confirmDelete } from '../utils';
 import { exportSessionJSON, exportAllJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 
@@ -368,10 +368,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
           <GlassBtn label="Export JSON" small onPress={() => exportSessionJSON(session, compositions).catch(() => {})} color={COLOURS.steel} />
-          <GlassBtn label="Delete" danger small onPress={() => Alert.alert('Delete session?', fmtDate(session.date), [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => onDeleteSession(session.id) },
-          ])} color={COLOURS.red} />
+          <GlassBtn label="Delete" danger small onPress={() => confirmDelete('Delete session?', fmtDate(session.date), () => onDeleteSession(session.id))} color={COLOURS.red} />
         </View>
       </View>
     );
@@ -433,10 +430,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
           </BlurView>
         ) : null}
 
-        <GlassBtn label="Delete lesson" danger small onPress={() => Alert.alert('Delete lesson?', fmtDate(lesson.date), [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: () => onDeleteLesson(lesson.id) },
-        ])} color={COLOURS.danger} />
+        <GlassBtn label="Delete lesson" danger small onPress={() => confirmDelete('Delete lesson?', fmtDate(lesson.date), () => onDeleteLesson(lesson.id))} color={COLOURS.danger} />
       </View>
     );
   }

@@ -173,6 +173,8 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
 export function DatePickerF({ label, value, onChange, icon }) {
   const [open, setOpen] = React.useState(false);
   const today = todayISO();
+  // Measure the trigger button width so the calendar grid fits exactly
+  const [containerW, setContainerW] = React.useState(0);
 
   const initDate = value ? new Date(value + 'T12:00:00') : new Date();
   const [viewYear,  setViewYear]  = React.useState(initDate.getFullYear());
@@ -197,7 +199,11 @@ export function DatePickerF({ label, value, onChange, icon }) {
   }
 
   const cells = calDays(viewYear, viewMonth);
-  const CELL_W = 36;
+  // 32px = 16px padding each side inside the BlurView
+  const availableW = containerW > 0 ? containerW - 32 : 252;
+  // Cap at 44 so it doesn't get absurdly large on desktop
+  const CELL_W = Math.min(44, Math.max(32, Math.floor(availableW / 7)));
+  const CELL_H = CELL_W;
 
   const calendar = (
     <BlurView intensity={60} tint="light" style={{
@@ -231,7 +237,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
         {Array.from({ length: cells.length / 7 }, (_, row) => (
           <View key={row} style={{ flexDirection: 'row' }}>
             {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
-              if (!day) return <View key={col} style={{ width: CELL_W, height: 36 }} />;
+              if (!day) return <View key={col} style={{ width: CELL_W, height: CELL_H }} />;
               const iso = isoFor(viewYear, viewMonth, day);
               const isSelected = iso === value;
               const isToday    = iso === today;
@@ -242,9 +248,9 @@ export function DatePickerF({ label, value, onChange, icon }) {
                   onPress={() => { if (!isFuture) { onChange(iso); setOpen(false); } }}
                   activeOpacity={isFuture ? 1 : 0.7}
                   style={{
-                    width: CELL_W, height: 36,
+                    width: CELL_W, height: CELL_H,
                     alignItems: 'center', justifyContent: 'center',
-                    borderRadius: 18,
+                    borderRadius: CELL_H / 2,
                     backgroundColor: isSelected
                       ? COLOURS.navy
                       : isToday
@@ -285,6 +291,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
     <Field label={label} icon={icon}>
       <TouchableOpacity
         onPress={() => setOpen(o => !o)}
+        onLayout={e => setContainerW(e.nativeEvent.layout.width)}
         activeOpacity={0.8}
         style={[inputStyle, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 11 }]}
       >
