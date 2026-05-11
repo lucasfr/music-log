@@ -24,6 +24,7 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import AboutScreen from './src/screens/AboutScreen';
 import { AppBackground } from './src/components/Background';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
