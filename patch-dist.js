@@ -11,7 +11,7 @@ let html = fs.readFileSync(file, 'utf8');
 // 1. Fix viewport — add viewport-fit=cover
 html = html.replace(
   'width=device-width, initial-scale=1, shrink-to-fit=no',
-  'width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover'
+  'width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover, maximum-scale=1'
 );
 
 // 2. Inject PWA + iOS meta tags and bg colour before </head>
