@@ -7,45 +7,10 @@ function uuid() {
   });
 }
 
-export async function exportSessionJSON(session, compositions) {
-  const compName = id => (compositions.find(c => c.id === id) || {}).title || id;
+// ─── Payload builders ────────────────────────────────────────────────────────
 
-  const payload = {
-    exported_at: new Date().toISOString(),
-    app: 'music.log',
-    session: {
-      date:             session.date,
-      duration_minutes: session.duration    ?? null,
-      energy:           session.energy      ?? null,
-      enjoyment:        session.enjoyment   ?? null,
-      wins:             session.wins        || null,
-      tomorrow_focus:   session.tomorrowFocus || null,
-      segments: (session.segments || []).map(seg => ({
-        type:             seg.type,
-        group:            seg.group           || null,
-        piece:            seg.compositionId ? compName(seg.compositionId) : (seg.title || null),
-        section:          seg.section         || null,
-        notes:            seg.notes           || null,
-        duration_minutes: seg.duration        ?? null,
-        difficulty:       seg.feltDifficulty  ?? null,
-        liking:           seg.liking          ?? null,
-        scales:           seg.scales          || null,
-        octaves:          seg.octaves         || null,
-        teacher_feedback: seg.teacherFeedback || null,
-        assignment:       seg.assignment      || null,
-        challenge_tags:   seg.challenges      || [],
-        progress_tags:    seg.progress        || [],
-      })),
-    },
-  };
-
-  await downloadJSON(payload, `musiclog-${session.date}.json`);
-}
-
-export async function exportAllJSON(sessions, lessons, compositions) {
-  const compName = id => (compositions.find(c => c.id === id) || {}).title || id;
-
-  const mapSegment = seg => ({
+function buildSegment(seg, compName) {
+  return {
     type:             seg.type,
     group:            seg.group           || null,
     piece:            seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName || null),
@@ -60,43 +25,81 @@ export async function exportAllJSON(sessions, lessons, compositions) {
     assignment:       seg.assignment      || null,
     challenge_tags:   seg.challenges      || [],
     progress_tags:    seg.progress        || [],
-  });
+  };
+}
 
-  const payload = {
+function buildSessionPayload(session, compositions) {
+  const compName = id => (compositions.find(c => c.id === id) || {}).title || id;
+  return {
+    exported_at: new Date().toISOString(),
+    app: 'music.log',
+    session: {
+      date:             session.date,
+      duration_minutes: session.duration      ?? null,
+      energy:           session.energy        ?? null,
+      enjoyment:        session.enjoyment     ?? null,
+      wins:             session.wins          || null,
+      tomorrow_focus:   session.tomorrowFocus || null,
+      segments: (session.segments || []).map(seg => buildSegment(seg, compName)),
+    },
+  };
+}
+
+function buildAllPayload(sessions, lessons, compositions) {
+  const compName = id => (compositions.find(c => c.id === id) || {}).title || id;
+  return {
     exported_at: new Date().toISOString(),
     app: 'music.log',
     sessions: [...sessions]
       .sort((a, b) => a.date.localeCompare(b.date))
       .map(s => ({
         date:             s.date,
-        duration_minutes: s.duration    ?? null,
-        energy:           s.energy      ?? null,
-        enjoyment:        s.enjoyment   ?? null,
-        wins:             s.wins        || null,
-        segments:         (s.segments   || []).map(mapSegment),
+        duration_minutes: s.duration  ?? null,
+        energy:           s.energy    ?? null,
+        enjoyment:        s.enjoyment ?? null,
+        wins:             s.wins      || null,
+        segments:         (s.segments || []).map(seg => buildSegment(seg, compName)),
       })),
     lessons: [...lessons]
       .sort((a, b) => a.date.localeCompare(b.date))
       .map(l => ({
         date:             l.date,
-        duration_minutes: l.duration    ?? null,
-        teacher:          l.teacher     || null,
-        wins:             l.wins        || null,
-        segments:         (l.segments   || []).map(mapSegment),
+        duration_minutes: l.duration ?? null,
+        teacher:          l.teacher  || null,
+        wins:             l.wins     || null,
+        segments:         (l.segments || []).map(seg => buildSegment(seg, compName)),
       })),
     compositions: [...compositions]
       .sort((a, b) => (a.title || '').localeCompare(b.title || ''))
       .map(c => ({
         title:     c.title,
-        composer:  c.composer  || null,
-        status:    c.status    || null,
-        keys:      c.keys      || [],
-        time_sigs: c.timeSigs  || [],
-        notes:     c.notes     || null,
+        composer:  c.composer || null,
+        status:    c.status   || null,
+        keys:      c.keys     || [],
+        time_sigs: c.timeSigs || [],
+        notes:     c.notes    || null,
       })),
   };
+}
 
-  await downloadJSON(payload, `musiclog-export-${new Date().toISOString().slice(0, 10)}.json`);
+// ─── Download ─────────────────────────────────────────────────────────────────
+
+export async function exportSessionJSON(session, compositions) {
+  await downloadJSON(buildSessionPayload(session, compositions), `musiclog-${session.date}.json`);
+}
+
+export async function exportAllJSON(sessions, lessons, compositions) {
+  await downloadJSON(buildAllPayload(sessions, lessons, compositions), `musiclog-export-${new Date().toISOString().slice(0, 10)}.json`);
+}
+
+// ─── Copy to clipboard ───────────────────────────────────────────────────────
+
+export async function copySessionJSON(session, compositions) {
+  await copyToClipboard(buildSessionPayload(session, compositions));
+}
+
+export async function copyAllJSON(sessions, lessons, compositions) {
+  await copyToClipboard(buildAllPayload(sessions, lessons, compositions));
 }
 
 // ─── Shared download helper ───────────────────────────────────────────────────
@@ -131,6 +134,19 @@ async function downloadJSON(payload, filename) {
       UTI: 'public.json',
     });
   }
+}
+
+async function copyToClipboard(payload) {
+  const json = JSON.stringify(payload, null, 2);
+
+  if (Platform.OS === 'web') {
+    await navigator.clipboard.writeText(json);
+    return;
+  }
+
+  // Native: expo-clipboard
+  const Clipboard = await import('expo-clipboard');
+  await Clipboard.default.setStringAsync(json);
 }
 
 // ─── Import ───────────────────────────────────────────────────────────────────

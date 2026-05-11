@@ -7,7 +7,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
 import { fmtDate, confirmDelete } from '../utils';
-import { exportSessionJSON } from '../utils/export';
+import { exportSessionJSON, copySessionJSON } from '../utils/export';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
 
@@ -208,6 +208,11 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
             } />
             <Btn label="Export JSON" onPress={() =>
               exportSessionJSON(session, compositions).catch(e => Alert.alert('Export failed', e.message))
+            } />
+            <Btn label="Copy JSON" onPress={() =>
+              copySessionJSON(session, compositions)
+                .then(() => Alert.alert('Copied', 'JSON copied to clipboard.'))
+                .catch(e => Alert.alert('Copy failed', e.message))
             } />
           </BtnRow>
         </ScrollView>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,7 @@ import {
   signOut,
 } from '../lib/supabase';
 import { pushRecord } from '../db/sync';
-import { exportAllJSON, parseImportJSON, pickJSONFile } from '../utils/export';
+import { exportAllJSON, copyAllJSON, parseImportJSON, pickJSONFile } from '../utils/export';
 
 // ─── Design primitives ────────────────────────────────────────────────────────
 
@@ -369,6 +369,13 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
               />
               <Row icon="arrow-down-outline" label="Export all as JSON"
                 onPress={() => exportAllJSON(sessions, lessons, compositions).catch(() => {})}
+              />
+              <Row icon="copy-outline" label="Copy all as JSON"
+                onPress={() =>
+                  copyAllJSON(sessions, lessons, compositions)
+                    .then(() => Alert.alert('Copied', 'All data copied to clipboard.'))
+                    .catch(() => {})
+                }
               />
               <Row icon="arrow-up-outline" label="Import from JSON"
                 onPress={handleImport}
