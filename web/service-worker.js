@@ -1,5 +1,5 @@
 // Service worker for Music.log PWA
-const CACHE = 'musiclog-v2';
+const CACHE = 'musiclog-v3';
 const PRECACHE = ['/', '/index.html'];
 
 self.addEventListener('install', e => {
