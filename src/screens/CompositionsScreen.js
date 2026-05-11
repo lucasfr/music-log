@@ -785,6 +785,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
 
       {modal && (
         <CompModal
+          key={modal.id}
           comp={modal}
           onSave={c => { onSave(c); setModal(null); }}
           onClose={() => setModal(null)}
