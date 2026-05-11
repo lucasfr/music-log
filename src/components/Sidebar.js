@@ -59,8 +59,8 @@ export function Sidebar({ activeTab, onNavigate }) {
         })}
       </View>
       <View style={{ flex: 1 }} />
-      {/* About + Settings pinned to bottom */}
-      <View style={{ gap: 2 }}>
+      {/* About + Settings pinned to bottom — same glass container as main nav */}
+      <View style={styles.navContainer}>
         {BOTTOM_ITEMS.map(item => {
           const active = activeTab === item.name;
           return (
