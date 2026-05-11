@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import {
@@ -64,17 +64,8 @@ const isStandalone =
     window.matchMedia('(display-mode: standalone)').matches
   );
 
-export default function App() {
-  const [fontsLoaded] = useFonts({
-    'CormorantGaramond':            CormorantGaramond_400Regular,
-    'CormorantGaramond-Italic':     CormorantGaramond_400Regular_Italic,
-    'CormorantGaramond-Bold':       CormorantGaramond_600SemiBold,
-    'CormorantGaramond-BoldItalic': CormorantGaramond_600SemiBold_Italic,
-    'Lato-Light':                   Lato_300Light,
-    'Lato':                         Lato_400Regular,
-    'Lato-Bold':                    Lato_700Bold,
-  });
-
+function AppInner({ fontsLoaded }) {
+  const insets = useSafeAreaInsets();
   const [ready, setReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -123,13 +114,13 @@ export default function App() {
 
   if (showOnboarding && !(Platform.OS === 'web' && typeof window !== 'undefined' && window.innerWidth >= 768)) {
     return (
-      <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+      <>
         <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
         <View style={{ flex: 1 }}>
           <AppBackground />
           <OnboardingScreen onComplete={completeOnboarding} />
         </View>
-      </SafeAreaProvider>
+      </>
     );
   }
 
@@ -155,7 +146,7 @@ export default function App() {
     };
 
     return (
-      <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+      <>
         <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
         <View style={styles.desktopOuter} onLayout={onLayout}>
           <AppBackground />
@@ -167,7 +158,7 @@ export default function App() {
           </View>
           {showOnboarding && <OnboardingScreen onComplete={completeOnboarding} />}
         </View>
-      </SafeAreaProvider>
+      </>
     );
   }
 
@@ -198,9 +189,9 @@ export default function App() {
               backgroundColor: 'rgba(234,240,245,0.95)',
               borderTopWidth: 0,
               position: 'absolute',
-              height: Platform.OS === 'web' ? 96 : 82 + (Platform.OS === 'ios' ? 20 : 0),
+              height: Platform.OS === 'web' ? (72 + 20) : (72 + insets.bottom),
               paddingTop: 18,
-              paddingBottom: Platform.OS === 'web' ? 12 : Platform.OS === 'ios' ? 16 : 8,
+              paddingBottom: Platform.OS === 'web' ? 20 : (insets.bottom || 8),
               shadowColor: COLOURS.glassShadow,
               shadowOffset: { width: 0, height: -4 },
               shadowOpacity: 1,
@@ -237,7 +228,7 @@ export default function App() {
   );
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+    <>
       <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
       {Platform.OS === 'web' ? (
         isStandalone ? (
@@ -248,6 +239,24 @@ export default function App() {
           </View>
         )
       ) : mobileContent}
+    </>
+  );
+}
+
+export default function App() {
+  const [fontsLoaded] = useFonts({
+    'CormorantGaramond':            CormorantGaramond_400Regular,
+    'CormorantGaramond-Italic':     CormorantGaramond_400Regular_Italic,
+    'CormorantGaramond-Bold':       CormorantGaramond_600SemiBold,
+    'CormorantGaramond-BoldItalic': CormorantGaramond_600SemiBold_Italic,
+    'Lato-Light':                   Lato_300Light,
+    'Lato':                         Lato_400Regular,
+    'Lato-Bold':                    Lato_700Bold,
+  });
+
+  return (
+    <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+      <AppInner fontsLoaded={fontsLoaded} />
     </SafeAreaProvider>
   );
 }
