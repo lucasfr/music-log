@@ -138,15 +138,7 @@ async function downloadJSON(payload, filename) {
 
 async function copyToClipboard(payload) {
   const json = JSON.stringify(payload, null, 2);
-
-  if (Platform.OS === 'web') {
-    await navigator.clipboard.writeText(json);
-    return;
-  }
-
-  // Native: expo-clipboard
-  const Clipboard = await import('expo-clipboard');
-  await Clipboard.default.setStringAsync(json);
+  await navigator.clipboard.writeText(json);
 }
 
 // ─── Import ───────────────────────────────────────────────────────────────────
