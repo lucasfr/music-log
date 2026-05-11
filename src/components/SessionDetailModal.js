@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
-import { fmtDate } from '../utils';
+import { fmtDate, confirmDelete } from '../utils';
 import { exportSessionJSON } from '../utils/export';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
@@ -204,10 +204,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
 
           <BtnRow>
             <Btn label="Delete" variant="danger" onPress={() =>
-              Alert.alert('Delete session?', fmtDate(session.date), [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => { onDelete(session.id); onClose(); } },
-              ])
+              confirmDelete('Delete session?', fmtDate(session.date), () => { onDelete(session.id); onClose(); })
             } />
             <Btn label="Export JSON" onPress={() =>
               exportSessionJSON(session, compositions).catch(e => Alert.alert('Export failed', e.message))

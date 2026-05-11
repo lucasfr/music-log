@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
-import { fmtDate } from '../utils';
+import { fmtDate, confirmDelete } from '../utils';
 import { exportSessionJSON } from '../utils/export';
 
 export function LessonDetailModal({ visible, lesson, compositions, onClose, onDelete }) {
@@ -137,10 +137,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
 
           <BtnRow>
             <Btn label="Delete" variant="danger" onPress={() =>
-              Alert.alert('Delete lesson?', fmtDate(lesson.date), [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => { onDelete(lesson.id); onClose(); } },
-              ])
+              confirmDelete('Delete lesson?', fmtDate(lesson.date), () => { onDelete(lesson.id); onClose(); })
             } />
             <Btn label="Export JSON" onPress={() =>
               exportSessionJSON(lesson, compositions).catch(e => Alert.alert('Export failed', e.message))

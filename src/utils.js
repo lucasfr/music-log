@@ -1,3 +1,5 @@
+import { Alert, Platform } from 'react-native';
+
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
@@ -22,4 +24,16 @@ export function fmtDateShort(iso) {
     day: 'numeric',
     month: 'short',
   });
+}
+
+// Alert.alert is a no-op on web — use window.confirm there instead
+export function confirmDelete(title, message, onConfirm) {
+  if (Platform.OS === 'web') {
+    if (window.confirm(`${title}\n${message}`)) onConfirm();
+  } else {
+    Alert.alert(title, message, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: onConfirm },
+    ]);
+  }
 }
