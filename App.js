@@ -137,7 +137,7 @@ function AppInner({ fontsLoaded }) {
         case 'Home':     return <HomeScreen     key="home"     {...screenProps} />;
         case 'Calendar': return <CalendarScreen key="calendar" {...screenProps} />;
         case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
-        case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} isDesktop={isDesktop} />;
+        case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} lessons={lessons} isDesktop={isDesktop} />;
         case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />;
         case 'About':    return <AboutScreen    key="about"    isDesktop={isDesktop} />;
         default:         return <HomeScreen     key="home"     {...screenProps} />;
@@ -214,7 +214,7 @@ function AppInner({ fontsLoaded }) {
             {() => <CompositionsScreen compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Stats">
-            {() => <StatsScreen sessions={sessions} compositions={compositions} isDesktop={false} />}
+            {() => <StatsScreen sessions={sessions} compositions={compositions} lessons={lessons} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Settings">
             {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />}

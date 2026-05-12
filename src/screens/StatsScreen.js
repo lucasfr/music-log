@@ -56,7 +56,7 @@ function buildYear(year, dateMap) {
   return months;
 }
 
-function ActivityGrid({ sessions }) {
+function ActivityGrid({ sessions, lessons }) {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const [width, setWidth] = useState(0);
@@ -65,6 +65,8 @@ function ActivityGrid({ sessions }) {
   sessions.forEach(s => {
     dateMap[s.date] = (dateMap[s.date] || 0) + (Number(s.duration) || 0);
   });
+
+  const lessonDates = new Set((lessons || []).map(l => l.date));
 
   const months = buildYear(year, dateMap);
 
@@ -114,15 +116,28 @@ function ActivityGrid({ sessions }) {
                         const color = day.isFuture
                           ? 'rgba(0,0,0,0.05)'
                           : cellColor(day.duration) || 'rgba(140,32,69,0.07)';
+                        const isLesson = lessonDates.has(day.iso);
                         const isToday = day.iso === new Date().toISOString().slice(0, 10);
                         return (
-                          <View key={di} style={{
-                            width: cell, height: cell,
-                            borderRadius: Math.max(1, cell * 0.2),
-                            backgroundColor: color,
-                            borderWidth: isToday ? 1 : 0,
-                            borderColor: COLOURS.navy,
-                          }} />
+                          <View key={di} style={{ width: cell, height: cell, position: 'relative' }}>
+                            <View style={{
+                              width: cell, height: cell,
+                              borderRadius: Math.max(1, cell * 0.2),
+                              backgroundColor: color,
+                              borderWidth: isToday ? 1 : 0,
+                              borderColor: COLOURS.navy,
+                            }} />
+                            {isLesson && (
+                              <View style={{
+                                position: 'absolute',
+                                top: -2, right: -2,
+                                width: Math.max(3, Math.round(cell * 0.28)),
+                                height: Math.max(3, Math.round(cell * 0.28)),
+                                borderRadius: 99,
+                                backgroundColor: COLOURS.amber,
+                              }} />
+                            )}
+                          </View>
                         );
                       })}
                     </View>
@@ -144,7 +159,9 @@ function ActivityGrid({ sessions }) {
             backgroundColor: d === 0 ? 'rgba(140,32,69,0.07)' : cellColor(d),
           }} />
         ))}
-        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2 }}>More</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2, marginRight: 8 }}>More</Text>
+        <View style={{ width: Math.max(3, Math.round(cell * 0.28)), height: Math.max(3, Math.round(cell * 0.28)), borderRadius: 99, backgroundColor: COLOURS.amber }} />
+        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>Lesson</Text>
       </View>
     </View>
   );
@@ -159,7 +176,7 @@ function TouchableYear({ onPress, label }) {
   );
 }
 
-export default function StatsScreen({ sessions, compositions, isDesktop }) {
+export default function StatsScreen({ sessions, compositions, lessons, isDesktop }) {
 
   const last30 = sessions.filter(s => {
     const d = new Date(s.date + 'T12:00:00');
@@ -255,7 +272,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
 
         <SectionTitle>Activity</SectionTitle>
         <GlassCard>
-          <ActivityGrid sessions={sessions} />
+          <ActivityGrid sessions={sessions} lessons={lessons} />
         </GlassCard>
 
         <SectionTitle>Last 14 days</SectionTitle>
