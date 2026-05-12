@@ -176,7 +176,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
         <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
           <View style={{ flexDirection: 'row', marginBottom: 6 }}>
             {DAYS.map((d, i) => (
-              <View key={i} style={{ width: cellW, height: 36, alignItems: 'center', justifyContent: 'center' }}>
+              <View key={i} style={{ flex: 1, height: 36, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy, opacity: 0.7, letterSpacing: 0.5 }}>{d}</Text>
               </View>
             ))}
@@ -185,7 +185,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
           {Array.from({ length: cells.length / 7 }, (_, row) => (
             <View key={row} style={{ flexDirection: 'row' }}>
               {cells.slice(row * 7, row * 7 + 7).map((day, col) => {
-                if (!day) return <View key={col} style={{ width: cellW, height: cellH }} />;
+                if (!day) return <View key={col} style={{ flex: 1, height: cellH }} />;
                 const iso         = isoFor(viewYear, viewMonth, day);
                 const daySessions = sessionsByDate[iso] || [];
                 const dayLessons  = lessonsByDate[iso]  || [];
@@ -196,7 +196,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
                 return (
                   <TouchableOpacity key={col} onPress={() => !isFuture && onDayPress(day, iso)}
                     activeOpacity={isFuture ? 1 : 0.7}
-                    style={{ width: cellW, height: cellH, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 8, borderRadius: RADIUS.sm, position: 'relative',
+                    style={{ flex: 1, height: cellH, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 8, borderRadius: RADIUS.sm, position: 'relative',
                       backgroundColor: isSelected ? 'rgba(9,99,126,0.15)' : isToday ? 'rgba(9,99,126,0.08)' : 'transparent' }}>
                     <DayDots hasPractice={daySessions.length > 0} hasLesson={dayLessons.length > 0} />
                     <Text style={{ fontFamily: isToday ? 'Lato-Bold' : 'Lato', fontSize: Math.max(SIZES.body, Math.round(cellW * 0.28)),
