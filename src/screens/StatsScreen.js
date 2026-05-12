@@ -135,12 +135,12 @@ function ActivityGrid({ sessions, lessons }) {
                                 justifyContent: 'center',
                               }}>
                                 <View style={{
-                                  width: Math.max(3, Math.round(cell * 0.32)),
-                                  height: Math.max(3, Math.round(cell * 0.32)),
+                                  width: Math.round(cell * 0.55),
+                                  height: Math.round(cell * 0.55),
                                   borderRadius: 99,
                                   backgroundColor: COLOURS.amber,
-                                  borderWidth: 1.5,
-                                  borderColor: 'rgba(255,255,255,0.9)',
+                                  borderWidth: 2,
+                                  borderColor: 'rgba(255,255,255,0.95)',
                                 }} />
                               </View>
                             )}
@@ -167,7 +167,7 @@ function ActivityGrid({ sessions, lessons }) {
           }} />
         ))}
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2, marginRight: 8 }}>More</Text>
-        <View style={{ width: Math.max(3, Math.round(cell * 0.32)), height: Math.max(3, Math.round(cell * 0.32)), borderRadius: 99, backgroundColor: COLOURS.amber, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.9)' }} />
+        <View style={{ width: Math.round(cell * 0.55), height: Math.round(cell * 0.55), borderRadius: 99, backgroundColor: COLOURS.amber, borderWidth: 2, borderColor: 'rgba(255,255,255,0.95)' }} />
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>Lesson</Text>
       </View>
     </View>
