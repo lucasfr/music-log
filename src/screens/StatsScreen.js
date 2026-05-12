@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
@@ -12,106 +12,150 @@ const STATUS_TEXT_COLOURS = {
   'performance-ready': COLOURS.success,
 };
 
-// ─── Activity grid (GitHub-style) ───────────────────────────────────────────
+// ─── Activity grid (Jan–Dec calendar year) ──────────────────────────────────
 
-const WEEKS = 53;
-const CELL  = 11;
-const GAP   = 3;
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY_LABELS   = ['M','T','W','T','F','S','S'];
+const GAP = 2;
 
 function cellColor(duration) {
-  if (!duration) return 'rgba(140,32,69,0.07)';
-  if (duration < 20)  return 'rgba(140,32,69,0.22)';
-  if (duration < 40)  return 'rgba(140,32,69,0.45)';
-  if (duration < 60)  return 'rgba(140,32,69,0.68)';
+  if (!duration)      return null; // empty — handled by caller
+  if (duration < 20)  return 'rgba(140,32,69,0.25)';
+  if (duration < 40)  return 'rgba(140,32,69,0.50)';
+  if (duration < 60)  return 'rgba(140,32,69,0.75)';
   return '#8C2045';
 }
 
-const FUTURE_CELL = 'rgba(0,0,0,0.06)';
+function buildYear(year, dateMap) {
+  // Returns array of 12 months, each an array of weeks, each an array of 7 days (Mon–Sun)
+  const today = new Date();
+  const todayISO = today.toISOString().slice(0, 10);
+  const months = [];
+
+  for (let m = 0; m < 12; m++) {
+    const firstDay = new Date(year, m, 1);
+    const lastDay  = new Date(year, m + 1, 0);
+    // offset so week starts on Monday
+    const startOffset = (firstDay.getDay() + 6) % 7;
+    const weeks = [];
+    let week = Array(startOffset).fill(null);
+
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const date = new Date(year, m, d);
+      const iso  = date.toISOString().slice(0, 10);
+      const isFuture = iso > todayISO;
+      week.push({ iso, duration: isFuture ? -1 : (dateMap[iso] || 0), isFuture });
+      if (week.length === 7) { weeks.push(week); week = []; }
+    }
+    if (week.length > 0) {
+      while (week.length < 7) week.push(null);
+      weeks.push(week);
+    }
+    months.push(weeks);
+  }
+  return months;
+}
 
 function ActivityGrid({ sessions }) {
+  const currentYear = new Date().getFullYear();
+  const [year, setYear] = useState(currentYear);
+  const [width, setWidth] = useState(0);
+
   const dateMap = {};
-  sessions.forEach(s => { dateMap[s.date] = (dateMap[s.date] || 0) + (Number(s.duration) || 0); });
-
-  const today = new Date();
-  const dayOfWeek = (today.getDay() + 6) % 7; // 0=Mon, 6=Sun
-  const gridEnd = new Date(today);
-  gridEnd.setDate(today.getDate() + (6 - dayOfWeek));
-
-  const gridStart = new Date(gridEnd);
-  gridStart.setDate(gridEnd.getDate() - WEEKS * 7 + 1);
-
-  const cells = Array.from({ length: WEEKS }, (_, col) =>
-    Array.from({ length: 7 }, (_, row) => {
-      const d = new Date(gridStart);
-      d.setDate(gridStart.getDate() + col * 7 + row);
-      const iso = d.toISOString().slice(0, 10);
-      const isFuture = d > today;
-      return { iso, duration: isFuture ? null : (dateMap[iso] || 0), isFuture };
-    })
-  );
-
-  const monthLabels = [];
-  const seen = new Set();
-  cells.forEach((col, ci) => {
-    const month = col[0].iso.slice(0, 7);
-    if (!seen.has(month)) {
-      seen.add(month);
-      const d = new Date(col[0].iso + 'T12:00:00');
-      monthLabels.push({ col: ci, label: d.toLocaleDateString('en-GB', { month: 'short' }) });
-    }
+  sessions.forEach(s => {
+    dateMap[s.date] = (dateMap[s.date] || 0) + (Number(s.duration) || 0);
   });
 
-  const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  const gridW = WEEKS * (CELL + GAP) - GAP;
+  const months = buildYear(year, dateMap);
+
+  // Cell size: fit 12 months × (max 6 weeks) + 11 gaps between months into width
+  // Each month takes (weeks * (cell+GAP) - GAP), but we size by max weeks = 6
+  // Total = 12 * (6*cell + 5*GAP) + 11 * monthGap
+  const MONTH_GAP = 6;
+  const maxWeeks  = 6;
+  // cell = (width - 11*MONTH_GAP - 12*(5*GAP)) / (12 * 6)
+  const cell = width > 0
+    ? Math.max(4, Math.floor((width - 11 * MONTH_GAP - 12 * 5 * GAP) / (12 * maxWeeks)))
+    : 11;
+
+  const totalHeight = 7 * (cell + GAP) - GAP;
+  const dayLabelW   = cell + 2;
 
   return (
-    <View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View>
-          {/* Month labels */}
-          <View style={{ marginLeft: 18, marginBottom: 4, height: 12, position: 'relative' }}>
-            {monthLabels.map(({ col, label }) => (
-              <Text key={label + col} style={{
-                position: 'absolute', left: col * (CELL + GAP),
-                fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, letterSpacing: 0.3,
-              }}>{label}</Text>
-            ))}
-          </View>
+    <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      {/* Year picker */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>{year}</Text>
+        <View style={{ flexDirection: 'row', gap: 6 }}>
+          <TouchableYear onPress={() => setYear(y => y - 1)} label={‹} />
+          {year < currentYear && <TouchableYear onPress={() => setYear(y => y + 1)} label={›} />}
+        </View>
+      </View>
 
-          {/* Grid + day labels */}
-          <View style={{ flexDirection: 'row', gap: 4, alignItems: 'flex-start' }}>
-            <View style={{ gap: GAP, marginTop: 1 }}>
-              {DAY_LABELS.map((l, i) => (
-                <View key={i} style={{ width: 10, height: CELL, justifyContent: 'center' }}>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 8, color: i % 2 === 0 ? COLOURS.textDim : 'transparent', textAlign: 'right' }}>{l}</Text>
-                </View>
-              ))}
-            </View>
-            <View style={{ flexDirection: 'row', gap: GAP }}>
-              {cells.map((col, ci) => (
-                <View key={ci} style={{ gap: GAP }}>
-                  {col.map(({ iso, duration, isFuture }) => (
-                    <View key={iso} style={{
-                      width: CELL, height: CELL, borderRadius: 2,
-                      backgroundColor: isFuture ? FUTURE_CELL : cellColor(duration),
-                    }} />
+      {width > 0 && (
+        <View style={{ flexDirection: 'row', gap: MONTH_GAP }}>
+          {months.map((weeks, mi) => {
+            const monthW = weeks.length * (cell + GAP) - GAP;
+            return (
+              <View key={mi} style={{ width: monthW }}>
+                {/* Month label */}
+                <Text style={{
+                  fontFamily: 'Lato-Bold', fontSize: Math.max(7, cell - 2),
+                  color: COLOURS.textDim, letterSpacing: 0.2,
+                  marginBottom: 4, textAlign: 'center',
+                }}>{MONTHS_SHORT[mi]}</Text>
+
+                {/* Week columns */}
+                <View style={{ flexDirection: 'row', gap: GAP }}>
+                  {weeks.map((week, wi) => (
+                    <View key={wi} style={{ gap: GAP }}>
+                      {week.map((day, di) => {
+                        if (!day) return <View key={di} style={{ width: cell, height: cell }} />;
+                        const color = day.isFuture
+                          ? 'rgba(0,0,0,0.05)'
+                          : cellColor(day.duration) || 'rgba(140,32,69,0.07)';
+                        const isToday = day.iso === new Date().toISOString().slice(0, 10);
+                        return (
+                          <View key={di} style={{
+                            width: cell, height: cell,
+                            borderRadius: Math.max(1, cell * 0.2),
+                            backgroundColor: color,
+                            borderWidth: isToday ? 1 : 0,
+                            borderColor: COLOURS.navy,
+                          }} />
+                        );
+                      })}
+                    </View>
                   ))}
                 </View>
-              ))}
-            </View>
-          </View>
+              </View>
+            );
+          })}
         </View>
-      </ScrollView>
+      )}
 
       {/* Legend */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8, justifyContent: 'flex-end' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12, justifyContent: 'flex-end' }}>
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
         {[0, 15, 35, 55, 75].map(d => (
-          <View key={d} style={{ width: CELL, height: CELL, borderRadius: 2, backgroundColor: cellColor(d) }} />
+          <View key={d} style={{
+            width: cell, height: cell,
+            borderRadius: Math.max(1, cell * 0.2),
+            backgroundColor: d === 0 ? 'rgba(140,32,69,0.07)' : cellColor(d),
+          }} />
         ))}
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2 }}>More</Text>
       </View>
     </View>
+  );
+}
+
+function TouchableYear({ onPress, label }) {
+  return (
+    <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
+      style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>{label}</Text>
+    </TouchableOpacity>
   );
 }
 
