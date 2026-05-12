@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Dimensions, Platform, StyleSheet,
+  View, Text, ScrollView, TouchableOpacity, Platform, StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -257,7 +257,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
   const [selectedDate,    setSelectedDate]    = useState(null);
-  const [leftColWidth,    setLeftColWidth]    = useState(480);
+  const [gridWidth, setGridWidth] = useState(0);
 
   const sessionsByDate = useMemo(() => {
     const m = {};
@@ -290,16 +290,9 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
     else                                                          setDetailSession(daySessions[0]);
   }
 
-  // cellW based on content area after sidebar padding
-  // Sidebar is 200px + 24px left padding + 20px right padding = 244px total
-  const SIDEBAR_OFFSET = 244;
-  const contentW = isDesktop ? Math.max(leftColWidth - SIDEBAR_OFFSET, 200) : Dimensions.get('window').width - 32;
-  // Cap at 700 so the grid doesn't go absurdly wide on ultrawide monitors,
-  // but allow it to breathe well beyond the old 460 limit
-  const gridW   = Math.min(contentW, 700);
-  const cellW   = Math.floor(gridW / 7);
-  // Keep cells roughly square-ish — scale height with width
-  const cellH   = Math.max(58, Math.round(cellW * 0.85));
+  // cellW derived from measured content width (set via onLayout on inner view)
+  const cellW = gridWidth > 0 ? Math.floor(Math.min(gridWidth, 700) / 7) : 44;
+  const cellH = Math.max(58, Math.round(cellW * 0.85));
 
   const modals = (
     <>
@@ -327,7 +320,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
     return (
       <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* Left: calendar glass card */}
-        <View onLayout={e => setLeftColWidth(e.nativeEvent.layout.width)} style={{
+        <View style={{
           flex: 1,
           marginTop: 12,
           marginBottom: 12,
@@ -343,6 +336,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           elevation: 2,
         }}>
           <ScrollView contentContainerStyle={{ paddingTop: 20, paddingBottom: 40, paddingLeft: 224, paddingRight: 24 }}>
+            {/* Measure actual content width after padding */}
+            <View style={{ height: 0 }} onLayout={e => setGridWidth(e.nativeEvent.layout.width)} />
             <CalendarGrid
               sessions={sessions} lessons={lessons}
               viewYear={viewYear} viewMonth={viewMonth}
@@ -432,6 +427,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <View style={{ height: 0 }} onLayout={e => setGridWidth(e.nativeEvent.layout.width)} />
         <CalendarGrid
           sessions={sessions} lessons={lessons}
           viewYear={viewYear} viewMonth={viewMonth}

@@ -21,6 +21,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
   });
 
   const totalMin = last30.reduce((a, s) => a + (Number(s.duration) || 0), 0);
+  const allTimeMin = sessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
   const avgEnergy = last30.length
     ? (last30.reduce((a, s) => a + Number(s.energy), 0) / last30.length).toFixed(1)
     : '—';
@@ -37,17 +38,29 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
   })();
 
   const pieceFreq = {};
+  const pieceEnjoyment = {};
   last30.forEach(s => {
     (s.segments || []).forEach(seg => {
-      if (seg.compositionId) {
-        const name = (compositions.find(c => c.id === seg.compositionId) || {}).title || seg.compositionId;
-        pieceFreq[name] = (pieceFreq[name] || 0) + 1;
-      } else if (seg.title) {
-        pieceFreq[seg.title] = (pieceFreq[seg.title] || 0) + 1;
+      if (seg.type !== 'repertoire') return;
+      const name = seg.compositionId
+        ? (compositions.find(c => c.id === seg.compositionId) || {}).title || seg.compositionId
+        : seg.title;
+      if (!name) return;
+      pieceFreq[name] = (pieceFreq[name] || 0) + 1;
+      if (seg.liking) {
+        if (!pieceEnjoyment[name]) pieceEnjoyment[name] = [];
+        pieceEnjoyment[name].push(seg.liking);
       }
     });
   });
-  const topPieces = Object.entries(pieceFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topPieces = Object.entries(pieceFreq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, count]) => {
+      const joys = pieceEnjoyment[name] || [];
+      const avgLiking = joys.length ? joys.reduce((a, v) => a + v, 0) / joys.length : null;
+      return { name, count, avgLiking };
+    });
 
   const last14 = Array.from({ length: 14 }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (13 - i));
@@ -64,10 +77,10 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
   const barH = 72;
 
   const statItems = [
-    { value: Math.round(totalMin), label: 'minutes practised', emoji: '⏱' },
-    { value: last30.length,        label: 'sessions',           emoji: '🎹' },
-    { value: streak,               label: 'day streak',         emoji: '🔥' },
-    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy', emoji: '⚡' },
+    { value: allTimeMin >= 60 ? `${Math.floor(allTimeMin / 60)}h ${allTimeMin % 60}m` : `${Math.round(allTimeMin)}m`, label: 'total practice', emoji: '⏱' },
+    { value: last30.length,        label: 'sessions (30d)',      emoji: '🎹' },
+    { value: streak,               label: 'day streak',          emoji: '🔥' },
+    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy (30d)', emoji: '⚡' },
   ];
 
   return (
@@ -110,12 +123,21 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
         {topPieces.length > 0 && (
           <>
             <SectionTitle style={{ marginTop: 8 }}>Most practised (30 days)</SectionTitle>
-            {topPieces.map(([name, count]) => (
+        {topPieces.map(({ name, count, avgLiking }) => (
               <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 5 }}>📜 {name}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5, flexWrap: 'wrap' }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>📜 {name}</Text>
+                    {avgLiking !== null && (
+                      <View style={{ flexDirection: 'row', gap: 1 }}>
+                        {[1,2,3,4,5].map(n => (
+                          <Text key={n} style={{ fontSize: 11, opacity: n <= Math.round(avgLiking) ? 1 : 0.18 }}>⭐</Text>
+                        ))}
+                      </View>
+                    )}
+                  </View>
                   <View style={{ height: 5, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3 }}>
-                    <View style={{ height: '100%', width: `${(count / topPieces[0][1]) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
+                    <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
                   </View>
                 </View>
                 <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, minWidth: 24, textAlign: 'right' }}>{count}×</Text>

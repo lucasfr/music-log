@@ -18,26 +18,38 @@ export const TECH_GROUPS = [
 ];
 
 export const SCALE_OPTIONS = [
-  // Major
+  // ── Major (all 12, circle of 5ths) ──────────────────────────────────────
   'C major', 'G major', 'D major', 'A major', 'E major', 'B major',
-  'F major', 'Bb major', 'Eb major', 'Ab major', 'Db major', 'F# major',
-  // Natural minor
-  'A minor', 'E minor', 'B minor', 'F# minor', 'C# minor', 'G# minor',
-  'D minor', 'G minor', 'C minor', 'F minor', 'Bb minor', 'Eb minor',
-  // Harmonic minor
-  'A harmonic minor', 'D harmonic minor', 'G harmonic minor',
-  'E harmonic minor', 'B harmonic minor', 'C harmonic minor',
-  // Melodic minor
-  'A melodic minor', 'D melodic minor', 'G melodic minor',
-  // Modes
+  'F# major', 'Db major', 'Ab major', 'Eb major', 'Bb major', 'F major',
+  // ── Natural minor (all 12, circle of 5ths) ───────────────────────────────
+  'A natural minor', 'E natural minor', 'B natural minor',
+  'F# natural minor', 'C# natural minor', 'G# natural minor',
+  'D# natural minor', 'Bb natural minor', 'F natural minor',
+  'C natural minor', 'G natural minor', 'D natural minor',
+  // ── Harmonic minor (all 12, circle of 5ths) ──────────────────────────────
+  'A harmonic minor', 'E harmonic minor', 'B harmonic minor',
+  'F# harmonic minor', 'C# harmonic minor', 'G# harmonic minor',
+  'D# harmonic minor', 'Bb harmonic minor', 'F harmonic minor',
+  'C harmonic minor', 'G harmonic minor', 'D harmonic minor',
+  // ── Melodic minor (all 12, circle of 5ths) ───────────────────────────────
+  'A melodic minor', 'E melodic minor', 'B melodic minor',
+  'F# melodic minor', 'C# melodic minor', 'G# melodic minor',
+  'D# melodic minor', 'Bb melodic minor', 'F melodic minor',
+  'C melodic minor', 'G melodic minor', 'D melodic minor',
+  // ── Modes ────────────────────────────────────────────────────────────────
   'C Dorian', 'D Dorian', 'G Dorian',
   'C Mixolydian', 'G Mixolydian', 'D Mixolydian',
   'A Phrygian', 'E Phrygian',
-  // Pentatonic
-  'C pentatonic', 'G pentatonic', 'D pentatonic', 'A pentatonic',
+  'C Lydian', 'G Lydian', 'D Lydian',
+  'B Locrian', 'E Locrian',
+  // ── Pentatonic ───────────────────────────────────────────────────────────
+  'C major pentatonic', 'G major pentatonic', 'D major pentatonic',
+  'A major pentatonic', 'E major pentatonic',
   'A minor pentatonic', 'D minor pentatonic', 'E minor pentatonic',
-  // Other
-  'C chromatic', 'Whole tone', 'Diminished', 'Augmented',
+  'G minor pentatonic', 'C minor pentatonic',
+  // ── Other ────────────────────────────────────────────────────────────────
+  'C chromatic', 'Whole tone', 'Diminished (octatonic)', 'Augmented',
+  'Blues (A)', 'Blues (E)', 'Blues (G)',
 ];
 
 export const CHALLENGE_TAGS = [
