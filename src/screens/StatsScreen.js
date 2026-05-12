@@ -12,6 +12,103 @@ const STATUS_TEXT_COLOURS = {
   'performance-ready': COLOURS.success,
 };
 
+// ─── Activity grid (GitHub-style) ───────────────────────────────────────────
+
+const WEEKS = 18;
+const CELL  = 11;
+const GAP   = 3;
+
+function cellColor(duration) {
+  if (!duration) return 'rgba(9,99,126,0.07)';
+  if (duration < 20)  return 'rgba(9,99,126,0.20)';
+  if (duration < 40)  return 'rgba(9,99,126,0.42)';
+  if (duration < 60)  return 'rgba(9,99,126,0.65)';
+  return '#09637E';
+}
+
+function ActivityGrid({ sessions }) {
+  const dateMap = {};
+  sessions.forEach(s => { dateMap[s.date] = (dateMap[s.date] || 0) + (Number(s.duration) || 0); });
+
+  const today = new Date();
+  const dayOfWeek = (today.getDay() + 6) % 7; // 0=Mon, 6=Sun
+  const gridEnd = new Date(today);
+  gridEnd.setDate(today.getDate() + (6 - dayOfWeek));
+
+  const gridStart = new Date(gridEnd);
+  gridStart.setDate(gridEnd.getDate() - WEEKS * 7 + 1);
+
+  const cells = Array.from({ length: WEEKS }, (_, col) =>
+    Array.from({ length: 7 }, (_, row) => {
+      const d = new Date(gridStart);
+      d.setDate(gridStart.getDate() + col * 7 + row);
+      const iso = d.toISOString().slice(0, 10);
+      const isFuture = d > today;
+      return { iso, duration: isFuture ? null : (dateMap[iso] || 0), isFuture };
+    })
+  );
+
+  const monthLabels = [];
+  const seen = new Set();
+  cells.forEach((col, ci) => {
+    const month = col[0].iso.slice(0, 7);
+    if (!seen.has(month)) {
+      seen.add(month);
+      const d = new Date(col[0].iso + 'T12:00:00');
+      monthLabels.push({ col: ci, label: d.toLocaleDateString('en-GB', { month: 'short' }) });
+    }
+  });
+
+  const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const gridW = WEEKS * (CELL + GAP) - GAP;
+
+  return (
+    <View>
+      {/* Month labels */}
+      <View style={{ marginLeft: 18, marginBottom: 4, height: 12, position: 'relative' }}>
+        {monthLabels.map(({ col, label }) => (
+          <Text key={label + col} style={{
+            position: 'absolute', left: col * (CELL + GAP),
+            fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, letterSpacing: 0.3,
+          }}>{label}</Text>
+        ))}
+      </View>
+
+      {/* Grid + day labels */}
+      <View style={{ flexDirection: 'row', gap: 4, alignItems: 'flex-start' }}>
+        <View style={{ gap: GAP, marginTop: 1 }}>
+          {DAY_LABELS.map((l, i) => (
+            <View key={i} style={{ width: 10, height: CELL, justifyContent: 'center' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 8, color: i % 2 === 0 ? COLOURS.textDim : 'transparent', textAlign: 'right' }}>{l}</Text>
+            </View>
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row', gap: GAP }}>
+          {cells.map((col, ci) => (
+            <View key={ci} style={{ gap: GAP }}>
+              {col.map(({ iso, duration, isFuture }) => (
+                <View key={iso} style={{
+                  width: CELL, height: CELL, borderRadius: 2,
+                  backgroundColor: isFuture ? 'transparent' : cellColor(duration),
+                }} />
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* Legend */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8, justifyContent: 'flex-end' }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
+        {[0, 15, 35, 55, 75].map(d => (
+          <View key={d} style={{ width: CELL, height: CELL, borderRadius: 2, backgroundColor: cellColor(d) }} />
+        ))}
+        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2 }}>More</Text>
+      </View>
+    </View>
+  );
+}
+
 export default function StatsScreen({ sessions, compositions, isDesktop }) {
 
   const last30 = sessions.filter(s => {
@@ -105,6 +202,11 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
             </View>
           ))}
         </View>
+
+        <SectionTitle>Activity</SectionTitle>
+        <GlassCard>
+          <ActivityGrid sessions={sessions} />
+        </GlassCard>
 
         <SectionTitle>Last 14 days</SectionTitle>
         <GlassCard style={{ paddingBottom: 8 }}>
