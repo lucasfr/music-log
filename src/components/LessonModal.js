@@ -23,11 +23,14 @@ function ZeldaBar({ emoji, value, onChange }) {
 }
 
 
-export function LessonModal({ visible, onClose, onSave, compositions, initialDate, inline }) {
+function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
+function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
+
+export function LessonModal({ visible, onClose, onSave, compositions, initialDate, initialLesson, inline }) {
   const [date, setDate]             = useState(initialDate || '');
   const [teacher, setTeacher]       = useState('');
   const [duration, setDuration]     = useState('60');
-  const [energy, setEnergy]         = useState(0);
+  const [energyBar, setEnergyBar]   = useState(0);
   const [enjoyment, setEnjoyment]   = useState(0);
   const [pieces, setPieces]         = useState([]);
   const [overallNotes, setOverallNotes] = useState('');
@@ -36,13 +39,25 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
 
   useEffect(() => {
     if (visible || inline) {
-      setDate(initialDate || '');
-      setTeacher(''); setDuration('60');
-      setEnergy(0); setEnjoyment(0);
-      setPieces([]); setOverallNotes('');
-      setWins(''); setNextFocus('');
+      if (initialLesson) {
+        setDate(initialLesson.date || '');
+        setTeacher(initialLesson.teacher || '');
+        setDuration(initialLesson.duration ? String(initialLesson.duration) : '60');
+        setEnergyBar(energyValueToBar(initialLesson.energy));
+        setEnjoyment(initialLesson.enjoyment || 0);
+        setPieces(initialLesson.segments || initialLesson.pieces || []);
+        setOverallNotes(initialLesson.overallNotes || '');
+        setWins(initialLesson.wins || '');
+        setNextFocus(initialLesson.nextFocus || '');
+      } else {
+        setDate(initialDate || '');
+        setTeacher(''); setDuration('60');
+        setEnergyBar(0); setEnjoyment(0);
+        setPieces([]); setOverallNotes('');
+        setWins(''); setNextFocus('');
+      }
     }
-  }, [visible, inline, initialDate]);
+  }, [visible, inline, initialDate, initialLesson]);
 
   function addPiece(type = 'repertoire') {
     setPieces(p => [...p, { id: uid(), type, compositionId: '', title: '', group: '', notes: '', feedback: '', assignment: '', isNew: false, section: '', duration: '', feltDifficulty: 0, liking: 0, challenges: [], progress: [], scales: [], octaves: 1 }]);
@@ -53,11 +68,12 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
   function handleSave() {
     if (!date) { Alert.alert('Date required'); return; }
     onSave({
-      id: uid(), type: 'lesson', date, teacher,
+      id: initialLesson?.id || uid(),
+      type: 'lesson', date, teacher,
       duration: Number(duration) || 60,
-      energy: energy || null, enjoyment: enjoyment || null,
-      pieces, overallNotes, wins, nextFocus,
-      createdAt: new Date().toISOString(),
+      energy: energyBarToValue(energyBar), enjoyment: enjoyment || null,
+      segments: pieces, overallNotes, wins, nextFocus,
+      createdAt: initialLesson?.createdAt || new Date().toISOString(),
     });
     onClose();
   }
@@ -84,11 +100,12 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
         <View style={{ flexDirection: 'row', gap: 20 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Energy</Text>
-            <ZeldaBar emoji="⚡" value={energy} onChange={setEnergy} />
+            <ZeldaBar emoji="⚡" value={energyBar} onChange={setEnergyBar} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Enjoyment</Text>
             <ZeldaBar emoji="❤️" value={enjoyment} onChange={setEnjoyment} />
+
           </View>
         </View>
       </GlassCard>

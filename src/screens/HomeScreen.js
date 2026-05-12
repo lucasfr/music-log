@@ -101,10 +101,10 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
 
 function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelected = false }) {
   const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
-  const pieceNames = [...new Set((lesson.pieces || []).map(p =>
-    p.compositionId ? compName(p.compositionId) : p.pieceName
+  const pieceNames = [...new Set((lesson.segments || lesson.pieces || []).map(p =>
+    p.compositionId ? compName(p.compositionId) : (p.title || p.pieceName)
   ).filter(Boolean))];
-  const newPieces = (lesson.pieces || []).filter(p => p.isNew);
+  const newPieces = (lesson.segments || lesson.pieces || []).filter(p => p.isNew);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
@@ -230,7 +230,7 @@ function GlassBtn({ label, onPress, color, danger, small }) {
 
 // ─── Desktop detail panel ─────────────────────────────────────────────────────
 
-function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onCloseLesson, onDeleteSession, onDeleteLesson, onEditSession }) {
+function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onCloseLesson, onDeleteSession, onDeleteLesson, onEditSession, onEditLesson }) {
   const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
 
   if (session) {
@@ -383,50 +383,127 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
   }
 
   if (lesson) {
-    const compNames = [...new Set((lesson.pieces || []).map(p =>
-      p.compositionId ? compName(p.compositionId) : p.pieceName
-    ).filter(Boolean))];
+    const allSegs  = lesson.segments || lesson.pieces || [];
+    const techSegs = allSegs.filter(s => s.type === 'technique');
+    const repSegs  = allSegs.filter(s => s.type === 'repertoire');
+    const energyLabel = ENERGY_LABELS[String(lesson.energy)] || '';
     return (
       <View style={{ flex: 1 }}>
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <View>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>{fmtDate(lesson.date)}</Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>🎓 {lesson.duration} min · {lesson.teacher}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>🎓 Lesson{lesson.teacher ? ` · ${lesson.teacher}` : ''}{lesson.duration ? ` · ${lesson.duration} min` : ''}</Text>
           </View>
-          <GlassBtn label="✕" onPress={onCloseLesson} color={COLOURS.textDim} />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {onEditLesson && <GlassBtn label="Edit" onPress={() => onEditLesson(lesson)} color={COLOURS.steel} />}
+            <GlassBtn label="✕" onPress={onCloseLesson} color={COLOURS.textDim} />
+          </View>
+        </View>
+
+        {/* Summary chip */}
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+          <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 lesson</Text>
+          </View>
+          {lesson.duration ? (
+            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.65)', shadowColor: 'rgba(9,99,126,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {lesson.duration} min</Text>
+            </View>
+          ) : null}
         </View>
 
         {/* Energy + enjoyment */}
-        {(lesson.energy || lesson.enjoyment) ? (
+        {(lesson.energy != null || lesson.enjoyment) ? (
           <BlurView intensity={40} tint="light" style={glass.card}>
             <View style={glass.inner}>
               <View style={{ flexDirection: 'row', gap: 28 }}>
-                {lesson.energy ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy</Text><ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} size={22} /></View> : null}
+                {lesson.energy != null ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy{energyLabel ? ` · ${energyLabel}` : ''}</Text><ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} size={22} /></View> : null}
                 {lesson.enjoyment ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>❤️ Enjoyment</Text><ZeldaMini emoji="❤️" value={lesson.enjoyment} size={22} /></View> : null}
               </View>
             </View>
           </BlurView>
         ) : null}
 
-        {/* Pieces */}
-        {compNames.length > 0 && (
+        {/* Technique segments */}
+        {techSegs.length > 0 && (
           <BlurView intensity={40} tint="light" style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Pieces</Text>
-              {(lesson.pieces || []).map((item, i) => {
-                const name = item.compositionId ? compName(item.compositionId) : item.pieceName;
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
+              {techSegs.map(seg => (
+                <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
+                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                  </View>
+                  {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.join(' · ')}{seg.octaves ? ` · ${seg.octaves} oct` : ''}</Text>}
+                  {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
+                  {seg.assignment ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>📚 Assignment</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text></View> : null}
+                  {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+                  {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                      {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>{t}</Text></View>)}
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          </BlurView>
+        )}
+
+        {/* Repertoire segments */}
+        {repSegs.length > 0 && (
+          <BlurView intensity={40} tint="light" style={glass.card}>
+            <View style={[glass.inner, { paddingBottom: 8 }]}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
+              {repSegs.map(seg => {
+                const name = seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName);
                 return (
-                  <View key={i} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.amber, marginBottom: 10 }}>
-                    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, marginBottom: 4 }}>📜 {name || 'Piece'}</Text>
-                    {item.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>💬 {item.feedback}</Text> : null}
-                    {item.assignment ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20, marginTop: 4 }}>📚 {item.assignment}</Text> : null}
+                  <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.amber, marginBottom: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
+                      {seg.isNew && <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: '#5C2D6E' }}>new</Text></View>}
+                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                    </View>
+                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                    {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
+                    {seg.assignment ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>📚 Assignment</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text></View> : null}
+                    {seg.feltDifficulty ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Difficulty</Text>
+                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}</View>
+                      </View>
+                    ) : null}
+                    {seg.liking ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Liking</Text>
+                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 13, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>)}</View>
+                      </View>
+                    ) : null}
+                    {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+                    {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                        {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>{t}</Text></View>)}
+                      </View>
+                    )}
                   </View>
                 );
               })}
             </View>
           </BlurView>
         )}
+
+        {/* Lesson notes */}
+        {lesson.overallNotes ? (
+          <BlurView intensity={40} tint="light" style={glass.card}>
+            <View style={glass.inner}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Lesson notes</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text>
+            </View>
+          </BlurView>
+        ) : null}
 
         {/* Wins */}
         {lesson.wins ? (
@@ -438,7 +515,20 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
           </BlurView>
         ) : null}
 
-        <GlassBtn label="Delete lesson" danger small onPress={() => confirmDelete('Delete lesson?', fmtDate(lesson.date), () => onDeleteLesson(lesson.id))} color={COLOURS.danger} />
+        {/* Next focus */}
+        {lesson.nextFocus ? (
+          <BlurView intensity={40} tint="light" style={glass.card}>
+            <View style={glass.inner}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text>
+            </View>
+          </BlurView>
+        ) : null}
+
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+          <GlassBtn label="Export JSON" small onPress={() => exportSessionJSON(lesson, compositions).catch(() => {})} color={COLOURS.steel} />
+          <GlassBtn label="Delete" danger small onPress={() => confirmDelete('Delete lesson?', fmtDate(lesson.date), () => onDeleteLesson(lesson.id))} color={COLOURS.red} />
+        </View>
       </View>
     );
   }
@@ -453,6 +543,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [logModalDate,    setLogModalDate]    = useState(null);
   const [logModalSession, setLogModalSession] = useState(null);
   const [lessonModalDate, setLessonModalDate] = useState(null);
+  const [lessonModalLesson, setLessonModalLesson] = useState(null);
   const [detailSession,   setDetailSession]   = useState(null);
   const [detailLesson,    setDetailLesson]    = useState(null);
   const [rightPanel,      setRightPanel]      = useState(null); // 'detail-session' | 'detail-lesson' | 'log-session' | 'log-lesson'
@@ -464,11 +555,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     if (isDesktop) { setLogModalSession(session || null); setLogModalDate(date || today); setRightPanel('log-session'); }
     else { setLogModalSession(session || null); setLogModalDate(date || today); }
   }
-  function openLogLesson(date) {
-    if (isDesktop) { setLessonModalDate(date || today); setRightPanel('log-lesson'); }
-    else setLessonModalDate(date || today);
+  function openLogLesson(date, lesson) {
+    if (isDesktop) { setLessonModalLesson(lesson || null); setLessonModalDate(date || today); setRightPanel('log-lesson'); }
+    else { setLessonModalLesson(lesson || null); setLessonModalDate(date || today); }
   }
-  function closeRight() { setRightPanel(null); setDetailSession(null); setDetailLesson(null); setLogModalDate(null); setLogModalSession(null); setLessonModalDate(null); }
+  function closeRight() { setRightPanel(null); setDetailSession(null); setDetailLesson(null); setLogModalDate(null); setLogModalSession(null); setLessonModalDate(null); setLessonModalLesson(null); }
 
   const todaySessions = useMemo(() => sessions.filter(s => s.date === today), [sessions, today]);
   const todayLessons  = useMemo(() => (lessons || []).filter(l => l.date === today), [lessons, today]);
@@ -495,11 +586,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             onClose={() => { setLogModalDate(null); setLogModalSession(null); }}
           />
           <LessonModal
-            visible={!!lessonModalDate}
-            initialDate={lessonModalDate || ''}
+            visible={!!lessonModalDate || !!lessonModalLesson}
+            initialDate={lessonModalLesson?.date || lessonModalDate || ''}
+            initialLesson={lessonModalLesson}
             compositions={compositions}
-            onSave={l => { onSaveLesson(l); setLessonModalDate(null); }}
-            onClose={() => setLessonModalDate(null)}
+            onSave={l => { onSaveLesson(l); setLessonModalDate(null); setLessonModalLesson(null); }}
+            onClose={() => { setLessonModalDate(null); setLessonModalLesson(null); }}
           />
           <SessionDetailModal
             visible={!!detailSession}
@@ -515,6 +607,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             compositions={compositions}
             onClose={() => setDetailLesson(null)}
             onDelete={id => { onDeleteLesson(id); setDetailLesson(null); }}
+            onEdit={l => { setDetailLesson(null); setLessonModalLesson(l); }}
           />
         </>
       )}
@@ -638,7 +731,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           {rightPanel === 'log-lesson' && (
             <LessonModal
               inline
-              initialDate={lessonModalDate || today}
+              initialDate={lessonModalLesson?.date || lessonModalDate || today}
+              initialLesson={lessonModalLesson}
               compositions={compositions}
               onSave={l => { onSaveLesson(l); closeRight(); }}
               onClose={closeRight}
@@ -655,6 +749,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                 onDeleteSession={id => { onDelete(id); closeRight(); }}
                 onDeleteLesson={id => { onDeleteLesson(id); closeRight(); }}
                 onEditSession={s => openLogSession(s.date, s)}
+                onEditLesson={l => openLogLesson(l.date, l)}
               />
             </ScrollView>
           )}
