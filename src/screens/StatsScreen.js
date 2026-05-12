@@ -130,12 +130,19 @@ function ActivityGrid({ sessions, lessons }) {
                             {isLesson && (
                               <View style={{
                                 position: 'absolute',
-                                top: -2, right: -2,
-                                width: Math.max(3, Math.round(cell * 0.28)),
-                                height: Math.max(3, Math.round(cell * 0.28)),
-                                borderRadius: 99,
-                                backgroundColor: COLOURS.amber,
-                              }} />
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}>
+                                <View style={{
+                                  width: Math.max(3, Math.round(cell * 0.32)),
+                                  height: Math.max(3, Math.round(cell * 0.32)),
+                                  borderRadius: 99,
+                                  backgroundColor: COLOURS.amber,
+                                  borderWidth: 1.5,
+                                  borderColor: 'rgba(255,255,255,0.9)',
+                                }} />
+                              </View>
                             )}
                           </View>
                         );
@@ -160,7 +167,7 @@ function ActivityGrid({ sessions, lessons }) {
           }} />
         ))}
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2, marginRight: 8 }}>More</Text>
-        <View style={{ width: Math.max(3, Math.round(cell * 0.28)), height: Math.max(3, Math.round(cell * 0.28)), borderRadius: 99, backgroundColor: COLOURS.amber }} />
+        <View style={{ width: Math.max(3, Math.round(cell * 0.32)), height: Math.max(3, Math.round(cell * 0.32)), borderRadius: 99, backgroundColor: COLOURS.amber, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.9)' }} />
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>Lesson</Text>
       </View>
     </View>
