@@ -552,10 +552,16 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
               <>
                 {comp.info ? <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22, marginBottom: 14 }}>{comp.info}</Text> : null}
                 <BtnRow>
-                  <Btn label="Remove" variant="danger" onPress={() => Alert.alert('Remove piece?', comp.title, [
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Remove', style: 'destructive', onPress: () => onDelete(comp.id) },
-                  ])} />
+                  <Btn label="Remove" variant="danger" onPress={() => {
+                    if (Platform.OS === 'web') {
+                      if (window.confirm(`Remove "${comp.title}" from your library?`)) onDelete(comp.id);
+                    } else {
+                      Alert.alert('Remove piece?', comp.title, [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Remove', style: 'destructive', onPress: () => onDelete(comp.id) },
+                      ]);
+                    }
+                  }} />
                   <Btn label="Edit" onPress={() => onEdit(comp)} />
                 </BtnRow>
               </>
