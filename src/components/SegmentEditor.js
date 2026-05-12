@@ -115,7 +115,7 @@ function ScalesPicker({ selected = [], onChange }) {
   );
 }
 
-export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
+export function SegmentEditor({ segment, onChange, onRemove, compositions, lessonMode = false }) {
   const [open, setOpen] = useState(true);
   const isTech = segment.type === 'technique';
   const field = (k, v) => onChange({ ...segment, [k]: v });
@@ -316,9 +316,20 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions }) {
             </>
           )}
 
-          <Field label="Notes" icon="create-outline">
-            <TextF value={segment.notes || ''} onChange={v => field('notes', v)} placeholder="Observations, what clicked, what to work on…" multiline />
-          </Field>
+          {lessonMode ? (
+            <>
+              <Field label="Teacher feedback" icon="chatbubble-outline">
+                <TextF value={segment.feedback || ''} onChange={v => field('feedback', v)} placeholder="What Kerrin said…" multiline />
+              </Field>
+              <Field label="Assignment" icon="book-outline">
+                <TextF value={segment.assignment || ''} onChange={v => field('assignment', v)} placeholder="What to practise before next lesson…" multiline />
+              </Field>
+            </>
+          ) : (
+            <Field label="Notes" icon="create-outline">
+              <TextF value={segment.notes || ''} onChange={v => field('notes', v)} placeholder="Observations, what clicked, what to work on…" multiline />
+            </Field>
+          )}
 
           <Field label="Felt difficulty" icon="speedometer-outline">
             <ZeldaBar emoji="🎵" value={segment.feltDifficulty || 0} onChange={v => field('feltDifficulty', v)} />
