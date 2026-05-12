@@ -81,8 +81,26 @@ export default function HistoryScreen({ sessions, compositions, onDelete }) {
                   <View style={{ borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, padding: 14, backgroundColor: 'rgba(255,255,255,0.30)' }}>
                     {(s.segments || []).map(seg => (
                       <View key={seg.id} style={{ marginBottom: 10, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: seg.type === 'technique' ? COLOURS.steel : COLOURS.navy }}>
-                        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>{seg.title || seg.group || (seg.type === 'technique' ? 'Technique' : 'Repertoire')}</Text>
+                        <Text style={{ fontFamily: 'SourceSans3-Bold', fontSize: 13, color: COLOURS.text }}>{seg.compositionId ? compName(seg.compositionId) : seg.title || seg.group || (seg.type === 'technique' ? 'Technique' : 'Repertoire')}</Text>
                         {seg.section ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 12, color: COLOURS.textDim }}>Section: {seg.section}</Text> : null}
+                        {(seg.liking > 0 || seg.feltDifficulty > 0) ? (
+                          <View style={{ flexDirection: 'row', gap: 10, marginTop: 3, alignItems: 'center' }}>
+                            {seg.liking > 0 && (
+                              <View style={{ flexDirection: 'row', gap: 1 }}>
+                                {[1,2,3,4,5].map(n => (
+                                  <Text key={n} style={{ fontSize: 11, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>
+                                ))}
+                              </View>
+                            )}
+                            {seg.feltDifficulty > 0 && (
+                              <View style={{ flexDirection: 'row', gap: 1 }}>
+                                {[1,2,3,4,5].map(n => (
+                                  <Text key={n} style={{ fontSize: 11, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
+                                ))}
+                              </View>
+                            )}
+                          </View>
+                        ) : null}
                         {seg.notes  ? <Text style={{ fontFamily: 'SourceSans3', fontSize: 13, color: COLOURS.textMuted, marginTop: 3, lineHeight: 19 }}>{seg.notes}</Text> : null}
                       </View>
                     ))}

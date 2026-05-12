@@ -642,15 +642,29 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
                         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 4 }}>📍 {seg.section}</Text>
                       ) : null}
 
-                      {/* Felt difficulty */}
-                      {seg?.feltDifficulty ? (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Difficulty</Text>
-                          <View style={{ flexDirection: 'row', gap: 2 }}>
-                            {[1,2,3,4,5].map(n => (
-                              <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
-                            ))}
-                          </View>
+                      {/* Felt difficulty + piece liking */}
+                      {(seg?.feltDifficulty > 0 || seg?.liking > 0) ? (
+                        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 4, alignItems: 'center' }}>
+                          {seg?.feltDifficulty > 0 && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Difficulty</Text>
+                              <View style={{ flexDirection: 'row', gap: 2 }}>
+                                {[1,2,3,4,5].map(n => (
+                                  <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
+                                ))}
+                              </View>
+                            </View>
+                          )}
+                          {seg?.liking > 0 && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Enjoyment</Text>
+                              <View style={{ flexDirection: 'row', gap: 2 }}>
+                                {[1,2,3,4,5].map(n => (
+                                  <Text key={n} style={{ fontSize: 13, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>
+                                ))}
+                              </View>
+                            </View>
+                          )}
                         </View>
                       ) : null}
 
