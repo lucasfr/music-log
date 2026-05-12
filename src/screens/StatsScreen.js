@@ -14,17 +14,19 @@ const STATUS_TEXT_COLOURS = {
 
 // ─── Activity grid (GitHub-style) ───────────────────────────────────────────
 
-const WEEKS = 18;
+const WEEKS = 53;
 const CELL  = 11;
 const GAP   = 3;
 
 function cellColor(duration) {
-  if (!duration) return 'rgba(9,99,126,0.07)';
-  if (duration < 20)  return 'rgba(9,99,126,0.20)';
-  if (duration < 40)  return 'rgba(9,99,126,0.42)';
-  if (duration < 60)  return 'rgba(9,99,126,0.65)';
-  return '#09637E';
+  if (!duration) return 'rgba(140,32,69,0.07)';
+  if (duration < 20)  return 'rgba(140,32,69,0.22)';
+  if (duration < 40)  return 'rgba(140,32,69,0.45)';
+  if (duration < 60)  return 'rgba(140,32,69,0.68)';
+  return '#8C2045';
 }
+
+const FUTURE_CELL = 'rgba(0,0,0,0.06)';
 
 function ActivityGrid({ sessions }) {
   const dateMap = {};
@@ -64,38 +66,42 @@ function ActivityGrid({ sessions }) {
 
   return (
     <View>
-      {/* Month labels */}
-      <View style={{ marginLeft: 18, marginBottom: 4, height: 12, position: 'relative' }}>
-        {monthLabels.map(({ col, label }) => (
-          <Text key={label + col} style={{
-            position: 'absolute', left: col * (CELL + GAP),
-            fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, letterSpacing: 0.3,
-          }}>{label}</Text>
-        ))}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View>
+          {/* Month labels */}
+          <View style={{ marginLeft: 18, marginBottom: 4, height: 12, position: 'relative' }}>
+            {monthLabels.map(({ col, label }) => (
+              <Text key={label + col} style={{
+                position: 'absolute', left: col * (CELL + GAP),
+                fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, letterSpacing: 0.3,
+              }}>{label}</Text>
+            ))}
+          </View>
 
-      {/* Grid + day labels */}
-      <View style={{ flexDirection: 'row', gap: 4, alignItems: 'flex-start' }}>
-        <View style={{ gap: GAP, marginTop: 1 }}>
-          {DAY_LABELS.map((l, i) => (
-            <View key={i} style={{ width: 10, height: CELL, justifyContent: 'center' }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 8, color: i % 2 === 0 ? COLOURS.textDim : 'transparent', textAlign: 'right' }}>{l}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={{ flexDirection: 'row', gap: GAP }}>
-          {cells.map((col, ci) => (
-            <View key={ci} style={{ gap: GAP }}>
-              {col.map(({ iso, duration, isFuture }) => (
-                <View key={iso} style={{
-                  width: CELL, height: CELL, borderRadius: 2,
-                  backgroundColor: isFuture ? 'transparent' : cellColor(duration),
-                }} />
+          {/* Grid + day labels */}
+          <View style={{ flexDirection: 'row', gap: 4, alignItems: 'flex-start' }}>
+            <View style={{ gap: GAP, marginTop: 1 }}>
+              {DAY_LABELS.map((l, i) => (
+                <View key={i} style={{ width: 10, height: CELL, justifyContent: 'center' }}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 8, color: i % 2 === 0 ? COLOURS.textDim : 'transparent', textAlign: 'right' }}>{l}</Text>
+                </View>
               ))}
             </View>
-          ))}
+            <View style={{ flexDirection: 'row', gap: GAP }}>
+              {cells.map((col, ci) => (
+                <View key={ci} style={{ gap: GAP }}>
+                  {col.map(({ iso, duration, isFuture }) => (
+                    <View key={iso} style={{
+                      width: CELL, height: CELL, borderRadius: 2,
+                      backgroundColor: isFuture ? FUTURE_CELL : cellColor(duration),
+                    }} />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8, justifyContent: 'flex-end' }}>
