@@ -39,6 +39,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
 
   const pieceFreq = {};
   const pieceEnjoyment = {};
+  const pieceMinutes = {};
   last30.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'repertoire') return;
@@ -47,6 +48,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
         : seg.title;
       if (!name) return;
       pieceFreq[name] = (pieceFreq[name] || 0) + 1;
+      pieceMinutes[name] = (pieceMinutes[name] || 0) + (Number(seg.duration) || 0);
       if (seg.liking) {
         if (!pieceEnjoyment[name]) pieceEnjoyment[name] = [];
         pieceEnjoyment[name].push(seg.liking);
@@ -59,7 +61,8 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
     .map(([name, count]) => {
       const joys = pieceEnjoyment[name] || [];
       const avgLiking = joys.length ? joys.reduce((a, v) => a + v, 0) / joys.length : null;
-      return { name, count, avgLiking };
+      const mins = pieceMinutes[name] || 0;
+      return { name, count, avgLiking, mins };
     });
 
   const last14 = Array.from({ length: 14 }, (_, i) => {
@@ -123,7 +126,7 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
         {topPieces.length > 0 && (
           <>
             <SectionTitle style={{ marginTop: 8 }}>Most practised (30 days)</SectionTitle>
-        {topPieces.map(({ name, count, avgLiking }) => (
+        {topPieces.map(({ name, count, avgLiking, mins }) => (
               <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5, flexWrap: 'wrap' }}>
@@ -140,7 +143,12 @@ export default function StatsScreen({ sessions, compositions, isDesktop }) {
                     <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
                   </View>
                 </View>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, minWidth: 24, textAlign: 'right' }}>{count}×</Text>
+                <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{count}×</Text>
+                  {mins > 0 && (
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {mins}m</Text>
+                  )}
+                </View>
               </View>
             ))}
           </>
