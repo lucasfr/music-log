@@ -10,7 +10,7 @@ import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate, confirmDelete } from '../utils';
-import { exportSessionJSON, exportAllJSON } from '../utils/export';
+import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
@@ -376,6 +376,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
           <GlassBtn label="Export JSON" small onPress={() => exportSessionJSON(session, compositions).catch(() => {})} color={COLOURS.steel} />
+          <GlassBtn label="Copy JSON" small onPress={() => copySessionJSON(session, compositions).catch(() => {})} color={COLOURS.steel} />
           <GlassBtn label="Delete" danger small onPress={() => confirmDelete('Delete session?', fmtDate(session.date), () => onDeleteSession(session.id))} color={COLOURS.red} />
         </View>
       </View>
@@ -527,6 +528,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
           <GlassBtn label="Export JSON" small onPress={() => exportSessionJSON(lesson, compositions).catch(() => {})} color={COLOURS.steel} />
+          <GlassBtn label="Copy JSON" small onPress={() => copySessionJSON(lesson, compositions).catch(() => {})} color={COLOURS.steel} />
           <GlassBtn label="Delete" danger small onPress={() => confirmDelete('Delete lesson?', fmtDate(lesson.date), () => onDeleteLesson(lesson.id))} color={COLOURS.red} />
         </View>
       </View>
