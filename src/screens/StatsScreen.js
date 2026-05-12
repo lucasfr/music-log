@@ -87,8 +87,8 @@ function ActivityGrid({ sessions }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>{year}</Text>
         <View style={{ flexDirection: 'row', gap: 6 }}>
-          <TouchableYear onPress={() => setYear(y => y - 1)} label={‹} />
-          {year < currentYear && <TouchableYear onPress={() => setYear(y => y + 1)} label={›} />}
+          <TouchableYear onPress={() => setYear(y => y - 1)} label="‹" />
+          {year < currentYear && <TouchableYear onPress={() => setYear(y => y + 1)} label="›" />}
         </View>
       </View>
 
