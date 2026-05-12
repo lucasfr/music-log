@@ -48,23 +48,28 @@ function energyOpacity(energy) {
 }
 
 const ind = StyleSheet.create({
-  wrap:   { flexDirection: 'row', justifyContent: 'center', gap: 2, marginTop: 1 },
+  wrap:   { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 2, marginTop: 2 },
   emoji:  { fontSize: 11, lineHeight: 13 },
+  val:    { fontFamily: 'Lato-Bold', fontSize: 10, lineHeight: 13 },
   dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 2, alignSelf: 'center' },
   dot:    { width: 5, height: 5, borderRadius: 3 },
 });
 
 function DayIndicators({ sessions }) {
-  const hasPractice  = sessions.length > 0;
-  const avgEnjoyment = hasPractice
-    ? sessions.filter(s => s.enjoyment).reduce((a, s, _, arr) => a + s.enjoyment / arr.length, 0)
-    : 0;
-  if (!hasPractice) return null;
+  if (!sessions.length) return null;
+  const s = sessions[0];
+  const e = s.energy ?? 0;
+  const joy = s.enjoyment ?? 0;
+  const avgJoy = sessions.filter(s => s.enjoyment).reduce((a, s, _, arr) => a + s.enjoyment / arr.length, 0);
   return (
     <View style={ind.wrap}>
-      <Text style={[ind.emoji, { opacity: energyOpacity(sessions[0].energy) }]}>⚡</Text>
-      {avgEnjoyment > 0 && (
-        <Text style={[ind.emoji, { opacity: 0.25 + (avgEnjoyment / 5) * 0.75 }]}>❤️</Text>
+      <Text style={[ind.emoji, { opacity: energyOpacity(e) }]}>⚡</Text>
+      <Text style={[ind.val, { color: COLOURS.red, opacity: energyOpacity(e) }]}>{e > 0 ? `+${e}` : `${e}`}</Text>
+      {avgJoy > 0 && (
+        <>
+          <Text style={[ind.emoji, { opacity: 0.25 + (avgJoy / 5) * 0.75, marginLeft: 3 }]}>❤️</Text>
+          <Text style={[ind.val, { color: '#8A2A50', opacity: 0.25 + (avgJoy / 5) * 0.75 }]}>{Math.round(avgJoy)}</Text>
+        </>
       )}
     </View>
   );
@@ -203,18 +208,6 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
                       color: isFuture ? COLOURS.textDim : isToday ? COLOURS.navy : hasData ? COLOURS.text : COLOURS.textMuted }}>
                       {day}
                     </Text>
-                    {daySessions.length > 0 && (() => {
-                      const e = daySessions[0].energy;
-                      const joy = daySessions[0].enjoyment;
-                      return (
-                        <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
-                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.red, opacity: energyOpacity(e), lineHeight: SIZES.label + 2 }}>
-                            {e > 0 ? `+${e}` : e}
-                          </Text>
-                          {joy ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: '#8A2A50', opacity: 0.25 + (joy / 5) * 0.75, lineHeight: SIZES.label + 2 }}>{joy}</Text> : null}
-                        </View>
-                      );
-                    })()}
                     <DayIndicators sessions={daySessions} lessons={dayLessons} />
                   </TouchableOpacity>
                 );
