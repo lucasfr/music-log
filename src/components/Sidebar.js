@@ -9,6 +9,7 @@ const SIDEBAR_W = 200;
 const NAV_ITEMS = [
   { name: 'Home',     icon: 'home',          iconOut: 'home-outline' },
   { name: 'Calendar', icon: 'calendar',      iconOut: 'calendar-outline' },
+  { name: 'History',  icon: 'time',          iconOut: 'time-outline' },
   { name: 'Pieces',   icon: 'musical-notes', iconOut: 'musical-notes-outline' },
   { name: 'Stats',    icon: 'bar-chart',     iconOut: 'bar-chart-outline' },
 ];
