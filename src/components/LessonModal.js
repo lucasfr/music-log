@@ -4,20 +4,26 @@ import {
   KeyboardAvoidingView, Platform, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { GlassCard, SectionTitle, Btn } from '../components/UI';
 import { Field, TextF, NumberF, DatePickerF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
 import { uid } from '../utils';
 
-function ZeldaBar({ emoji, value, onChange }) {
+function ZeldaBar({ label, emoji, value, onChange }) {
   return (
-    <View style={{ flexDirection: 'row', gap: 2 }}>
-      {[1,2,3,4,5].map(n => (
-        <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}>
-          <Text style={{ fontSize: 26, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>{emoji}</Text>
-        </TouchableOpacity>
-      ))}
+    <View style={{ marginBottom: 0 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+        {label}
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 2 }}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}>
+            <Text style={{ fontSize: 26, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>{emoji}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 }
@@ -99,13 +105,10 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
       <GlassCard>
         <View style={{ flexDirection: 'row', gap: 20 }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Energy</Text>
-            <ZeldaBar emoji="⚡" value={energyBar} onChange={setEnergyBar} />
+            <ZeldaBar label="Energy" emoji="⚡" value={energyBar} onChange={setEnergyBar} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Enjoyment</Text>
-            <ZeldaBar emoji="❤️" value={enjoyment} onChange={setEnjoyment} />
-
+            <ZeldaBar label="Enjoyment" emoji="❤️" value={enjoyment} onChange={setEnjoyment} />
           </View>
         </View>
       </GlassCard>
@@ -125,7 +128,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
       </View>
 
       {pieces.length === 0 && (
-        <View style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: COLOURS.glassBorder, borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.25)' }}>
+        <View style={{ borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.35)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 1 }}>
           <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments from this lesson</Text>
         </View>
       )}
@@ -176,13 +179,15 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Log lesson</Text>
-            <TouchableOpacity onPress={onClose} activeOpacity={0.75}
-              style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
+          <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Log lesson</Text>
+              <TouchableOpacity onPress={onClose} activeOpacity={0.75}
+                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
         </SafeAreaView>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
