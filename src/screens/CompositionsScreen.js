@@ -8,7 +8,7 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState } from '../components/UI';
-import { Field, TextF, SelectF } from '../components/Form';
+import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate } from '../utils';
 
@@ -387,14 +387,10 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1 }}>
-                <Field label="📅 Date started">
-                  <TextF value={data.dateStarted || ''} onChange={v => f('dateStarted', v)} placeholder="YYYY-MM-DD" />
-                </Field>
+                <DatePickerF label="📅 Date started" value={data.dateStarted || ''} onChange={v => f('dateStarted', v)} />
               </View>
               <View style={{ flex: 1 }}>
-                <Field label="✅ Date completed">
-                  <TextF value={data.dateCompleted || ''} onChange={v => f('dateCompleted', v)} placeholder="YYYY-MM-DD" />
-                </Field>
+                <DatePickerF label="✅ Date completed" value={data.dateCompleted || ''} onChange={v => f('dateCompleted', v)} />
               </View>
             </View>
 
