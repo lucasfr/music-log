@@ -420,7 +420,9 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                           })}
                         </View>
                       )}
-                      {l.wins ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
+                      {l.wins ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
+                      {l.overallNotes ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.overallNotes}</Text></View> : null}
+                      {l.nextFocus ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.nextFocus}</Text></View> : null}
                     </View>
                   </BlurView>
                 );
