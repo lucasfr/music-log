@@ -105,7 +105,12 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
               {techSegs.map(seg => (
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 14 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.title || seg.group || 'Technical work'}</Text>
+                    {seg.group ? (
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{seg.group}</Text>
+                      </View>
+                    ) : null}
                     {seg.duration ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
@@ -115,6 +120,12 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                   {seg.scales?.length > 0 && (
                     <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.join(' · ')}</Text>
                   )}
+                  {seg.feltDifficulty ? (
+                    <View style={{ marginTop: 4 }}>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 2 }}>Difficulty</Text>
+                      <StarRow value={seg.feltDifficulty} emoji="🎵" />
+                    </View>
+                  ) : null}
                   {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                   {(seg.challenges || []).length > 0 && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
