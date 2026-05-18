@@ -178,7 +178,7 @@ export default function HistoryScreen({ sessions, lessons, compositions, onDelet
         <SectionTitle style={{ marginTop: 4 }}>History</SectionTitle>
         {grouped.map(group => (
           <View key={group.label} style={{ marginBottom: 8 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textMuted, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10, marginTop: 4 }}>
               {group.label}
             </Text>
             {group.items.map(item =>
