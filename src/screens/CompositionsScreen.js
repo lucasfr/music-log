@@ -478,7 +478,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
   return (
     <BlurView intensity={32} tint="light" style={{
       borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12,
-      shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 5,
+      shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 16, elevation: 5,
     }}>
       <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.8} style={{ padding: 14, backgroundColor: COLOURS.glass }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
