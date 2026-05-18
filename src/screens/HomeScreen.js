@@ -52,7 +52,7 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
         shadowRadius: isSelected ? 24 : 18,
         elevation: isSelected ? 8 : 5,
       }}>
-        <View style={{ backgroundColor: COLOURS.accentLight, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+        <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
           <View style={{ flex: 1 }}>
             {showDate && (
@@ -117,7 +117,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
         shadowRadius: isSelected ? 24 : 18,
         elevation: isSelected ? 8 : 5,
       }}>
-        <View style={{ backgroundColor: COLOURS.accent2Light, padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+        <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
           <View style={{ flex: 1 }}>
             {showDate && (
