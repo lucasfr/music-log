@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
-import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState } from '../components/UI';
+import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate } from '../utils';
@@ -291,150 +291,150 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
 
-            <SectionDivider label="Identity" icon="information-circle-outline" />
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 3 }}>
-                <Field label="Title *">
-                  <TextF value={data.title} onChange={v => f('title', v)} placeholder="e.g. Gymnopédie No. 1" />
-                </Field>
-              </View>
-              <View style={{ flex: 2 }}>
-                <AutocompleteField label="Composer" value={data.composer || ''} onChange={v => f('composer', v)} placeholder="e.g. Satie" suggestions={composerSuggestions} />
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}>
-                <AutocompleteField label="Arrangement / arrangers" value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Rachmaninoff" suggestions={arrangementSuggestions} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Field label="Collection">
-                  <TextF value={data.collection || ''} onChange={v => f('collection', v)} placeholder="e.g. For Children Vol. 1" />
-                </Field>
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}>
-                <Field label="Year">
-                  <TextF value={data.year || ''} onChange={v => f('year', v)} placeholder="e.g. 1888" />
-                </Field>
-              </View>
-              <View style={{ flex: 2 }}>
-                <SelectF label="Grade estimate" value={data.grade || ''} onChange={v => f('grade', v)} options={GRADES} placeholder="— Unknown —" />
-              </View>
-            </View>
-
-            <TagInput value={data.tags || []} onChange={v => f('tags', v)} />
-
-            <SectionDivider label="Musical properties" icon="musical-note-outline" />
-            <KeysPicker
-              value={data.keys || (data.keyRoot ? [{ root: data.keyRoot, mode: data.keyMode || 'major' }] : [])}
-              onChange={v => f('keys', v)}
-            />
-            <TimeSigPicker
-              value={data.timeSigs || (data.timeSig ? [data.timeSig] : [])}
-              onChange={v => f('timeSigs', v)}
-            />
-
-            <DifficultyPicker value={data.difficulty || 0} onChange={v => f('difficulty', v)} />
-
-            <Field label="⭐ Liking">
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <View style={{ flexDirection: 'row', gap: 2 }}>
-                  {[1,2,3,4,5].map(n => (
-                    <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75}>
-                      <Text style={{ fontSize: 26, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
-                    </TouchableOpacity>
-                  ))}
+            <GlassCard>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flex: 3 }}>
+                  <Field label="Title *">
+                    <TextF value={data.title} onChange={v => f('title', v)} placeholder="e.g. Gymnopédie No. 1" />
+                  </Field>
                 </View>
-                {(data.liking || 0) > 0 && (
-                  <TouchableOpacity onPress={() => f('liking', 0)} activeOpacity={0.7} hitSlop={{ top:8, bottom:8, left:8, right:8 }}>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
-                  </TouchableOpacity>
-                )}
+                <View style={{ flex: 2 }}>
+                  <AutocompleteField label="Composer" value={data.composer || ''} onChange={v => f('composer', v)} placeholder="e.g. Satie" suggestions={composerSuggestions} />
+                </View>
               </View>
-            </Field>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <AutocompleteField label="Arrangement" value={data.arrangement || ''} onChange={v => f('arrangement', v)} placeholder="e.g. Rachmaninoff" suggestions={arrangementSuggestions} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Field label="Collection">
+                    <TextF value={data.collection || ''} onChange={v => f('collection', v)} placeholder="e.g. For Children Vol. 1" />
+                  </Field>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 10, marginBottom: 0 }}>
+                <View style={{ flex: 1 }}>
+                  <Field label="Year" style={{ marginBottom: 0 }}>
+                    <TextF value={data.year || ''} onChange={v => f('year', v)} placeholder="e.g. 1888" />
+                  </Field>
+                </View>
+                <View style={{ flex: 2 }}>
+                  <SelectF label="Grade estimate" value={data.grade || ''} onChange={v => f('grade', v)} options={GRADES} placeholder="— Unknown —" />
+                </View>
+              </View>
+            </GlassCard>
 
-            <SectionDivider label="Status" icon="flag-outline" />
-            <Field label="Status">
-              <View style={{ flexDirection: 'row', gap: 7, flexWrap: 'wrap' }}>
-                {STATUS_OPTIONS.map(s => {
-                  const active = data.status === s;
-                  const sc = STATUS_COLOURS[s];
-                  return (
-                    <TouchableOpacity
-                      key={s} onPress={() => f('status', s)} activeOpacity={0.75}
-                      style={{
-                        paddingHorizontal: 14, paddingVertical: 7,
-                        borderRadius: RADIUS.pill,
-                        backgroundColor: active ? sc.bg : 'rgba(255,255,255,0.50)',
-                        shadowColor: active ? sc.border : COLOURS.glassShadow,
-                        shadowOffset: { width: 0, height: active ? 3 : 1 },
-                        shadowOpacity: 1,
-                        shadowRadius: active ? 8 : 4,
-                        elevation: active ? 3 : 1,
-                      }}
-                    >
-                      <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? sc.text : COLOURS.textMuted }}>
-                        {s}
-                      </Text>
+            <GlassCard>
+              <TagInput value={data.tags || []} onChange={v => f('tags', v)} />
+            </GlassCard>
+
+            <GlassCard>
+              <KeysPicker
+                value={data.keys || (data.keyRoot ? [{ root: data.keyRoot, mode: data.keyMode || 'major' }] : [])}
+                onChange={v => f('keys', v)}
+              />
+              <TimeSigPicker
+                value={data.timeSigs || (data.timeSig ? [data.timeSig] : [])}
+                onChange={v => f('timeSigs', v)}
+              />
+              <DifficultyPicker value={data.difficulty || 0} onChange={v => f('difficulty', v)} />
+              <Field label="⭐ Liking" style={{ marginBottom: 0 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <View style={{ flexDirection: 'row', gap: 2 }}>
+                    {[1,2,3,4,5].map(n => (
+                      <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75}>
+                        <Text style={{ fontSize: 26, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  {(data.liking || 0) > 0 && (
+                    <TouchableOpacity onPress={() => f('liking', 0)} activeOpacity={0.7} hitSlop={{ top:8, bottom:8, left:8, right:8 }}>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
                     </TouchableOpacity>
-                  );
-                })}
+                  )}
+                </View>
+              </Field>
+            </GlassCard>
+
+            <GlassCard>
+              <Field label="Status">
+                <View style={{ flexDirection: 'row', gap: 7, flexWrap: 'wrap' }}>
+                  {STATUS_OPTIONS.map(s => {
+                    const active = data.status === s;
+                    const sc = STATUS_COLOURS[s];
+                    return (
+                      <TouchableOpacity
+                        key={s} onPress={() => f('status', s)} activeOpacity={0.75}
+                        style={{
+                          paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
+                          backgroundColor: active ? sc.bg : 'rgba(255,255,255,0.50)',
+                          shadowColor: active ? sc.border : COLOURS.glassShadow,
+                          shadowOffset: { width: 0, height: active ? 3 : 1 },
+                          shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+                        }}
+                      >
+                        <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? sc.text : COLOURS.textMuted }}>{s}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </Field>
+              <View style={{ flexDirection: 'row', gap: 10, marginBottom: 0 }}>
+                <View style={{ flex: 1 }}>
+                  <DatePickerF label="📅 Date started" value={data.dateStarted || ''} onChange={v => f('dateStarted', v)} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <DatePickerF label="✅ Date completed" value={data.dateCompleted || ''} onChange={v => f('dateCompleted', v)} />
+                </View>
               </View>
-            </Field>
+            </GlassCard>
 
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}>
-                <DatePickerF label="📅 Date started" value={data.dateStarted || ''} onChange={v => f('dateStarted', v)} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <DatePickerF label="✅ Date completed" value={data.dateCompleted || ''} onChange={v => f('dateCompleted', v)} />
-              </View>
-            </View>
+            <GlassCard>
+              <Field label="About this piece" style={{ marginBottom: 0 }}>
+                <TextF value={data.info || ''} onChange={v => f('info', v)} placeholder="Style, context, history, why you're learning it…" multiline />
+              </Field>
+            </GlassCard>
 
-            <SectionDivider label="About" icon="document-text-outline" />
-            <Field label="About this piece">
-              <TextF value={data.info || ''} onChange={v => f('info', v)} placeholder="Style, context, history, why you're learning it…" multiline />
-            </Field>
+            <GlassCard>
+              <Field label="Technical challenges" icon="construct-outline">
+                <TextF value={data.technicalChallenges || ''} onChange={v => f('technicalChallenges', v)} placeholder="Hand coordination, fingering, rhythm…" multiline />
+              </Field>
+              <Field label="Musical focus areas" icon="musical-notes-outline">
+                <TextF value={data.musicalFocus || ''} onChange={v => f('musicalFocus', v)} placeholder="Phrasing, dynamics, character…" multiline />
+              </Field>
+              <Field label="Practice notes" icon="repeat-outline" style={{ marginBottom: 0 }}>
+                <TextF value={data.practiceNotes || ''} onChange={v => f('practiceNotes', v)} placeholder="Approaches, methods, what works…" multiline />
+              </Field>
+            </GlassCard>
 
-            <SectionDivider label="Study notes" icon="school-outline" />
-            <Field label="Technical challenges" icon="construct-outline">
-              <TextF value={data.technicalChallenges || ''} onChange={v => f('technicalChallenges', v)} placeholder="Hand coordination, fingering, rhythm…" multiline />
-            </Field>
-            <Field label="Musical focus areas" icon="musical-notes-outline">
-              <TextF value={data.musicalFocus || ''} onChange={v => f('musicalFocus', v)} placeholder="Phrasing, dynamics, character…" multiline />
-            </Field>
-            <Field label="Practice notes" icon="repeat-outline">
-              <TextF value={data.practiceNotes || ''} onChange={v => f('practiceNotes', v)} placeholder="Approaches, methods, what works…" multiline />
-            </Field>
+            <GlassCard>
+              <Field label="Teacher's notes / assignment" icon="chatbubble-outline">
+                <TextF value={data.kerrinNotes || ''} onChange={v => f('kerrinNotes', v)} placeholder="Teacher feedback, what to focus on…" multiline />
+              </Field>
+              <Field label="Teacher feedback log" icon="journal-outline" style={{ marginBottom: 0 }}>
+                <TextF value={data.teacherFeedback || ''} onChange={v => f('teacherFeedback', v)} placeholder="Feedback from lessons over time…" multiline />
+              </Field>
+            </GlassCard>
 
-            <SectionDivider label="Teacher" icon="person-outline" />
-            <Field label="Teacher's notes / assignment" icon="chatbubble-outline">
-              <TextF value={data.kerrinNotes || ''} onChange={v => f('kerrinNotes', v)} placeholder="Teacher feedback, what to focus on…" multiline />
-            </Field>
-            <Field label="Teacher feedback log" icon="journal-outline">
-              <TextF value={data.teacherFeedback || ''} onChange={v => f('teacherFeedback', v)} placeholder="Feedback from lessons over time…" multiline />
-            </Field>
+            <GlassCard>
+              <Field label="My notes" style={{ marginBottom: 0 }}>
+                <TextF value={data.myNotes || ''} onChange={v => f('myNotes', v)} placeholder="Your own observations, discoveries…" multiline />
+              </Field>
+            </GlassCard>
 
-            <SectionDivider label="My notes" icon="pencil-outline" />
-            <Field label="My notes" style={{ marginBottom: 0 }}>
-              <TextF value={data.myNotes || ''} onChange={v => f('myNotes', v)} placeholder="Your own observations, discoveries…" multiline />
-            </Field>
+            <GlassCard>
+              <Field label="Sheet music source" icon="musical-notes-outline">
+                <TextF value={data.resourceSheet || ''} onChange={v => f('resourceSheet', v)} placeholder="Where the score is from…" />
+              </Field>
+              <Field label="Recording references" icon="headset-outline">
+                <TextF value={data.resourceRecordings || ''} onChange={v => f('resourceRecordings', v)} placeholder="Reference recordings, performers…" multiline />
+              </Field>
+              <Field label="Tutorial videos" icon="videocam-outline" style={{ marginBottom: 0 }}>
+                <TextF value={data.resourceTutorials || ''} onChange={v => f('resourceTutorials', v)} placeholder="YouTube links, tutorial notes…" multiline />
+              </Field>
+            </GlassCard>
 
-            <SectionDivider label="Resources" icon="link-outline" />
-            <Field label="Sheet music source" icon="musical-notes-outline">
-              <TextF value={data.resourceSheet || ''} onChange={v => f('resourceSheet', v)} placeholder="Where the score is from…" />
-            </Field>
-            <Field label="Recording references" icon="headset-outline">
-              <TextF value={data.resourceRecordings || ''} onChange={v => f('resourceRecordings', v)} placeholder="Reference recordings, performers…" multiline />
-            </Field>
-            <Field label="Tutorial videos" icon="videocam-outline" style={{ marginBottom: 0 }}>
-              <TextF value={data.resourceTutorials || ''} onChange={v => f('resourceTutorials', v)} placeholder="YouTube links, tutorial notes…" multiline />
-            </Field>
-
-            <Btn label="Save piece" variant="primary" onPress={handleSave} style={{ marginTop: 24 }} />
+            <Btn label="Save piece" variant="primary" onPress={handleSave} style={{ marginTop: 4 }} />
           </ScrollView>
         </KeyboardAvoidingView>
       </View>
