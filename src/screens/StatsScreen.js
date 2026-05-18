@@ -284,13 +284,16 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle>Last 14 days</SectionTitle>
         <GlassCard style={{ paddingBottom: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', marginBottom: 4 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>min</Text>
+          </View>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barH + 18, gap: 3 }}>
             {last14.map(d => (
               <View key={d.iso} style={{ flex: 1, alignItems: 'center' }}>
                 <View style={{
                   width: '100%',
                   height: d.practiced ? Math.max((d.duration / maxDur) * barH, 5) : 5,
-                  backgroundColor: d.practiced ? COLOURS.navy : COLOURS.glassBorder,
+                  backgroundColor: d.practiced ? COLOURS.navy : 'rgba(140,32,69,0.10)',
                   borderRadius: 4,
                 }} />
                 <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginTop: 4 }}>{d.label}</Text>
