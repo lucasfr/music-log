@@ -240,11 +240,13 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     const d = new Date(); d.setDate(d.getDate() - (13 - i));
     const iso = d.toISOString().slice(0, 10);
     const s = sessions.find(s => s.date === iso);
+    const hasLesson = (lessons || []).some(l => l.date === iso);
     return {
       iso,
       label: d.toLocaleDateString('en-GB', { weekday: 'short' }).slice(0, 1),
       duration: s ? (Number(s.duration) || 30) : 0,
       practiced: !!s,
+      hasLesson,
     };
   });
   const maxDur = Math.max(...last14.map(d => d.duration), 1);
@@ -291,6 +293,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barH + 18, gap: 3 }}>
             {last14.map(d => (
               <View key={d.iso} style={{ flex: 1, alignItems: 'center' }}>
+                <View style={{ height: 6, justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
+                  {d.hasLesson ? <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: COLOURS.amber }} /> : null}
+                </View>
                 <View style={{
                   width: '100%',
                   height: d.practiced ? Math.max((d.duration / maxDur) * barH, 5) : 5,
