@@ -284,7 +284,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle>Last 14 days</SectionTitle>
         <GlassCard style={{ paddingBottom: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', marginBottom: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>{maxDur}m</Text>
             <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>min</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barH + 18, gap: 3 }}>
