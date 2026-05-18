@@ -255,6 +255,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   const statItems = [
     { value: allTimeMin >= 60 ? `${Math.floor(allTimeMin / 60)}h ${allTimeMin % 60}m` : `${Math.round(allTimeMin)}m`, label: 'total practice', emoji: '⏱' },
     { value: last30.length,        label: 'sessions (30d)',      emoji: '🎹' },
+    { value: (lessons || []).filter(l => { const d = new Date(l.date + 'T12:00:00'); const ago = new Date(); ago.setDate(ago.getDate() - 30); return d >= ago; }).length, label: 'lessons (30d)', emoji: '🎓' },
     { value: streak,               label: 'day streak',          emoji: '🔥' },
     { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy (30d)', emoji: '⚡' },
   ];
