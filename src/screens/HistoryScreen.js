@@ -63,7 +63,7 @@ function SegDetail({ seg, compName, accentColor }) {
 
 function DeleteBtn({ onPress }) {
   return (
-    <View style={{ alignItems: 'flex-end', marginTop: 8 }}>
+    <View style={{ alignItems: 'flex-end', marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLOURS.glassBorderSubtle }}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.75} style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.dangerLight, shadowColor: 'rgba(192,57,43,0.18)', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 8, elevation: 3 }}>
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.danger }}>Delete</Text>
       </TouchableOpacity>
