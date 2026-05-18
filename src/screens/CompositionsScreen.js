@@ -468,6 +468,7 @@ function NoteSection({ label, value }) {
 function CompCard({ comp, sessions, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [tab, setTab] = useState('details');
+  const shadowColor = (STATUS_COLOURS[comp.status] || {}).border || COLOURS.accentMid;
 
   const compSessions = sessions
     .filter(s => (s.segments || []).some(sg => sg.compositionId === comp.id))
@@ -478,7 +479,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
   return (
     <BlurView intensity={32} tint="light" style={{
       borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12,
-      shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 16, elevation: 5,
+      shadowColor: shadowColor, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 16, elevation: 5,
     }}>
       <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.8} style={{ padding: 14, backgroundColor: COLOURS.glass }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
