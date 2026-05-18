@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 
@@ -349,9 +349,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               tint="light"
               style={{
                 flex: 1, borderRadius: RADIUS.md, overflow: 'hidden',
-                shadowColor: COLOURS.glassShadow,
-                shadowOffset: { width: 0, height: 3 },
-                shadowOpacity: 1, shadowRadius: 8, elevation: 3,
+                shadowColor: (STATUS_COLOURS[s] || {}).border || COLOURS.accentMid,
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.6, shadowRadius: 14, elevation: 3,
               }}
             >
               <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
