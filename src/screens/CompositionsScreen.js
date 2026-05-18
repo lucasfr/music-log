@@ -765,9 +765,9 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
                   backgroundColor: active ? 'rgba(247,127,0,0.14)' : 'rgba(255,255,255,0.55)',
                   shadowColor: active ? COLOURS.accent2Mid : COLOURS.glassShadow,
-                  shadowOffset: { width: 0, height: active ? 4 : 1 },
-                  shadowOpacity: 1,
-                  shadowRadius: active ? 10 : 4,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: active ? 0.6 : 0.5,
+                  shadowRadius: active ? 10 : 6,
                   elevation: active ? 4 : 1,
                 }}>
                 <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
