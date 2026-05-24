@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { name: 'History',  icon: 'time',          iconOut: 'time-outline' },
   { name: 'Pieces',   icon: 'musical-notes', iconOut: 'musical-notes-outline' },
   { name: 'Stats',    icon: 'bar-chart',     iconOut: 'bar-chart-outline' },
+  { name: 'Timeline', icon: 'git-branch',    iconOut: 'git-branch-outline' },
 ];
 
 const BOTTOM_ITEMS = [

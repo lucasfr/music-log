@@ -24,6 +24,7 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import StatsScreen from './src/screens/StatsScreen';
+import TimelineScreen from './src/screens/TimelineScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import AboutScreen from './src/screens/AboutScreen';
 import { AppBackground } from './src/components/Background';
@@ -40,6 +41,7 @@ const TAB_ICONS = {
   History:  { active: 'time',                inactive: 'time-outline' },
   Pieces:   { active: 'musical-notes',       inactive: 'musical-notes-outline' },
   Stats:    { active: 'bar-chart',           inactive: 'bar-chart-outline' },
+  Timeline: { active: 'git-branch',          inactive: 'git-branch-outline' },
   Settings: { active: 'settings',            inactive: 'settings-outline' },
 };
 
@@ -141,6 +143,7 @@ function AppInner({ fontsLoaded }) {
         case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
         case 'History':  return <HistoryScreen  key="history"  sessions={sessions} lessons={lessons} compositions={compositions} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={isDesktop} />;
         case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} lessons={lessons} isDesktop={isDesktop} />;
+        case 'Timeline': return <TimelineScreen key="timeline" compositions={compositions} sessions={sessions} isDesktop={isDesktop} />;
         case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />;
         case 'About':    return <AboutScreen    key="about"    isDesktop={isDesktop} />;
         default:         return <HomeScreen     key="home"     {...screenProps} />;
@@ -221,6 +224,9 @@ function AppInner({ fontsLoaded }) {
           </Tab.Screen>
           <Tab.Screen name="Stats">
             {() => <StatsScreen sessions={sessions} compositions={compositions} lessons={lessons} isDesktop={false} />}
+          </Tab.Screen>
+          <Tab.Screen name="Timeline">
+            {() => <TimelineScreen compositions={compositions} sessions={sessions} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Settings">
             {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />}
