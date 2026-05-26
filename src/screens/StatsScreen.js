@@ -996,56 +996,6 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           </View>
         </GlassCard>
 
-        {topPieces.length > 0 ? (
-          <>
-            <SectionTitle style={{ marginTop: 8 }}>Most practised ({periodLabel})</SectionTitle>
-            {topPieces.map(({ name, count, avgLiking, avgEnergy, avgDifficulty, mins }) => (
-              <BlurView key={name} intensity={32} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
-                <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
-                  {/* Title row */}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
-                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{count}×</Text>
-                      {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
-                    </View>
-                  </View>
-                  {/* Progress bar */}
-                  <View style={{ height: 3, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 2, marginBottom: 12 }}>
-                    <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
-                  </View>
-                  {/* Zelda bars row */}
-                  <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
-                    {avgEnergy !== null && (
-                      <View style={{ gap: 3 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Energy</Text>
-                        <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={14} />
-                      </View>
-                    )}
-                    {avgLiking !== null && (
-                      <View style={{ gap: 3 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Liking</Text>
-                        <ZeldaBarFractional emoji="❤️" fill={avgLiking} size={14} />
-                      </View>
-                    )}
-                    {avgDifficulty !== null && (
-                      <View style={{ gap: 3 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Difficulty</Text>
-                        <ZeldaBarFractional emoji="🎵" fill={avgDifficulty} size={14} />
-                      </View>
-                    )}
-                  </View>
-                </View>
-              </BlurView>
-            ))}
-          </>
-        ) : (
-          <>
-            <SectionTitle style={{ marginTop: 8 }}>Most practised ({periodLabel})</SectionTitle>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim, marginBottom: 16 }}>No repertoire logged in this period.</Text>
-          </>
-        )}
-
         <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {STATUS_OPTIONS.map(s => {
@@ -1082,9 +1032,38 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <LibraryGrowthChart compositions={compositions} />
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 8 }}>Wins ({periodLabel})</SectionTitle>
+        <SectionTitle style={{ marginTop: 8 }}>Most practised & wins ({periodLabel})</SectionTitle>
         <GlassCard>
-          <WinsTimeline sessions={sessions} period={period} />
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Most practised</Text>
+              {topPieces.length > 0 ? topPieces.map(({ name, count, avgLiking, avgEnergy, avgDifficulty, mins }) => (
+                <View key={name} style={{ marginBottom: 14 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
+                    <View style={{ alignItems: 'flex-end', gap: 1 }}>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{count}×</Text>
+                      {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
+                    </View>
+                  </View>
+                  <View style={{ height: 3, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 2, marginBottom: 6 }}>
+                    <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    {avgEnergy !== null && <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={12} />}
+                    {avgLiking !== null && <ZeldaBarFractional emoji="❤️" fill={avgLiking} size={12} />}
+                    {avgDifficulty !== null && <ZeldaBarFractional emoji="🎵" fill={avgDifficulty} size={12} />}
+                  </View>
+                </View>
+              )) : (
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No repertoire logged in this period.</Text>
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Wins</Text>
+              <WinsTimeline sessions={sessions} period={period} />
+            </View>
+          </View>
         </GlassCard>
 
         <SectionTitle style={{ marginTop: 8 }}>Streak history</SectionTitle>
