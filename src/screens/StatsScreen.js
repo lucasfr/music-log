@@ -570,7 +570,7 @@ function TechniqueBreakdown({ sessions }) {
   sessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
-      const g = seg.group || 'Other';
+      const g = seg.group || seg.title || 'Technique';
       if (!groups[g]) groups[g] = { count: 0, minutes: 0, difficulty: [] };
       groups[g].count++;
       groups[g].minutes += Number(seg.duration) || 0;
@@ -594,13 +594,14 @@ function TechniqueBreakdown({ sessions }) {
           : null;
         return (
           <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.text, width: 90 }} numberOfLines={1}>{name}</Text>
-            <View style={{ flex: 1, height: 10, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 5 }}>
-              <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 5 }} />
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.text, width: 90 }} numberOfLines={1}>{name}</Text>
+            <View style={{ flex: 1, height: 14, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 7 }}>
+              <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 7 }} />
             </View>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, width: 72, textAlign: 'right' }}>
-              {data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}{avgDiff !== null ? `  🎵${avgDiff.toFixed(1)}` : ''}
-            </Text>
+            <View style={{ alignItems: 'flex-end', gap: 3, width: 80 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>
+              {avgDiff !== null && <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={13} />}
+            </View>
           </View>
         );
       })}
@@ -772,13 +773,13 @@ function ScaleCoverage({ sessions }) {
           {/* Centre stats */}
           {!sel ? (
             <G>
-              <SvgText x={cx} y={cy - size*0.088} textAnchor="middle" dominantBaseline="central"
+              <SvgText x={cx} y={cy - size*0.068} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.034} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⏱ {timeStr(totalScaleMins)}</SvgText>
-              <SvgText x={cx} y={cy - size*0.044} textAnchor="middle" dominantBaseline="central"
+              <SvgText x={cx} y={cy - size*0.024} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.026} fill={COLOURS.textDim} fontFamily="Lato">total scale time</SvgText>
-              <SvgText x={cx} y={cy + size*0.008} textAnchor="middle" dominantBaseline="central"
+              <SvgText x={cx} y={cy + size*0.028} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {totalScaleSess} sessions</SvgText>
-              <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
+              <SvgText x={cx} y={cy + size*0.072} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
 
             </G>
@@ -800,7 +801,7 @@ function ScaleCoverage({ sessions }) {
         {!sel && avgDiff !== null && (
           <View style={{
             position: 'absolute',
-            top: cy + size * 0.068,
+            top: cy + size * 0.088,
             left: cx - size * 0.14,
             width: size * 0.28,
             alignItems: 'center',
@@ -812,7 +813,7 @@ function ScaleCoverage({ sessions }) {
         {sel && selAvgDiff !== null && (
           <View style={{
             position: 'absolute',
-            top: cy + size * 0.068,
+            top: cy + size * 0.088,
             left: cx - size * 0.14,
             width: size * 0.28,
             alignItems: 'center',
