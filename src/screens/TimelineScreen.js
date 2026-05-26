@@ -2,21 +2,19 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { SectionTitle, GlassCard } from '../components/UI';
+import { STATUS_OPTIONS } from '../constants';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-const STATUS_BAR_COLOURS = {
-  learning:            { fill: COLOURS.accent,  track: COLOURS.accentLight,  label: COLOURS.practiceText },
-  consolidating:       { fill: COLOURS.amber,   track: COLOURS.accent2Light, label: COLOURS.lessonText   },
-  'performance-ready': { fill: COLOURS.gold,    track: COLOURS.yellowLight,  label: '#5A3A00'            },
-};
-
+// Derive bar colours from the shared STATUS_COLOURS palette
 function statusColour(status) {
-  return STATUS_BAR_COLOURS[status] || { fill: COLOURS.steel, track: COLOURS.tealAccent, label: COLOURS.navy };
+  const sc = STATUS_COLOURS[status];
+  if (sc) return { fill: sc.border.replace(/,[^,]+\)$/, ',1)').replace('rgba','rgb').replace(/,1\)/, ')'), track: sc.bg, label: sc.text };
+  return { fill: COLOURS.steel, track: COLOURS.tealAccent, label: COLOURS.navy };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -310,11 +308,11 @@ function TimelineChart({ compositions, sessions, selectedId, onSelect }) {
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
-        {['learning', 'consolidating', 'performance-ready'].map(s => {
-          const c = STATUS_BAR_COLOURS[s];
+        {STATUS_OPTIONS.map(s => {
+          const sc = STATUS_COLOURS[s] || {};
           return (
             <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-              <View style={{ width: 12, height: 8, borderRadius: 4, backgroundColor: c.fill }} />
+              <View style={{ width: 12, height: 8, borderRadius: 4, backgroundColor: sc.border || COLOURS.steel }} />
               <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{s}</Text>
             </View>
           );
@@ -331,12 +329,19 @@ function TimelineChart({ compositions, sessions, selectedId, onSelect }) {
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function TimelineScreen({ compositions, sessions, isDesktop }) {
-  const [selectedId, setSelectedId]     = useState(null);
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedId, setSelectedId]       = useState(null);
+  const [activeFilters, setActiveFilters] = useState([]); // empty = all
 
-  const filtered = filterStatus === 'all'
+  function toggleFilter(s) {
+    setActiveFilters(prev =>
+      prev.includes(s) ? prev.filter(f => f !== s) : [...prev, s]
+    );
+    setSelectedId(null);
+  }
+
+  const filtered = activeFilters.length === 0
     ? compositions
-    : compositions.filter(c => c.status === filterStatus);
+    : compositions.filter(c => activeFilters.includes(c.status));
 
   const selectedComp = selectedId ? compositions.find(c => c.id === selectedId) : null;
   const undatedCount = compositions.filter(c => !c.dateStarted).length;
@@ -354,29 +359,41 @@ export default function TimelineScreen({ compositions, sessions, isDesktop }) {
           </Text>
         </View>
 
-        {/* Status filter */}
+        {/* Status filter — additive multi-select */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 16 }}>
-          {['all', 'learning', 'consolidating', 'performance-ready'].map(s => {
-            const active = filterStatus === s;
-            const sc = STATUS_BAR_COLOURS[s] || {};
+          {/* All pill */}
+          <TouchableOpacity
+            onPress={() => { setActiveFilters([]); setSelectedId(null); }}
+            activeOpacity={0.75}
+            style={{
+              paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
+              backgroundColor: activeFilters.length === 0 ? 'rgba(9,99,126,0.14)' : 'rgba(255,255,255,0.55)',
+              shadowColor: activeFilters.length === 0 ? COLOURS.navy : COLOURS.glassShadow,
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: activeFilters.length === 0 ? 0.6 : 0.5,
+              shadowRadius: activeFilters.length === 0 ? 10 : 6,
+              elevation: activeFilters.length === 0 ? 4 : 1,
+            }}>
+            <Text style={{ fontFamily: activeFilters.length === 0 ? 'Lato-Bold' : 'Lato', fontSize: 12, color: activeFilters.length === 0 ? COLOURS.navy : COLOURS.textMuted }}>all</Text>
+          </TouchableOpacity>
+
+          {STATUS_OPTIONS.map(s => {
+            const active = activeFilters.includes(s);
+            const sc = STATUS_COLOURS[s] || {};
             return (
-              <TouchableOpacity key={s} onPress={() => setFilterStatus(s)} activeOpacity={0.75}
+              <TouchableOpacity key={s} onPress={() => toggleFilter(s)} activeOpacity={0.75}
                 style={{
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
-                  backgroundColor: active ? (sc.track || 'rgba(9,99,126,0.12)') : 'rgba(255,255,255,0.55)',
-                  shadowColor: active ? (sc.fill || COLOURS.navy) : COLOURS.glassShadow,
+                  backgroundColor: active ? sc.bg : 'rgba(255,255,255,0.55)',
+                  borderWidth: active ? 1 : 0,
+                  borderColor: active ? sc.border : 'transparent',
+                  shadowColor: active ? sc.border : COLOURS.glassShadow,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: active ? 0.6 : 0.5,
                   shadowRadius: active ? 10 : 6,
                   elevation: active ? 4 : 1,
                 }}>
-                <Text style={{
-                  fontFamily: active ? 'Lato-Bold' : 'Lato',
-                  fontSize: 12,
-                  color: active ? (sc.label || COLOURS.navy) : COLOURS.textMuted,
-                }}>
-                  {s}
-                </Text>
+                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? sc.text : COLOURS.textMuted }}>{s}</Text>
               </TouchableOpacity>
             );
           })}
