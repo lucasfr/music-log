@@ -544,6 +544,9 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     let count = 0;
     const dateSet = new Set(sessions.map(s => s.date));
     const d = new Date();
+    // If today isn't logged yet, start counting from yesterday
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (!dateSet.has(todayStr)) d.setDate(d.getDate() - 1);
     while (true) {
       const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!dateSet.has(iso)) break;
