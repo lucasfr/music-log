@@ -115,38 +115,23 @@ function ActivityGrid({ sessions, lessons }) {
                     <View key={wi} style={{ gap: GAP }}>
                       {week.map((day, di) => {
                         if (!day) return <View key={di} style={{ width: cell, height: cell }} />;
-                        const color = day.isFuture
-                          ? 'rgba(0,0,0,0.05)'
-                          : cellColor(day.duration) || 'rgba(140,32,69,0.07)';
                         const isLesson = lessonDates.has(day.iso);
                         const isToday = day.iso === new Date().toISOString().slice(0, 10);
+                        const color = day.isFuture
+                          ? 'rgba(0,0,0,0.05)'
+                          : isLesson
+                            ? day.duration > 0
+                              ? `rgba(247,127,0,${0.45 + Math.min(0.55, day.duration / 120)})`
+                              : 'rgba(247,127,0,0.45)'
+                            : cellColor(day.duration) || 'rgba(140,32,69,0.07)';
                         return (
-                          <View key={di} style={{ width: cell, height: cell, position: 'relative' }}>
-                            <View style={{
-                              width: cell, height: cell,
-                              borderRadius: Math.max(1, cell * 0.2),
-                              backgroundColor: color,
-                              borderWidth: isToday ? 1 : 0,
-                              borderColor: COLOURS.navy,
-                            }} />
-                            {isLesson && (
-                              <View style={{
-                                position: 'absolute',
-                                top: 0, left: 0, right: 0, bottom: 0,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}>
-                                <View style={{
-                                  width: Math.round(cell * 0.55),
-                                  height: Math.round(cell * 0.55),
-                                  borderRadius: 99,
-                                  backgroundColor: COLOURS.amber,
-                                  borderWidth: 2,
-                                  borderColor: 'rgba(255,255,255,0.95)',
-                                }} />
-                              </View>
-                            )}
-                          </View>
+                          <View key={di} style={{
+                            width: cell, height: cell,
+                            borderRadius: Math.max(1, cell * 0.2),
+                            backgroundColor: color,
+                            borderWidth: isToday ? 1 : 0,
+                            borderColor: COLOURS.navy,
+                          }} />
                         );
                       })}
                     </View>
@@ -169,7 +154,7 @@ function ActivityGrid({ sessions, lessons }) {
           }} />
         ))}
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2, marginRight: 8 }}>More</Text>
-        <View style={{ width: Math.round(cell * 0.55), height: Math.round(cell * 0.55), borderRadius: 99, backgroundColor: COLOURS.amber, borderWidth: 2, borderColor: 'rgba(255,255,255,0.95)' }} />
+        <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: 'rgba(247,127,0,0.55)' }} />
         <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>Lesson</Text>
       </View>
     </View>
