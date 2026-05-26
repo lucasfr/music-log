@@ -768,10 +768,7 @@ function ScaleCoverage({ sessions }) {
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {totalScaleSess} sessions</SvgText>
               <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
-              {avgDiff !== null && (
-                <SvgText x={cx} y={cy + size*0.110} textAnchor="middle" dominantBaseline="central"
-                  fontSize={size*0.026} fill={COLOURS.textDim} fontFamily="Lato">avg diff</SvgText>
-              )}
+
             </G>
           ) : (
             <G>
@@ -796,7 +793,7 @@ function ScaleCoverage({ sessions }) {
             width: size * 0.28,
             alignItems: 'center',
           }}>
-            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={size * 0.052} />
+            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={size * 0.038} />
           </View>
         )}
         {/* Avg diff Zelda bar — selected key */}
@@ -808,7 +805,7 @@ function ScaleCoverage({ sessions }) {
             width: size * 0.28,
             alignItems: 'center',
           }}>
-            <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.052} />
+            <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.038} />
           </View>
         )}
         </View>
@@ -824,7 +821,13 @@ function ScaleCoverage({ sessions }) {
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#5DCAA5' }} />
           <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>minor</Text>
         </View>
-        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, fontStyle: 'italic' }}>tap a segment for details</Text>
+        {avgDiff !== null && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={10} />
+            <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>avg diff</Text>
+          </View>
+        )}
+        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>
       </View>
     </View>
   );
