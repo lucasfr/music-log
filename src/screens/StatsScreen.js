@@ -6,10 +6,12 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 
-const STATUS_TEXT_COLOURS = {
-  learning:            COLOURS.steel,
-  consolidating:       '#7A4FA0',
-  'performance-ready': COLOURS.success,
+const STATUS_EMOJI = {
+  new:                 '🌿',
+  learning:            '🌱',
+  consolidating:       '💧',
+  'performance-ready': '✨',
+  shelved:             '📦',
 };
 
 // ─── Activity grid (Jan–Dec calendar year) ──────────────────────────────────
@@ -342,29 +344,33 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          {STATUS_OPTIONS.map(s => (
-            <BlurView
-              key={s}
-              intensity={32}
-              tint="light"
-              style={{
-                flex: 1, borderRadius: RADIUS.md, overflow: 'hidden',
-                shadowColor: (STATUS_COLOURS[s] || {}).border || COLOURS.accentMid,
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.6, shadowRadius: 14, elevation: 3,
-              }}
-            >
-              <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
-                <Text style={{ fontSize: 32, lineHeight: 38, marginBottom: 6 }}>
-                  {s === 'learning' ? '🌱' : s === 'consolidating' ? '💧' : '✨'}
-                </Text>
-                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: STATUS_TEXT_COLOURS[s] || COLOURS.navy, lineHeight: 28 }}>
-                  {compositions.filter(c => c.status === s).length}
-                </Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 3, letterSpacing: 0.2 }}>{s}</Text>
-              </View>
-            </BlurView>
-          ))}
+          {STATUS_OPTIONS.map(s => {
+            const sc = STATUS_COLOURS[s] || {};
+            const count = compositions.filter(c => c.status === s).length;
+            return (
+              <BlurView
+                key={s}
+                intensity={32}
+                tint="light"
+                style={{
+                  flex: 1, borderRadius: RADIUS.md, overflow: 'hidden',
+                  shadowColor: sc.border || COLOURS.accentMid,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.6, shadowRadius: 14, elevation: 3,
+                }}
+              >
+                <View style={{ backgroundColor: sc.bg || COLOURS.glass, padding: 14 }}>
+                  <Text style={{ fontSize: 32, lineHeight: 38, marginBottom: 6 }}>
+                    {STATUS_EMOJI[s] || '🎵'}
+                  </Text>
+                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: sc.text || COLOURS.navy, lineHeight: 28 }}>
+                    {count}
+                  </Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: sc.text || COLOURS.textDim, marginTop: 3, letterSpacing: 0.2, opacity: 0.8 }}>{s}</Text>
+                </View>
+              </BlurView>
+            );
+          })}
         </View>
       </ScrollView>
     </SafeAreaView>

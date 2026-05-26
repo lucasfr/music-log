@@ -1,4 +1,4 @@
-export const STATUS_OPTIONS = ['learning', 'consolidating', 'performance-ready'];
+export const STATUS_OPTIONS = ['new', 'learning', 'consolidating', 'performance-ready', 'shelved'];
 
 export const ENERGY_LABELS = {
   '-2': 'Very low',

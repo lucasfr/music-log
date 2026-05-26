@@ -173,7 +173,7 @@ export function BtnRow({ children, style }) {
 // ─── Status pill ──────────────────────────────────────────────────────────────
 
 export function StatusPill({ status }) {
-  const c = STATUS_COLOURS[status] || STATUS_COLOURS.learning;
+  const c = STATUS_COLOURS[status] || STATUS_COLOURS.new;
   return (
     <View style={{
       paddingHorizontal: 10, paddingVertical: 4,

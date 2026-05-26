@@ -68,9 +68,13 @@ export const COLOURS = {
 };
 
 export const STATUS_COLOURS = {
-  learning:            { bg: 'rgba(140,32,69,0.10)',  text: '#6B1535', border: 'rgba(140,32,69,0.35)'  },
-  consolidating:       { bg: 'rgba(247,127,0,0.12)',  text: '#7A3A00', border: 'rgba(247,127,0,0.38)'  },
-  'performance-ready': { bg: 'rgba(252,191,73,0.20)', text: '#5A3A00', border: 'rgba(252,191,73,0.50)' },
+  // Lifecycle arc — hues from palette 4 (crimson → navy), lightened for light bg
+  new:                 { bg: '#FDE8D8', text: '#7A3500', border: 'rgba(247,127,0,0.43)'   },  // amber
+  learning:            { bg: '#FAD9CC', text: '#6B1A05', border: 'rgba(213,62,15,0.43)'   },  // rust
+  consolidating:       { bg: '#FDEFC8', text: '#6B3A00', border: 'rgba(252,191,73,0.43)'  },  // gold
+  'performance-ready': { bg: '#FAEAC0', text: '#412402', border: 'rgba(186,117,23,0.43)'  },  // deep gold
+  // Holding state
+  shelved:             { bg: '#D6E4EE', text: '#002035', border: 'rgba(0,48,73,0.43)'      },  // navy
 };
 
 export const RADIUS = {

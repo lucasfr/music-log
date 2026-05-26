@@ -729,7 +729,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
 
   const blank = () => ({
     id: uid(), title: '', composer: '', arrangement: '', collection: '',
-    status: 'learning', grade: '', keys: [], timeSigs: [],
+    status: 'new', grade: '', keys: [], timeSigs: [],
     difficulty: 0, liking: 0, year: '', tags: [],
     dateStarted: '', dateCompleted: '',
     info: '', technicalChallenges: '', musicalFocus: '', practiceNotes: '',
@@ -763,8 +763,8 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
               <TouchableOpacity key={s} onPress={() => setFilterStatus(s)} activeOpacity={0.75}
                 style={{
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
-                  backgroundColor: active ? 'rgba(247,127,0,0.14)' : 'rgba(255,255,255,0.55)',
-                  shadowColor: active ? COLOURS.accent2Mid : COLOURS.glassShadow,
+                  backgroundColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.bg || 'rgba(247,127,0,0.14)') : active ? 'rgba(247,127,0,0.14)' : 'rgba(255,255,255,0.55)',
+                  shadowColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.border || COLOURS.accent2Mid) : active ? COLOURS.accent2Mid : COLOURS.glassShadow,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: active ? 0.6 : 0.5,
                   shadowRadius: active ? 10 : 6,
