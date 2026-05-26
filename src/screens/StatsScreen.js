@@ -1033,10 +1033,16 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 8 }}>Technique & scales ({periodLabel})</SectionTitle>
         <GlassCard>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Groups</Text>
-          <TechniqueBreakdown sessions={periodSessions} />
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16, marginBottom: 10 }}>Keys ({periodLabel})</Text>
-          <ScaleCoverage sessions={periodSessions} />
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24, alignItems: 'flex-start' }}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Groups</Text>
+              <TechniqueBreakdown sessions={periodSessions} />
+            </View>
+            <View style={{ width: 420, flexShrink: 0 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Keys ({periodLabel})</Text>
+              <ScaleCoverage sessions={periodSessions} />
+            </View>
+          </View>
         </GlassCard>
 
         <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
