@@ -12,6 +12,7 @@ const STATUS_EMOJI = {
   consolidating:       '💧',
   'performance-ready': '✨',
   shelved:             '📦',
+  ambition:            '🌟',
 };
 
 // ─── Activity grid (Jan–Dec calendar year) ──────────────────────────────────
@@ -248,8 +249,10 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   periodSessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'repertoire') return;
+      const comp = compositions.find(c => c.id === seg.compositionId);
+      if (comp?.status === 'ambition') return; // exclude wishlist pieces
       const name = seg.compositionId
-        ? (compositions.find(c => c.id === seg.compositionId) || {}).title || seg.compositionId
+        ? (comp || {}).title || seg.compositionId
         : seg.title;
       if (!name) return;
       pieceFreq[name] = (pieceFreq[name] || 0) + 1;

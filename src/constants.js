@@ -1,4 +1,7 @@
-export const STATUS_OPTIONS = ['new', 'learning', 'consolidating', 'performance-ready', 'shelved'];
+export const STATUS_OPTIONS = ['new', 'learning', 'consolidating', 'performance-ready', 'shelved', 'ambition'];
+
+// Statuses that represent active practice pieces (exclude from ambition/holding views)
+export const ACTIVE_STATUSES = ['new', 'learning', 'consolidating', 'performance-ready', 'shelved'];
 
 export const ENERGY_LABELS = {
   '-2': 'Very low',

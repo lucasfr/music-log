@@ -126,6 +126,8 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions, lesso
   const linkedComp    = compositions.find(c => c.id === segment.compositionId);
   const techLinked    = isTech && linkedComp;
   const accentColor   = isTech ? COLOURS.steel : COLOURS.navy;
+  // Exclude ambition pieces from session pickers — they're not active practice
+  const activeComps   = compositions.filter(c => c.status !== 'ambition');
 
   // Header display name: for tech, prefer linked comp title, then manual title
   const headerName = isTech
@@ -278,7 +280,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions, lesso
                     label=""
                     value={segment.compositionId || ''}
                     onChange={id => field('compositionId', id)}
-                    options={compositions.map(c => ({ value: c.id, label: c.title }))}
+                    options={activeComps.map(c => ({ value: c.id, label: c.title }))}
                     placeholder="— None —"
                   />
                 )}
@@ -295,8 +297,7 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions, lesso
                       const comp = compositions.find(c => c.id === id);
                       onChange({ ...segment, compositionId: id, title: comp ? comp.title : segment.title });
                     }}
-                    options={compositions.map(c => ({ value: c.id, label: c.title }))}
-                    placeholder="— Select or type —"
+                    options={activeComps.map(c => ({ value: c.id, label: c.title }))}
                   />
                 </View>
                 <View style={{ width: 90 }}>
