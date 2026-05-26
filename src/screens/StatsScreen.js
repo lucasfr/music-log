@@ -606,7 +606,7 @@ const COF_MINORS = ['Am','Em','Bm','F#m','C#m','G#m','D#m','Bbm','Fm','Cm','Gm',
 const SCALE_LABEL_TO_COF = {
   // Major
   'C major': 'C', 'G major': 'G', 'D major': 'D', 'A major': 'A',
-  'E major': 'E', 'B major': 'B', 'F# major': 'F#', 'Db major': 'Db',
+  'E major': 'E', 'B major': 'B', 'F# major': 'F#', 'Gb major': 'F#', 'Db major': 'Db',
   'Ab major': 'Ab', 'Eb major': 'Eb', 'Bb major': 'Bb', 'F major': 'F',
   // Natural minor
   'A natural minor': 'Am', 'E natural minor': 'Em', 'B natural minor': 'Bm',
@@ -730,7 +730,7 @@ function ScaleCoverage({ sessions }) {
                   textAnchor="middle" dominantBaseline="central"
                   fontSize={size * 0.038} fontWeight="500"
                   fill={COLOURS.text} fontFamily="Lato"
-                >{key}</SvgText>
+                >{key === 'F#' ? 'F#/Gb' : key}</SvgText>
                 <SvgText
                   x={cx + (R2 + R3) / 2 * Math.cos(midRad)}
                   y={cy + (R2 + R3) / 2 * Math.sin(midRad)}
