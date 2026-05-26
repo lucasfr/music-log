@@ -601,6 +601,23 @@ function TechniqueBreakdown({ sessions }) {
 const COF_KEYS   = ['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
 const COF_MINORS = ['Am','Em','Bm','F#m','C#m','G#m','D#m','Bbm','Fm','Cm','Gm','Dm'];
 
+// Maps the scale label stored in session data to a COF key or minor key
+// e.g. 'C major' → 'C', 'A harmonic minor' → 'Am'
+const SCALE_LABEL_TO_COF = {};
+const COF_KEY_ROOTS   = ['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
+const COF_MINOR_ROOTS = [
+  ['A','Am'], ['E','Em'], ['B','Bm'], ['F#','F#m'], ['C#','C#m'], ['G#','G#m'],
+  ['D#','D#m'], ['Bb','Bbm'], ['F','Fm'], ['C','Cm'], ['G','Gm'], ['D','Dm'],
+];
+COF_KEY_ROOTS.forEach(root => {
+  SCALE_LABEL_TO_COF[`${root} major`] = root;
+});
+COF_MINOR_ROOTS.forEach(([root, cof]) => {
+  SCALE_LABEL_TO_COF[`${root} natural minor`]  = cof;
+  SCALE_LABEL_TO_COF[`${root} harmonic minor`] = cof;
+  SCALE_LABEL_TO_COF[`${root} melodic minor`]  = cof;
+});
+
 function amberForCount(n, max) {
   if (!n) return 'rgba(180,178,170,0.22)';
   const t = n / Math.max(max, 1);
@@ -638,11 +655,13 @@ function ScaleCoverage({ sessions }) {
   sessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
-      (seg.scales || []).forEach(scale => {
-        if (!scaleCounts[scale]) scaleCounts[scale] = { sessions: 0, minutes: 0, difficulty: [] };
-        scaleCounts[scale].sessions++;
-        scaleCounts[scale].minutes += Number(seg.duration) || 0;
-        if (seg.feltDifficulty) scaleCounts[scale].difficulty.push(Number(seg.feltDifficulty));
+      (seg.scales || []).forEach(scaleLabel => {
+        const cofKey = SCALE_LABEL_TO_COF[scaleLabel];
+        if (!cofKey) return; // ignore modes, pentatonics etc. for now
+        if (!scaleCounts[cofKey]) scaleCounts[cofKey] = { sessions: 0, minutes: 0, difficulty: [] };
+        scaleCounts[cofKey].sessions++;
+        scaleCounts[cofKey].minutes += Number(seg.duration) || 0;
+        if (seg.feltDifficulty) scaleCounts[cofKey].difficulty.push(Number(seg.feltDifficulty));
       });
     });
   });
