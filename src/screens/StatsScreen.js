@@ -593,24 +593,18 @@ function TechniqueBreakdown({ sessions }) {
           ? data.difficulty.reduce((a, v) => a + v, 0) / data.difficulty.length
           : null;
         return (
-          <View key={name} style={{ marginBottom: 14 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{name}</Text>
-              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-                {data.minutes > 0 && (
-                  <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {timeStr(data.minutes)}</Text>
-                )}
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{data.count}×</Text>
+          <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.text, width: 90 }} numberOfLines={1}>{name}</Text>
+            <View style={{ flex: 1, gap: 4 }}>
+              <View style={{ height: 10, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 5 }}>
+                <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 5 }} />
               </View>
+              {avgDiff !== null && <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={11} />}
             </View>
-            <View style={{ height: 10, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 5 }}>
-              <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 5 }} />
+            <View style={{ alignItems: 'flex-end', gap: 2, width: 44 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{data.count}×</Text>
+              {data.minutes > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>{timeStr(data.minutes)}</Text>}
             </View>
-            {avgDiff !== null && (
-              <View style={{ marginTop: 6 }}>
-                <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={12} />
-              </View>
-            )}
           </View>
         );
       })}
