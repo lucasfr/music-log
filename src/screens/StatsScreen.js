@@ -328,10 +328,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         )}
 
         <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {STATUS_OPTIONS.map(s => {
             const sc = STATUS_COLOURS[s] || {};
             const count = compositions.filter(c => c.status === s).length;
+            if (count === 0) return null;
             return (
               <BlurView
                 key={s}
