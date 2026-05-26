@@ -769,7 +769,7 @@ function ScaleCoverage({ sessions }) {
               <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
               {avgDiff !== null && (
-                <SvgText x={cx} y={cy + size*0.096} textAnchor="middle" dominantBaseline="central"
+                <SvgText x={cx} y={cy + size*0.110} textAnchor="middle" dominantBaseline="central"
                   fontSize={size*0.026} fill={COLOURS.textDim} fontFamily="Lato">avg diff</SvgText>
               )}
             </G>
@@ -788,25 +788,27 @@ function ScaleCoverage({ sessions }) {
           )}
         </Svg>
         {/* Avg diff Zelda bar — overview (no selection) */}
-        {avgDiff !== null && (
+        {!sel && avgDiff !== null && (
           <View style={{
             position: 'absolute',
-            top: cy + size * 0.055,
-            left: 0, right: 0,
+            top: cy + size * 0.068,
+            left: cx - size * 0.14,
+            width: size * 0.28,
             alignItems: 'center',
           }}>
-            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={size * 0.038} />
+            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={size * 0.052} />
           </View>
         )}
         {/* Avg diff Zelda bar — selected key */}
         {sel && selAvgDiff !== null && (
           <View style={{
             position: 'absolute',
-            top: cy + size * 0.063,
-            left: 0, right: 0,
+            top: cy + size * 0.068,
+            left: cx - size * 0.14,
+            width: size * 0.28,
             alignItems: 'center',
           }}>
-            <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.038} />
+            <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.052} />
           </View>
         )}
         </View>
@@ -977,7 +979,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         {/* Stat tiles — wrap into two rows on narrow screens */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20, alignItems: 'stretch' }}>
           {statItems.map((item, i) => (
-            <View key={i} style={{ flexBasis: '18%', flexGrow: 1 }}>
+            <View key={i} style={{ flexBasis: '13%', flexGrow: 1 }}>
               <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3, flex: 1 }}>
                 <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
                   <Text style={{ fontSize: 32, lineHeight: 38, marginBottom: 6 }}>{item.emoji}</Text>
