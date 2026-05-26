@@ -72,7 +72,7 @@ export const STATUS_COLOURS = {
   new:                 { bg: '#FDE8D8', text: '#7A3500', border: 'rgba(247,127,0,0.43)'   },  // amber
   learning:            { bg: '#FAD9CC', text: '#6B1A05', border: 'rgba(213,62,15,0.43)'   },  // rust
   consolidating:       { bg: '#FDEFC8', text: '#6B3A00', border: 'rgba(252,191,73,0.43)'  },  // gold
-  'performance-ready': { bg: '#FAEAC0', text: '#412402', border: 'rgba(186,117,23,0.43)'  },  // deep gold
+  'performance-ready': { bg: '#D6EDD8', text: '#1E4D28', border: 'rgba(46,120,58,0.43)'   },  // sage green — clearly distinct, still warm
   // Holding state
   shelved:             { bg: '#D6E4EE', text: '#002035', border: 'rgba(0,48,73,0.43)'      },  // navy
 };
