@@ -1048,6 +1048,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Most practised</Text>
               {topPieces.length > 0 ? topPieces.map(({ name, count, avgLiking, avgEnergy, avgDifficulty, mins }) => (
                 <View key={name} style={{ marginBottom: 14 }}>
+                  {/* Title + count */}
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
                     <View style={{ alignItems: 'flex-end', gap: 1 }}>
@@ -1055,12 +1056,19 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                       {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
                     </View>
                   </View>
-                  <View style={{ height: 3, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 2, marginBottom: 6 }}>
+                  {/* Frequency bar */}
+                  <View style={{ height: 3, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 2, marginBottom: 8 }}>
                     <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
                   </View>
-                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                  {/* Session-level metrics */}
+                  <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>Session</Text>
+                  <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
                     {avgEnergy !== null && <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={12} />}
-                    {avgLiking !== null && <ZeldaBarFractional emoji="❤️" fill={avgLiking} size={12} />}
+                  </View>
+                  {/* Piece-level metrics */}
+                  <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>Piece</Text>
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    {avgLiking !== null && <ZeldaBarFractional emoji="⭐" fill={avgLiking} size={12} />}
                     {avgDifficulty !== null && <ZeldaBarFractional emoji="🎵" fill={avgDifficulty} size={12} />}
                   </View>
                 </View>
