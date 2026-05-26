@@ -540,6 +540,19 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const todayLessons  = useMemo(() => (lessons || []).filter(l => l.date === today), [lessons, today]);
   const hasToday = todaySessions.length > 0 || todayLessons.length > 0;
 
+  const currentStreak = useMemo(() => {
+    let count = 0;
+    const dateSet = new Set(sessions.map(s => s.date));
+    const d = new Date();
+    while (true) {
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (!dateSet.has(iso)) break;
+      count++;
+      d.setDate(d.getDate() - 1);
+    }
+    return count;
+  }, [sessions]);
+
   const feedItems = useMemo(() => {
     const s = sessions.filter(s => s.date !== today).map(s => ({ ...s, _type: 'practice' }));
     const l = (lessons || []).filter(l => l.date !== today).map(l => ({ ...l, _type: 'lesson' }));
@@ -594,7 +607,15 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     <>
       {/* Today */}
       <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Today</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Today</Text>
+          {currentStreak > 0 && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 9, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}>
+              <Text style={{ fontSize: 11 }}>🔥</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.navy }}>{currentStreak} day{currentStreak !== 1 ? 's' : ''}</Text>
+            </View>
+          )}
+        </View>
         {hasToday ? (
           <View style={{ gap: 10 }}>
             {todayLessons.map(l => (
