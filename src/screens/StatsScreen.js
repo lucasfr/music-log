@@ -495,6 +495,74 @@ function StreakHistory({ sessions }) {
   );
 }
 
+// ─── Library growth chart ─────────────────────────────────────────────────
+
+function LibraryGrowthChart({ compositions }) {
+  const [width, setWidth] = useState(0);
+  const H = 90;
+  const padL = 6, padR = 6, padT = 8, padB = 24;
+
+  // Group by month added (createdAt or dateStarted)
+  const byMonth = {};
+  compositions.forEach(c => {
+    const raw = c.createdAt || c.dateStarted || null;
+    if (!raw) return;
+    const month = raw.slice(0, 7); // 'YYYY-MM'
+    byMonth[month] = (byMonth[month] || 0) + 1;
+  });
+
+  const months = Object.keys(byMonth).sort();
+  if (months.length < 2) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
+  );
+
+  // Cumulative totals
+  let running = 0;
+  const pts = months.map(m => { running += byMonth[m]; return { m, total: running, added: byMonth[m] }; });
+  const maxTotal = pts[pts.length - 1].total;
+
+  function toX(i) { return padL + (i / (pts.length - 1)) * (width - padL - padR); }
+  function toY(v) { return padT + (1 - v / maxTotal) * (H - padT - padB); }
+
+  const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p.total).toFixed(1)}`).join(' ');
+
+  return (
+    <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 8 }}>
+        {compositions.length} piece{compositions.length !== 1 ? 's' : ''} total · {compositions.filter(c => c.status !== 'ambition' && c.status !== 'shelved').length} active
+      </Text>
+      {width > 0 && (
+        <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
+          {/* Area fill */}
+          <Path
+            d={`${linePath} L${toX(pts.length - 1).toFixed(1)},${H - padB} L${toX(0).toFixed(1)},${H - padB} Z`}
+            fill={COLOURS.amber}
+            opacity={0.12}
+          />
+          {/* Line */}
+          <Path d={linePath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Dots */}
+          {pts.map((p, i) => (
+            <Circle key={i} cx={toX(i)} cy={toY(p.total)} r={3} fill={COLOURS.amber} />
+          ))}
+          {/* X-axis labels — every 2nd or 3rd month */}
+          {pts.map((p, i) => {
+            const step = pts.length > 8 ? 3 : 2;
+            if (i % step !== 0 && i !== pts.length - 1) return null;
+            return (
+              <SvgText key={p.m} x={toX(i)} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">
+                {new Date(p.m + '-15').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })}
+              </SvgText>
+            );
+          })}
+          {/* Y-axis max label */}
+          <SvgText x={padL} y={padT + 6} textAnchor="start" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{maxTotal}</SvgText>
+        </Svg>
+      )}
+    </View>
+  );
+}
+
 function TouchableYear({ onPress, label }) {
   return (
     <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
@@ -741,6 +809,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             );
           })}
         </View>
+        <SectionTitle style={{ marginTop: 8 }}>Library growth</SectionTitle>
+        <GlassCard>
+          <LibraryGrowthChart compositions={compositions} />
+        </GlassCard>
+
         <SectionTitle style={{ marginTop: 8 }}>Session quality ({periodLabel})</SectionTitle>
         <GlassCard>
           <ScatterPlot sessions={periodSessions} />
