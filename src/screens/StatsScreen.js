@@ -242,22 +242,6 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
       return { name, count, avgLiking, mins };
     });
 
-  const last14 = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (13 - i));
-    const iso = d.toISOString().slice(0, 10);
-    const s = sessions.find(s => s.date === iso);
-    const hasLesson = (lessons || []).some(l => l.date === iso);
-    return {
-      iso,
-      label: d.toLocaleDateString('en-GB', { weekday: 'short' }).slice(0, 1),
-      duration: s ? (Number(s.duration) || 30) : 0,
-      practiced: !!s,
-      hasLesson,
-    };
-  });
-  const maxDur = Math.max(...last14.map(d => d.duration), 1);
-  const barH = 72;
-
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
 
   const statItems = [
@@ -310,30 +294,6 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle>Activity</SectionTitle>
         <GlassCard>
           <ActivityGrid sessions={sessions} lessons={lessons} />
-        </GlassCard>
-
-        <SectionTitle>Last 14 days</SectionTitle>
-        <GlassCard style={{ paddingBottom: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 4 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>{maxDur}m</Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>min</Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: barH + 18, gap: 3 }}>
-            {last14.map(d => (
-              <View key={d.iso} style={{ flex: 1, alignItems: 'center' }}>
-                <View style={{ height: 6, justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
-                  {d.hasLesson ? <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: COLOURS.amber }} /> : null}
-                </View>
-                <View style={{
-                  width: '100%',
-                  height: d.practiced ? Math.max((d.duration / maxDur) * barH, 5) : 5,
-                  backgroundColor: d.practiced ? COLOURS.navy : 'rgba(140,32,69,0.10)',
-                  borderRadius: 4,
-                }} />
-                <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginTop: 4 }}>{d.label}</Text>
-              </View>
-            ))}
-          </View>
         </GlassCard>
 
         {topPieces.length > 0 && (
