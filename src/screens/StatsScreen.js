@@ -296,10 +296,10 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <ActivityGrid sessions={sessions} lessons={lessons} />
         </GlassCard>
 
-        {topPieces.length > 0 && (
+        {topPieces.length > 0 ? (
           <>
             <SectionTitle style={{ marginTop: 8 }}>Most practised ({periodLabel})</SectionTitle>
-        {topPieces.map(({ name, count, avgLiking, mins }) => (
+            {topPieces.map(({ name, count, avgLiking, mins }) => (
               <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5, flexWrap: 'wrap' }}>
@@ -324,6 +324,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                 </View>
               </View>
             ))}
+          </>
+        ) : (
+          <>
+            <SectionTitle style={{ marginTop: 8 }}>Most practised ({periodLabel})</SectionTitle>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim, marginBottom: 16 }}>No repertoire logged in this period.</Text>
           </>
         )}
 
