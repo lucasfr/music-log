@@ -955,11 +955,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         </View>
 
         {/* Stat tiles — wrap into two rows on narrow screens */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20, alignItems: 'stretch' }}>
           {statItems.map((item, i) => (
             <View key={i} style={{ flexBasis: '18%', flexGrow: 1 }}>
-              <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
-                <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center' }}>
+              <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3, flex: 1 }}>
+                <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
                   <Text style={{ fontSize: 32, lineHeight: 38, marginBottom: 6 }}>{item.emoji}</Text>
                   {(item.type === 'energy' || item.type === 'enjoyment') ? (
                     item.fill !== null
