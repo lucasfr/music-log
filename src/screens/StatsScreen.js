@@ -595,15 +595,12 @@ function TechniqueBreakdown({ sessions }) {
         return (
           <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.text, width: 90 }} numberOfLines={1}>{name}</Text>
-            <View style={{ flex: 1, gap: 4 }}>
-              <View style={{ height: 10, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 5 }}>
-                <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 5 }} />
-              </View>
-              {avgDiff !== null && <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={11} />}
+            <View style={{ flex: 1, height: 10, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 5 }}>
+              <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 5 }} />
             </View>
-            <View style={{ alignItems: 'flex-end', gap: 2, width: 44 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{data.count}×</Text>
-              {data.minutes > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>{timeStr(data.minutes)}</Text>}
+            <View style={{ alignItems: 'flex-end', gap: 2, width: 60 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>
+              {avgDiff !== null && <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={11} />}
             </View>
           </View>
         );
