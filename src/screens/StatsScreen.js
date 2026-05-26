@@ -171,17 +171,29 @@ function TouchableYear({ onPress, label }) {
 }
 
 export default function StatsScreen({ sessions, compositions, lessons, isDesktop }) {
+  const [period, setPeriod] = useState('30d');
 
-  const last30 = sessions.filter(s => {
-    const d = new Date(s.date + 'T12:00:00');
-    const ago = new Date(); ago.setDate(ago.getDate() - 30);
-    return d >= ago;
-  });
+  const PERIODS = [
+    { key: '7d',  label: '7 days' },
+    { key: '30d', label: '30 days' },
+    { key: 'all', label: 'All time' },
+  ];
 
-  const totalMin = last30.reduce((a, s) => a + (Number(s.duration) || 0), 0);
-  const allTimeMin = sessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
-  const avgEnergy = last30.length
-    ? (last30.reduce((a, s) => a + Number(s.energy), 0) / last30.length).toFixed(1)
+  function filterByPeriod(items, days) {
+    if (period === 'all') return items;
+    const ago = new Date();
+    ago.setDate(ago.getDate() - days);
+    return items.filter(s => new Date(s.date + 'T12:00:00') >= ago);
+  }
+
+  const days = period === '7d' ? 7 : 30;
+  const periodSessions = filterByPeriod(sessions, days);
+  const periodLessons  = filterByPeriod(lessons || [], days);
+
+  const totalMin    = periodSessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
+  const allTimeMin  = sessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
+  const avgEnergy   = periodSessions.length
+    ? (periodSessions.reduce((a, s) => a + Number(s.energy), 0) / periodSessions.length).toFixed(1)
     : '—';
 
   const streak = (() => {
@@ -198,7 +210,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   const pieceFreq = {};
   const pieceEnjoyment = {};
   const pieceMinutes = {};
-  last30.forEach(s => {
+  periodSessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'repertoire') return;
       const name = seg.compositionId
@@ -239,18 +251,39 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   const maxDur = Math.max(...last14.map(d => d.duration), 1);
   const barH = 72;
 
+  const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
+
   const statItems = [
-    { value: allTimeMin >= 60 ? `${Math.floor(allTimeMin / 60)}h ${allTimeMin % 60}m` : `${Math.round(allTimeMin)}m`, label: 'total practice', emoji: '⏱' },
-    { value: last30.length,        label: 'sessions (30d)',      emoji: '🎹' },
-    { value: (lessons || []).filter(l => { const d = new Date(l.date + 'T12:00:00'); const ago = new Date(); ago.setDate(ago.getDate() - 30); return d >= ago; }).length, label: 'lessons (30d)', emoji: '🎓' },
-    { value: streak,               label: 'day streak',          emoji: '🔥' },
-    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: 'avg energy (30d)', emoji: '⚡' },
+    { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱' },
+    { value: periodSessions.length, label: `sessions (${periodLabel})`,  emoji: '🎹' },
+    { value: periodLessons.length,  label: `lessons (${periodLabel})`,   emoji: '🎓' },
+    { value: streak,                label: 'day streak',                 emoji: '🔥' },
+    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: `avg energy (${periodLabel})`, emoji: '⚡' },
   ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 40 }}>
-        <SectionTitle style={{ marginTop: 4 }}>Overview</SectionTitle>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 }}>
+          <SectionTitle style={{ marginBottom: 0 }}>Overview</SectionTitle>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {PERIODS.map(p => {
+              const active = period === p.key;
+              return (
+                <TouchableOpacity key={p.key} onPress={() => setPeriod(p.key)} activeOpacity={0.75}
+                  style={{
+                    paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
+                    backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+                    shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
+                    shadowOffset: { width: 0, height: active ? 3 : 1 },
+                    shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+                  }}>
+                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? '#fff' : COLOURS.textMuted }}>{p.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
 
         {/* Stat tiles — wrap into two rows on narrow screens */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
@@ -298,7 +331,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         {topPieces.length > 0 && (
           <>
-            <SectionTitle style={{ marginTop: 8 }}>Most practised (30 days)</SectionTitle>
+            <SectionTitle style={{ marginTop: 8 }}>Most practised ({periodLabel})</SectionTitle>
         {topPieces.map(({ name, count, avgLiking, mins }) => (
               <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <View style={{ flex: 1 }}>
