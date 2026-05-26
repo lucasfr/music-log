@@ -963,14 +963,18 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <WeeklyTrendChart sessions={sessions} period={period} />
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 8 }}>Technique ({periodLabel})</SectionTitle>
+        <SectionTitle style={{ marginTop: 8 }}>Technique & scales ({periodLabel})</SectionTitle>
         <GlassCard>
-          <TechniqueBreakdown sessions={periodSessions} />
-        </GlassCard>
-
-        <SectionTitle style={{ marginTop: 8 }}>Scale coverage ({periodLabel})</SectionTitle>
-        <GlassCard>
-          <ScaleCoverage sessions={periodSessions} />
+          <View style={{ flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Groups</Text>
+              <TechniqueBreakdown sessions={periodSessions} />
+            </View>
+            <View style={{ width: 200 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Keys (all time)</Text>
+              <ScaleCoverage sessions={sessions} />
+            </View>
+          </View>
         </GlassCard>
 
         {topPieces.length > 0 ? (
