@@ -382,11 +382,13 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   const pieceFreq = {};
   const pieceEnjoyment = {};
   const pieceMinutes = {};
+  const pieceEnergy = {};
+  const pieceDifficulty = {};
   periodSessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'repertoire') return;
       const comp = compositions.find(c => c.id === seg.compositionId);
-      if (comp?.status === 'ambition') return; // exclude wishlist pieces
+      if (comp?.status === 'ambition') return;
       const name = seg.compositionId
         ? (comp || {}).title || seg.compositionId
         : seg.title;
@@ -397,6 +399,15 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         if (!pieceEnjoyment[name]) pieceEnjoyment[name] = [];
         pieceEnjoyment[name].push(seg.liking);
       }
+      // energy from parent session
+      if (s.energy != null) {
+        if (!pieceEnergy[name]) pieceEnergy[name] = [];
+        pieceEnergy[name].push(Number(s.energy));
+      }
+      if (seg.feltDifficulty) {
+        if (!pieceDifficulty[name]) pieceDifficulty[name] = [];
+        pieceDifficulty[name].push(Number(seg.feltDifficulty));
+      }
     });
   });
   const topPieces = Object.entries(pieceFreq)
@@ -404,9 +415,13 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     .slice(0, 5)
     .map(([name, count]) => {
       const joys = pieceEnjoyment[name] || [];
-      const avgLiking = joys.length ? joys.reduce((a, v) => a + v, 0) / joys.length : null;
+      const engs = pieceEnergy[name] || [];
+      const diffs = pieceDifficulty[name] || [];
+      const avgLiking     = joys.length  ? joys.reduce((a, v) => a + v, 0)  / joys.length  : null;
+      const avgEnergy     = engs.length  ? engs.reduce((a, v) => a + v, 0)  / engs.length  : null;
+      const avgDifficulty = diffs.length ? diffs.reduce((a, v) => a + v, 0) / diffs.length : null;
       const mins = pieceMinutes[name] || 0;
-      return { name, count, avgLiking, mins };
+      return { name, count, avgLiking, avgEnergy, avgDifficulty, mins };
     });
 
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
@@ -477,30 +492,44 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         {topPieces.length > 0 ? (
           <>
             <SectionTitle style={{ marginTop: 8 }}>Most practised ({periodLabel})</SectionTitle>
-            {topPieces.map(({ name, count, avgLiking, mins }) => (
-              <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5, flexWrap: 'wrap' }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>📜 {name}</Text>
+            {topPieces.map(({ name, count, avgLiking, avgEnergy, avgDifficulty, mins }) => (
+              <BlurView key={name} intensity={32} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
+                <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
+                  {/* Title row */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
+                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{count}×</Text>
+                      {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
+                    </View>
+                  </View>
+                  {/* Progress bar */}
+                  <View style={{ height: 3, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 2, marginBottom: 12 }}>
+                    <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
+                  </View>
+                  {/* Zelda bars row */}
+                  <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+                    {avgEnergy !== null && (
+                      <View style={{ gap: 3 }}>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Energy</Text>
+                        <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={14} />
+                      </View>
+                    )}
                     {avgLiking !== null && (
-                      <View style={{ flexDirection: 'row', gap: 1 }}>
-                        {[1,2,3,4,5].map(n => (
-                          <Text key={n} style={{ fontSize: 11, opacity: n <= Math.round(avgLiking) ? 1 : 0.18 }}>⭐</Text>
-                        ))}
+                      <View style={{ gap: 3 }}>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Liking</Text>
+                        <ZeldaBarFractional emoji="❤️" fill={avgLiking} size={14} />
+                      </View>
+                    )}
+                    {avgDifficulty !== null && (
+                      <View style={{ gap: 3 }}>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Difficulty</Text>
+                        <ZeldaBarFractional emoji="🎵" fill={avgDifficulty} size={14} />
                       </View>
                     )}
                   </View>
-                  <View style={{ height: 5, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3 }}>
-                    <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
-                  </View>
                 </View>
-                <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{count}×</Text>
-                  {mins > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {mins}m</Text>
-                  )}
-                </View>
-              </View>
+              </BlurView>
             ))}
           </>
         ) : (
