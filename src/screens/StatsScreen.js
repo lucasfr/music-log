@@ -867,6 +867,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   const pieceEnjoyment = {};
   const pieceMinutes = {};
   const pieceEnergy = {};
+  const pieceSessionEnjoyment = {};
   const pieceDifficulty = {};
   periodSessions.forEach(s => {
     (s.segments || []).forEach(seg => {
@@ -883,10 +884,14 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         if (!pieceEnjoyment[name]) pieceEnjoyment[name] = [];
         pieceEnjoyment[name].push(seg.liking);
       }
-      // energy from parent session
+      // energy + enjoyment from parent session
       if (s.energy != null) {
         if (!pieceEnergy[name]) pieceEnergy[name] = [];
         pieceEnergy[name].push(Number(s.energy));
+      }
+      if (s.enjoyment != null) {
+        if (!pieceSessionEnjoyment[name]) pieceSessionEnjoyment[name] = [];
+        pieceSessionEnjoyment[name].push(Number(s.enjoyment));
       }
       if (seg.feltDifficulty) {
         if (!pieceDifficulty[name]) pieceDifficulty[name] = [];
@@ -898,14 +903,16 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([name, count]) => {
-      const joys = pieceEnjoyment[name] || [];
-      const engs = pieceEnergy[name] || [];
+      const joys  = pieceEnjoyment[name] || [];
+      const engs  = pieceEnergy[name] || [];
+      const sesEnj = pieceSessionEnjoyment[name] || [];
       const diffs = pieceDifficulty[name] || [];
-      const avgLiking     = joys.length  ? joys.reduce((a, v) => a + v, 0)  / joys.length  : null;
-      const avgEnergy     = engs.length  ? engs.reduce((a, v) => a + v, 0)  / engs.length  : null;
-      const avgDifficulty = diffs.length ? diffs.reduce((a, v) => a + v, 0) / diffs.length : null;
+      const avgLiking          = joys.length   ? joys.reduce((a, v) => a + v, 0)   / joys.length   : null;
+      const avgEnergy          = engs.length   ? engs.reduce((a, v) => a + v, 0)   / engs.length   : null;
+      const avgSessionEnjoyment = sesEnj.length ? sesEnj.reduce((a, v) => a + v, 0) / sesEnj.length : null;
+      const avgDifficulty      = diffs.length  ? diffs.reduce((a, v) => a + v, 0)  / diffs.length  : null;
       const mins = pieceMinutes[name] || 0;
-      return { name, count, avgLiking, avgEnergy, avgDifficulty, mins };
+      return { name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins };
     });
 
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
@@ -1046,7 +1053,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Most practised</Text>
-              {topPieces.length > 0 ? topPieces.map(({ name, count, avgLiking, avgEnergy, avgDifficulty, mins }) => (
+              {topPieces.length > 0 ? topPieces.map(({ name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins }) => (
                 <View key={name} style={{ marginBottom: 14 }}>
                   {/* Title + count */}
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -1064,6 +1071,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>Session</Text>
                   <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
                     {avgEnergy !== null && <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={12} />}
+                    {avgSessionEnjoyment !== null && <ZeldaBarFractional emoji="❤️" fill={avgSessionEnjoyment} size={12} />}
                   </View>
                   {/* Piece-level metrics */}
                   <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>Piece</Text>
