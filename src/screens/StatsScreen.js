@@ -161,6 +161,32 @@ function ActivityGrid({ sessions, lessons }) {
   );
 }
 
+// ─── Half-fill Zelda bar ─────────────────────────────────────────────────────
+// Renders emoji icons with precise fractional fill using overlapping clipped text.
+// `fill` is 0–5 (can be fractional, e.g. 3.5)
+
+function ZeldaBarFractional({ emoji, fill, total = 5, size = 22 }) {
+  return (
+    <View style={{ flexDirection: 'row', position: 'relative' }}>
+      {/* Dim base row */}
+      {Array.from({ length: total }, (_, i) => (
+        <Text key={i} style={{ fontSize: size, opacity: 0.18 }}>{emoji}</Text>
+      ))}
+      {/* Filled overlay — clipped to fill width */}
+      <View style={{
+        position: 'absolute', left: 0, top: 0, bottom: 0,
+        width: `${(fill / total) * 100}%`,
+        overflow: 'hidden',
+        flexDirection: 'row',
+      }}>
+        {Array.from({ length: total }, (_, i) => (
+          <Text key={i} style={{ fontSize: size }}>{emoji}</Text>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function TouchableYear({ onPress, label }) {
   return (
     <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
@@ -192,9 +218,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
   const totalMin    = periodSessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
   const allTimeMin  = sessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
-  const avgEnergy   = periodSessions.length
-    ? (periodSessions.reduce((a, s) => a + Number(s.energy), 0) / periodSessions.length).toFixed(1)
-    : '—';
+  // Energy: convert -2…+2 scale to 0…5 fill for the Zelda bar
+  const avgEnergyNum  = periodSessions.length
+    ? periodSessions.reduce((a, s) => a + Number(s.energy), 0) / periodSessions.length
+    : null;
+  const energyFill    = avgEnergyNum !== null ? avgEnergyNum + 3 : null; // -2→1, 0→3, +2→5
 
   const streak = (() => {
     const dateSet = new Set(periodSessions.map(s => s.date));
@@ -249,7 +277,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { value: periodSessions.length, label: `sessions (${periodLabel})`,  emoji: '🎹' },
     { value: periodLessons.length,  label: `lessons (${periodLabel})`,   emoji: '🎓' },
     { value: streak,                label: 'longest streak',              emoji: '🔥' },
-    { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: `avg energy (${periodLabel})`, emoji: '⚡' },
+    { value: null, fill: energyFill, label: `avg energy (${periodLabel})`,  emoji: '⚡', type: 'energy' },
   ];
 
   return (
@@ -283,7 +311,13 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                 <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center' }}>
                   <Text style={{ fontSize: 32, lineHeight: 38, marginBottom: 6 }}>{item.emoji}</Text>
-                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28 }}>{item.value}</Text>
+                  {item.type === 'energy' ? (
+                    item.fill !== null
+                      ? <ZeldaBarFractional emoji="⚡" fill={item.fill} size={18} />
+                      : <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28 }}>—</Text>
+                  ) : (
+                    <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28 }}>{item.value}</Text>
+                  )}
                   <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 3, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
                 </View>
               </BlurView>
