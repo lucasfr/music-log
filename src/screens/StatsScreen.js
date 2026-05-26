@@ -684,6 +684,16 @@ function ScaleCoverage({ sessions }) {
   const avgDiff        = allDiffs.length ? allDiffs.reduce((a, v) => a + v, 0) / allDiffs.length : null;
   const timeStr        = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
 
+  // Difficulty as note symbols for SVG (can't use clip trick inside SVG)
+  // ♩ = full, ♪ = half-step, ○ = empty
+  function diffNotes(val) {
+    if (val === null) return '';
+    const full  = Math.floor(val);
+    const half  = (val - full) >= 0.4 ? 1 : 0;
+    const empty = 5 - full - half;
+    return '♩'.repeat(full) + (half ? '♪' : '') + '○'.repeat(empty);
+  }
+
   const size = width || 300;
   const cx = size / 2, cy = size / 2;
   const R1 = size * 0.46, R2 = size * 0.315, R3 = size * 0.18;
@@ -760,7 +770,7 @@ function ScaleCoverage({ sessions }) {
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
               {avgDiff !== null && (
                 <SvgText x={cx} y={cy + size*0.096} textAnchor="middle" dominantBaseline="central"
-                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{'🎵'.repeat(Math.round(avgDiff))} avg diff</SvgText>
+                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{diffNotes(avgDiff)} avg diff</SvgText>
               )}
             </G>
           ) : (
@@ -775,7 +785,7 @@ function ScaleCoverage({ sessions }) {
                 fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
               {selAvgDiff !== null && (
                 <SvgText x={cx} y={cy + size*0.096} textAnchor="middle" dominantBaseline="central"
-                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{'🎵'.repeat(Math.round(selAvgDiff))}</SvgText>
+                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{diffNotes(selAvgDiff)}</SvgText>
               )}
             </G>
           )}
