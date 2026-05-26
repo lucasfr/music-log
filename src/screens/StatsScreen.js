@@ -844,6 +844,10 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     ? periodSessions.reduce((a, s) => a + Number(s.energy), 0) / periodSessions.length
     : null;
   const energyFill    = avgEnergyNum !== null ? avgEnergyNum + 3 : null; // -2→1, 0→3, +2→5
+  const enjoymentSessions = periodSessions.filter(s => s.enjoyment != null);
+  const avgEnjoymentFill   = enjoymentSessions.length
+    ? enjoymentSessions.reduce((a, s) => a + Number(s.enjoyment), 0) / enjoymentSessions.length
+    : null;
 
   const streak = (() => {
     const dateSet = new Set(periodSessions.map(s => s.date));
@@ -922,7 +926,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { value: periodSessions.length, label: `sessions (${periodLabel})`,  emoji: '🎹' },
     { value: periodLessons.length,  label: `lessons (${periodLabel})`,   emoji: '🎓' },
     { value: streak,                label: 'longest streak',              emoji: '🔥' },
-    { value: null, fill: energyFill, label: `avg energy (${periodLabel})`,  emoji: '⚡', type: 'energy' },
+    { value: null, fill: energyFill,    label: `avg energy (${periodLabel})`,    emoji: '⚡', type: 'energy' },
+    { value: null, fill: avgEnjoymentFill, label: `avg enjoyment (${periodLabel})`, emoji: '❤️', type: 'enjoyment' },
   ];
 
   return (
@@ -956,9 +961,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:3 }}>
                 <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center' }}>
                   <Text style={{ fontSize: 32, lineHeight: 38, marginBottom: 6 }}>{item.emoji}</Text>
-                  {item.type === 'energy' ? (
+                  {(item.type === 'energy' || item.type === 'enjoyment') ? (
                     item.fill !== null
-                      ? <ZeldaBarFractional emoji="⚡" fill={item.fill} size={18} />
+                      ? <ZeldaBarFractional emoji={item.emoji} fill={item.fill} size={18} />
                       : <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28 }}>—</Text>
                   ) : (
                     <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28 }}>{item.value}</Text>
