@@ -115,7 +115,7 @@ function ScalesPicker({ selected = [], onChange }) {
   );
 }
 
-export function SegmentEditor({ segment, onChange, onRemove, compositions, lessonMode = false }) {
+export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDown, compositions, lessonMode = false }) {
   const [open, setOpen] = useState(true);
   const isTech = segment.type === 'technique';
   const field = (k, v) => onChange({ ...segment, [k]: v });
@@ -172,7 +172,21 @@ export function SegmentEditor({ segment, onChange, onRemove, compositions, lesso
             <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{segment.duration} min</Text>
           ) : null}
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          {onMoveUp ? (
+            <TouchableOpacity onPress={onMoveUp} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 15 }} />
+          )}
+          {onMoveDown ? (
+            <TouchableOpacity onPress={onMoveDown} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 15 }} />
+          )}
           <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text style={{ fontSize: 16, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
           </TouchableOpacity>
