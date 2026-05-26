@@ -585,8 +585,8 @@ function TechniqueBreakdown({ sessions }) {
     <View>
       {sorted.map(([name, count]) => (
         <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.text, width: 110 }}>{name}</Text>
-          <View style={{ flex: 1, height: 6, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.text, width: 90 }} numberOfLines={1}>{name}</Text>
+          <View style={{ flex: 1, height: 6, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3, maxWidth: 280 }}>
             <View style={{ height: '100%', width: `${(count / max) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
           </View>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, width: 28, textAlign: 'right' }}>{count}×</Text>
@@ -684,14 +684,13 @@ function ScaleCoverage({ sessions }) {
   const avgDiff        = allDiffs.length ? allDiffs.reduce((a, v) => a + v, 0) / allDiffs.length : null;
   const timeStr        = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
 
-  // Difficulty as note symbols for SVG (can't use clip trick inside SVG)
-  // ♩ = full, ♪ = half-step, ○ = empty
+  // Difficulty as dot symbols for SVG — ● = full, ◐ = half, ○ = empty
   function diffNotes(val) {
     if (val === null) return '';
     const full  = Math.floor(val);
     const half  = (val - full) >= 0.4 ? 1 : 0;
     const empty = 5 - full - half;
-    return '♩'.repeat(full) + (half ? '♪' : '') + '○'.repeat(empty);
+    return '●'.repeat(full) + (half ? '◐' : '') + '○'.repeat(empty);
   }
 
   const size = width || 300;
@@ -1001,7 +1000,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Groups</Text>
               <TechniqueBreakdown sessions={periodSessions} />
             </View>
-            <View style={{ width: 400 }}>
+            <View style={{ width: 600 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Keys ({periodLabel})</Text>
               <ScaleCoverage sessions={periodSessions} />
             </View>
