@@ -324,6 +324,177 @@ function WeeklyTrendChart({ sessions, period }) {
   );
 }
 
+// ─── Energy vs Duration scatter plot ───────────────────────────────
+
+const ENERGY_COLOURS = {
+  '-2': '#8C2045', '-1': '#B85C7A', '0': '#7AB2B2', '1': '#F77F00', '2': '#FCBF49',
+};
+
+function ScatterPlot({ sessions }) {
+  const [width, setWidth] = useState(0);
+  const H = 110;
+  const padL = 24, padR = 10, padT = 8, padB = 24;
+
+  const pts = sessions
+    .filter(s => s.duration && s.energy != null)
+    .map(s => ({ x: Number(s.duration), y: Number(s.energy) }));
+
+  if (pts.length < 3) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
+  );
+
+  const maxDur = Math.max(...pts.map(p => p.x), 1);
+  const toX = v => padL + ((v / maxDur) * (width - padL - padR));
+  const toY = v => padT + ((1 - (v + 2) / 4) * (H - padT - padB));
+
+  // Simple linear regression
+  const n = pts.length;
+  const mx = pts.reduce((a, p) => a + p.x, 0) / n;
+  const my = pts.reduce((a, p) => a + p.y, 0) / n;
+  const num = pts.reduce((a, p) => a + (p.x - mx) * (p.y - my), 0);
+  const den = pts.reduce((a, p) => a + (p.x - mx) ** 2, 0);
+  const slope = den ? num / den : 0;
+  const intercept = my - slope * mx;
+  const trend = slope > 0.005 ? 'longer sessions → higher energy ↗' :
+                slope < -0.005 ? 'longer sessions → lower energy ↘' :
+                'no clear correlation';
+
+  return (
+    <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>{trend}</Text>
+      {width > 0 && (
+        <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
+          {/* Y-axis labels */}
+          {[-2, -1, 0, 1, 2].map(v => (
+            <SvgText key={v} x={padL - 4} y={toY(v) + 3} textAnchor="end" fontSize="7" fill={COLOURS.textDim} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
+          ))}
+          {/* Zero line */}
+          <Line x1={padL} y1={toY(0)} x2={width - padR} y2={toY(0)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
+          {/* Trend line */}
+          {den > 0 && (
+            <Line
+              x1={toX(0)} y1={toY(intercept)}
+              x2={toX(maxDur)} y2={toY(slope * maxDur + intercept)}
+              stroke={COLOURS.navy} strokeWidth="1" strokeDasharray="4,3" opacity={0.4}
+            />
+          )}
+          {/* Dots */}
+          {pts.map((p, i) => (
+            <Circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={4}
+              fill={ENERGY_COLOURS[String(Math.round(p.y))] || COLOURS.steel}
+              opacity={0.75}
+            />
+          ))}
+          {/* X-axis label */}
+          <SvgText x={width / 2} y={H - 2} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">duration (min)</SvgText>
+        </Svg>
+      )}
+      {/* Legend */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+        {['-2','-1','0','1','2'].map(v => (
+          <View key={v} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ENERGY_COLOURS[v] }} />
+            <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>{v > 0 ? `+${v}` : v}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// ─── Wins timeline ────────────────────────────────────────────────────
+
+function WinsTimeline({ sessions, period }) {
+  const cutoff = (() => {
+    if (period === 'all') return null;
+    const d = new Date();
+    d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
+    return d.toISOString().slice(0, 10);
+  })();
+
+  const wins = sessions
+    .filter(s => s.wins && s.wins.trim() && (!cutoff || s.date >= cutoff))
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 8);
+
+  if (wins.length === 0) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No wins logged in this period.</Text>
+  );
+
+  return (
+    <View>
+      {wins.map((s, i) => (
+        <View key={s.id || i} style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+          <View style={{ alignItems: 'center', width: 32 }}>
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLOURS.gold, marginTop: 4 }} />
+            {i < wins.length - 1 && <View style={{ width: 1, flex: 1, backgroundColor: COLOURS.glassBorderSubtle, marginTop: 4 }} />}
+          </View>
+          <View style={{ flex: 1, paddingBottom: 4 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginBottom: 3 }}>
+              {new Date(s.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+            </Text>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>“{s.wins}”</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// ─── Streak history ─────────────────────────────────────────────────────
+
+function StreakHistory({ sessions }) {
+  // Find all streaks (runs of consecutive practice days) across all time
+  const dates = [...new Set(sessions.map(s => s.date))].sort();
+  if (dates.length === 0) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No sessions yet.</Text>
+  );
+
+  const streaks = [];
+  let start = dates[0], prev = dates[0], len = 1;
+  for (let i = 1; i < dates.length; i++) {
+    const diff = (new Date(dates[i] + 'T12:00:00') - new Date(prev + 'T12:00:00')) / 86400000;
+    if (diff === 1) { len++; prev = dates[i]; }
+    else {
+      if (len > 1) streaks.push({ start, end: prev, len });
+      start = dates[i]; prev = dates[i]; len = 1;
+    }
+  }
+  if (len > 1) streaks.push({ start, end: prev, len });
+
+  if (streaks.length === 0) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No streaks of 2+ days yet.</Text>
+  );
+
+  const maxLen = Math.max(...streaks.map(s => s.len));
+  const visible = streaks.sort((a, b) => b.len - a.len).slice(0, 6);
+
+  return (
+    <View>
+      {visible.map((s, i) => (
+        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <View style={{ width: 28, alignItems: 'center' }}>
+            <Text style={{ fontSize: i === 0 ? 20 : 16 }}>{i === 0 ? '🔥' : '⭐'}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>
+                {new Date(s.start + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                {' → '}
+                {new Date(s.end + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+              </Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.navy }}>{s.len} days</Text>
+            </View>
+            <View style={{ height: 4, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 2 }}>
+              <View style={{ height: '100%', width: `${(s.len / maxLen) * 100}%`, backgroundColor: i === 0 ? COLOURS.amber : COLOURS.steel, borderRadius: 2 }} />
+            </View>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 function TouchableYear({ onPress, label }) {
   return (
     <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
@@ -570,6 +741,21 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             );
           })}
         </View>
+        <SectionTitle style={{ marginTop: 8 }}>Session quality ({periodLabel})</SectionTitle>
+        <GlassCard>
+          <ScatterPlot sessions={periodSessions} />
+        </GlassCard>
+
+        <SectionTitle style={{ marginTop: 8 }}>Wins ({periodLabel})</SectionTitle>
+        <GlassCard>
+          <WinsTimeline sessions={sessions} period={period} />
+        </GlassCard>
+
+        <SectionTitle style={{ marginTop: 8 }}>Streak history</SectionTitle>
+        <GlassCard>
+          <StreakHistory sessions={sessions} />
+        </GlassCard>
+
       </ScrollView>
     </SafeAreaView>
   );
