@@ -711,6 +711,7 @@ function ScaleCoverage({ sessions }) {
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
       {width > 0 && (
+        <View style={{ position: 'relative', width: size, height: size }}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {COF_KEYS.map((key, i) => {
             const startDeg = -90 + i * 30 - 15;
@@ -769,7 +770,7 @@ function ScaleCoverage({ sessions }) {
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
               {avgDiff !== null && (
                 <SvgText x={cx} y={cy + size*0.096} textAnchor="middle" dominantBaseline="central"
-                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{diffNotes(avgDiff)} avg diff</SvgText>
+                  fontSize={size*0.026} fill={COLOURS.textDim} fontFamily="Lato">avg diff</SvgText>
               )}
             </G>
           ) : (
@@ -782,13 +783,33 @@ function ScaleCoverage({ sessions }) {
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {selData?.sessions || 0} sessions</SvgText>
               <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
-              {selAvgDiff !== null && (
-                <SvgText x={cx} y={cy + size*0.096} textAnchor="middle" dominantBaseline="central"
-                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{diffNotes(selAvgDiff)}</SvgText>
-              )}
+
             </G>
           )}
         </Svg>
+        {/* Avg diff Zelda bar — overview (no selection) */}
+        {avgDiff !== null && (
+          <View style={{
+            position: 'absolute',
+            top: cy + size * 0.055,
+            left: 0, right: 0,
+            alignItems: 'center',
+          }}>
+            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={size * 0.038} />
+          </View>
+        )}
+        {/* Avg diff Zelda bar — selected key */}
+        {sel && selAvgDiff !== null && (
+          <View style={{
+            position: 'absolute',
+            top: cy + size * 0.063,
+            left: 0, right: 0,
+            alignItems: 'center',
+          }}>
+            <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.038} />
+          </View>
+        )}
+        </View>
       )}
 
       {/* Legend */}
