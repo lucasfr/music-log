@@ -958,9 +958,18 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <ActivityGrid sessions={sessions} lessons={lessons} />
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 8 }}>Weekly trends ({periodLabel})</SectionTitle>
+        <SectionTitle style={{ marginTop: 8 }}>Weekly trends & session quality ({periodLabel})</SectionTitle>
         <GlassCard>
-          <WeeklyTrendChart sessions={sessions} period={period} />
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Weekly trends</Text>
+              <WeeklyTrendChart sessions={sessions} period={period} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Session quality</Text>
+              <ScatterPlot sessions={periodSessions} />
+            </View>
+          </View>
         </GlassCard>
 
         <SectionTitle style={{ marginTop: 8 }}>Technique & scales ({periodLabel})</SectionTitle>
@@ -1061,11 +1070,6 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle style={{ marginTop: 8 }}>Library growth</SectionTitle>
         <GlassCard>
           <LibraryGrowthChart compositions={compositions} />
-        </GlassCard>
-
-        <SectionTitle style={{ marginTop: 8 }}>Session quality ({periodLabel})</SectionTitle>
-        <GlassCard>
-          <ScatterPlot sessions={periodSessions} />
         </GlassCard>
 
         <SectionTitle style={{ marginTop: 8 }}>Wins ({periodLabel})</SectionTitle>
