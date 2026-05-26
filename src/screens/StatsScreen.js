@@ -251,8 +251,8 @@ function WeeklyTrendChart({ sessions, period }) {
     return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
   });
 
-  const H = 90;
-  const padL = 6, padR = 6, padT = 8, padB = 24;
+  const H = 150;
+  const padL = 28, padR = 6, padT = 10, padB = 24;
 
   function toY(val, min, max) {
     if (val === null) return null;
@@ -289,10 +289,12 @@ function WeeklyTrendChart({ sessions, period }) {
       {width > 0 && (
         <View>
           <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
-            {(() => {
-              const midY = toY(0, -2, 2);
-              return <Line x1={padL} y1={midY} x2={width - padR} y2={midY} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />;
-            })()}
+            {/* Y-axis labels — energy scale */}
+            {[-2, -1, 0, 1, 2].map(v => (
+              <SvgText key={v} x={padL - 4} y={toY(v, -2, 2) + 3} textAnchor="end" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
+            ))}
+            {/* Zero line */}
+            <Line x1={padL} y1={toY(0, -2, 2)} x2={width - padR} y2={toY(0, -2, 2)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
             {energyPath ? <Path d={energyPath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
             {energyPts.map((v, i) => {
               if (v === null) return null;
@@ -499,7 +501,7 @@ function StreakHistory({ sessions }) {
 
 function LibraryGrowthChart({ compositions }) {
   const [width, setWidth] = useState(0);
-  const H = 90;
+  const H = 150;
   const padL = 6, padR = 6, padT = 8, padB = 24;
 
   // Group by month added (createdAt or dateStarted)
@@ -600,7 +602,7 @@ function TechniqueBreakdown({ sessions }) {
             </View>
             <View style={{ alignItems: 'flex-end', gap: 3, width: 80, flexShrink: 0 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>
-              {avgDiff !== null && <View style={{ marginTop: 4 }}><ZeldaBarFractional emoji="🎵" fill={avgDiff} size={13} /></View>}
+              {avgDiff !== null && <View style={{ marginTop: 8 }}><ZeldaBarFractional emoji="🎵" fill={avgDiff} size={13} /></View>}
             </View>
           </View>
         );
