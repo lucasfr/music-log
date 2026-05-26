@@ -598,10 +598,9 @@ function TechniqueBreakdown({ sessions }) {
             <View style={{ flex: 1, height: 10, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 5 }}>
               <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 5 }} />
             </View>
-            <View style={{ alignItems: 'flex-end', gap: 2, width: 60 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>
-              {avgDiff !== null && <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={11} />}
-            </View>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, width: 72, textAlign: 'right' }}>
+              {data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}{avgDiff !== null ? `  🎵${avgDiff.toFixed(1)}` : ''}
+            </Text>
           </View>
         );
       })}
