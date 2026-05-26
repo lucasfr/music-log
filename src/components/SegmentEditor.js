@@ -174,20 +174,20 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           {onMoveUp ? (
-            <TouchableOpacity onPress={onMoveUp} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveUp(); }} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
             </TouchableOpacity>
           ) : (
             <View style={{ width: 15 }} />
           )}
           {onMoveDown ? (
-            <TouchableOpacity onPress={onMoveDown} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveDown(); }} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
             </TouchableOpacity>
           ) : (
             <View style={{ width: 15 }} />
           )}
-          <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={e => { e.stopPropagation(); onRemove(); }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text style={{ fontSize: 16, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
           </TouchableOpacity>
           <Text style={{ fontSize: 11, color: COLOURS.textDim }}>{open ? '▲' : '▼'}</Text>
