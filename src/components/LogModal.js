@@ -65,6 +65,17 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   }
   function updateSegment(id, val) { setSegments(s => s.map(seg => seg.id === id ? val : seg)); }
   function removeSegment(id)      { setSegments(s => s.filter(seg => seg.id !== id)); }
+  function moveSegment(id, dir) {
+    setSegments(s => {
+      const idx = s.findIndex(seg => seg.id === id);
+      if (idx < 0) return s;
+      const next = idx + dir;
+      if (next < 0 || next >= s.length) return s;
+      const arr = [...s];
+      [arr[idx], arr[next]] = [arr[next], arr[idx]];
+      return arr;
+    });
+  }
 
   function handleSave() {
     if (energyBar === 0) {
@@ -128,10 +139,12 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
         </View>
       )}
 
-      {segments.map(seg => (
+      {segments.map((seg, idx) => (
         <SegmentEditor key={seg.id} segment={seg} compositions={compositions}
           onChange={val => updateSegment(seg.id, val)}
-          onRemove={() => removeSegment(seg.id)} />
+          onRemove={() => removeSegment(seg.id)}
+          onMoveUp={idx > 0 ? () => moveSegment(seg.id, -1) : null}
+          onMoveDown={idx < segments.length - 1 ? () => moveSegment(seg.id, 1) : null} />
       ))}
 
       <GlassCard>

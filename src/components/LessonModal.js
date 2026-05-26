@@ -70,6 +70,17 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
   }
   function updatePiece(id, val) { setPieces(p => p.map(x => x.id === id ? val : x)); }
   function removePiece(id)      { setPieces(p => p.filter(x => x.id !== id)); }
+  function movePiece(id, dir) {
+    setPieces(p => {
+      const idx = p.findIndex(x => x.id === id);
+      if (idx < 0) return p;
+      const next = idx + dir;
+      if (next < 0 || next >= p.length) return p;
+      const arr = [...p];
+      [arr[idx], arr[next]] = [arr[next], arr[idx]];
+      return arr;
+    });
+  }
 
   function handleSave() {
     if (!date) { Alert.alert('Date required'); return; }
@@ -133,10 +144,12 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
         </View>
       )}
 
-      {pieces.map(item => (
+      {pieces.map((item, idx) => (
         <SegmentEditor key={item.id} segment={item} compositions={compositions}
           onChange={val => updatePiece(item.id, val)}
           onRemove={() => removePiece(item.id)}
+          onMoveUp={idx > 0 ? () => movePiece(item.id, -1) : null}
+          onMoveDown={idx < pieces.length - 1 ? () => movePiece(item.id, 1) : null}
           lessonMode />
       ))}
 
