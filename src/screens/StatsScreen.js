@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
+import Svg, { Path, Circle, Line, Text as SvgText } from 'react-native-svg';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -188,6 +189,141 @@ function ZeldaBarFractional({ emoji, fill, total = 5, size = 22 }) {
   );
 }
 
+// ─── Weekly trend chart (energy + liking) ──────────────────────────────────
+
+function getISOWeek(dateStr) {
+  // Returns 'YYYY-Www' string for grouping
+  const d = new Date(dateStr + 'T12:00:00');
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() + 4 - day);
+  const yearStart = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+  return `${d.getFullYear()}-W${String(week).padStart(2, '0')}`;
+}
+
+function weekLabel(isoWeek) {
+  // 'YYYY-Www' → short label like '14 Apr'
+  const [year, w] = isoWeek.split('-W');
+  const jan4 = new Date(Number(year), 0, 4);
+  const monday = new Date(jan4);
+  monday.setDate(jan4.getDate() - ((jan4.getDay() || 7) - 1) + (Number(w) - 1) * 7);
+  return monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function WeeklyTrendChart({ sessions, period }) {
+  const [width, setWidth] = useState(0);
+
+  // Build week buckets
+  const buckets = {};
+  const cutoff = (() => {
+    if (period === 'all') return null;
+    const d = new Date();
+    d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
+    return d.toISOString().slice(0, 10);
+  })();
+
+  sessions.forEach(s => {
+    if (cutoff && s.date < cutoff) return;
+    const wk = getISOWeek(s.date);
+    if (!buckets[wk]) buckets[wk] = { energy: [], liking: [] };
+    if (s.energy != null) buckets[wk].energy.push(Number(s.energy));
+    // collect liking from repertoire segments
+    (s.segments || []).forEach(seg => {
+      if (seg.type === 'repertoire' && seg.liking) buckets[wk].liking.push(Number(seg.liking));
+    });
+  });
+
+  const weeks = Object.keys(buckets).sort();
+  if (weeks.length < 2) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
+  );
+
+  // Limit to last 12 weeks max for readability
+  const visible = weeks.slice(-12);
+
+  // avg per week, energy mapped -2…+2 → 0…1, liking 1…5 → 0…1
+  const energyPts = visible.map(wk => {
+    const arr = buckets[wk].energy;
+    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
+  });
+  const likingPts = visible.map(wk => {
+    const arr = buckets[wk].liking;
+    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
+  });
+
+  const H = 90;
+  const padL = 6, padR = 6, padT = 8, padB = 24;
+
+  function toY(val, min, max) {
+    if (val === null) return null;
+    return padT + (1 - (val - min) / (max - min)) * (H - padT - padB);
+  }
+
+  function buildPath(pts, min, max) {
+    const validPts = pts.map((v, i) => ({ v, i })).filter(p => p.v !== null);
+    if (validPts.length < 2) return '';
+    return validPts.map(({ v, i }, idx) => {
+      const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+      const y = toY(v, min, max);
+      return `${idx === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+  }
+
+  const energyPath = buildPath(energyPts, -2, 2);
+  const likingPath = buildPath(likingPts, 1, 5);
+
+  return (
+    <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      {/* Legend */}
+      <View style={{ flexDirection: 'row', gap: 16, marginBottom: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 20, height: 2, backgroundColor: COLOURS.amber, borderRadius: 1 }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⚡ Energy</Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 20, height: 2, backgroundColor: '#E87EA1', borderRadius: 1 }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>❤️ Liking</Text>
+        </View>
+      </View>
+
+      {width > 0 && (
+        <View>
+          <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
+            {(() => {
+              const midY = toY(0, -2, 2);
+              return <Line x1={padL} y1={midY} x2={width - padR} y2={midY} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />;
+            })()}
+            {energyPath ? <Path d={energyPath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
+            {energyPts.map((v, i) => {
+              if (v === null) return null;
+              const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+              const y = toY(v, -2, 2);
+              return <Circle key={`e${i}`} cx={x} cy={y} r={3} fill={COLOURS.amber} />;
+            })}
+            {likingPath ? <Path d={likingPath} fill="none" stroke="#E87EA1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
+            {likingPts.map((v, i) => {
+              if (v === null) return null;
+              const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+              const y = toY(v, 1, 5);
+              return <Circle key={`l${i}`} cx={x} cy={y} r={3} fill="#E87EA1" />;
+            })}
+            {visible.map((wk, i) => {
+              const step = visible.length > 8 ? 3 : 2;
+              if (i % step !== 0 && i !== visible.length - 1) return null;
+              const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+              return (
+                <SvgText key={wk} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">
+                  {weekLabel(wk)}
+                </SvgText>
+              );
+            })}
+          </Svg>
+        </View>
+      )}
+    </View>
+  );
+}
+
 function TouchableYear({ onPress, label }) {
   return (
     <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
@@ -331,6 +467,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle>Activity</SectionTitle>
         <GlassCard>
           <ActivityGrid sessions={sessions} lessons={lessons} />
+        </GlassCard>
+
+        <SectionTitle style={{ marginTop: 8 }}>Weekly trends ({periodLabel})</SectionTitle>
+        <GlassCard>
+          <WeeklyTrendChart sessions={sessions} period={period} />
         </GlassCard>
 
         {topPieces.length > 0 ? (
