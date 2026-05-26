@@ -197,14 +197,21 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     : '—';
 
   const streak = (() => {
-    let count = 0, d = new Date();
-    const dateSet = new Set(sessions.map(s => s.date));
-    while (true) {
+    const dateSet = new Set(periodSessions.map(s => s.date));
+    if (dateSet.size === 0) return 0;
+    // Walk every day in the period, find the longest consecutive run
+    const start = period === 'all'
+      ? new Date(Math.min(...periodSessions.map(s => new Date(s.date + 'T12:00:00'))))
+      : (() => { const d = new Date(); d.setDate(d.getDate() - days); return d; })();
+    const end = new Date();
+    let best = 0, current = 0, d = new Date(start);
+    while (d <= end) {
       const iso = d.toISOString().slice(0, 10);
-      if (!dateSet.has(iso)) break;
-      count++; d.setDate(d.getDate() - 1);
+      if (dateSet.has(iso)) { current++; best = Math.max(best, current); }
+      else { current = 0; }
+      d.setDate(d.getDate() + 1);
     }
-    return count;
+    return best;
   })();
 
   const pieceFreq = {};
@@ -257,7 +264,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱' },
     { value: periodSessions.length, label: `sessions (${periodLabel})`,  emoji: '🎹' },
     { value: periodLessons.length,  label: `lessons (${periodLabel})`,   emoji: '🎓' },
-    { value: streak,                label: 'day streak',                 emoji: '🔥' },
+    { value: streak,                label: 'longest streak',              emoji: '🔥' },
     { value: Number(avgEnergy) > 0 ? `+${avgEnergy}` : avgEnergy, label: `avg energy (${periodLabel})`, emoji: '⚡' },
   ];
 
