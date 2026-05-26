@@ -26,7 +26,7 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🎼 **Segment logging** — sessions split into technique segments (Hanon, Scales, Arpeggios, Sight-reading) and repertoire segments, each with notes, felt difficulty, challenge tags, and progress tags
 - 🗂️ **Composition library** — per-piece tracking of status, 🎹 difficulty, keys, time signatures, grade, arrangement, collection, year, tags, dates, teacher notes, study notes, and session history
 - ⚡ **Zelda-style rating bars** — energy (⚡) and enjoyment (❤️) per session; felt difficulty (🎵) and liking (⭐) per segment; all rated by tap or hold-and-slide
-- 📊 **Stats** — 5-tile overview (total practice, sessions, lessons, streak, avg energy), 14-day bar chart with lesson markers, year-long activity grid, most-practised pieces, and library breakdown by status
+- 📊 **Stats** — period-aware overview (6 tiles: practice time, sessions, lessons, streak, avg energy ⚡, avg enjoyment ❤️); activity grid (full year, lesson markers); weekly trends + session quality scatter; technique group breakdown with time, count and difficulty; interactive circle of fifths (major/minor rings, tap for per-key stats); library status tiles; library growth chart + streak history; most-practised pieces with session and piece-level Zelda bars; wins timeline — all half-half glass cards on desktop
 - 🖥️ **Desktop two-column layout** — sidebar navigation, inline log forms and detail panels, no modals
 - 📤 **JSON export** — share any session as structured JSON via native share sheet or browser download
 - 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; no account or network required
@@ -136,7 +136,8 @@ Connect the repo to Netlify — it will pick up `netlify.toml` automatically and
 | `expo-file-system` | ~18 | Temp file write for JSON export (native) |
 | `expo-sharing` | ~12 | Native share sheet for JSON export |
 | `react-native-web` | ~0.20 | Web render target |
-| `react-native-svg` | ~15 | Dot-grid background |
+| `react-native-svg` | ~15 | Circle of fifths, charts, dot-grid background |
+| `@expo/vector-icons` | ~14 | Ionicons used throughout UI |
 | `@react-navigation/bottom-tabs` | ^7 | Tab bar navigation |
 | `@react-native-picker/picker` | ~2.11 | Native select inputs |
 | `@expo-google-fonts/cormorant-garamond` | ~0.3 | Serif display font |
