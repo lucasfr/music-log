@@ -799,19 +799,7 @@ function ScaleCoverage({ sessions }) {
             </G>
           )}
         </Svg>
-        {/* Avg diff Zelda bar — overview (no selection) */}
-        {!sel && avgDiff !== null && (
-          <View style={{
-            position: 'absolute',
-            top: cy + size * 0.088,
-            left: cx - size * 0.14,
-            width: size * 0.28,
-            alignItems: 'center',
-          }}>
-            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={size * 0.038} />
-          </View>
-        )}
-        {/* Avg diff Zelda bar — selected key */}
+        {/* Avg diff Zelda bar — selected key only */}
         {sel && selAvgDiff !== null && (
           <View style={{
             position: 'absolute',
@@ -836,12 +824,6 @@ function ScaleCoverage({ sessions }) {
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#5DCAA5' }} />
           <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>minor</Text>
         </View>
-        {avgDiff !== null && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={10} />
-            <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>avg diff</Text>
-          </View>
-        )}
         <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>
       </View>
     </View>
