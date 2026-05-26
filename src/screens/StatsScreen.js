@@ -965,14 +965,14 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 8 }}>Technique & scales ({periodLabel})</SectionTitle>
         <GlassCard>
-          <View style={{ flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}>
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }}>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Groups</Text>
               <TechniqueBreakdown sessions={periodSessions} />
             </View>
-            <View style={{ width: 200 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Keys (all time)</Text>
-              <ScaleCoverage sessions={sessions} />
+            <View style={{ width: 400 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Keys ({periodLabel})</Text>
+              <ScaleCoverage sessions={periodSessions} />
             </View>
           </View>
         </GlassCard>
