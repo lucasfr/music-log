@@ -1027,9 +1027,18 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             );
           })}
         </View>
-        <SectionTitle style={{ marginTop: 8 }}>Library growth</SectionTitle>
+        <SectionTitle style={{ marginTop: 8 }}>Library growth & streak history</SectionTitle>
         <GlassCard>
-          <LibraryGrowthChart compositions={compositions} />
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 20, alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Library growth</Text>
+              <LibraryGrowthChart compositions={compositions} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Streak history</Text>
+              <StreakHistory sessions={sessions} />
+            </View>
+          </View>
         </GlassCard>
 
         <SectionTitle style={{ marginTop: 8 }}>Most practised & wins ({periodLabel})</SectionTitle>
@@ -1064,11 +1073,6 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <WinsTimeline sessions={sessions} period={period} />
             </View>
           </View>
-        </GlassCard>
-
-        <SectionTitle style={{ marginTop: 8 }}>Streak history</SectionTitle>
-        <GlassCard>
-          <StreakHistory sessions={sessions} />
         </GlassCard>
 
       </ScrollView>
