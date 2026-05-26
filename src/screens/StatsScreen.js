@@ -563,6 +563,80 @@ function LibraryGrowthChart({ compositions }) {
   );
 }
 
+// ─── Technique breakdown ───────────────────────────────────────────────
+
+function TechniqueBreakdown({ sessions }) {
+  const groups = {};
+  sessions.forEach(s => {
+    (s.segments || []).forEach(seg => {
+      if (seg.type !== 'technique') return;
+      const g = seg.group || 'Other';
+      groups[g] = (groups[g] || 0) + 1;
+    });
+  });
+
+  const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
+  if (sorted.length === 0) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No technique segments logged in this period.</Text>
+  );
+
+  const max = sorted[0][1];
+  return (
+    <View>
+      {sorted.map(([name, count]) => (
+        <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.text, width: 110 }}>{name}</Text>
+          <View style={{ flex: 1, height: 6, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3 }}>
+            <View style={{ height: '100%', width: `${(count / max) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
+          </View>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, width: 28, textAlign: 'right' }}>{count}×</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// ─── Scale coverage ───────────────────────────────────────────────────
+
+function ScaleCoverage({ sessions }) {
+  const scaleCounts = {};
+  sessions.forEach(s => {
+    (s.segments || []).forEach(seg => {
+      if (seg.type !== 'technique') return;
+      (seg.scales || []).forEach(scale => {
+        scaleCounts[scale] = (scaleCounts[scale] || 0) + 1;
+      });
+    });
+  });
+
+  const scales = Object.entries(scaleCounts).sort((a, b) => b[1] - a[1]);
+  if (scales.length === 0) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No scales logged in this period.</Text>
+  );
+
+  const max = scales[0][1];
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+      {scales.map(([scale, count]) => {
+        const intensity = Math.max(0.15, count / max);
+        return (
+          <View key={scale} style={{
+            paddingHorizontal: 10, paddingVertical: 5,
+            borderRadius: RADIUS.pill,
+            backgroundColor: `rgba(8,131,149,${intensity * 0.22})`,
+            borderWidth: 1,
+            borderColor: `rgba(8,131,149,${intensity * 0.45})`,
+          }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy, opacity: 0.6 + intensity * 0.4 }}>
+              {scale} <Text style={{ fontFamily: 'Lato-Bold' }}>{count}×</Text>
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 function TouchableYear({ onPress, label }) {
   return (
     <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
@@ -726,6 +800,16 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle style={{ marginTop: 8 }}>Weekly trends ({periodLabel})</SectionTitle>
         <GlassCard>
           <WeeklyTrendChart sessions={sessions} period={period} />
+        </GlassCard>
+
+        <SectionTitle style={{ marginTop: 8 }}>Technique ({periodLabel})</SectionTitle>
+        <GlassCard>
+          <TechniqueBreakdown sessions={periodSessions} />
+        </GlassCard>
+
+        <SectionTitle style={{ marginTop: 8 }}>Scale coverage ({periodLabel})</SectionTitle>
+        <GlassCard>
+          <ScaleCoverage sessions={periodSessions} />
         </GlassCard>
 
         {topPieces.length > 0 ? (
