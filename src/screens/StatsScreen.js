@@ -571,27 +571,49 @@ function TechniqueBreakdown({ sessions }) {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
       const g = seg.group || 'Other';
-      groups[g] = (groups[g] || 0) + 1;
+      if (!groups[g]) groups[g] = { count: 0, minutes: 0, difficulty: [] };
+      groups[g].count++;
+      groups[g].minutes += Number(seg.duration) || 0;
+      if (seg.feltDifficulty) groups[g].difficulty.push(Number(seg.feltDifficulty));
     });
   });
 
-  const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
+  const sorted = Object.entries(groups).sort((a, b) => b[1].count - a[1].count);
   if (sorted.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No technique segments logged in this period.</Text>
   );
 
-  const max = sorted[0][1];
+  const maxCount = sorted[0][1].count;
+  const timeStr  = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+
   return (
     <View>
-      {sorted.map(([name, count]) => (
-        <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.text, width: 90 }} numberOfLines={1}>{name}</Text>
-          <View style={{ flex: 1, height: 6, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 3, maxWidth: 280 }}>
-            <View style={{ height: '100%', width: `${(count / max) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 3 }} />
+      {sorted.map(([name, data]) => {
+        const avgDiff = data.difficulty.length
+          ? data.difficulty.reduce((a, v) => a + v, 0) / data.difficulty.length
+          : null;
+        return (
+          <View key={name} style={{ marginBottom: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{name}</Text>
+              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                {data.minutes > 0 && (
+                  <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {timeStr(data.minutes)}</Text>
+                )}
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{data.count}×</Text>
+              </View>
+            </View>
+            <View style={{ height: 10, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 5 }}>
+              <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 5 }} />
+            </View>
+            {avgDiff !== null && (
+              <View style={{ marginTop: 6 }}>
+                <ZeldaBarFractional emoji="🎵" fill={avgDiff} size={12} />
+              </View>
+            )}
           </View>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, width: 28, textAlign: 'right' }}>{count}×</Text>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }
@@ -1021,16 +1043,10 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 8 }}>Technique & scales ({periodLabel})</SectionTitle>
         <GlassCard>
-          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Groups</Text>
-              <TechniqueBreakdown sessions={periodSessions} />
-            </View>
-            <View style={{ width: 600 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Keys ({periodLabel})</Text>
-              <ScaleCoverage sessions={periodSessions} />
-            </View>
-          </View>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>Groups</Text>
+          <TechniqueBreakdown sessions={periodSessions} />
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16, marginBottom: 10 }}>Keys ({periodLabel})</Text>
+          <ScaleCoverage sessions={periodSessions} />
         </GlassCard>
 
         <SectionTitle style={{ marginTop: 8 }}>Library</SectionTitle>
