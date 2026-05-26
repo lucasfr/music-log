@@ -1109,7 +1109,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   paddingBottom: 4,
                 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>{name}</Text>
+                    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
                     <View style={{ alignItems: 'flex-end', gap: 1 }}>
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{count}×</Text>
                       {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
