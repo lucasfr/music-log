@@ -602,21 +602,28 @@ const COF_KEYS   = ['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
 const COF_MINORS = ['Am','Em','Bm','F#m','C#m','G#m','D#m','Bbm','Fm','Cm','Gm','Dm'];
 
 // Maps the scale label stored in session data to a COF key or minor key
-// e.g. 'C major' → 'C', 'A harmonic minor' → 'Am'
-const SCALE_LABEL_TO_COF = {};
-const COF_KEY_ROOTS   = ['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
-const COF_MINOR_ROOTS = [
-  ['A','Am'], ['E','Em'], ['B','Bm'], ['F#','F#m'], ['C#','C#m'], ['G#','G#m'],
-  ['D#','D#m'], ['Bb','Bbm'], ['F','Fm'], ['C','Cm'], ['G','Gm'], ['D','Dm'],
-];
-COF_KEY_ROOTS.forEach(root => {
-  SCALE_LABEL_TO_COF[`${root} major`] = root;
-});
-COF_MINOR_ROOTS.forEach(([root, cof]) => {
-  SCALE_LABEL_TO_COF[`${root} natural minor`]  = cof;
-  SCALE_LABEL_TO_COF[`${root} harmonic minor`] = cof;
-  SCALE_LABEL_TO_COF[`${root} melodic minor`]  = cof;
-});
+// Built explicitly to avoid any root collision between major and minor
+const SCALE_LABEL_TO_COF = {
+  // Major
+  'C major': 'C', 'G major': 'G', 'D major': 'D', 'A major': 'A',
+  'E major': 'E', 'B major': 'B', 'F# major': 'F#', 'Db major': 'Db',
+  'Ab major': 'Ab', 'Eb major': 'Eb', 'Bb major': 'Bb', 'F major': 'F',
+  // Natural minor
+  'A natural minor': 'Am', 'E natural minor': 'Em', 'B natural minor': 'Bm',
+  'F# natural minor': 'F#m', 'C# natural minor': 'C#m', 'G# natural minor': 'G#m',
+  'D# natural minor': 'D#m', 'Bb natural minor': 'Bbm', 'F natural minor': 'Fm',
+  'C natural minor': 'Cm', 'G natural minor': 'Gm', 'D natural minor': 'Dm',
+  // Harmonic minor
+  'A harmonic minor': 'Am', 'E harmonic minor': 'Em', 'B harmonic minor': 'Bm',
+  'F# harmonic minor': 'F#m', 'C# harmonic minor': 'C#m', 'G# harmonic minor': 'G#m',
+  'D# harmonic minor': 'D#m', 'Bb harmonic minor': 'Bbm', 'F harmonic minor': 'Fm',
+  'C harmonic minor': 'Cm', 'G harmonic minor': 'Gm', 'D harmonic minor': 'Dm',
+  // Melodic minor
+  'A melodic minor': 'Am', 'E melodic minor': 'Em', 'B melodic minor': 'Bm',
+  'F# melodic minor': 'F#m', 'C# melodic minor': 'C#m', 'G# melodic minor': 'G#m',
+  'D# melodic minor': 'D#m', 'Bb melodic minor': 'Bbm', 'F melodic minor': 'Fm',
+  'C melodic minor': 'Cm', 'G melodic minor': 'Gm', 'D melodic minor': 'Dm',
+};
 
 function amberForCount(n, max) {
   if (!n) return 'rgba(180,178,170,0.22)';
