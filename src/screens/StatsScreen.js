@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
-import Svg, { Path, Circle, Line, Text as SvgText } from 'react-native-svg';
+import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -596,43 +596,178 @@ function TechniqueBreakdown({ sessions }) {
   );
 }
 
-// ─── Scale coverage ───────────────────────────────────────────────────
+// ─── Scale coverage — circle of fifths ───────────────────────────────────────
+
+const COF_KEYS   = ['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
+const COF_MINORS = ['Am','Em','Bm','F#m','C#m','G#m','D#m','Bbm','Fm','Cm','Gm','Dm'];
+
+function amberForCount(n, max) {
+  if (!n) return 'rgba(180,178,170,0.22)';
+  const t = n / Math.max(max, 1);
+  if (t < 0.15) return '#FAEEDA';
+  if (t < 0.35) return '#FAC775';
+  if (t < 0.6)  return '#EF9F27';
+  if (t < 0.85) return '#BA7517';
+  return '#854F0B';
+}
+function tealForCount(n, max) {
+  if (!n) return 'rgba(180,178,170,0.15)';
+  const t = n / Math.max(max, 1);
+  if (t < 0.1)  return '#E1F5EE';
+  if (t < 0.3)  return '#9FE1CB';
+  if (t < 0.55) return '#5DCAA5';
+  if (t < 0.8)  return '#1D9E75';
+  return '#0F6E56';
+}
+
+function cofArcPath(cx, cy, r1, r2, startDeg, endDeg) {
+  const s = startDeg * Math.PI / 180;
+  const e = endDeg   * Math.PI / 180;
+  const x1 = cx + r1 * Math.cos(s), y1 = cy + r1 * Math.sin(s);
+  const x2 = cx + r1 * Math.cos(e), y2 = cy + r1 * Math.sin(e);
+  const x3 = cx + r2 * Math.cos(e), y3 = cy + r2 * Math.sin(e);
+  const x4 = cx + r2 * Math.cos(s), y4 = cy + r2 * Math.sin(s);
+  return `M${x1},${y1} A${r1},${r1} 0 0,1 ${x2},${y2} L${x3},${y3} A${r2},${r2} 0 0,0 ${x4},${y4} Z`;
+}
 
 function ScaleCoverage({ sessions }) {
+  const [width, setWidth] = useState(0);
+  const [selected, setSelected] = useState(null);
+
   const scaleCounts = {};
   sessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
       (seg.scales || []).forEach(scale => {
-        scaleCounts[scale] = (scaleCounts[scale] || 0) + 1;
+        if (!scaleCounts[scale]) scaleCounts[scale] = { sessions: 0, minutes: 0, difficulty: [] };
+        scaleCounts[scale].sessions++;
+        scaleCounts[scale].minutes += Number(seg.duration) || 0;
+        if (seg.feltDifficulty) scaleCounts[scale].difficulty.push(Number(seg.feltDifficulty));
       });
     });
   });
 
-  const scales = Object.entries(scaleCounts).sort((a, b) => b[1] - a[1]);
-  if (scales.length === 0) return (
+  const majorCounts = COF_KEYS.map(k => scaleCounts[k]?.sessions || 0);
+  const minorCounts = COF_MINORS.map(k => scaleCounts[k]?.sessions || 0);
+  const maxCount    = Math.max(...majorCounts, ...minorCounts, 1);
+
+  const totalScaleMins = Object.values(scaleCounts).reduce((a, v) => a + v.minutes, 0);
+  const totalScaleSess = Object.values(scaleCounts).reduce((a, v) => a + v.sessions, 0);
+  const keysVisited    = [...majorCounts, ...minorCounts].filter(v => v > 0).length;
+  const allDiffs       = Object.values(scaleCounts).flatMap(v => v.difficulty);
+  const avgDiff        = allDiffs.length ? allDiffs.reduce((a, v) => a + v, 0) / allDiffs.length : null;
+  const timeStr        = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+
+  const size = width || 300;
+  const cx = size / 2, cy = size / 2;
+  const R1 = size * 0.46, R2 = size * 0.315, R3 = size * 0.18;
+
+  const sel = selected;
+  const selKey  = sel ? (sel.ring === 'major' ? COF_KEYS[sel.index] : COF_MINORS[sel.index]) : null;
+  const selData = selKey ? scaleCounts[selKey] : null;
+  const selAvgDiff = selData?.difficulty?.length
+    ? selData.difficulty.reduce((a, v) => a + v, 0) / selData.difficulty.length
+    : null;
+
+  if (totalScaleSess === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No scales logged in this period.</Text>
   );
 
-  const max = scales[0][1];
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
-      {scales.map(([scale, count]) => {
-        const intensity = Math.max(0.15, count / max);
-        return (
-          <View key={scale} style={{
-            paddingHorizontal: 10, paddingVertical: 5,
-            borderRadius: RADIUS.pill,
-            backgroundColor: `rgba(8,131,149,${intensity * 0.22})`,
-            borderWidth: 1,
-            borderColor: `rgba(8,131,149,${intensity * 0.45})`,
-          }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy, opacity: 0.6 + intensity * 0.4 }}>
-              {scale} <Text style={{ fontFamily: 'Lato-Bold' }}>{count}×</Text>
-            </Text>
-          </View>
-        );
-      })}
+    <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      {width > 0 && (
+        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {COF_KEYS.map((key, i) => {
+            const startDeg = -90 + i * 30 - 15;
+            const endDeg   = startDeg + 30;
+            const midDeg   = startDeg + 15;
+            const midRad   = midDeg * Math.PI / 180;
+            const majorSel = sel?.ring === 'major' && sel?.index === i;
+            const minorSel = sel?.ring === 'minor' && sel?.index === i;
+            return (
+              <G key={key}>
+                <Path
+                  d={cofArcPath(cx, cy, R1, R2, startDeg, endDeg)}
+                  fill={majorSel ? '#FCBF49' : amberForCount(majorCounts[i], maxCount)}
+                  stroke="#fff" strokeWidth={2}
+                  onPress={() => setSelected(majorSel ? null : { ring: 'major', index: i })}
+                />
+                <Path
+                  d={cofArcPath(cx, cy, R2, R3, startDeg, endDeg)}
+                  fill={minorSel ? '#1D9E75' : tealForCount(minorCounts[i], maxCount)}
+                  stroke="#fff" strokeWidth={1.5}
+                  onPress={() => setSelected(minorSel ? null : { ring: 'minor', index: i })}
+                />
+                <SvgText
+                  x={cx + (R1 + R2) / 2 * Math.cos(midRad)}
+                  y={cy + (R1 + R2) / 2 * Math.sin(midRad)}
+                  textAnchor="middle" dominantBaseline="central"
+                  fontSize={size * 0.038} fontWeight="500"
+                  fill={COLOURS.text} fontFamily="Lato"
+                >{key}</SvgText>
+                <SvgText
+                  x={cx + (R2 + R3) / 2 * Math.cos(midRad)}
+                  y={cy + (R2 + R3) / 2 * Math.sin(midRad)}
+                  textAnchor="middle" dominantBaseline="central"
+                  fontSize={size * 0.028}
+                  fill={COLOURS.textDim} fontFamily="Lato"
+                >{COF_MINORS[i]}</SvgText>
+              </G>
+            );
+          })}
+
+          {/* Centre circle */}
+          <Circle cx={cx} cy={cy} r={R3 - 1}
+            fill={COLOURS.glass} stroke={COLOURS.glassBorderSubtle} strokeWidth={1}
+          />
+
+          {/* Centre stats */}
+          {!sel ? (
+            <G>
+              <SvgText x={cx} y={cy - size*0.088} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.034} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⏱ {timeStr(totalScaleMins)}</SvgText>
+              <SvgText x={cx} y={cy - size*0.044} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.026} fill={COLOURS.textDim} fontFamily="Lato">total scale time</SvgText>
+              <SvgText x={cx} y={cy + size*0.008} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{totalScaleSess} sessions</SvgText>
+              <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
+              {avgDiff !== null && (
+                <SvgText x={cx} y={cy + size*0.096} textAnchor="middle" dominantBaseline="central"
+                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{'🎵'.repeat(Math.round(avgDiff))} avg diff</SvgText>
+              )}
+            </G>
+          ) : (
+            <G>
+              <SvgText x={cx} y={cy - size*0.088} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.044} fontWeight="500" fill={COLOURS.text} fontFamily="CormorantGaramond">{selKey}</SvgText>
+              <SvgText x={cx} y={cy - size*0.038} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{sel.ring === 'major' ? 'major' : 'minor'}</SvgText>
+              <SvgText x={cx} y={cy + size*0.01} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{selData?.sessions || 0} sessions</SvgText>
+              <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
+              {selAvgDiff !== null && (
+                <SvgText x={cx} y={cy + size*0.096} textAnchor="middle" dominantBaseline="central"
+                  fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{'🎵'.repeat(Math.round(selAvgDiff))}</SvgText>
+              )}
+            </G>
+          )}
+        </Svg>
+      )}
+
+      {/* Legend */}
+      <View style={{ flexDirection: 'row', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#EF9F27' }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>major</Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#5DCAA5' }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>minor</Text>
+        </View>
+        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, fontStyle: 'italic' }}>tap a segment for details</Text>
+      </View>
     </View>
   );
 }
