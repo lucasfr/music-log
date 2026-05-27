@@ -965,6 +965,99 @@ function ScaleCoverage({ sessions }) {
   );
 }
 
+// ─── Day-of-week patterns ───────────────────────────────────────────────────
+
+const DOW_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+function DayOfWeekChart({ sessions }) {
+  const [width, setWidth] = useState(0);
+
+  if (sessions.length < 7) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
+  );
+
+  // Bucket all sessions by day of week (Mon=0 … Sun=6)
+  const byDay = Array.from({ length: 7 }, () => ({ count: 0, minutes: 0, energy: [] }));
+  sessions.forEach(s => {
+    const dow = (new Date(s.date + 'T12:00:00').getDay() + 6) % 7; // Mon=0
+    byDay[dow].count++;
+    byDay[dow].minutes += Number(s.duration) || 0;
+    if (s.energy != null) byDay[dow].energy.push(Number(s.energy));
+  });
+
+  const maxCount   = Math.max(...byDay.map(d => d.count), 1);
+  const bestDay    = byDay.indexOf(byDay.reduce((a, b) => b.count > a.count ? b : a));
+
+  const H = 120;
+  const padL = 0, padR = 0, padT = 4, padB = 20;
+  const barW = width > 0 ? Math.floor((width - padL - padR) / 7) : 0;
+  const maxBarH = H - padT - padB;
+
+  return (
+    <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 10, fontStyle: 'italic' }}>
+        Most active: {DOW_LABELS[bestDay]} ({byDay[bestDay].count} sessions)
+      </Text>
+      {width > 0 && (
+        <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
+          {byDay.map((d, i) => {
+            const barH  = maxBarH * (d.count / maxCount);
+            const x     = padL + i * barW;
+            const y     = padT + maxBarH - barH;
+            const avgE  = d.energy.length ? d.energy.reduce((a, v) => a + v, 0) / d.energy.length : null;
+            const alpha = 0.35 + 0.65 * (d.count / maxCount);
+            const fill  = i === bestDay
+              ? COLOURS.amber
+              : `rgba(8,131,149,${alpha.toFixed(2)})`;
+            return (
+              <G key={i}>
+                {/* Bar */}
+                <Path
+                  d={`M${x + 4},${y} h${barW - 8} v${barH} h${-(barW - 8)} Z`}
+                  fill={fill}
+                  opacity={0.9}
+                />
+                {/* Session count above bar */}
+                {d.count > 0 && (
+                  <SvgText
+                    x={x + barW / 2} y={y - 3}
+                    textAnchor="middle" fontSize="9"
+                    fill={COLOURS.text} fontFamily="Lato"
+                  >{d.count}</SvgText>
+                )}
+                {/* Avg energy dot below bar */}
+                {avgE !== null && (
+                  <SvgText
+                    x={x + barW / 2} y={H - padB + 2}
+                    textAnchor="middle" fontSize="8"
+                    fill={avgE >= 0 ? COLOURS.amber : COLOURS.red}
+                    fontFamily="Lato"
+                  >{avgE >= 0 ? `+${avgE.toFixed(1)}` : avgE.toFixed(1)}</SvgText>
+                )}
+                {/* Day label */}
+                <SvgText
+                  x={x + barW / 2} y={H - 4}
+                  textAnchor="middle" fontSize="9"
+                  fill={i === bestDay ? COLOURS.navy : COLOURS.textDim}
+                  fontWeight={i === bestDay ? '700' : '400'}
+                  fontFamily="Lato"
+                >{DOW_LABELS[i]}</SvgText>
+              </G>
+            );
+          })}
+        </Svg>
+      )}
+      <View style={{ flexDirection: 'row', gap: 12, marginTop: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: COLOURS.amber }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>most active day</Text>
+        </View>
+        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, fontStyle: 'italic' }}>numbers = avg energy</Text>
+      </View>
+    </View>
+  );
+}
+
 function TouchableYear({ onPress, label }) {
   return (
     <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
@@ -1171,6 +1264,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>Session quality</Label>
               <ScatterPlot sessions={periodSessions} />
+            </View>
+            {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
+            <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
+              <Label>Day of week (all time)</Label>
+              <DayOfWeekChart sessions={sessions} />
             </View>
           </View>
         </GlassCard>
