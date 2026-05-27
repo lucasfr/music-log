@@ -1191,6 +1191,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     return best;
   })();
 
+
   const pieceFreq = {};
   const pieceEnjoyment = {};
   const pieceMinutes = {};
@@ -1271,7 +1272,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱' },
     { value: periodSessions.length, label: `sessions (${periodLabel})`,  emoji: '🎹' },
     { value: periodLessons.length,  label: `lessons (${periodLabel})`,   emoji: '🎓' },
-    { value: streak,                label: 'longest streak',              emoji: '🔥' },
+    { value: streak,         label: `best streak (${periodLabel})`,   emoji: '🔥' },
     { value: null, fill: energyFill,    label: `avg energy (${periodLabel})`,    emoji: '⚡', type: 'energy' },
     { value: null, fill: avgEnjoymentFill, label: `avg enjoyment (${periodLabel})`, emoji: '❤️', type: 'enjoyment' },
   ];
