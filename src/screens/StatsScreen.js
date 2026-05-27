@@ -208,6 +208,103 @@ function weekLabel(isoWeek) {
   return monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
+// ─── Practice volume chart ───────────────────────────────────────────────────
+
+function PracticeVolumeChart({ sessions, period }) {
+  const [width, setWidth] = useState(0);
+  const isDaily = period === '7d';
+
+  const cutoff = (() => {
+    if (period === 'all') return null;
+    const d = new Date();
+    d.setDate(d.getDate() - (isDaily ? 7 : 30));
+    return d.toISOString().slice(0, 10);
+  })();
+
+  const buckets = {};
+  if (isDaily) {
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      buckets[d.toISOString().slice(0, 10)] = 0;
+    }
+  }
+  sessions.forEach(s => {
+    if (cutoff && s.date < cutoff) return;
+    const key = isDaily ? s.date : getISOWeek(s.date);
+    buckets[key] = (buckets[key] || 0) + (Number(s.duration) || 0);
+  });
+
+  const keys = Object.keys(buckets).sort();
+  const visible = isDaily ? keys : keys.slice(-12);
+  const mins = visible.map(k => buckets[k] || 0);
+
+  if (mins.every(v => v === 0)) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
+  );
+
+  const maxMin = Math.max(...mins, 1);
+  const activeMins = mins.filter(v => v > 0);
+  const avgMin = activeMins.length ? Math.round(activeMins.reduce((a, v) => a + v, 0) / activeMins.length) : 0;
+  const totalMin = mins.reduce((a, v) => a + v, 0);
+  const timeStr = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+
+  const H = 120;
+  const padT = 16, padB = 20;
+  const barGap = 2;
+  const barW = width > 0 ? Math.max(4, Math.floor((width - (visible.length - 1) * barGap) / visible.length)) : 0;
+  const maxBarH = H - padT - padB;
+  const avgY = padT + (1 - avgMin / maxMin) * maxBarH;
+
+  function xLabel(key, i) {
+    if (isDaily) return new Date(key + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short' });
+    const step = visible.length > 8 ? 3 : 2;
+    if (i % step !== 0 && i !== visible.length - 1) return null;
+    return weekLabel(key);
+  }
+
+  return (
+    <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>
+        avg {timeStr(avgMin)} / {isDaily ? 'day' : 'week'} · {timeStr(totalMin)} total
+      </Text>
+      {width > 0 && (
+        <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
+          {mins.map((m, i) => {
+            const barH = maxBarH * (m / maxMin);
+            const x = i * (barW + barGap);
+            const y = padT + maxBarH - barH;
+            const isMax = m === maxMin && m > 0;
+            return (
+              <G key={i}>
+                <Path
+                  d={`M${x},${y} h${barW} v${barH} h${-barW} Z`}
+                  fill={isMax ? COLOURS.steel : 'rgba(8,131,149,0.38)'}
+                />
+                {isMax && (
+                  <SvgText x={x + barW / 2} y={y - 3} textAnchor="middle" fontSize="8" fill={COLOURS.text} fontFamily="Lato">
+                    {timeStr(m)}
+                  </SvgText>
+                )}
+              </G>
+            );
+          })}
+          <Line x1={0} y1={avgY} x2={width} y2={avgY} stroke={COLOURS.amber} strokeWidth="1" strokeDasharray="3,3" />
+          <SvgText x={width - 2} y={avgY - 3} textAnchor="end" fontSize="7" fill={COLOURS.amber} fontFamily="Lato">avg</SvgText>
+          {visible.map((key, i) => {
+            const label = xLabel(key, i);
+            if (!label) return null;
+            const x = i * (barW + barGap) + barW / 2;
+            return (
+              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
+            );
+          })}
+        </Svg>
+      )}
+    </View>
+  );
+}
+
 function WeeklyTrendChart({ sessions, period }) {
   const [width, setWidth] = useState(0);
   const isDaily = period === '7d';
@@ -1343,6 +1440,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
             <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
+              <Label>Practice volume</Label>
+              <PracticeVolumeChart sessions={sessions} period={period} />
+            </View>
+            {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
+            <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>{period === '7d' ? 'Daily' : 'Weekly'} trends</Label>
               <WeeklyTrendChart sessions={sessions} period={period} />
             </View>
