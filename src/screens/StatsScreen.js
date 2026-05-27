@@ -259,25 +259,30 @@ function WeeklyTrendChart({ sessions, period }) {
   );
 
   const H = 150;
-  const padL = 28, padR = 6, padT = 10, padB = 24;
+  const padL = 28, padR = 28, padT = 10, padB = 24;
 
-  function toY(val, min, max) {
+  // Each series normalised independently to the same pixel range
+  function toYEnergy(val) {
     if (val === null) return null;
-    return padT + (1 - (val - min) / (max - min)) * (H - padT - padB);
+    return padT + (1 - (val - (-2)) / (2 - (-2))) * (H - padT - padB);
+  }
+  function toYLiking(val) {
+    if (val === null) return null;
+    return padT + (1 - (val - 1) / (5 - 1)) * (H - padT - padB);
   }
 
-  function buildPath(pts, min, max) {
+  function buildPath(pts, toY) {
     const validPts = pts.map((v, i) => ({ v, i })).filter(p => p.v !== null);
     if (validPts.length < 2) return '';
     return validPts.map(({ v, i }, idx) => {
       const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
-      const y = toY(v, min, max);
+      const y = toY(v);
       return `${idx === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
     }).join(' ');
   }
 
-  const energyPath = buildPath(energyPts, -2, 2);
-  const likingPath = buildPath(likingPts, 1, 5);
+  const energyPath = buildPath(energyPts, toYEnergy);
+  const likingPath = buildPath(likingPts, toYLiking);
 
   function xLabel(key, i) {
     if (isDaily) {
@@ -304,21 +309,27 @@ function WeeklyTrendChart({ sessions, period }) {
 
       {width > 0 && (
         <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
+          {/* Left axis — energy (−2…+2) */}
           {[-2, -1, 0, 1, 2].map(v => (
-            <SvgText key={v} x={padL - 4} y={toY(v, -2, 2) + 3} textAnchor="end" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
+            <SvgText key={v} x={padL - 4} y={toYEnergy(v) + 3} textAnchor="end" fontSize="8" fill={COLOURS.amber} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
           ))}
-          <Line x1={padL} y1={toY(0, -2, 2)} x2={width - padR} y2={toY(0, -2, 2)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
+          {/* Right axis — liking (1…5) */}
+          {[1, 2, 3, 4, 5].map(v => (
+            <SvgText key={v} x={width - padR + 4} y={toYLiking(v) + 3} textAnchor="start" fontSize="8" fill="#E87EA1" fontFamily="Lato">{v}</SvgText>
+          ))}
+          {/* Zero line for energy */}
+          <Line x1={padL} y1={toYEnergy(0)} x2={width - padR} y2={toYEnergy(0)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
           {energyPath ? <Path d={energyPath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
           {energyPts.map((v, i) => {
             if (v === null) return null;
             const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
-            return <Circle key={`e${i}`} cx={x} cy={toY(v, -2, 2)} r={3} fill={COLOURS.amber} />;
+            return <Circle key={`e${i}`} cx={x} cy={toYEnergy(v)} r={3} fill={COLOURS.amber} />;
           })}
           {likingPath ? <Path d={likingPath} fill="none" stroke="#E87EA1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
           {likingPts.map((v, i) => {
             if (v === null) return null;
             const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
-            return <Circle key={`l${i}`} cx={x} cy={toY(v, 1, 5)} r={3} fill="#E87EA1" />;
+            return <Circle key={`l${i}`} cx={x} cy={toYLiking(v)} r={3} fill="#E87EA1" />;
           })}
           {visible.map((key, i) => {
             const label = xLabel(key, i);
