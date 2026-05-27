@@ -250,7 +250,7 @@ function PracticeVolumeChart({ sessions, period }) {
   const totalMin = mins.reduce((a, v) => a + v, 0);
   const timeStr = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
 
-  const H = 120;
+  const H = 160;
   const padT = 16, padB = 20;
   const barGap = 2;
   const barW = width > 0 ? Math.max(4, Math.floor((width - (visible.length - 1) * barGap) / visible.length)) : 0;
@@ -357,7 +357,7 @@ function WeeklyTrendChart({ sessions, period }) {
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
   );
 
-  const H = 150;
+  const H = 160;
   const padL = 28, padR = 28, padT = 10, padB = 24;
 
   // Each series normalised independently to the same pixel range
@@ -452,7 +452,7 @@ const ENERGY_COLOURS = {
 
 function ScatterPlot({ sessions }) {
   const [width, setWidth] = useState(0);
-  const H = 110;
+  const H = 160;
   const padL = 24, padR = 10, padT = 8, padB = 24;
 
   const pts = sessions
@@ -1171,8 +1171,8 @@ function DayOfWeekChart({ sessions }) {
   const maxCount   = Math.max(...byDay.map(d => d.count), 1);
   const bestDay    = byDay.indexOf(byDay.reduce((a, b) => b.count > a.count ? b : a));
 
-  const H = 120;
-  const padL = 0, padR = 0, padT = 4, padB = 20;
+  const H = 160;
+  const padL = 0, padR = 0, padT = 16, padB = 36;
   const barW = width > 0 ? Math.floor((width - padL - padR) / 7) : 0;
   const maxBarH = H - padT - padB;
 
@@ -1208,19 +1208,19 @@ function DayOfWeekChart({ sessions }) {
                     fill={COLOURS.text} fontFamily="Lato"
                   >{d.count}</SvgText>
                 )}
-                {/* Avg energy dot below bar */}
+                {/* Avg energy number — row 1 below bars */}
                 {avgE !== null && (
                   <SvgText
-                    x={x + barW / 2} y={H - padB + 2}
-                    textAnchor="middle" fontSize="8"
+                    x={x + barW / 2} y={H - padB + 14}
+                    textAnchor="middle" fontSize="9"
                     fill={avgE >= 0 ? COLOURS.amber : COLOURS.red}
                     fontFamily="Lato"
                   >{avgE >= 0 ? `+${avgE.toFixed(1)}` : avgE.toFixed(1)}</SvgText>
                 )}
-                {/* Day label */}
+                {/* Day label — row 2, always visible */}
                 <SvgText
                   x={x + barW / 2} y={H - 4}
-                  textAnchor="middle" fontSize="9"
+                  textAnchor="middle" fontSize="10"
                   fill={i === bestDay ? COLOURS.navy : COLOURS.textDim}
                   fontWeight={i === bestDay ? '700' : '400'}
                   fontFamily="Lato"
