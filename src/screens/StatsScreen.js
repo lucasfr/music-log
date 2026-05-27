@@ -236,7 +236,8 @@ function PracticeVolumeChart({ sessions, period }) {
   });
 
   const keys = Object.keys(buckets).sort();
-  const visible = isDaily ? keys : keys.slice(-12);
+  const MAX_WEEKS = period === 'all' ? keys.length : 12;
+  const visible = isDaily ? keys : keys.slice(-MAX_WEEKS);
   const mins = visible.map(k => buckets[k] || 0);
 
   if (mins.every(v => v === 0)) return (
@@ -339,7 +340,8 @@ function WeeklyTrendChart({ sessions, period }) {
   });
 
   const keys = Object.keys(buckets).sort();
-  const visible = isDaily ? keys : keys.slice(-12);
+  const MAX_WEEKS = period === 'all' ? keys.length : 12;
+  const visible = isDaily ? keys : keys.slice(-MAX_WEEKS);
 
   const energyPts = visible.map(k => {
     const arr = buckets[k]?.energy || [];
