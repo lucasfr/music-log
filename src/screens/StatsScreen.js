@@ -505,6 +505,123 @@ function StreakHistory({ sessions }) {
   );
 }
 
+// ─── Lesson insights ────────────────────────────────────────────────────────
+
+function LessonInsights({ lessons, sessions, compositions, period }) {
+  const cutoff = (() => {
+    if (period === 'all') return null;
+    const d = new Date();
+    d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
+    return d.toISOString().slice(0, 10);
+  })();
+
+  const periodLessons = lessons.filter(l => !cutoff || l.date >= cutoff);
+
+  if (periodLessons.length === 0) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No lessons logged in this period.</Text>
+  );
+
+  // ── Avg energy & enjoyment ────────────────────────────────────────────────
+  const energyVals    = periodLessons.filter(l => l.energy != null).map(l => Number(l.energy));
+  const enjoymentVals = periodLessons.filter(l => l.enjoyment != null).map(l => Number(l.enjoyment));
+  const avgEnergy    = energyVals.length    ? energyVals.reduce((a, v) => a + v, 0) / energyVals.length       : null;
+  const avgEnjoyment = enjoymentVals.length ? enjoymentVals.reduce((a, v) => a + v, 0) / enjoymentVals.length : null;
+
+  // ── Pieces covered in lessons ─────────────────────────────────────────────
+  const lessonPieceCounts = {};
+  periodLessons.forEach(l => {
+    (l.segments || []).forEach(seg => {
+      if (seg.type !== 'repertoire' || !seg.compositionId) return;
+      lessonPieceCounts[seg.compositionId] = (lessonPieceCounts[seg.compositionId] || 0) + 1;
+    });
+  });
+
+  const topLessonPieces = Object.entries(lessonPieceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([id, count]) => ({
+      id,
+      title: compositions.find(c => c.id === id)?.title || id,
+      count,
+    }));
+
+  // ── Lesson-only pieces (never appeared in a practice session) ─────────────
+  const sessionPieceIds = new Set(
+    sessions.flatMap(s =>
+      (s.segments || [])
+        .filter(seg => seg.type === 'repertoire' && seg.compositionId)
+        .map(seg => seg.compositionId)
+    )
+  );
+  const lessonOnlyIds = Object.keys(lessonPieceCounts).filter(id => !sessionPieceIds.has(id));
+  const lessonOnlyPieces = lessonOnlyIds
+    .map(id => ({ id, title: compositions.find(c => c.id === id)?.title || id }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  const maxCount = topLessonPieces[0]?.count || 1;
+
+  return (
+    <View>
+      {/* Avg energy & enjoyment */}
+      <View style={{ flexDirection: 'row', gap: 20, marginBottom: 16 }}>
+        {avgEnergy !== null && (
+          <View style={{ gap: 4 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Avg energy</Text>
+            <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={16} />
+          </View>
+        )}
+        {avgEnjoyment !== null && (
+          <View style={{ gap: 4 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Avg enjoyment</Text>
+            <ZeldaBarFractional emoji="❤️" fill={avgEnjoyment} size={16} />
+          </View>
+        )}
+        <View style={{ gap: 4 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Lessons</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy }}>{periodLessons.length}</Text>
+        </View>
+      </View>
+
+      {/* Most covered in lessons */}
+      {topLessonPieces.length > 0 && (
+        <View style={{ marginBottom: 16 }}>
+          <Label>Most covered in lessons</Label>
+          {topLessonPieces.map(({ id, title, count }) => (
+            <View key={id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flex: 1 }} numberOfLines={1}>📜 {title}</Text>
+              <View style={{ width: 80, height: 6, backgroundColor: COLOURS.bg2, borderRadius: 3 }}>
+                <View style={{ height: '100%', width: `${(count / maxCount) * 100}%`, backgroundColor: COLOURS.amber, borderRadius: 3 }} />
+              </View>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, width: 24, textAlign: 'right' }}>{count}×</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Lesson-only pieces */}
+      {lessonOnlyPieces.length > 0 && (
+        <View>
+          <Label>Lesson-only pieces</Label>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>Covered in lessons but not yet self-practised</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {lessonOnlyPieces.map(({ id, title }) => (
+              <View key={id} style={{
+                paddingHorizontal: 10, paddingVertical: 5,
+                borderRadius: RADIUS.pill,
+                backgroundColor: COLOURS.lessonBg,
+                shadowColor: COLOURS.lessonBorder,
+                shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1,
+              }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.lessonText }}>📜 {title}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+    </View>
+  );
+}
+
 // ─── Library growth chart ─────────────────────────────────────────────────
 
 function LibraryGrowthChart({ compositions }) {
@@ -1081,6 +1198,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             );
           })}
         </View>
+
+        <SectionTitle style={{ marginTop: 16 }}>Lesson insights ({periodLabel})</SectionTitle>
+        <GlassCard>
+          <LessonInsights lessons={lessons || []} sessions={sessions} compositions={compositions} period={period} />
+        </GlassCard>
 
         <SectionTitle style={{ marginTop: 16 }}>Library growth & streak history</SectionTitle>
         <GlassCard>
