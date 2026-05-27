@@ -414,6 +414,79 @@ function ScatterPlot({ sessions }) {
 
 // ─── Wins timeline ────────────────────────────────────────────────────
 
+// ─── Neglected pieces ─────────────────────────────────────────────────────
+
+function NeglectedPieces({ sessions, compositions }) {
+  const today = new Date();
+
+  const lastSeen = {};
+  sessions.forEach(s => {
+    (s.segments || []).forEach(seg => {
+      if (seg.type !== 'repertoire' || !seg.compositionId) return;
+      if (!lastSeen[seg.compositionId] || s.date > lastSeen[seg.compositionId]) {
+        lastSeen[seg.compositionId] = s.date;
+      }
+    });
+  });
+
+  const ACTIVE = new Set(['learning', 'consolidating']);
+  const neglected = compositions
+    .filter(c => ACTIVE.has(c.status))
+    .map(c => {
+      const last = lastSeen[c.id] || null;
+      const daysSince = last
+        ? Math.floor((today - new Date(last + 'T12:00:00')) / 86400000)
+        : null;
+      return { id: c.id, title: c.title, status: c.status, daysSince };
+    })
+    .filter(p => p.daysSince === null || p.daysSince >= 7)
+    .sort((a, b) => {
+      if (a.daysSince === null) return -1;
+      if (b.daysSince === null) return 1;
+      return b.daysSince - a.daysSince;
+    });
+
+  if (neglected.length === 0) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>
+      All active pieces practised in the last 7 days.
+    </Text>
+  );
+
+  function urgencyColour(d) {
+    if (d === null || d >= 21) return COLOURS.red;
+    if (d >= 14) return COLOURS.amber;
+    return COLOURS.steel;
+  }
+
+  function sinceLabel(d) {
+    if (d === null) return 'never practised';
+    return `${d} day${d === 1 ? '' : 's'} ago`;
+  }
+
+  return (
+    <View>
+      {neglected.map(({ id, title, status, daysSince }) => (
+        <View key={id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 10 }}>
+          <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: urgencyColour(daysSince) }} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }} numberOfLines={1}>
+              📜 {title}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 3 }}>
+              <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[status]?.bg || COLOURS.tealAccent }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: 11, color: STATUS_COLOURS[status]?.text || COLOURS.navy }}>{status}</Text>
+              </View>
+              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: urgencyColour(daysSince), fontStyle: 'italic' }}>
+                {sinceLabel(daysSince)}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 function WinsTimeline({ sessions, period }) {
   const cutoff = (() => {
     if (period === 'all') return null;
@@ -1411,6 +1484,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>Wins</Label>
               <WinsTimeline sessions={sessions} period={period} />
+              <View style={{ height: 1, backgroundColor: COLOURS.glassBorderSubtle, marginVertical: 14 }} />
+              <Label>Needs attention</Label>
+              <NeglectedPieces sessions={sessions} compositions={compositions} />
             </View>
           </View>
         </GlassCard>
