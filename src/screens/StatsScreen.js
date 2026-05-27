@@ -712,7 +712,7 @@ function ScaleCoverage({ sessions }) {
   const keysVisited    = [...majorCounts, ...minorCounts].filter(v => v > 0).length;
   const allDiffs       = Object.values(scaleCounts).flatMap(v => v.difficulty);
   const avgDiff        = allDiffs.length ? allDiffs.reduce((a, v) => a + v, 0) / allDiffs.length : null;
-  const timeStr        = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+  const timeStr        = m => { const r = Math.round(m); return r >= 60 ? `${Math.floor(r / 60)}h ${r % 60}m` : `${r}m`; };
 
   // Difficulty as dot symbols for SVG — ● = full, ◐ = half, ○ = empty
   function diffNotes(val) {
