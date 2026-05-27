@@ -808,7 +808,7 @@ function ScaleCoverage({ sessions }) {
           )}
         </Svg>
         {/* Avg diff Zelda bar — selected key only */}
-        {sel && selAvgDiff !== null && (
+        {sel && (
           <View style={{
             position: 'absolute',
             top: cy + size * 0.088,
@@ -816,7 +816,10 @@ function ScaleCoverage({ sessions }) {
             width: size * 0.28,
             alignItems: 'center',
           }}>
-            <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.038} />
+            {selAvgDiff !== null
+              ? <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.038} />
+              : <Text style={{ fontFamily: 'Lato', fontSize: size * 0.026, color: COLOURS.textDim, fontStyle: 'italic' }}>no difficulty data</Text>
+            }
           </View>
         )}
         </View>
