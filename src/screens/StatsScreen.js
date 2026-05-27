@@ -189,10 +189,9 @@ function ZeldaBarFractional({ emoji, fill, total = 5, size = 22 }) {
   );
 }
 
-// ─── Weekly trend chart (energy + liking) ──────────────────────────────────
+// ─── Trend chart (daily for 7d, weekly for 30d/all) ──────────────────────────
 
 function getISOWeek(dateStr) {
-  // Returns 'YYYY-Www' string for grouping
   const d = new Date(dateStr + 'T12:00:00');
   const day = d.getDay() || 7;
   d.setDate(d.getDate() + 4 - day);
@@ -202,7 +201,6 @@ function getISOWeek(dateStr) {
 }
 
 function weekLabel(isoWeek) {
-  // 'YYYY-Www' → short label like '14 Apr'
   const [year, w] = isoWeek.split('-W');
   const jan4 = new Date(Number(year), 0, 4);
   const monday = new Date(jan4);
@@ -212,44 +210,53 @@ function weekLabel(isoWeek) {
 
 function WeeklyTrendChart({ sessions, period }) {
   const [width, setWidth] = useState(0);
+  const isDaily = period === '7d';
 
-  // Build week buckets
-  const buckets = {};
   const cutoff = (() => {
     if (period === 'all') return null;
     const d = new Date();
-    d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
+    d.setDate(d.getDate() - (isDaily ? 7 : 30));
     return d.toISOString().slice(0, 10);
   })();
 
+  // Build buckets — daily ISO string for 7d, ISO week key for 30d/all
+  const buckets = {};
+
+  if (isDaily) {
+    // Pre-fill all 7 days so gaps (no session) still appear as null points
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      buckets[d.toISOString().slice(0, 10)] = { energy: [], liking: [] };
+    }
+  }
+
   sessions.forEach(s => {
     if (cutoff && s.date < cutoff) return;
-    const wk = getISOWeek(s.date);
-    if (!buckets[wk]) buckets[wk] = { energy: [], liking: [] };
-    if (s.energy != null) buckets[wk].energy.push(Number(s.energy));
-    // collect liking from repertoire segments
+    const key = isDaily ? s.date : getISOWeek(s.date);
+    if (!buckets[key]) buckets[key] = { energy: [], liking: [] };
+    if (s.energy != null) buckets[key].energy.push(Number(s.energy));
     (s.segments || []).forEach(seg => {
-      if (seg.type === 'repertoire' && seg.liking) buckets[wk].liking.push(Number(seg.liking));
+      if (seg.type === 'repertoire' && seg.liking) buckets[key].liking.push(Number(seg.liking));
     });
   });
 
-  const weeks = Object.keys(buckets).sort();
-  if (weeks.length < 2) return (
+  const keys = Object.keys(buckets).sort();
+  const visible = isDaily ? keys : keys.slice(-12);
+
+  const energyPts = visible.map(k => {
+    const arr = buckets[k]?.energy || [];
+    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
+  });
+  const likingPts = visible.map(k => {
+    const arr = buckets[k]?.liking || [];
+    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
+  });
+
+  const hasData = energyPts.some(v => v !== null) || likingPts.some(v => v !== null);
+  if (!hasData) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
   );
-
-  // Limit to last 12 weeks max for readability
-  const visible = weeks.slice(-12);
-
-  // avg per week, energy mapped -2…+2 → 0…1, liking 1…5 → 0…1
-  const energyPts = visible.map(wk => {
-    const arr = buckets[wk].energy;
-    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
-  });
-  const likingPts = visible.map(wk => {
-    const arr = buckets[wk].liking;
-    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
-  });
 
   const H = 150;
   const padL = 28, padR = 6, padT = 10, padB = 24;
@@ -272,6 +279,15 @@ function WeeklyTrendChart({ sessions, period }) {
   const energyPath = buildPath(energyPts, -2, 2);
   const likingPath = buildPath(likingPts, 1, 5);
 
+  function xLabel(key, i) {
+    if (isDaily) {
+      return new Date(key + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short' });
+    }
+    const step = visible.length > 8 ? 3 : 2;
+    if (i % step !== 0 && i !== visible.length - 1) return null;
+    return weekLabel(key);
+  }
+
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
       {/* Legend */}
@@ -287,40 +303,32 @@ function WeeklyTrendChart({ sessions, period }) {
       </View>
 
       {width > 0 && (
-        <View>
-          <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
-            {/* Y-axis labels — energy scale */}
-            {[-2, -1, 0, 1, 2].map(v => (
-              <SvgText key={v} x={padL - 4} y={toY(v, -2, 2) + 3} textAnchor="end" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
-            ))}
-            {/* Zero line */}
-            <Line x1={padL} y1={toY(0, -2, 2)} x2={width - padR} y2={toY(0, -2, 2)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
-            {energyPath ? <Path d={energyPath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
-            {energyPts.map((v, i) => {
-              if (v === null) return null;
-              const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
-              const y = toY(v, -2, 2);
-              return <Circle key={`e${i}`} cx={x} cy={y} r={3} fill={COLOURS.amber} />;
-            })}
-            {likingPath ? <Path d={likingPath} fill="none" stroke="#E87EA1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
-            {likingPts.map((v, i) => {
-              if (v === null) return null;
-              const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
-              const y = toY(v, 1, 5);
-              return <Circle key={`l${i}`} cx={x} cy={y} r={3} fill="#E87EA1" />;
-            })}
-            {visible.map((wk, i) => {
-              const step = visible.length > 8 ? 3 : 2;
-              if (i % step !== 0 && i !== visible.length - 1) return null;
-              const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
-              return (
-                <SvgText key={wk} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">
-                  {weekLabel(wk)}
-                </SvgText>
-              );
-            })}
-          </Svg>
-        </View>
+        <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
+          {[-2, -1, 0, 1, 2].map(v => (
+            <SvgText key={v} x={padL - 4} y={toY(v, -2, 2) + 3} textAnchor="end" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
+          ))}
+          <Line x1={padL} y1={toY(0, -2, 2)} x2={width - padR} y2={toY(0, -2, 2)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
+          {energyPath ? <Path d={energyPath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
+          {energyPts.map((v, i) => {
+            if (v === null) return null;
+            const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+            return <Circle key={`e${i}`} cx={x} cy={toY(v, -2, 2)} r={3} fill={COLOURS.amber} />;
+          })}
+          {likingPath ? <Path d={likingPath} fill="none" stroke="#E87EA1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
+          {likingPts.map((v, i) => {
+            if (v === null) return null;
+            const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+            return <Circle key={`l${i}`} cx={x} cy={toY(v, 1, 5)} r={3} fill="#E87EA1" />;
+          })}
+          {visible.map((key, i) => {
+            const label = xLabel(key, i);
+            if (!label) return null;
+            const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+            return (
+              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
+            );
+          })}
+        </Svg>
       )}
     </View>
   );
@@ -1002,11 +1010,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <ActivityGrid sessions={sessions} lessons={lessons} />
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 16 }}>Weekly trends & session quality ({periodLabel})</SectionTitle>
+        <SectionTitle style={{ marginTop: 16 }}>{period === '7d' ? 'Daily' : 'Weekly'} trends & session quality ({periodLabel})</SectionTitle>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
             <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
-              <Label>Weekly trends</Label>
+              <Label>{period === '7d' ? 'Daily' : 'Weekly'} trends</Label>
               <WeeklyTrendChart sessions={sessions} period={period} />
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
