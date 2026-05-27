@@ -74,18 +74,31 @@ export async function deleteRecord(table, id) {
 // ─── Pull (load) ──────────────────────────────────────────────────────────────
 
 // Fetches all rows for the current user from a table.
+// Paginates in chunks of 1000 to bypass Supabase's default server-side row
+// limit, which would otherwise silently truncate older records.
 // Caller is responsible for merging with local data (newer updated_at wins).
 export async function pullTable(table) {
   try {
     const session = await getSession();
     if (!session) return null;
     const client = getClient();
-    const { data, error } = await client
-      .from(table)
-      .select('*')
-      .eq('user_id', userId(session));
-    if (error) { console.warn(`[sync] pull ${table} failed:`, error.message); return null; }
-    return data;
+    const PAGE_SIZE = 1000;
+    let allData = [];
+    let from = 0;
+    while (true) {
+      const { data, error } = await client
+        .from(table)
+        .select('*')
+        .eq('user_id', userId(session))
+        .order('created_at', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error) { console.warn(`[sync] pull ${table} failed:`, error.message); return null; }
+      if (!data || data.length === 0) break;
+      allData = allData.concat(data);
+      if (data.length < PAGE_SIZE) break; // last page
+      from += PAGE_SIZE;
+    }
+    return allData;
   } catch (e) {
     console.warn(`[sync] pull ${table} exception:`, e.message);
     return null;
