@@ -122,7 +122,21 @@ export function useCompositions() {
   useEffect(() => { reload(); }, [reload]);
 
   const save = useCallback(async (comp) => {
-    const record = { ...comp, updated_at: new Date().toISOString() };
+    // Record status transitions
+    const prev = compositions.find(c => c.id === comp.id);
+    let statusHistory = comp.statusHistory || [];
+    if (prev && prev.status && comp.status && prev.status !== comp.status) {
+      statusHistory = [
+        ...statusHistory,
+        { date: new Date().toISOString().slice(0, 10), from: prev.status, to: comp.status },
+      ];
+    } else if (!prev && comp.status) {
+      // New composition — seed history with initial status
+      statusHistory = [
+        { date: (comp.dateStarted || new Date().toISOString().slice(0, 10)), from: null, to: comp.status },
+      ];
+    }
+    const record = { ...comp, statusHistory, updated_at: new Date().toISOString() };
     pendingSaves.compositions.set(record.id, record);
     await saveComposition(record);
     pushRecord('compositions', record).finally(() => {
