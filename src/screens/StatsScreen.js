@@ -685,12 +685,16 @@ function ScaleCoverage({ sessions }) {
   sessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
-      (seg.scales || []).forEach(scaleLabel => {
-        const cofKey = SCALE_LABEL_TO_COF[scaleLabel];
-        if (!cofKey) return; // ignore modes, pentatonics etc. for now
+      const cofKeys = [...new Set(
+        (seg.scales || []).map(l => SCALE_LABEL_TO_COF[l]).filter(Boolean)
+      )];
+      if (cofKeys.length === 0) return;
+      // Apportion duration evenly across distinct keys so total time isn't inflated
+      const durPerKey = (Number(seg.duration) || 0) / cofKeys.length;
+      cofKeys.forEach(cofKey => {
         if (!scaleCounts[cofKey]) scaleCounts[cofKey] = { sessions: 0, minutes: 0, difficulty: [] };
         scaleCounts[cofKey].sessions++;
-        scaleCounts[cofKey].minutes += Number(seg.duration) || 0;
+        scaleCounts[cofKey].minutes += durPerKey;
         if (seg.feltDifficulty) scaleCounts[cofKey].difficulty.push(Number(seg.feltDifficulty));
       });
     });
@@ -700,7 +704,10 @@ function ScaleCoverage({ sessions }) {
   const minorCounts = COF_MINORS.map(k => scaleCounts[k]?.sessions || 0);
   const maxCount    = Math.max(...majorCounts, ...minorCounts, 1);
 
-  const totalScaleMins = Object.values(scaleCounts).reduce((a, v) => a + v.minutes, 0);
+  const totalScaleMins = sessions.reduce((acc, s) =>
+    acc + (s.segments || []).reduce((a, seg) =>
+      seg.type === 'technique' && (seg.scales || []).some(l => SCALE_LABEL_TO_COF[l])
+        ? a + (Number(seg.duration) || 0) : a, 0), 0);
   const totalScaleSess = Object.values(scaleCounts).reduce((a, v) => a + v.sessions, 0);
   const keysVisited    = [...majorCounts, ...minorCounts].filter(v => v > 0).length;
   const allDiffs       = Object.values(scaleCounts).flatMap(v => v.difficulty);
