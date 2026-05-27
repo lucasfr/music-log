@@ -99,6 +99,46 @@ function AppInner({ fontsLoaded }) {
   const { sessions, save: saveSession, remove: deleteSession } = useSessions();
   const { compositions, save: saveComp, remove: deleteComp }   = useCompositions();
   const { lessons, save: saveLesson, remove: deleteLesson }    = useLessons();
+
+  // ── One-time migration: seed statusHistory from session data ────────────────
+  // Runs once when both sessions and compositions are loaded.
+  // For any composition with no statusHistory, finds the earliest session date
+  // that piece appeared in, then seeds { from: null, to: currentStatus, date }.
+  const [migrationDone, setMigrationDone] = useState(false);
+  useEffect(() => {
+    if (migrationDone) return;
+    if (sessions.length === 0 && compositions.length === 0) return;
+
+    // Build a map of compositionId → earliest session date
+    const earliestSession = {};
+    sessions.forEach(s => {
+      (s.segments || []).forEach(seg => {
+        if (!seg.compositionId) return;
+        const cur = earliestSession[seg.compositionId];
+        if (!cur || s.date < cur) earliestSession[seg.compositionId] = s.date;
+      });
+    });
+
+    const toMigrate = compositions.filter(
+      c => !c.statusHistory || c.statusHistory.length === 0
+    );
+    if (toMigrate.length === 0) { setMigrationDone(true); return; }
+
+    toMigrate.forEach(comp => {
+      const seedDate =
+        earliestSession[comp.id] ||
+        comp.dateStarted ||
+        (comp.createdAt ? comp.createdAt.slice(0, 10) : null) ||
+        new Date().toISOString().slice(0, 10);
+      saveComp({
+        ...comp,
+        statusHistory: [
+          { date: seedDate, from: null, to: comp.status || 'new' },
+        ],
+      });
+    });
+    setMigrationDone(true);
+  }, [sessions, compositions, migrationDone, saveComp]);
   const { width, onLayout, isDesktop }                         = useLayout();
 
   // Desktop: manage active tab ourselves (no React Navigation tab bar)
