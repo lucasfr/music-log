@@ -147,7 +147,7 @@ function ActivityGrid({ sessions, lessons }) {
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12, justifyContent: 'flex-end' }}>
-        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
         {[0, 15, 35, 55, 75].map(d => (
           <View key={d} style={{
             width: cell, height: cell,
@@ -155,9 +155,9 @@ function ActivityGrid({ sessions, lessons }) {
             backgroundColor: d === 0 ? 'rgba(140,32,69,0.07)' : cellColor(d),
           }} />
         ))}
-        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginLeft: 2, marginRight: 8 }}>More</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginLeft: 2, marginRight: 8 }}>More</Text>
         <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: 'rgba(247,127,0,0.55)' }} />
-        <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim }}>Lesson</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
       </View>
     </View>
   );
@@ -294,11 +294,11 @@ function WeeklyTrendChart({ sessions, period }) {
       <View style={{ flexDirection: 'row', gap: 16, marginBottom: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 20, height: 2, backgroundColor: COLOURS.amber, borderRadius: 1 }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⚡ Energy</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>⚡ Energy</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 20, height: 2, backgroundColor: '#E87EA1', borderRadius: 1 }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>❤️ Liking</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>❤️ Liking</Text>
         </View>
       </View>
 
@@ -371,7 +371,7 @@ function ScatterPlot({ sessions }) {
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>{trend}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>{trend}</Text>
       {width > 0 && (
         <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
           {/* Y-axis labels */}
@@ -404,7 +404,7 @@ function ScatterPlot({ sessions }) {
         {['-2','-1','0','1','2'].map(v => (
           <View key={v} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ENERGY_COLOURS[v] }} />
-            <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>{v > 0 ? `+${v}` : v}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{v > 0 ? `+${v}` : v}</Text>
           </View>
         ))}
       </View>
@@ -440,7 +440,7 @@ function WinsTimeline({ sessions, period }) {
             {i < wins.length - 1 && <View style={{ width: 1, flex: 1, backgroundColor: COLOURS.glassBorderSubtle, marginTop: 4 }} />}
           </View>
           <View style={{ flex: 1, paddingBottom: 4 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginBottom: 3 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 3 }}>
               {new Date(s.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
             </Text>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>“{s.wins}”</Text>
@@ -488,12 +488,12 @@ function StreakHistory({ sessions }) {
           </View>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>
                 {new Date(s.start + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                 {' → '}
                 {new Date(s.end + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
               </Text>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.navy }}>{s.len} days</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{s.len} days</Text>
             </View>
             <View style={{ height: 4, backgroundColor: COLOURS.glassBorderSubtle, borderRadius: 2 }}>
               <View style={{ height: '100%', width: `${(s.len / maxLen) * 100}%`, backgroundColor: i === 0 ? COLOURS.amber : COLOURS.steel, borderRadius: 2 }} />
@@ -538,7 +538,7 @@ function LibraryGrowthChart({ compositions }) {
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 8 }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 8 }}>
         {compositions.length} piece{compositions.length !== 1 ? 's' : ''} total · {compositions.filter(c => c.status !== 'ambition' && c.status !== 'shelved').length} active
       </Text>
       {width > 0 && (
@@ -793,7 +793,7 @@ function ScaleCoverage({ sessions }) {
               <SvgText x={cx} y={cy - size*0.068} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.034} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⏱ {timeStr(totalScaleMins)}</SvgText>
               <SvgText x={cx} y={cy - size*0.024} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.026} fill={COLOURS.textDim} fontFamily="Lato">total scale time</SvgText>
+                fontSize={size*0.030} fill={COLOURS.textDim} fontFamily="Lato">total scale time</SvgText>
               <SvgText x={cx} y={cy + size*0.028} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {totalScaleSess} sessions</SvgText>
               <SvgText x={cx} y={cy + size*0.072} textAnchor="middle" dominantBaseline="central"
@@ -805,11 +805,11 @@ function ScaleCoverage({ sessions }) {
               <SvgText x={cx} y={cy - size*0.088} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.044} fontWeight="500" fill={COLOURS.text} fontFamily="CormorantGaramond">{selKey}</SvgText>
               <SvgText x={cx} y={cy - size*0.038} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">{sel.ring === 'major' ? 'major' : 'minor'}</SvgText>
+                fontSize={size*0.032} fill={COLOURS.textDim} fontFamily="Lato">{sel.ring === 'major' ? 'major' : 'minor'}</SvgText>
               <SvgText x={cx} y={cy + size*0.01} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {selData?.sessions || 0} sessions</SvgText>
               <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.028} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
+                fontSize={size*0.032} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
 
             </G>
           )}
@@ -825,7 +825,7 @@ function ScaleCoverage({ sessions }) {
           }}>
             {selAvgDiff !== null
               ? <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.038} />
-              : <Text style={{ fontFamily: 'Lato', fontSize: size * 0.026, color: COLOURS.textDim, fontStyle: 'italic' }}>no difficulty data</Text>
+              : <Text style={{ fontFamily: 'Lato', fontSize: size * 0.030, color: COLOURS.textDim, fontStyle: 'italic' }}>no difficulty data</Text>
             }
           </View>
         )}
@@ -836,13 +836,13 @@ function ScaleCoverage({ sessions }) {
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#EF9F27' }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>major</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>major</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#5DCAA5' }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>minor</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>minor</Text>
         </View>
-        <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>
       </View>
     </View>
   );
@@ -1008,7 +1008,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   ) : (
                     <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, color: COLOURS.navy, lineHeight: 32 }}>{item.value}</Text>
                   )}
-                  <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 4, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 4, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
                 </View>
               </BlurView>
             </View>
@@ -1113,8 +1113,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
                     <View style={{ alignItems: 'flex-end', gap: 1 }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>{count}×</Text>
-                      {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{count}×</Text>
+                      {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
                     </View>
                   </View>
                   <View style={{ height: 3, backgroundColor: COLOURS.bg2, borderRadius: 2, marginBottom: 8 }}>
@@ -1122,14 +1122,14 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   </View>
                   <View style={{ flexDirection: 'row', gap: 16 }}>
                     <View style={{ gap: 3 }}>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Session</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Session</Text>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
                         {avgEnergy !== null && <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={12} />}
                         {avgSessionEnjoyment !== null && <ZeldaBarFractional emoji="❤️" fill={avgSessionEnjoyment} size={12} />}
                       </View>
                     </View>
                     <View style={{ gap: 3 }}>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Piece</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Piece</Text>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
                         {avgLiking !== null && <ZeldaBarFractional emoji="⭐" fill={avgLiking} size={12} />}
                         {avgDifficulty !== null && <ZeldaBarFractional emoji="🎵" fill={avgDifficulty} size={12} />}
