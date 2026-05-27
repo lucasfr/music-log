@@ -1376,6 +1376,21 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
 
+  const today = new Date().toISOString().slice(0, 10);
+
+  const daysSinceSession = (() => {
+    if (sessions.length === 0) return null;
+    const last = sessions.map(s => s.date).sort().at(-1);
+    return Math.floor((new Date(today + 'T12:00:00') - new Date(last + 'T12:00:00')) / 86400000);
+  })();
+
+  const daysSinceLesson = (() => {
+    const all = lessons || [];
+    if (all.length === 0) return null;
+    const last = all.map(l => l.date).sort().at(-1);
+    return Math.floor((new Date(today + 'T12:00:00') - new Date(last + 'T12:00:00')) / 86400000);
+  })();
+
   const statItems = [
     { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱', allTime: period !== 'all' ? (allTimeMin >= 60 ? `${Math.floor(allTimeMin / 60)}h ${allTimeMin % 60}m total` : `${Math.round(allTimeMin)}m total`) : null },
     { value: periodSessions.length, label: `sessions (${periodLabel})`,  emoji: '🎹' },
@@ -1383,6 +1398,10 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { value: streak,         label: `best streak (${periodLabel})`,   emoji: '🔥' },
     { value: null, fill: energyFill,    label: `avg energy (${periodLabel})`,    emoji: '⚡', type: 'energy' },
     { value: null, fill: avgEnjoymentFill, label: `avg enjoyment (${periodLabel})`, emoji: '❤️', type: 'enjoyment' },
+    { value: daysSinceSession === null ? '—' : daysSinceSession === 0 ? 'today' : `${daysSinceSession}d`, label: 'since practice', emoji: '📅',
+      urgent: daysSinceSession !== null && daysSinceSession >= 3 },
+    { value: daysSinceLesson === null ? '—' : daysSinceLesson === 0 ? 'today' : `${daysSinceLesson}d`, label: 'since lesson', emoji: '🎼',
+      urgent: daysSinceLesson !== null && daysSinceLesson >= 16 },
   ];
 
   return (
@@ -1421,7 +1440,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                       ? <ZeldaBarFractional emoji={item.emoji} fill={item.fill} size={16} />
                       : <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 24, color: COLOURS.navy, lineHeight: 28 }}>—</Text>
                   ) : (
-                    <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, color: COLOURS.navy, lineHeight: 32 }}>{item.value}</Text>
+                    <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, color: item.urgent ? COLOURS.red : COLOURS.navy, lineHeight: 32 }}>{item.value}</Text>
                   )}
                   <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 4, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
                   {item.allTime ? <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginTop: 2, textAlign: 'center', opacity: 0.7 }}>{item.allTime}</Text> : null}
