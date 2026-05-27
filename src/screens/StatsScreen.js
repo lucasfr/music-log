@@ -1280,7 +1280,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
 
   const statItems = [
-    { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱' },
+    { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱', allTime: period !== 'all' ? (allTimeMin >= 60 ? `${Math.floor(allTimeMin / 60)}h ${allTimeMin % 60}m total` : `${Math.round(allTimeMin)}m total`) : null },
     { value: periodSessions.length, label: `sessions (${periodLabel})`,  emoji: '🎹' },
     { value: periodLessons.length,  label: `lessons (${periodLabel})`,   emoji: '🎓' },
     { value: streak,         label: `best streak (${periodLabel})`,   emoji: '🔥' },
@@ -1327,6 +1327,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                     <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, color: COLOURS.navy, lineHeight: 32 }}>{item.value}</Text>
                   )}
                   <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 4, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
+                  {item.allTime ? <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginTop: 2, textAlign: 'center', opacity: 0.7 }}>{item.allTime}</Text> : null}
                 </View>
               </BlurView>
             </View>
