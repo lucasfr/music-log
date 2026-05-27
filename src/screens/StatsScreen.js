@@ -976,6 +976,7 @@ function TouchableYear({ onPress, label }) {
 
 export default function StatsScreen({ sessions, compositions, lessons, isDesktop }) {
   const [period, setPeriod] = useState('30d');
+  const [pieceSort, setPieceSort] = useState('count');
 
   const PERIODS = [
     { key: '7d',  label: '7 days' },
@@ -1075,6 +1076,28 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
       const mins = pieceMinutes[name] || 0;
       return { name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins };
     });
+
+  const topPiecesByTime = Object.entries(pieceMinutes)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, mins]) => {
+      const count = pieceFreq[name] || 0;
+      const joys  = pieceEnjoyment[name] || [];
+      const engs  = pieceEnergy[name] || [];
+      const sesEnj = pieceSessionEnjoyment[name] || [];
+      const diffs = pieceDifficulty[name] || [];
+      const avgLiking          = joys.length   ? joys.reduce((a, v) => a + v, 0)   / joys.length   : null;
+      const avgEnergy          = engs.length   ? engs.reduce((a, v) => a + v, 0)   / engs.length   : null;
+      const avgSessionEnjoyment = sesEnj.length ? sesEnj.reduce((a, v) => a + v, 0) / sesEnj.length : null;
+      const avgDifficulty      = diffs.length  ? diffs.reduce((a, v) => a + v, 0)  / diffs.length  : null;
+      return { name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins };
+    });
+
+  const activePieces = pieceSort === 'time' ? topPiecesByTime : topPieces;
+  const activePieceMax = pieceSort === 'time'
+    ? (topPiecesByTime[0]?.mins || 1)
+    : (topPieces[0]?.count || 1);
+  const timeStr = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
 
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
 
@@ -1223,8 +1246,27 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
             <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
-              <Label>Most practised</Label>
-              {topPieces.length > 0 ? topPieces.map(({ name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins }, idx) => (
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <Label style={{ marginBottom: 0 }}>Most practised</Label>
+                <View style={{ flexDirection: 'row', gap: 5 }}>
+                  {[{ key: 'count', label: 'Sessions' }, { key: 'time', label: 'Time' }].map(opt => {
+                    const active = pieceSort === opt.key;
+                    return (
+                      <TouchableOpacity key={opt.key} onPress={() => setPieceSort(opt.key)} activeOpacity={0.75}
+                        style={{
+                          paddingHorizontal: 9, paddingVertical: 4, borderRadius: RADIUS.pill,
+                          backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+                          shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
+                          shadowOffset: { width: 0, height: active ? 2 : 1 },
+                          shadowOpacity: 1, shadowRadius: active ? 6 : 3, elevation: active ? 2 : 1,
+                        }}>
+                        <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 11, color: active ? '#fff' : COLOURS.textMuted }}>{opt.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+              {activePieces.length > 0 ? activePieces.map(({ name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins }) => (
                 <View key={name} style={{
                   marginBottom: 12,
                   paddingLeft: 12,
@@ -1235,12 +1277,16 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
                     <View style={{ alignItems: 'flex-end', gap: 1 }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{count}×</Text>
-                      {mins > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {mins}m</Text>}
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>
+                        {pieceSort === 'time' ? timeStr(mins) : `${count}×`}
+                      </Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>
+                        {pieceSort === 'time' ? `${count}× sessions` : (mins > 0 ? `⏱ ${timeStr(mins)}` : '')}
+                      </Text>
                     </View>
                   </View>
                   <View style={{ height: 3, backgroundColor: COLOURS.bg2, borderRadius: 2, marginBottom: 8 }}>
-                    <View style={{ height: '100%', width: `${(count / topPieces[0].count) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
+                    <View style={{ height: '100%', width: `${((pieceSort === 'time' ? mins : count) / activePieceMax) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
                   </View>
                   <View style={{ flexDirection: 'row', gap: 16 }}>
                     <View style={{ gap: 3 }}>
