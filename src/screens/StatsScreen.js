@@ -6,7 +6,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName } from '../utils';
+import { scaleName, scaleMotion } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -1016,16 +1016,49 @@ function cofArcPath(cx, cy, r1, r2, startDeg, endDeg) {
   return `M${x1},${y1} A${r1},${r1} 0 0,1 ${x2},${y2} L${x3},${y3} A${r2},${r2} 0 0,0 ${x4},${y4} Z`;
 }
 
+// Parallel / Contrary / All filter for scale coverage — lets Lucas isolate
+// how much contrary-motion practice he's actually logged, since that's
+// specifically examined from around Grade 5–6.
+function MotionToggle({ motionFilter, setMotionFilter }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 6, marginBottom: 10 }}>
+      {[
+        { key: 'all', label: 'All' },
+        { key: 'parallel', label: 'Parallel' },
+        { key: 'contrary', label: 'Contrary' },
+      ].map(m => {
+        const active = motionFilter === m.key;
+        return (
+          <TouchableOpacity key={m.key} onPress={() => setMotionFilter(m.key)} activeOpacity={0.75}
+            style={{
+              paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill,
+              backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+              shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
+              shadowOffset: { width: 0, height: active ? 2 : 1 },
+              shadowOpacity: 1, shadowRadius: active ? 6 : 3, elevation: active ? 2 : 1,
+            }}>
+            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 11, color: active ? '#fff' : COLOURS.textMuted }}>{m.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
 function ScaleCoverage({ sessions }) {
   const [width, setWidth] = useState(0);
   const [selected, setSelected] = useState(null);
+  const [motionFilter, setMotionFilter] = useState('all'); // 'all' | 'parallel' | 'contrary'
 
   const scaleCounts = {};
   sessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
       const cofKeys = [...new Set(
-        (seg.scales || []).map(l => SCALE_LABEL_TO_COF[scaleName(l)]).filter(Boolean)
+        (seg.scales || [])
+          .filter(l => motionFilter === 'all' || scaleMotion(l) === motionFilter)
+          .map(l => SCALE_LABEL_TO_COF[scaleName(l)])
+          .filter(Boolean)
       )];
       if (cofKeys.length === 0) return;
       // Apportion duration evenly across distinct keys so total time isn't inflated
@@ -1045,7 +1078,9 @@ function ScaleCoverage({ sessions }) {
 
   const totalScaleMins = sessions.reduce((acc, s) =>
     acc + (s.segments || []).reduce((a, seg) =>
-      seg.type === 'technique' && (seg.scales || []).some(l => SCALE_LABEL_TO_COF[scaleName(l)])
+      seg.type === 'technique' && (seg.scales || []).some(l =>
+        (motionFilter === 'all' || scaleMotion(l) === motionFilter) && SCALE_LABEL_TO_COF[scaleName(l)]
+      )
         ? a + (Number(seg.duration) || 0) : a, 0), 0);
   const totalScaleSess = Object.values(scaleCounts).reduce((a, v) => a + v.sessions, 0);
   const keysVisited    = [...majorCounts, ...minorCounts].filter(v => v > 0).length;
@@ -1074,11 +1109,17 @@ function ScaleCoverage({ sessions }) {
     : null;
 
   if (totalScaleSess === 0) return (
-    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No scales logged in this period.</Text>
+    <View>
+      <MotionToggle motionFilter={motionFilter} setMotionFilter={setMotionFilter} />
+      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>
+        No {motionFilter !== 'all' ? `${motionFilter} motion ` : ''}scales logged in this period.
+      </Text>
+    </View>
   );
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      <MotionToggle motionFilter={motionFilter} setMotionFilter={setMotionFilter} />
       {width > 0 && (
         <View style={{ position: 'relative', width: size, height: size }}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
