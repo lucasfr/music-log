@@ -65,13 +65,17 @@ function ActivityGrid({ sessions, lessons }) {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const [width, setWidth] = useState(0);
+  const [mode, setMode] = useState('both'); // 'both' | 'practice' | 'lessons'
 
+  // Gate each dataset on the selected mode so the grid can isolate one type
   const dateMap = {};
-  sessions.forEach(s => {
-    dateMap[s.date] = (dateMap[s.date] || 0) + (Number(s.duration) || 0);
-  });
+  if (mode !== 'lessons') {
+    sessions.forEach(s => {
+      dateMap[s.date] = (dateMap[s.date] || 0) + (Number(s.duration) || 0);
+    });
+  }
 
-  const lessonDates = new Set((lessons || []).map(l => l.date));
+  const lessonDates = mode !== 'practice' ? new Set((lessons || []).map(l => l.date)) : new Set();
 
   const months = buildYear(year, dateMap);
 
@@ -90,6 +94,29 @@ function ActivityGrid({ sessions, lessons }) {
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
+      {/* View mode toggle */}
+      <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
+        {[
+          { key: 'both', label: 'Both' },
+          { key: 'practice', label: '🎹 Practice' },
+          { key: 'lessons', label: '🎓 Lessons' },
+        ].map(m => {
+          const active = mode === m.key;
+          return (
+            <TouchableOpacity key={m.key} onPress={() => setMode(m.key)} activeOpacity={0.75}
+              style={{
+                paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
+                backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+                shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
+                shadowOffset: { width: 0, height: active ? 3 : 1 },
+                shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+              }}>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? '#fff' : COLOURS.textMuted }}>{m.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
       {/* Year picker */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>{year}</Text>
@@ -148,17 +175,25 @@ function ActivityGrid({ sessions, lessons }) {
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12, justifyContent: 'flex-end' }}>
-        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
-        {[0, 15, 35, 55, 75].map(d => (
-          <View key={d} style={{
-            width: cell, height: cell,
-            borderRadius: Math.max(1, cell * 0.2),
-            backgroundColor: d === 0 ? 'rgba(140,32,69,0.07)' : cellColor(d),
-          }} />
-        ))}
-        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginLeft: 2, marginRight: 8 }}>More</Text>
-        <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: 'rgba(247,127,0,0.55)' }} />
-        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
+        {mode !== 'lessons' && (
+          <>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
+            {[0, 15, 35, 55, 75].map(d => (
+              <View key={d} style={{
+                width: cell, height: cell,
+                borderRadius: Math.max(1, cell * 0.2),
+                backgroundColor: d === 0 ? 'rgba(140,32,69,0.07)' : cellColor(d),
+              }} />
+            ))}
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginLeft: 2, marginRight: mode !== 'practice' ? 8 : 0 }}>More</Text>
+          </>
+        )}
+        {mode !== 'practice' && (
+          <>
+            <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: 'rgba(247,127,0,0.55)' }} />
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
+          </>
+        )}
       </View>
     </View>
   );
