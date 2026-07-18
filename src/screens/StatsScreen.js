@@ -530,10 +530,13 @@ function ScatterPlot({ sessions }) {
 function NeglectedPieces({ sessions, compositions }) {
   const today = new Date();
 
+  // Count any segment linked to a composition, whether logged as repertoire
+  // or as technique (e.g. Hanon linked as a library piece) — both count as
+  // "worked on it" for neglect purposes.
   const lastSeen = {};
   sessions.forEach(s => {
     (s.segments || []).forEach(seg => {
-      if (seg.type !== 'repertoire' || !seg.compositionId) return;
+      if (!seg.compositionId) return;
       if (!lastSeen[seg.compositionId] || s.date > lastSeen[seg.compositionId]) {
         lastSeen[seg.compositionId] = s.date;
       }
