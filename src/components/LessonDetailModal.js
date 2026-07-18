@@ -118,7 +118,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(formatScaleEntry).join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
                   )}
                   {seg.feedback ? (
                     <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}>

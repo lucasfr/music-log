@@ -5,7 +5,7 @@ import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
-import { scaleName, scaleMotion } from '../utils';
+import { scaleName, scaleMotion, scaleOctaves } from '../utils';
 
 // ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
 
@@ -53,26 +53,35 @@ function ScalesPicker({ selected = [], onChange }) {
   function toggle(scale) {
     onChange(selectedNames.includes(scale)
       ? selected.filter(s => scaleName(s) !== scale)
-      : [...selected, { scale, motion: 'parallel' }]
+      : [...selected, { scale, motion: 'parallel', octaves: 1 }]
     );
   }
 
   function toggleMotion(scale) {
     onChange(selected.map(s =>
       scaleName(s) === scale
-        ? { scale, motion: scaleMotion(s) === 'contrary' ? 'parallel' : 'contrary' }
+        ? { scale, motion: scaleMotion(s) === 'contrary' ? 'parallel' : 'contrary', octaves: scaleOctaves(s) }
+        : s
+    ));
+  }
+
+  function toggleOctaves(scale) {
+    onChange(selected.map(s =>
+      scaleName(s) === scale
+        ? { scale, motion: scaleMotion(s), octaves: scaleOctaves(s) === 2 ? 1 : 2 }
         : s
     ));
   }
 
   return (
     <View>
-      {/* Selected chips — tap the name to toggle contrary/parallel motion, ✕ to remove */}
+      {/* Selected chips — tap the name to toggle contrary/parallel motion, tap the octave badge to toggle 1/2 octaves, ✕ to remove */}
       {selected.length > 0 && (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
           {selected.map(s => {
             const name = scaleName(s);
             const isContrary = scaleMotion(s) === 'contrary';
+            const octaves = scaleOctaves(s);
             return (
               <View
                 key={name}
@@ -87,6 +96,13 @@ function ScalesPicker({ selected = [], onChange }) {
                   {isContrary && (
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.danger }}>⇄ contrary</Text>
                   )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => toggleOctaves(name)}
+                  activeOpacity={0.75}
+                  style={{ paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
+                >
+                  <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{octaves}oct</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggle(name)}
@@ -257,40 +273,12 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
               </Field>
 
               {(segment.group === 'Scales' || segment.group === 'Arpeggios') && (
-                <>
-                  <Field label={`${segment.group} practised`} icon="musical-notes-outline">
-                    <ScalesPicker
-                      selected={segment.scales || []}
-                      onChange={v => field('scales', v)}
-                    />
-                  </Field>
-                  <Field label="Octaves" icon="layers-outline">
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                      {[1, 2].map(n => {
-                        const active = (segment.octaves || 1) === n;
-                        return (
-                          <TouchableOpacity
-                            key={n}
-                            onPress={() => field('octaves', n)}
-                            activeOpacity={0.75}
-                            style={{
-                              paddingHorizontal: 20, paddingVertical: 8,
-                              borderRadius: RADIUS.pill,
-                              backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
-                              shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
-                              shadowOffset: { width: 0, height: active ? 3 : 1 },
-                              shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
-                            }}
-                          >
-                            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>
-                              {n} oct{n > 1 ? 's' : ''}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  </Field>
-                </>
+                <Field label={`${segment.group} practised`} icon="musical-notes-outline">
+                  <ScalesPicker
+                    selected={segment.scales || []}
+                    onChange={v => field('scales', v)}
+                  />
+                </Field>
               )}
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}>

@@ -27,10 +27,16 @@ export function fmtDateShort(iso) {
 }
 
 // ─── Scale entries ───────────────────────────────────────────────────────────
-// A scale entry in segment.scales can be either:
-//   - a plain string (legacy, e.g. 'C major') — always implicitly parallel motion
-//   - an object { scale, motion } where motion is 'parallel' (default) | 'contrary'
-// These helpers normalise access so old and new data read the same way.
+// A scale entry in segment.scales can be:
+//   - a plain string (oldest legacy, e.g. 'C major') — parallel motion, octaves
+//     falls back to the segment's old shared `octaves` field
+//   - an object { scale, motion } (legacy) — octaves still falls back to the
+//     segment's shared `octaves` field
+//   - an object { scale, motion, octaves } (current) — fully self-contained
+// These helpers normalise access so all three generations of data read the
+// same way. `fallbackOctaves` should be passed as `segment.octaves || 1` by
+// callers so older entries without their own octaves value still display
+// correctly.
 
 export function scaleName(entry) {
   return typeof entry === 'string' ? entry : entry.scale;
@@ -40,9 +46,18 @@ export function scaleMotion(entry) {
   return typeof entry === 'string' ? 'parallel' : (entry.motion || 'parallel');
 }
 
-export function formatScaleEntry(entry) {
+export function scaleOctaves(entry, fallbackOctaves = 1) {
+  if (typeof entry === 'string') return fallbackOctaves;
+  return entry.octaves || fallbackOctaves;
+}
+
+export function formatScaleEntry(entry, fallbackOctaves = 1) {
   const name = scaleName(entry);
-  return scaleMotion(entry) === 'contrary' ? `${name} (contrary)` : name;
+  const motion = scaleMotion(entry);
+  const octaves = scaleOctaves(entry, fallbackOctaves);
+  const attrs = [`${octaves}oct`];
+  if (motion === 'contrary') attrs.push('contrary');
+  return `${name} (${attrs.join(', ')})`;
 }
 
 // Alert.alert is a no-op on web — use window.confirm there instead

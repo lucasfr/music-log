@@ -118,7 +118,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(formatScaleEntry).join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
                   )}
                   {seg.feltDifficulty ? (
                     <View style={{ marginTop: 4 }}>
