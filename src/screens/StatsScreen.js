@@ -6,6 +6,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
+import { scaleName } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -986,7 +987,7 @@ function ScaleCoverage({ sessions }) {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
       const cofKeys = [...new Set(
-        (seg.scales || []).map(l => SCALE_LABEL_TO_COF[l]).filter(Boolean)
+        (seg.scales || []).map(l => SCALE_LABEL_TO_COF[scaleName(l)]).filter(Boolean)
       )];
       if (cofKeys.length === 0) return;
       // Apportion duration evenly across distinct keys so total time isn't inflated
@@ -1006,7 +1007,7 @@ function ScaleCoverage({ sessions }) {
 
   const totalScaleMins = sessions.reduce((acc, s) =>
     acc + (s.segments || []).reduce((a, seg) =>
-      seg.type === 'technique' && (seg.scales || []).some(l => SCALE_LABEL_TO_COF[l])
+      seg.type === 'technique' && (seg.scales || []).some(l => SCALE_LABEL_TO_COF[scaleName(l)])
         ? a + (Number(seg.duration) || 0) : a, 0), 0);
   const totalScaleSess = Object.values(scaleCounts).reduce((a, v) => a + v.sessions, 0);
   const keysVisited    = [...majorCounts, ...minorCounts].filter(v => v > 0).length;

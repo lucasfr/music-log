@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
-import { fmtDate, confirmDelete } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry } from '../utils';
 import { exportSessionJSON } from '../utils/export';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
@@ -118,7 +118,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(formatScaleEntry).join(' · ')}</Text>
                   )}
                   {seg.feedback ? (
                     <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}>

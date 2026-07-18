@@ -5,6 +5,7 @@ import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
+import { scaleName, scaleMotion } from '../utils';
 
 // ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
 
@@ -45,29 +46,59 @@ function ScalesPicker({ selected = [], onChange }) {
   const visible = showAll || filter.length > 0 ? filtered : filtered.slice(0, 16);
   const hasMore = !showAll && filter.length === 0 && filtered.length > 16;
 
+  // Normalise for lookups — legacy entries are plain strings, new entries are
+  // { scale, motion }. `scaleName` handles both transparently.
+  const selectedNames = selected.map(scaleName);
+
   function toggle(scale) {
-    onChange(selected.includes(scale)
-      ? selected.filter(s => s !== scale)
-      : [...selected, scale]
+    onChange(selectedNames.includes(scale)
+      ? selected.filter(s => scaleName(s) !== scale)
+      : [...selected, { scale, motion: 'parallel' }]
     );
+  }
+
+  function toggleMotion(scale) {
+    onChange(selected.map(s =>
+      scaleName(s) === scale
+        ? { scale, motion: scaleMotion(s) === 'contrary' ? 'parallel' : 'contrary' }
+        : s
+    ));
   }
 
   return (
     <View>
-      {/* Selected chips */}
+      {/* Selected chips — tap the name to toggle contrary/parallel motion, ✕ to remove */}
       {selected.length > 0 && (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-          {selected.map(s => (
-            <TouchableOpacity
-              key={s}
-              onPress={() => toggle(s)}
-              activeOpacity={0.75}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)', shadowColor: COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
-            >
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{s}</Text>
-              <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
-            </TouchableOpacity>
-          ))}
+          {selected.map(s => {
+            const name = scaleName(s);
+            const isContrary = scaleMotion(s) === 'contrary';
+            return (
+              <View
+                key={name}
+                style={{ flexDirection: 'row', alignItems: 'center', borderRadius: RADIUS.pill, overflow: 'hidden', backgroundColor: isContrary ? 'rgba(140,32,69,0.14)' : 'rgba(8,131,149,0.14)', shadowColor: isContrary ? COLOURS.danger : COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
+              >
+                <TouchableOpacity
+                  onPress={() => toggleMotion(name)}
+                  activeOpacity={0.75}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5 }}
+                >
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{name}</Text>
+                  {isContrary && (
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.danger }}>⇄ contrary</Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => toggle(name)}
+                  activeOpacity={0.75}
+                  hitSlop={{ top: 6, bottom: 6, left: 2, right: 6 }}
+                  style={{ paddingHorizontal: 9, paddingVertical: 5 }}
+                >
+                  <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
         </View>
       )}
 
@@ -82,7 +113,7 @@ function ScalesPicker({ selected = [], onChange }) {
       {/* Options grid */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         {visible.map(s => {
-          const active = selected.includes(s);
+          const active = selectedNames.includes(s);
           return (
             <TouchableOpacity
               key={s}

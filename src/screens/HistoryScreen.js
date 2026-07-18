@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { SectionTitle, EmptyState } from '../components/UI';
-import { fmtDate, confirmDelete } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry } from '../utils';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
@@ -48,7 +48,7 @@ function SegDetail({ seg, compName, accentColor }) {
           ? <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{'⏱ ' + seg.duration + ' min'}</Text></View>
           : null}
       </View>
-      {(seg.scales && seg.scales.length > 0) ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.join(' · ')}</Text> : null}
+      {(seg.scales && seg.scales.length > 0) ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(formatScaleEntry).join(' · ')}</Text> : null}
       {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
       {seg.feltDifficulty ? <View style={{ marginTop: 4 }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 2 }}>Difficulty</Text><StarRow value={seg.feltDifficulty} emoji="🎵" /></View> : null}
       {seg.liking ? <View style={{ marginTop: 4 }}><Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 2 }}>Liking</Text><StarRow value={seg.liking} emoji="⭐" /></View> : null}

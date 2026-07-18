@@ -26,6 +26,25 @@ export function fmtDateShort(iso) {
   });
 }
 
+// ─── Scale entries ───────────────────────────────────────────────────────────
+// A scale entry in segment.scales can be either:
+//   - a plain string (legacy, e.g. 'C major') — always implicitly parallel motion
+//   - an object { scale, motion } where motion is 'parallel' (default) | 'contrary'
+// These helpers normalise access so old and new data read the same way.
+
+export function scaleName(entry) {
+  return typeof entry === 'string' ? entry : entry.scale;
+}
+
+export function scaleMotion(entry) {
+  return typeof entry === 'string' ? 'parallel' : (entry.motion || 'parallel');
+}
+
+export function formatScaleEntry(entry) {
+  const name = scaleName(entry);
+  return scaleMotion(entry) === 'contrary' ? `${name} (contrary)` : name;
+}
+
 // Alert.alert is a no-op on web — use window.confirm there instead
 export function confirmDelete(title, message, onConfirm) {
   if (Platform.OS === 'web') {

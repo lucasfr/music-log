@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
-import { fmtDate, confirmDelete } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry } from '../utils';
 import { exportSessionJSON, copySessionJSON } from '../utils/export';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
@@ -118,7 +118,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(formatScaleEntry).join(' · ')}</Text>
                   )}
                   {seg.feltDifficulty ? (
                     <View style={{ marginTop: 4 }}>

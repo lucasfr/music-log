@@ -55,6 +55,14 @@ export const SCALE_OPTIONS = [
   'Blues (A)', 'Blues (E)', 'Blues (G)',
 ];
 
+// Motion applies per-scale (see ScalesPicker) — 'parallel' is the default and
+// covers all pre-existing data where scales were stored as plain strings.
+export const MOTION_OPTIONS = ['parallel', 'contrary'];
+export const MOTION_LABELS = {
+  parallel: 'Parallel',
+  contrary: 'Contrary',
+};
+
 export const CHALLENGE_TAGS = [
   'hand-coordination',
   'left-hand',
