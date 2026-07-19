@@ -60,6 +60,24 @@ export function formatScaleEntry(entry, fallbackOctaves = 1) {
   return `${name} (${attrs.join(', ')})`;
 }
 
+// ─── Local UI preferences ──────────────────────────────────────────
+// Persists small UI choices (e.g. which toggle was last selected) across
+// launches. Web-only for now (uses localStorage, same pattern as the
+// Supabase credentials in lib/supabase.js) — on native this silently
+// no-ops, so the preference just resets each launch instead of crashing.
+const PREF_PREFIX = 'musiclog_pref_';
+
+export function getLocalPref(key, fallback = null) {
+  if (typeof localStorage === 'undefined') return fallback;
+  const raw = localStorage.getItem(PREF_PREFIX + key);
+  return raw === null ? fallback : raw;
+}
+
+export function setLocalPref(key, value) {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem(PREF_PREFIX + key, value);
+}
+
 // Alert.alert is a no-op on web — use window.confirm there instead
 export function confirmDelete(title, message, onConfirm) {
   if (Platform.OS === 'web') {

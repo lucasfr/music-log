@@ -24,9 +24,10 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 📖 **History** — chronological feed of all sessions and lessons, fully expanded inline with complete segment detail, wins, and next-focus notes
 - 🎓 **Lessons** — log lessons separately with teacher, duration, per-piece feedback, assignments, overall notes, wins, and focus for next time
 - 🎼 **Segment logging** — sessions split into technique segments (Hanon, Scales, Arpeggios, Sight-reading) and repertoire segments, each with notes, felt difficulty, challenge tags, and progress tags
+- 🎹 **Per-scale motion & octaves** — scales/arpeggios tracked individually with parallel/contrary motion and 1 or 2 octaves per scale, backward-compatible with older plain-string entries
 - 🗂️ **Composition library** — per-piece tracking of status, 🎹 difficulty, keys, time signatures, grade, arrangement, collection, year, tags, dates, teacher notes, study notes, and session history
 - ⚡ **Zelda-style rating bars** — energy (⚡) and enjoyment (❤️) per session; felt difficulty (🎵) and liking (⭐) per segment; all rated by tap or hold-and-slide
-- 📊 **Stats** — period-aware overview (6 tiles: practice time, sessions, lessons, streak, avg energy ⚡, avg enjoyment ❤️); activity grid (full year, lesson markers); weekly trends + session quality scatter; technique group breakdown with time, count and difficulty; interactive circle of fifths (major/minor rings, tap for per-key stats); library status tiles; library growth chart + streak history; most-practised pieces with session and piece-level Zelda bars; wins timeline — all half-half glass cards on desktop
+- 📊 **Stats** — period-aware overview (6 tiles: practice time, sessions, lessons, streak, avg energy ⚡, avg enjoyment ❤️); activity grid (full year, lesson markers, Both/Practice/Lessons toggle that remembers your last choice); weekly trends + session quality scatter; technique group breakdown with time, count and difficulty; interactive circle of fifths (major/minor rings, tap for per-key stats, filterable by motion and octave count); library status tiles; library growth chart + streak history; most-practised pieces with session and piece-level Zelda bars; wins timeline — all half-half glass cards on desktop
 - 🖥️ **Desktop two-column layout** — sidebar navigation, inline log forms and detail panels, no modals
 - 📤 **JSON export** — share any session as structured JSON via native share sheet or browser download
 - 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; no account or network required
@@ -53,7 +54,7 @@ music-log/
 │   └── apple-touch-icon*.png       # iOS PWA home screen icons
 └── src/
     ├── constants.js                # Tag lists, keys, grades, status options
-    ├── utils.js                    # uid(), fmtDate(), confirmDelete()
+    ├── utils.js                    # uid(), fmtDate(), confirmDelete(), scale motion/octave helpers, local prefs
     ├── theme/
     │   └── index.js                # Colour tokens, radius, sizes
     ├── db/

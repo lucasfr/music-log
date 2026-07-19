@@ -6,7 +6,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName, scaleMotion, scaleOctaves } from '../utils';
+import { scaleName, scaleMotion, scaleOctaves, getLocalPref, setLocalPref } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -65,7 +65,11 @@ function ActivityGrid({ sessions, lessons }) {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const [width, setWidth] = useState(0);
-  const [mode, setMode] = useState('both'); // 'both' | 'practice' | 'lessons'
+  const [mode, setModeState] = useState(() => getLocalPref('activityGridMode', 'both')); // 'both' | 'practice' | 'lessons'
+  function setMode(m) {
+    setModeState(m);
+    setLocalPref('activityGridMode', m);
+  }
 
   // Gate each dataset on the selected mode so the grid can isolate one type
   const dateMap = {};
