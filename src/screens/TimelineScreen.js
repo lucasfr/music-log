@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { SectionTitle, GlassCard } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
-import { deriveStatusTimeline } from '../utils';
+import { deriveStatusTimeline, deriveStatusHistory } from '../utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -30,6 +30,14 @@ function formatDate(str) {
   const d = parseDate(str);
   if (!d) return '—';
   return `${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// Day-precision formatter, used for stage-history rows where a stage may
+// only have lasted a few days or weeks — month/year alone would flatten that.
+function formatDay(str) {
+  const d = parseDate(str);
+  if (!d) return '—';
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function buildMonthAxis(minDate, maxDate) {
@@ -166,7 +174,7 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
 
 // ─── Detail panel ─────────────────────────────────────────────────────────────
 
-function DetailPanel({ comp, sessions }) {
+function DetailPanel({ comp, sessions, lessons }) {
   if (!comp) return null;
   const sc = statusColour(comp.status);
 
@@ -177,6 +185,15 @@ function DetailPanel({ comp, sessions }) {
     const seg = (s.segments || []).find(sg => sg.compositionId === comp.id);
     return acc + (seg?.duration ? Number(seg.duration) : 0);
   }, 0);
+
+  const history = useMemo(
+    () => deriveStatusHistory(comp.id, sessions, lessons),
+    [comp.id, sessions, lessons]
+  );
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const histStart = history.length ? parseDate(history[0].start) : null;
+  const histEnd    = history.length ? parseDate(history[history.length - 1].end) : null;
+  const histTotalMs = histStart && histEnd ? Math.max(1, histEnd - histStart) : 0;
 
   return (
     <BlurView intensity={32} tint="light" style={{
@@ -225,6 +242,52 @@ function DetailPanel({ comp, sessions }) {
             borderRadius: RADIUS.pill, backgroundColor: sc.track,
           }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: sc.label }}>{comp.status}</Text>
+          </View>
+        )}
+
+        {/* Stage history — compact multi-colour bar + per-stage breakdown */}
+        {history.length > 0 && (
+          <View style={{ marginTop: 14 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+              Stage history
+            </Text>
+
+            <View style={{ height: 10, borderRadius: RADIUS.pill, overflow: 'hidden', flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.05)' }}>
+              {history.map((seg, i) => {
+                const segSc = statusColour(seg.status);
+                const width = ((parseDate(seg.end) - parseDate(seg.start)) / histTotalMs) * 100;
+                return (
+                  <View key={i} style={{
+                    width: `${Math.max(width, 1.5)}%`,
+                    backgroundColor: segSc.fill,
+                    opacity: seg.status === 'shelved' ? 0.35 : 0.9,
+                  }} />
+                );
+              })}
+            </View>
+
+            <View style={{ marginTop: 10, gap: 8 }}>
+              {history.map((seg, i) => {
+                const segSc = statusColour(seg.status);
+                const isShelved = seg.status === 'shelved';
+                const days = Math.round((parseDate(seg.end) - parseDate(seg.start)) / 86400000);
+                const endLabel = seg.end === todayISO ? 'now' : formatDay(seg.end);
+                return (
+                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: segSc.fill, opacity: isShelved ? 0.5 : 1 }} />
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: isShelved ? COLOURS.textDim : COLOURS.text, width: 108 }}>
+                      {isShelved ? 'shelved (gap)' : seg.status}
+                    </Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, flex: 1 }} numberOfLines={1}>
+                      {formatDay(seg.start)} → {endLabel}
+                    </Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted, marginLeft: 8 }}>
+                      {isShelved ? `${days}d quiet` : `${seg.count}× · ${seg.minutes}m`}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
           </View>
         )}
       </View>
@@ -457,7 +520,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
 
         {/* Piece detail on tap */}
         {selectedComp && (
-          <DetailPanel comp={selectedComp} sessions={sessions} />
+          <DetailPanel comp={selectedComp} sessions={sessions} lessons={lessons} />
         )}
 
         {/* Undated hint */}
