@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -6,7 +6,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName, scaleMotion, scaleOctaves, getLocalPref, setLocalPref } from '../utils';
+import { scaleName, scaleMotion, scaleOctaves, getLocalPref, setLocalPref, deriveStatusHistory } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -850,7 +850,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
 
 // ─── Library growth chart ─────────────────────────────────────────────────
 
-function LibraryGrowthChart({ compositions }) {
+function LibraryGrowthChart({ compositions, sessions, lessons }) {
   const [width, setWidth] = useState(0);
   const H = 150;
   const padL = 6, padR = 6, padT = 8, padB = 24;
@@ -874,10 +874,43 @@ function LibraryGrowthChart({ compositions }) {
   const pts = months.map(m => { running += byMonth[m]; return { m, total: running, added: byMonth[m] }; });
   const maxTotal = pts[pts.length - 1].total;
 
-  function toX(i) { return padL + (i / (pts.length - 1)) * (width - padL - padR); }
-  function toY(v) { return padT + (1 - v / maxTotal) * (H - padT - padB); }
+  // Each piece's full status history, reconstructed once so the active-count
+  // line reflects what was actually active at each past checkpoint — not
+  // just today's snapshot.
+  const histories = useMemo(
+    () => compositions.map(c => deriveStatusHistory(c.id, sessions, lessons, c.shelvedAt)),
+    [compositions, sessions, lessons]
+  );
 
-  const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p.total).toFixed(1)}`).join(' ');
+  function lastDayOfMonthISO(monthKey) {
+    const [y, mo] = monthKey.split('-').map(Number);
+    const lastDate = new Date(y, mo, 0).getDate();
+    return `${String(y).padStart(4, '0')}-${String(mo).padStart(2, '0')}-${String(lastDate).padStart(2, '0')}`;
+  }
+
+  function activeCountAt(monthKey) {
+    const asOf = lastDayOfMonthISO(monthKey);
+    let count = 0;
+    histories.forEach(history => {
+      if (history.length === 0) return; // still ambition as of any date
+      let seg = history.find(s => s.start <= asOf && asOf < s.end);
+      if (!seg) {
+        const last = history[history.length - 1];
+        if (asOf >= last.end) seg = last;
+      }
+      if (seg && seg.status !== 'shelved') count++;
+    });
+    return count;
+  }
+
+  const activePts = months.map(m => activeCountAt(m));
+  const maxY = maxTotal; // active is always ≤ total, so share the scale
+
+  function toX(i) { return padL + (i / (pts.length - 1)) * (width - padL - padR); }
+  function toY(v) { return padT + (1 - v / maxY) * (H - padT - padB); }
+
+  const totalPath  = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p.total).toFixed(1)}`).join(' ');
+  const activePath = activePts.map((v, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ');
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
@@ -886,17 +919,21 @@ function LibraryGrowthChart({ compositions }) {
       </Text>
       {width > 0 && (
         <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
-          {/* Area fill */}
+          {/* Area fill — total */}
           <Path
-            d={`${linePath} L${toX(pts.length - 1).toFixed(1)},${H - padB} L${toX(0).toFixed(1)},${H - padB} Z`}
+            d={`${totalPath} L${toX(pts.length - 1).toFixed(1)},${H - padB} L${toX(0).toFixed(1)},${H - padB} Z`}
             fill={COLOURS.amber}
             opacity={0.12}
           />
-          {/* Line */}
-          <Path d={linePath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Dots */}
+          {/* Total line */}
+          <Path d={totalPath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           {pts.map((p, i) => (
-            <Circle key={i} cx={toX(i)} cy={toY(p.total)} r={3} fill={COLOURS.amber} />
+            <Circle key={`t${i}`} cx={toX(i)} cy={toY(p.total)} r={3} fill={COLOURS.amber} />
+          ))}
+          {/* Active line */}
+          <Path d={activePath} fill="none" stroke={COLOURS.steel} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5,3" />
+          {activePts.map((v, i) => (
+            <Circle key={`a${i}`} cx={toX(i)} cy={toY(v)} r={3} fill={COLOURS.steel} />
           ))}
           {/* X-axis labels — every 2nd or 3rd month */}
           {pts.map((p, i) => {
@@ -909,9 +946,20 @@ function LibraryGrowthChart({ compositions }) {
             );
           })}
           {/* Y-axis max label */}
-          <SvgText x={padL} y={padT + 6} textAnchor="start" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{maxTotal}</SvgText>
+          <SvgText x={padL} y={padT + 6} textAnchor="start" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{maxY}</SvgText>
         </Svg>
       )}
+      {/* Legend */}
+      <View style={{ flexDirection: 'row', gap: 16, marginTop: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 16, height: 2, backgroundColor: COLOURS.amber, borderRadius: 1 }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Total</Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 16, height: 2, backgroundColor: COLOURS.steel, borderRadius: 1 }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Active</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -1643,7 +1691,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
             <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
               <Label>Library growth</Label>
-              <LibraryGrowthChart compositions={compositions} />
+              <LibraryGrowthChart compositions={compositions} sessions={sessions} lessons={lessons} />
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
             <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
