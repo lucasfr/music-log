@@ -92,8 +92,9 @@ export function confirmDelete(title, message, onConfirm) {
 }
 
 // ─── Composition status derivation ──────────────────────────────────────────
-// Status is derived entirely from repertoire segments logged against a
-// composition in sessions and lessons — no manual editing.
+// Status is derived entirely from segments logged against a composition in
+// sessions and lessons — whether logged as repertoire or as technique work
+// linked to a library piece (e.g. Hanon) — no manual editing.
 //   - No logs at all       -> 'ambition' (the resting default for pieces not
 //     yet actively practised)
 //   - First log             -> exits ambition; 'new' unless its progress tags
@@ -106,14 +107,14 @@ export function deriveCompositionStatus(compositionId, sessions, lessons) {
   const logs = [];
   (sessions || []).forEach(s => {
     (s.segments || []).forEach(seg => {
-      if (seg.type === 'repertoire' && seg.compositionId === compositionId) {
+      if (seg.compositionId === compositionId) {
         logs.push({ date: s.date, progress: seg.progress || [] });
       }
     });
   });
   (lessons || []).forEach(l => {
     (l.segments || []).forEach(seg => {
-      if (seg.type === 'repertoire' && seg.compositionId === compositionId) {
+      if (seg.compositionId === compositionId) {
         logs.push({ date: l.date, progress: seg.progress || [] });
       }
     });
@@ -145,14 +146,14 @@ export function deriveStatusTimeline(compositionId, sessions, lessons) {
   const logs = [];
   (sessions || []).forEach(s => {
     (s.segments || []).forEach(seg => {
-      if (seg.type === 'repertoire' && seg.compositionId === compositionId) {
+      if (seg.compositionId === compositionId) {
         logs.push({ date: s.date, progress: seg.progress || [] });
       }
     });
   });
   (lessons || []).forEach(l => {
     (l.segments || []).forEach(seg => {
-      if (seg.type === 'repertoire' && seg.compositionId === compositionId) {
+      if (seg.compositionId === compositionId) {
         logs.push({ date: l.date, progress: seg.progress || [] });
       }
     });
