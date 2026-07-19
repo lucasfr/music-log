@@ -1137,13 +1137,8 @@ function ScaleCoverage({ sessions }) {
     ? selData.difficulty.reduce((a, v) => a + v, 0) / selData.difficulty.length
     : null;
 
-  if (totalScaleSess === 0) return (
-    <View>
-      <ScaleCoverageFilters motionFilter={motionFilter} setMotionFilter={setMotionFilter} octaveFilter={octaveFilter} setOctaveFilter={setOctaveFilter} />
-      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>
-        No {motionFilter !== 'all' ? `${motionFilter} motion ` : ''}{octaveFilter !== 'all' ? `${octaveFilter}-octave ` : ''}scales logged in this period.
-      </Text>
-    </View>
+  if (totalScaleSess === 0 && sessions.every(s => (s.segments || []).every(seg => seg.type !== 'technique'))) return (
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No scales logged in this period.</Text>
   );
 
   return (
