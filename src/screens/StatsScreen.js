@@ -1695,8 +1695,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
             <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
-              <Label>Streak history</Label>
-              <StreakHistory sessions={sessions} />
+              <Label>Streak history ({periodLabel})</Label>
+              <StreakHistory sessions={periodSessions} />
             </View>
           </View>
         </GlassCard>
