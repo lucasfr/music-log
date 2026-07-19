@@ -74,7 +74,7 @@ export const STATUS_COLOURS = {
   consolidating:       { bg: '#FDEFC8', text: '#6B3A00', border: 'rgba(252,191,73,0.43)'  },  // gold
   'performance-ready': { bg: '#D6EDD8', text: '#1E4D28', border: 'rgba(46,120,58,0.43)'   },  // sage green — clearly distinct, still warm
   // Holding states
-  shelved:             { bg: '#D6E4EE', text: '#002035', border: 'rgba(0,48,73,0.43)'      },  // navy
+  shelved:             { bg: '#E4EAF0', text: '#3E5A6D', border: 'rgba(94,138,158,0.45)'   },  // soft slate blue
   ambition:            { bg: '#EEEDFE', text: '#26215C', border: 'rgba(127,119,221,0.43)'  },  // purple — aspirational
 };
 
