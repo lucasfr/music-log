@@ -6,7 +6,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName, scaleMotion } from '../utils';
+import { scaleName, scaleMotion, scaleOctaves } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -1016,20 +1016,14 @@ function cofArcPath(cx, cy, r1, r2, startDeg, endDeg) {
   return `M${x1},${y1} A${r1},${r1} 0 0,1 ${x2},${y2} L${x3},${y3} A${r2},${r2} 0 0,0 ${x4},${y4} Z`;
 }
 
-// Parallel / Contrary / All filter for scale coverage — lets Lucas isolate
-// how much contrary-motion practice he's actually logged, since that's
-// specifically examined from around Grade 5–6.
-function MotionToggle({ motionFilter, setMotionFilter }) {
+// Generic pill-row toggle used for the scale coverage filters below.
+function PillToggle({ options, value, onChange }) {
   return (
-    <View style={{ flexDirection: 'row', gap: 6, marginBottom: 10 }}>
-      {[
-        { key: 'all', label: 'All' },
-        { key: 'parallel', label: 'Parallel' },
-        { key: 'contrary', label: 'Contrary' },
-      ].map(m => {
-        const active = motionFilter === m.key;
+    <View style={{ flexDirection: 'row', gap: 6 }}>
+      {options.map(o => {
+        const active = value === o.key;
         return (
-          <TouchableOpacity key={m.key} onPress={() => setMotionFilter(m.key)} activeOpacity={0.75}
+          <TouchableOpacity key={o.key} onPress={() => onChange(o.key)} activeOpacity={0.75}
             style={{
               paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill,
               backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
@@ -1037,10 +1031,34 @@ function MotionToggle({ motionFilter, setMotionFilter }) {
               shadowOffset: { width: 0, height: active ? 2 : 1 },
               shadowOpacity: 1, shadowRadius: active ? 6 : 3, elevation: active ? 2 : 1,
             }}>
-            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 11, color: active ? '#fff' : COLOURS.textMuted }}>{m.label}</Text>
+            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 11, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
           </TouchableOpacity>
         );
       })}
+    </View>
+  );
+}
+
+const MOTION_FILTER_OPTIONS = [
+  { key: 'all', label: 'All' },
+  { key: 'parallel', label: 'Parallel' },
+  { key: 'contrary', label: 'Contrary' },
+];
+
+const OCTAVE_FILTER_OPTIONS = [
+  { key: 'all', label: 'All' },
+  { key: 1, label: '1 oct' },
+  { key: 2, label: '2 oct' },
+];
+
+// Parallel / Contrary / All and 1oct / 2oct / All filters for scale coverage
+// — lets Lucas isolate how much contrary-motion or 2-octave practice he's
+// actually logged, since both are specifically examined from around Grade 5–6.
+function ScaleCoverageFilters({ motionFilter, setMotionFilter, octaveFilter, setOctaveFilter }) {
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+      <PillToggle options={MOTION_FILTER_OPTIONS} value={motionFilter} onChange={setMotionFilter} />
+      <PillToggle options={OCTAVE_FILTER_OPTIONS} value={octaveFilter} onChange={setOctaveFilter} />
     </View>
   );
 }
@@ -1049,6 +1067,13 @@ function ScaleCoverage({ sessions }) {
   const [width, setWidth] = useState(0);
   const [selected, setSelected] = useState(null);
   const [motionFilter, setMotionFilter] = useState('all'); // 'all' | 'parallel' | 'contrary'
+  const [octaveFilter, setOctaveFilter] = useState('all'); // 'all' | 1 | 2
+
+  function matchesFilters(l, seg) {
+    if (motionFilter !== 'all' && scaleMotion(l) !== motionFilter) return false;
+    if (octaveFilter !== 'all' && scaleOctaves(l, seg.octaves || 1) !== octaveFilter) return false;
+    return true;
+  }
 
   const scaleCounts = {};
   sessions.forEach(s => {
@@ -1056,7 +1081,7 @@ function ScaleCoverage({ sessions }) {
       if (seg.type !== 'technique') return;
       const cofKeys = [...new Set(
         (seg.scales || [])
-          .filter(l => motionFilter === 'all' || scaleMotion(l) === motionFilter)
+          .filter(l => matchesFilters(l, seg))
           .map(l => SCALE_LABEL_TO_COF[scaleName(l)])
           .filter(Boolean)
       )];
@@ -1079,7 +1104,7 @@ function ScaleCoverage({ sessions }) {
   const totalScaleMins = sessions.reduce((acc, s) =>
     acc + (s.segments || []).reduce((a, seg) =>
       seg.type === 'technique' && (seg.scales || []).some(l =>
-        (motionFilter === 'all' || scaleMotion(l) === motionFilter) && SCALE_LABEL_TO_COF[scaleName(l)]
+        matchesFilters(l, seg) && SCALE_LABEL_TO_COF[scaleName(l)]
       )
         ? a + (Number(seg.duration) || 0) : a, 0), 0);
   const totalScaleSess = Object.values(scaleCounts).reduce((a, v) => a + v.sessions, 0);
@@ -1110,16 +1135,16 @@ function ScaleCoverage({ sessions }) {
 
   if (totalScaleSess === 0) return (
     <View>
-      <MotionToggle motionFilter={motionFilter} setMotionFilter={setMotionFilter} />
+      <ScaleCoverageFilters motionFilter={motionFilter} setMotionFilter={setMotionFilter} octaveFilter={octaveFilter} setOctaveFilter={setOctaveFilter} />
       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>
-        No {motionFilter !== 'all' ? `${motionFilter} motion ` : ''}scales logged in this period.
+        No {motionFilter !== 'all' ? `${motionFilter} motion ` : ''}{octaveFilter !== 'all' ? `${octaveFilter}-octave ` : ''}scales logged in this period.
       </Text>
     </View>
   );
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
-      <MotionToggle motionFilter={motionFilter} setMotionFilter={setMotionFilter} />
+      <ScaleCoverageFilters motionFilter={motionFilter} setMotionFilter={setMotionFilter} octaveFilter={octaveFilter} setOctaveFilter={setOctaveFilter} />
       {width > 0 && (
         <View style={{ position: 'relative', width: size, height: size }}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
