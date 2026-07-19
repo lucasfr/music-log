@@ -109,6 +109,8 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
           {historySegments ? (
             historySegments.map((seg, i) => {
               const segSc = statusColour(seg.status);
+              const isFirst = i === 0;
+              const isLast  = i === historySegments.length - 1;
               return (
                 <View key={i} style={{
                   position: 'absolute',
@@ -117,6 +119,10 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
                   top: 0, bottom: 0,
                   backgroundColor: segSc.fill,
                   opacity: selected ? 1 : 0.80,
+                  borderTopLeftRadius: isFirst ? RADIUS.pill : 0,
+                  borderBottomLeftRadius: isFirst ? RADIUS.pill : 0,
+                  borderTopRightRadius: isLast ? RADIUS.pill : 0,
+                  borderBottomRightRadius: isLast ? RADIUS.pill : 0,
                   shadowColor: segSc.fill,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: selected ? 0.55 : 0.20,
@@ -256,11 +262,16 @@ function DetailPanel({ comp, sessions, lessons }) {
               {history.map((seg, i) => {
                 const segSc = statusColour(seg.status);
                 const width = ((parseDate(seg.end) - parseDate(seg.start)) / histTotalMs) * 100;
+                const isFirst = i === 0;
+                const isLast  = i === history.length - 1;
                 return (
                   <View key={i} style={{
                     width: `${Math.max(width, 1.5)}%`,
                     backgroundColor: segSc.fill,
-                    opacity: seg.status === 'shelved' ? 0.35 : 0.9,
+                    borderTopLeftRadius: isFirst ? RADIUS.pill : 0,
+                    borderBottomLeftRadius: isFirst ? RADIUS.pill : 0,
+                    borderTopRightRadius: isLast ? RADIUS.pill : 0,
+                    borderBottomRightRadius: isLast ? RADIUS.pill : 0,
                   }} />
                 );
               })}
@@ -274,8 +285,8 @@ function DetailPanel({ comp, sessions, lessons }) {
                 const endLabel = seg.end === todayISO ? 'now' : formatDay(seg.end);
                 return (
                   <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: segSc.fill, opacity: isShelved ? 0.5 : 1 }} />
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: isShelved ? COLOURS.textDim : COLOURS.text, width: 108 }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: segSc.fill }} />
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.text, width: 108 }}>
                       {isShelved ? 'shelved (gap)' : seg.status}
                     </Text>
                     <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, flex: 1 }} numberOfLines={1}>
