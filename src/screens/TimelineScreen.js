@@ -335,6 +335,15 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
   const totalMs   = maxDate - minDate;
   const todayFrac = Math.min(1, Math.max(0, (today - minDate) / totalMs));
 
+  // Dashed marker for each distinct day a lesson was logged, within range
+  const lessonFracs = useMemo(() => {
+    const dates = [...new Set((lessons || []).map(l => l.date))];
+    return dates
+      .map(d => parseDate(d))
+      .filter(d => d && d >= minDate && d <= maxDate)
+      .map(d => (d - minDate) / totalMs);
+  }, [lessons, minDate, maxDate, totalMs]);
+
   const spanMonths = totalMs / (30 * 24 * 3600 * 1000);
 
   const sorted = useMemo(() => [
@@ -403,6 +412,17 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
             backgroundColor: COLOURS.glassBorderSubtle,
           }} />
         ))}
+        {/* Lesson day markers */}
+        {lessonFracs.map((frac, i) => (
+          <View key={`lesson-${i}`} style={{
+            position: 'absolute', left: `${frac * 100}%`,
+            top: 0, bottom: 0, width: 0,
+            borderLeftWidth: 1.5,
+            borderLeftColor: COLOURS.accent2,
+            borderStyle: 'dashed',
+            opacity: 0.5,
+          }} />
+        ))}
         {/* Today line */}
         <View style={{
           position: 'absolute', left: `${todayFrac * 100}%`,
@@ -436,6 +456,10 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
             </View>
           );
         })}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 0, height: 12, borderLeftWidth: 1.5, borderLeftColor: COLOURS.accent2, borderStyle: 'dashed', opacity: 0.7 }} />
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>lesson</Text>
+        </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 2, height: 12, backgroundColor: COLOURS.red, opacity: 0.55 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>today</Text>
