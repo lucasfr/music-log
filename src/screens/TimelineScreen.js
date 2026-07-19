@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { SectionTitle, GlassCard } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
+import { deriveStatusTimeline } from '../utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -58,7 +59,7 @@ function buildYearLines(minDate, maxDate) {
 
 // ─── Gantt bar ────────────────────────────────────────────────────────────────
 
-function GanttBar({ comp, minDate, maxDate, today, onPress, selected }) {
+function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, selected }) {
   const totalMs = maxDate - minDate;
   const sc = statusColour(comp.status);
 
@@ -72,6 +73,20 @@ function GanttBar({ comp, minDate, maxDate, today, onPress, selected }) {
   const barWidth     = Math.max(0.008, clampedEnd - clampedStart);
   const isOngoing    = !completed;
 
+  // Historical status segments, clipped to the bar's own visible range, so
+  // the bar shows colour changes over time instead of one flat colour.
+  const historySegments = useMemo(() => {
+    const raw = deriveStatusTimeline(comp.id, sessions, lessons);
+    if (raw.length === 0) return null;
+    return raw
+      .map(seg => {
+        const segStart = Math.max(clampedStart, (parseDate(seg.start) - minDate) / totalMs);
+        const segEnd   = Math.min(clampedEnd,   (parseDate(seg.end)   - minDate) / totalMs);
+        return { ...seg, fracStart: segStart, fracEnd: segEnd };
+      })
+      .filter(seg => seg.fracEnd > seg.fracStart);
+  }, [comp.id, sessions, lessons, minDate, maxDate, clampedStart, clampedEnd]);
+
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
       <View style={{ paddingVertical: 3 }}>
@@ -83,23 +98,51 @@ function GanttBar({ comp, minDate, maxDate, today, onPress, selected }) {
           position: 'relative',
           overflow: 'hidden',
         }}>
-          {/* Bar */}
-          <View style={{
-            position: 'absolute',
-            left:  `${clampedStart * 100}%`,
-            width: `${barWidth   * 100}%`,
-            top: 0, bottom: 0,
-            borderRadius: RADIUS.pill,
-            backgroundColor: sc.fill,
-            opacity: selected ? 1 : 0.80,
-            // Dashed right border for ongoing (web only—RN doesn't support dashed borders on arbitrary sides)
-            borderRightWidth: isOngoing ? 3 : 0,
-            borderRightColor: 'rgba(255,255,255,0.60)',
-            shadowColor: sc.fill,
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: selected ? 0.55 : 0.20,
-            shadowRadius: selected ? 8 : 3,
-          }} />
+          {historySegments ? (
+            historySegments.map((seg, i) => {
+              const segSc = statusColour(seg.status);
+              return (
+                <View key={i} style={{
+                  position: 'absolute',
+                  left:  `${seg.fracStart * 100}%`,
+                  width: `${(seg.fracEnd - seg.fracStart) * 100}%`,
+                  top: 0, bottom: 0,
+                  backgroundColor: segSc.fill,
+                  opacity: selected ? 1 : 0.80,
+                  shadowColor: segSc.fill,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: selected ? 0.55 : 0.20,
+                  shadowRadius: selected ? 8 : 3,
+                }} />
+              );
+            })
+          ) : (
+            // No logs yet (piece is in ambition with a manual start date) — fall
+            // back to a single flat fill, same as before.
+            <View style={{
+              position: 'absolute',
+              left:  `${clampedStart * 100}%`,
+              width: `${barWidth   * 100}%`,
+              top: 0, bottom: 0,
+              borderRadius: RADIUS.pill,
+              backgroundColor: sc.fill,
+              opacity: selected ? 1 : 0.80,
+              shadowColor: sc.fill,
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: selected ? 0.55 : 0.20,
+              shadowRadius: selected ? 8 : 3,
+            }} />
+          )}
+          {/* Dashed-look marker for ongoing pieces — right edge of the bar */}
+          {isOngoing && (
+            <View style={{
+              position: 'absolute',
+              left: `${clampedEnd * 100}%`,
+              width: 3, top: 0, bottom: 0,
+              backgroundColor: 'rgba(255,255,255,0.60)',
+              transform: [{ translateX: -3 }],
+            }} />
+          )}
         </View>
 
         {/* Row label */}
@@ -191,7 +234,7 @@ function DetailPanel({ comp, sessions }) {
 
 // ─── Timeline chart ───────────────────────────────────────────────────────────
 
-function TimelineChart({ compositions, sessions, selectedId, onSelect }) {
+function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }) {
   const today = useMemo(() => new Date(), []);
 
   const datedPieces = compositions.filter(c => c.dateStarted);
@@ -297,6 +340,8 @@ function TimelineChart({ compositions, sessions, selectedId, onSelect }) {
           <GanttBar
             key={comp.id}
             comp={comp}
+            sessions={sessions}
+            lessons={lessons}
             minDate={minDate}
             maxDate={maxDate}
             today={today}
@@ -328,7 +373,7 @@ function TimelineChart({ compositions, sessions, selectedId, onSelect }) {
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function TimelineScreen({ compositions, sessions, isDesktop }) {
+export default function TimelineScreen({ compositions, sessions, lessons, isDesktop }) {
   const [selectedId, setSelectedId]       = useState(null);
   const [activeFilters, setActiveFilters] = useState([]); // empty = all
 
@@ -404,6 +449,7 @@ export default function TimelineScreen({ compositions, sessions, isDesktop }) {
           <TimelineChart
             compositions={filtered}
             sessions={sessions}
+            lessons={lessons}
             selectedId={selectedId}
             onSelect={setSelectedId}
           />
