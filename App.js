@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -19,6 +19,7 @@ import {
 } from '@expo-google-fonts/lato';
 
 import { useSessions, useCompositions, useLessons } from './src/db/hooks';
+import { deriveCompositionStatus } from './src/utils';
 import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
@@ -101,6 +102,14 @@ function AppInner({ fontsLoaded }) {
   const { lessons, save: saveLesson, remove: deleteLesson }    = useLessons();
   const { width, onLayout, isDesktop }                         = useLayout();
 
+  // Status is derived, not stored — computed once here from sessions/lessons
+  // and threaded through as `compositions` to every screen below, so no
+  // screen needs its own logic to resolve it.
+  const compositionsWithStatus = useMemo(
+    () => compositions.map(c => ({ ...c, status: deriveCompositionStatus(c.id, sessions, lessons) })),
+    [compositions, sessions, lessons]
+  );
+
   // Desktop: manage active tab ourselves (no React Navigation tab bar)
   const [activeTab, setActiveTab] = useState('Home');
 
@@ -128,7 +137,7 @@ function AppInner({ fontsLoaded }) {
   }
 
   const screenProps = {
-    sessions, lessons, compositions,
+    sessions, lessons, compositions: compositionsWithStatus,
     onSave: saveSession, onSaveLesson: saveLesson,
     onDelete: deleteSession, onDeleteLesson: deleteLesson,
     isDesktop,
@@ -140,10 +149,10 @@ function AppInner({ fontsLoaded }) {
       switch (activeTab) {
         case 'Home':     return <HomeScreen     key="home"     {...screenProps} />;
         case 'Calendar': return <CalendarScreen key="calendar" {...screenProps} />;
-        case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
-        case 'History':  return <HistoryScreen  key="history"  sessions={sessions} lessons={lessons} compositions={compositions} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={isDesktop} />;
-        case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositions} lessons={lessons} isDesktop={isDesktop} />;
-        case 'Timeline': return <TimelineScreen key="timeline" compositions={compositions} sessions={sessions} isDesktop={isDesktop} />;
+        case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositionsWithStatus} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
+        case 'History':  return <HistoryScreen  key="history"  sessions={sessions} lessons={lessons} compositions={compositionsWithStatus} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={isDesktop} />;
+        case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositionsWithStatus} lessons={lessons} isDesktop={isDesktop} />;
+        case 'Timeline': return <TimelineScreen key="timeline" compositions={compositionsWithStatus} sessions={sessions} isDesktop={isDesktop} />;
         case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />;
         case 'About':    return <AboutScreen    key="about"    isDesktop={isDesktop} />;
         default:         return <HomeScreen     key="home"     {...screenProps} />;
@@ -217,16 +226,16 @@ function AppInner({ fontsLoaded }) {
             {() => <CalendarScreen {...screenProps} />}
           </Tab.Screen>
           <Tab.Screen name="History">
-            {() => <HistoryScreen sessions={sessions} lessons={lessons} compositions={compositions} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={false} />}
+            {() => <HistoryScreen sessions={sessions} lessons={lessons} compositions={compositionsWithStatus} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Pieces">
-            {() => <CompositionsScreen compositions={compositions} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={false} />}
+            {() => <CompositionsScreen compositions={compositionsWithStatus} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Stats">
-            {() => <StatsScreen sessions={sessions} compositions={compositions} lessons={lessons} isDesktop={false} />}
+            {() => <StatsScreen sessions={sessions} compositions={compositionsWithStatus} lessons={lessons} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Timeline">
-            {() => <TimelineScreen compositions={compositions} sessions={sessions} isDesktop={false} />}
+            {() => <TimelineScreen compositions={compositionsWithStatus} sessions={sessions} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Settings">
             {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />}

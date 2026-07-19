@@ -85,6 +85,27 @@ export const PROGRESS_TAGS = [
   'performance-ready',
 ];
 
+// ─── Composition status derivation ──────────────────────────────────────────
+// Status is derived from progress tags logged on repertoire segments, not
+// manually set. 'breakthrough' and 'plateau' describe a single session's feel
+// and don't map to a durable stage.
+export const PROGRESS_TAG_TO_STATUS = {
+  'new-piece': 'new',
+  'consolidation': 'consolidating',
+  'performance-ready': 'performance-ready',
+};
+
+// Ranking of active-practice stages so derivation tracks the highest ever
+// reached, rather than regressing if a later session doesn't repeat an
+// earlier tag.
+export const STATUS_RANK = { new: 0, learning: 1, consolidating: 2, 'performance-ready': 3 };
+export const RANK_TO_STATUS = ['new', 'learning', 'consolidating', 'performance-ready'];
+
+// Days since the last repertoire log before an actively-practised piece
+// rolls over to 'shelved'. Logging a new session/lesson immediately
+// re-derives status, auto-unshelving it.
+export const SHELVED_AFTER_DAYS = 60;
+
 export const KEYS = [
   'C','G','D','A','E','B','F#/Gb','Db','Ab','Eb','Bb','F',
 ];

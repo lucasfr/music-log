@@ -1,4 +1,5 @@
 import { Alert, Platform } from 'react-native';
+import { PROGRESS_TAG_TO_STATUS, STATUS_RANK, RANK_TO_STATUS, SHELVED_AFTER_DAYS } from './constants';
 
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -88,4 +89,50 @@ export function confirmDelete(title, message, onConfirm) {
       { text: 'Delete', style: 'destructive', onPress: onConfirm },
     ]);
   }
+}
+
+// ─── Composition status derivation ──────────────────────────────────────────
+// Status is derived entirely from repertoire segments logged against a
+// composition in sessions and lessons — no manual editing.
+//   - No logs at all       -> 'ambition' (the resting default for pieces not
+//     yet actively practised)
+//   - First log             -> exits ambition; 'new' unless its progress tags
+//     already indicate more
+//   - Subsequent logs        -> tracks the highest stage tag ever reached;
+//     2+ logs with no stage tag at all settle into 'learning'
+//   - Long inactivity on an actively-practised piece -> 'shelved'; a new log
+//     immediately re-derives status, auto-unshelving it
+export function deriveCompositionStatus(compositionId, sessions, lessons) {
+  const logs = [];
+  (sessions || []).forEach(s => {
+    (s.segments || []).forEach(seg => {
+      if (seg.type === 'repertoire' && seg.compositionId === compositionId) {
+        logs.push({ date: s.date, progress: seg.progress || [] });
+      }
+    });
+  });
+  (lessons || []).forEach(l => {
+    (l.segments || []).forEach(seg => {
+      if (seg.type === 'repertoire' && seg.compositionId === compositionId) {
+        logs.push({ date: l.date, progress: seg.progress || [] });
+      }
+    });
+  });
+
+  if (logs.length === 0) return 'ambition';
+
+  let rank = STATUS_RANK.new;
+  logs.forEach(({ progress }) => {
+    progress.forEach(tag => {
+      const status = PROGRESS_TAG_TO_STATUS[tag];
+      if (status && STATUS_RANK[status] > rank) rank = STATUS_RANK[status];
+    });
+  });
+  if (rank === STATUS_RANK.new && logs.length > 1) rank = STATUS_RANK.learning;
+
+  const lastDate = logs.map(l => l.date).sort().at(-1);
+  const daysSince = Math.floor((new Date() - new Date(lastDate + 'T12:00:00')) / 86400000);
+  if (daysSince >= SHELVED_AFTER_DAYS) return 'shelved';
+
+  return RANK_TO_STATUS[rank];
 }

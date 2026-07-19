@@ -358,25 +358,18 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
 
             <GlassCard>
               <Field label="Status">
-                <View style={{ flexDirection: 'row', gap: 7, flexWrap: 'wrap' }}>
-                  {STATUS_OPTIONS.map(s => {
-                    const active = data.status === s;
-                    const sc = STATUS_COLOURS[s];
-                    return (
-                      <TouchableOpacity
-                        key={s} onPress={() => f('status', s)} activeOpacity={0.75}
-                        style={{
-                          paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
-                          backgroundColor: active ? sc.bg : 'rgba(255,255,255,0.50)',
-                          shadowColor: active ? sc.border : COLOURS.glassShadow,
-                          shadowOffset: { width: 0, height: active ? 3 : 1 },
-                          shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
-                        }}
-                      >
-                        <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? sc.text : COLOURS.textMuted }}>{s}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <View style={{
+                    paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
+                    backgroundColor: (STATUS_COLOURS[data.status] || {}).bg || 'rgba(255,255,255,0.50)',
+                  }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: (STATUS_COLOURS[data.status] || {}).text || COLOURS.textMuted }}>
+                      {data.status || 'ambition'}
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, flex: 1 }}>
+                    Derived automatically from your practice log — log a session or lesson for this piece to move it out of ambition.
+                  </Text>
                 </View>
               </Field>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 0 }}>
@@ -729,7 +722,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
 
   const blank = () => ({
     id: uid(), title: '', composer: '', arrangement: '', collection: '',
-    status: 'new', grade: '', keys: [], timeSigs: [],
+    status: 'ambition', grade: '', keys: [], timeSigs: [],
     difficulty: 0, liking: 0, year: '', tags: [],
     dateStarted: '', dateCompleted: '',
     info: '', technicalChallenges: '', musicalFocus: '', practiceNotes: '',
