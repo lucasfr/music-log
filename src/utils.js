@@ -94,7 +94,7 @@ export function confirmDelete(title, message, onConfirm) {
 // ─── Composition status derivation ──────────────────────────────────────────
 // Status is derived entirely from segments logged against a composition in
 // sessions and lessons — whether logged as repertoire or as technique work
-// linked to a library piece (e.g. Hanon) — no manual editing.
+// linked to a library piece (e.g. Hanon).
 //   - No logs at all       -> 'ambition' (the resting default for pieces not
 //     yet actively practised)
 //   - First log             -> exits ambition; 'new' unless its progress tags
@@ -103,7 +103,13 @@ export function confirmDelete(title, message, onConfirm) {
 //     2+ logs with no stage tag at all settle into 'learning'
 //   - Long inactivity on an actively-practised piece -> 'shelved'; a new log
 //     immediately re-derives status, auto-unshelving it
-export function deriveCompositionStatus(compositionId, sessions, lessons) {
+// `manualShelvedAt` (composition.shelvedAt) is a deliberate "shelve now"
+// override: forces 'shelved' immediately rather than waiting out the
+// inactivity threshold, but only while no log has happened since — the
+// moment a new session/lesson is logged after that date, it's ignored and
+// derivation resumes normally (same auto-unshelve behaviour as the
+// inactivity case).
+export function deriveCompositionStatus(compositionId, sessions, lessons, manualShelvedAt) {
   const logs = [];
   (sessions || []).forEach(s => {
     (s.segments || []).forEach(seg => {
@@ -122,6 +128,10 @@ export function deriveCompositionStatus(compositionId, sessions, lessons) {
 
   if (logs.length === 0) return 'ambition';
 
+  const lastDate = logs.map(l => l.date).sort().at(-1);
+
+  if (manualShelvedAt && lastDate <= manualShelvedAt) return 'shelved';
+
   let rank = STATUS_RANK.new;
   logs.forEach(({ progress }) => {
     progress.forEach(tag => {
@@ -131,7 +141,6 @@ export function deriveCompositionStatus(compositionId, sessions, lessons) {
   });
   if (rank === STATUS_RANK.new && logs.length > 1) rank = STATUS_RANK.learning;
 
-  const lastDate = logs.map(l => l.date).sort().at(-1);
   const daysSince = Math.floor((new Date() - new Date(lastDate + 'T12:00:00')) / 86400000);
   if (daysSince >= SHELVED_AFTER_DAYS) return 'shelved';
 
@@ -143,7 +152,10 @@ export function deriveCompositionStatus(compositionId, sessions, lessons) {
 // date range — including any 'shelved' quiet gaps between logs. Contiguous
 // logs of the same derived stage are merged into one row (safe because rank
 // only ever increases, so each active stage forms one continuous block).
-export function deriveStatusHistory(compositionId, sessions, lessons) {
+// `manualShelvedAt` mirrors the override in deriveCompositionStatus: if set
+// and no log has happened since, the tail of the history is trimmed/replaced
+// with a 'shelved' segment running from that date to today.
+export function deriveStatusHistory(compositionId, sessions, lessons, manualShelvedAt) {
   const logs = [];
   (sessions || []).forEach(s => {
     (s.segments || []).forEach(seg => {
@@ -207,6 +219,19 @@ export function deriveStatusHistory(compositionId, sessions, lessons) {
     }
   });
 
+  const lastLogDate = logs[logs.length - 1].date;
+  if (manualShelvedAt && lastLogDate <= manualShelvedAt) {
+    // Trim any segments that start on/after the manual shelve date, clip
+    // whatever remains up to that date, then append the manual shelved tail.
+    while (merged.length && merged[merged.length - 1].start >= manualShelvedAt) {
+      merged.pop();
+    }
+    if (merged.length && merged[merged.length - 1].end > manualShelvedAt) {
+      merged[merged.length - 1].end = manualShelvedAt;
+    }
+    merged.push({ status: 'shelved', start: manualShelvedAt, end: todayISO, count: 0, minutes: 0 });
+  }
+
   return merged;
 }
 
@@ -214,7 +239,7 @@ export function deriveStatusHistory(compositionId, sessions, lessons) {
 // Timeline chart to render as colour changes along the bar rather than one
 // flat colour. Returns an ordered list of { start, end, status } date-string
 // ranges. Empty array means no logs exist yet (piece is still in ambition).
-export function deriveStatusTimeline(compositionId, sessions, lessons) {
-  return deriveStatusHistory(compositionId, sessions, lessons)
+export function deriveStatusTimeline(compositionId, sessions, lessons, manualShelvedAt) {
+  return deriveStatusHistory(compositionId, sessions, lessons, manualShelvedAt)
     .map(({ start, end, status }) => ({ start, end, status }));
 }

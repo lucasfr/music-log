@@ -84,7 +84,7 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
   // Historical status segments, clipped to the bar's own visible range, so
   // the bar shows colour changes over time instead of one flat colour.
   const historySegments = useMemo(() => {
-    const raw = deriveStatusTimeline(comp.id, sessions, lessons);
+    const raw = deriveStatusTimeline(comp.id, sessions, lessons, comp.shelvedAt);
     if (raw.length === 0) return null;
     return raw
       .map(seg => {
@@ -93,7 +93,7 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
         return { ...seg, fracStart: segStart, fracEnd: segEnd };
       })
       .filter(seg => seg.fracEnd > seg.fracStart);
-  }, [comp.id, sessions, lessons, minDate, maxDate, clampedStart, clampedEnd]);
+  }, [comp.id, comp.shelvedAt, sessions, lessons, minDate, maxDate, clampedStart, clampedEnd]);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
@@ -193,8 +193,8 @@ function DetailPanel({ comp, sessions, lessons }) {
   }, 0);
 
   const history = useMemo(
-    () => deriveStatusHistory(comp.id, sessions, lessons),
-    [comp.id, sessions, lessons]
+    () => deriveStatusHistory(comp.id, sessions, lessons, comp.shelvedAt),
+    [comp.id, sessions, lessons, comp.shelvedAt]
   );
   const todayISO = new Date().toISOString().slice(0, 10);
   const histStart = history.length ? parseDate(history[0].start) : null;

@@ -10,7 +10,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
-import { uid, fmtDate } from '../utils';
+import { uid, fmtDate, todayISO } from '../utils';
 
 // ─── Zelda-style 🎹 difficulty ───────────────────────────────────────────────
 
@@ -358,7 +358,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
 
             <GlassCard>
               <Field label="Status">
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <View style={{
                     paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
                     backgroundColor: (STATUS_COLOURS[data.status] || {}).bg || 'rgba(255,255,255,0.50)',
@@ -367,8 +367,31 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                       {data.status || 'ambition'}
                     </Text>
                   </View>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, flex: 1 }}>
-                    Derived automatically from your practice log — log a session or lesson for this piece to move it out of ambition.
+
+                  {data.status !== 'ambition' && !data.shelvedAt && (
+                    <TouchableOpacity
+                      onPress={() => setData(d => ({ ...d, shelvedAt: todayISO(), status: 'shelved' }))}
+                      activeOpacity={0.75}
+                      style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                    >
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>📦 Shelve now</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {data.shelvedAt ? (
+                    <TouchableOpacity
+                      onPress={() => setData(d => ({ ...d, shelvedAt: '' }))}
+                      activeOpacity={0.75}
+                      style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                    >
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>↺ Un-shelve</Text>
+                    </TouchableOpacity>
+                  ) : null}
+
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, flex: 1, minWidth: 180 }}>
+                    {data.shelvedAt
+                      ? 'Manually shelved — logging a session or lesson for this piece will automatically resume it.'
+                      : 'Derived automatically from your practice log — logging moves it out of ambition; 60+ days of inactivity rolls it to shelved.'}
                   </Text>
                 </View>
               </Field>

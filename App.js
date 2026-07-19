@@ -106,7 +106,7 @@ function AppInner({ fontsLoaded }) {
   // and threaded through as `compositions` to every screen below, so no
   // screen needs its own logic to resolve it.
   const compositionsWithStatus = useMemo(
-    () => compositions.map(c => ({ ...c, status: deriveCompositionStatus(c.id, sessions, lessons) })),
+    () => compositions.map(c => ({ ...c, status: deriveCompositionStatus(c.id, sessions, lessons, c.shelvedAt) })),
     [compositions, sessions, lessons]
   );
 
