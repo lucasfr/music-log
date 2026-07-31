@@ -58,14 +58,18 @@ const ind = StyleSheet.create({
 
 function DayIndicators({ sessions }) {
   if (!sessions.length) return null;
-  const s = sessions[0];
-  const e = s.energy ?? 0;
-  const joy = s.enjoyment ?? 0;
+  // Average energy (and enjoyment) across every session logged that day —
+  // previously this only read sessions[0], so a second session on the same
+  // day silently had no effect on the displayed energy indicator.
+  const avgEnergy = sessions.reduce((a, s) => a + Number(s.energy ?? 0), 0) / sessions.length;
   const avgJoy = sessions.filter(s => s.enjoyment).reduce((a, s, _, arr) => a + s.enjoyment / arr.length, 0);
+  const energyLabel = Number.isInteger(avgEnergy)
+    ? (avgEnergy > 0 ? `+${avgEnergy}` : `${avgEnergy}`)
+    : (avgEnergy > 0 ? `+${avgEnergy.toFixed(1)}` : avgEnergy.toFixed(1));
   return (
     <View style={ind.wrap}>
-      <Text style={[ind.emoji, { opacity: energyOpacity(e) }]}>⚡</Text>
-      <Text style={[ind.val, { color: COLOURS.red, opacity: energyOpacity(e) }]}>{e > 0 ? `+${e}` : `${e}`}</Text>
+      <Text style={[ind.emoji, { opacity: energyOpacity(avgEnergy) }]}>⚡</Text>
+      <Text style={[ind.val, { color: COLOURS.red, opacity: energyOpacity(avgEnergy) }]}>{energyLabel}</Text>
       {avgJoy > 0 && (
         <>
           <Text style={[ind.emoji, { opacity: 0.25 + (avgJoy / 5) * 0.75, marginLeft: 3 }]}>❤️</Text>
