@@ -1037,6 +1037,19 @@ const SCALE_LABEL_TO_COF = {
   'F# melodic minor': 'F#m', 'C# melodic minor': 'C#m', 'G# melodic minor': 'G#m',
   'D# melodic minor': 'D#m', 'Bb melodic minor': 'Bbm', 'F melodic minor': 'Fm',
   'C melodic minor': 'Cm', 'G melodic minor': 'Gm', 'D melodic minor': 'Dm',
+  // Chromatic — no inherent major/minor quality, but named by tonic the same
+  // way major scales are, so grouped onto the outer (major) ring
+  'C chromatic': 'C', 'G chromatic': 'G', 'D chromatic': 'D', 'A chromatic': 'A',
+  'E chromatic': 'E', 'B chromatic': 'B', 'F# chromatic': 'F#', 'Db chromatic': 'Db',
+  'Ab chromatic': 'Ab', 'Eb chromatic': 'Eb', 'Bb chromatic': 'Bb', 'F chromatic': 'F',
+  // Dominant 7th arpeggios — also grouped onto the outer ring by tonic
+  'C dominant 7th': 'C', 'G dominant 7th': 'G', 'D dominant 7th': 'D', 'A dominant 7th': 'A',
+  'E dominant 7th': 'E', 'B dominant 7th': 'B', 'F# dominant 7th': 'F#', 'Db dominant 7th': 'Db',
+  'Ab dominant 7th': 'Ab', 'Eb dominant 7th': 'Eb', 'Bb dominant 7th': 'Bb', 'F dominant 7th': 'F',
+  // Diminished 7th arpeggios — symmetrical, but grouped by named tonic same as above
+  'C diminished 7th': 'C', 'G diminished 7th': 'G', 'D diminished 7th': 'D', 'A diminished 7th': 'A',
+  'E diminished 7th': 'E', 'B diminished 7th': 'B', 'F# diminished 7th': 'F#', 'Db diminished 7th': 'Db',
+  'Ab diminished 7th': 'Ab', 'Eb diminished 7th': 'Eb', 'Bb diminished 7th': 'Bb', 'F diminished 7th': 'F',
 };
 
 function amberForCount(n, max) {
