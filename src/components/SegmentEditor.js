@@ -173,8 +173,11 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
   const linkedComp    = compositions.find(c => c.id === segment.compositionId);
   const techLinked    = isTech && linkedComp;
   const accentColor   = isTech ? COLOURS.steel : COLOURS.navy;
-  // Exclude ambition pieces from session pickers — they're not active practice
-  const activeComps   = compositions.filter(c => c.status !== 'ambition');
+  // All pieces are selectable here, including ambition ones — a new piece
+  // has no logs yet, so it's always 'ambition' until the first session is
+  // logged against it. Filtering ambition out of this picker made new
+  // pieces impossible to ever log (chicken-and-egg).
+  const activeComps   = compositions;
 
   // Header display name: for tech, prefer linked comp title, then manual title
   const headerName = isTech
