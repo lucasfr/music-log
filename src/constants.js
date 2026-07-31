@@ -50,8 +50,12 @@ export const SCALE_OPTIONS = [
   'A major pentatonic', 'E major pentatonic',
   'A minor pentatonic', 'D minor pentatonic', 'E minor pentatonic',
   'G minor pentatonic', 'C minor pentatonic',
+  // ── Chromatic (all 12 starting notes, circle of 5ths) ────────────────────
+  'C chromatic', 'G chromatic', 'D chromatic', 'A chromatic', 'E chromatic',
+  'B chromatic', 'F# chromatic', 'Db chromatic', 'Ab chromatic',
+  'Eb chromatic', 'Bb chromatic', 'F chromatic',
   // ── Other ────────────────────────────────────────────────────────────────
-  'C chromatic', 'Whole tone', 'Diminished (octatonic)', 'Augmented',
+  'Whole tone', 'Diminished (octatonic)', 'Augmented',
   'Blues (A)', 'Blues (E)', 'Blues (G)',
 ];
 
