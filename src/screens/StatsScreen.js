@@ -6,7 +6,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName, scaleMotion, scaleOctaves, getLocalPref, setLocalPref, deriveStatusHistory } from '../utils';
+import { scaleName, scaleMotion, scaleOctaves, scaleInterval, getLocalPref, setLocalPref, deriveStatusHistory } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -1103,14 +1103,24 @@ const OCTAVE_FILTER_OPTIONS = [
   { key: 2, label: '2 oct' },
 ];
 
-// Parallel / Contrary / All and 1oct / 2oct / All filters for scale coverage
-// — lets Lucas isolate how much contrary-motion or 2-octave practice he's
-// actually logged, since both are specifically examined from around Grade 5–6.
-function ScaleCoverageFilters({ motionFilter, setMotionFilter, octaveFilter, setOctaveFilter }) {
+const INTERVAL_FILTER_OPTIONS = [
+  { key: 'all', label: 'All' },
+  { key: 'unison', label: 'Unison' },
+  { key: 'third', label: '3rds' },
+  { key: 'sixth', label: '6ths' },
+  { key: 'tenth', label: '10ths' },
+];
+
+// Parallel / Contrary / All, 1oct / 2oct / All, and interval filters for
+// scale coverage — lets Lucas isolate how much contrary-motion, 2-octave, or
+// double-interval (3rds/6ths/10ths) practice he's actually logged, since
+// these are specifically examined from around Grade 5–6.
+function ScaleCoverageFilters({ motionFilter, setMotionFilter, octaveFilter, setOctaveFilter, intervalFilter, setIntervalFilter }) {
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
       <PillToggle options={MOTION_FILTER_OPTIONS} value={motionFilter} onChange={setMotionFilter} />
       <PillToggle options={OCTAVE_FILTER_OPTIONS} value={octaveFilter} onChange={setOctaveFilter} />
+      <PillToggle options={INTERVAL_FILTER_OPTIONS} value={intervalFilter} onChange={setIntervalFilter} />
     </View>
   );
 }
@@ -1120,10 +1130,12 @@ function ScaleCoverage({ sessions }) {
   const [selected, setSelected] = useState(null);
   const [motionFilter, setMotionFilter] = useState('all'); // 'all' | 'parallel' | 'contrary'
   const [octaveFilter, setOctaveFilter] = useState('all'); // 'all' | 1 | 2
+  const [intervalFilter, setIntervalFilter] = useState('all'); // 'all' | 'unison' | 'third' | 'sixth' | 'tenth'
 
   function matchesFilters(l, seg) {
     if (motionFilter !== 'all' && scaleMotion(l) !== motionFilter) return false;
     if (octaveFilter !== 'all' && scaleOctaves(l, seg.octaves || 1) !== octaveFilter) return false;
+    if (intervalFilter !== 'all' && scaleInterval(l) !== intervalFilter) return false;
     return true;
   }
 
@@ -1191,7 +1203,7 @@ function ScaleCoverage({ sessions }) {
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
-      <ScaleCoverageFilters motionFilter={motionFilter} setMotionFilter={setMotionFilter} octaveFilter={octaveFilter} setOctaveFilter={setOctaveFilter} />
+      <ScaleCoverageFilters motionFilter={motionFilter} setMotionFilter={setMotionFilter} octaveFilter={octaveFilter} setOctaveFilter={setOctaveFilter} intervalFilter={intervalFilter} setIntervalFilter={setIntervalFilter} />
       {width > 0 && (
         <View style={{ position: 'relative', width: size, height: size }}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
