@@ -76,7 +76,7 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
   const start = started   || today;
   const end   = completed || today;
 
-  const clampedStart = Math.max(0, (start - minDate) / totalMs);
+  const clampedStart = Math.min(1, Math.max(0, (start - minDate) / totalMs));
   const clampedEnd   = Math.min(1, (end   - minDate) / totalMs);
   const barWidth     = Math.max(0.008, clampedEnd - clampedStart);
   const isOngoing    = !completed;
@@ -325,6 +325,13 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
       if (s) { min = Math.min(min, s); max = Math.max(max, s); }
       max = Math.max(max, e);
     });
+    // Always fold ‘today’ into the range. Compositions with no dateStarted
+    // are drawn anchored at today (see GanttBar) — without this, a library
+    // where every dated piece was completed a while ago could put today (and
+    // thus every undated piece) past maxDate, rendering them off-chart with
+    // no visible trace beyond the footnote below.
+    min = Math.min(min, today);
+    max = Math.max(max, today);
     const pad = 30 * 24 * 3600 * 1000;
     return { minDate: new Date(min - pad), maxDate: new Date(max + pad) };
   }, [datedPieces, today]);
@@ -565,7 +572,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
             backgroundColor: 'rgba(255,255,255,0.40)',
           }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>
-              💡 {undatedCount} piece{undatedCount !== 1 ? 's' : ''} without a start date won't appear on the chart. Add a date started in the Pieces screen.
+              💡 {undatedCount} piece{undatedCount !== 1 ? 's' : ''} without a start date show as a thin marker at today. Add a date started in the Pieces screen to place them properly.
             </Text>
           </View>
         )}
