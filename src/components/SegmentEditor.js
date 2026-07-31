@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
-import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS } from '../constants';
+import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS } from '../constants';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval } from '../utils';
 
 // ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
@@ -66,11 +66,12 @@ function ScalesPicker({ selected = [], onChange }) {
   }
 
   function toggleOctaves(scale) {
-    onChange(selected.map(s =>
-      scaleName(s) === scale
-        ? { scale, motion: scaleMotion(s), octaves: scaleOctaves(s) === 2 ? 1 : 2, interval: scaleInterval(s) }
-        : s
-    ));
+    onChange(selected.map(s => {
+      if (scaleName(s) !== scale) return s;
+      const idx = OCTAVE_OPTIONS.indexOf(scaleOctaves(s));
+      const next = OCTAVE_OPTIONS[(idx + 1) % OCTAVE_OPTIONS.length];
+      return { scale, motion: scaleMotion(s), octaves: next, interval: scaleInterval(s) };
+    }));
   }
 
   function cycleInterval(scale) {

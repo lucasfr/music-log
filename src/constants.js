@@ -54,10 +54,25 @@ export const SCALE_OPTIONS = [
   'C chromatic', 'G chromatic', 'D chromatic', 'A chromatic', 'E chromatic',
   'B chromatic', 'F# chromatic', 'Db chromatic', 'Ab chromatic',
   'Eb chromatic', 'Bb chromatic', 'F chromatic',
+  // ── Dominant 7th arpeggios (all 12 keys, circle of 5ths) ───────────────
+  'C dominant 7th', 'G dominant 7th', 'D dominant 7th', 'A dominant 7th',
+  'E dominant 7th', 'B dominant 7th', 'F# dominant 7th', 'Db dominant 7th',
+  'Ab dominant 7th', 'Eb dominant 7th', 'Bb dominant 7th', 'F dominant 7th',
+  // ── Diminished 7th arpeggios (all 12 keys — enharmonically symmetrical in
+  // groups of 3, but listed per key since that's how Kerrin will assign them)
+  'C diminished 7th', 'G diminished 7th', 'D diminished 7th', 'A diminished 7th',
+  'E diminished 7th', 'B diminished 7th', 'F# diminished 7th', 'Db diminished 7th',
+  'Ab diminished 7th', 'Eb diminished 7th', 'Bb diminished 7th', 'F diminished 7th',
   // ── Other ────────────────────────────────────────────────────────────────
   'Whole tone', 'Diminished (octatonic)', 'Augmented',
   'Blues (A)', 'Blues (E)', 'Blues (G)',
 ];
+
+// Octave range covered per scale/arpeggio entry — 1 and 2 are typical
+// through mid grades, extending to 3–4 for scales/arpeggios examined over
+// a wider range from around Grade 6–8. Cycles through in the ScalesPicker
+// octave badge; falls back to 1 for legacy entries with no octaves field.
+export const OCTAVE_OPTIONS = [1, 2, 3, 4];
 
 // Motion applies per-scale (see ScalesPicker) — 'parallel' is the default and
 // covers all pre-existing data where scales were stored as plain strings.
