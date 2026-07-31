@@ -1101,6 +1101,8 @@ const OCTAVE_FILTER_OPTIONS = [
   { key: 'all', label: 'All' },
   { key: 1, label: '1 oct' },
   { key: 2, label: '2 oct' },
+  { key: 3, label: '3 oct' },
+  { key: 4, label: '4 oct' },
 ];
 
 const INTERVAL_FILTER_OPTIONS = [
