@@ -47,6 +47,10 @@ export function scaleMotion(entry) {
   return typeof entry === 'string' ? 'parallel' : (entry.motion || 'parallel');
 }
 
+export function scaleInterval(entry) {
+  return typeof entry === 'string' ? 'unison' : (entry.interval || 'unison');
+}
+
 export function scaleOctaves(entry, fallbackOctaves = 1) {
   if (typeof entry === 'string') return fallbackOctaves;
   return entry.octaves || fallbackOctaves;
@@ -55,9 +59,11 @@ export function scaleOctaves(entry, fallbackOctaves = 1) {
 export function formatScaleEntry(entry, fallbackOctaves = 1) {
   const name = scaleName(entry);
   const motion = scaleMotion(entry);
+  const interval = scaleInterval(entry);
   const octaves = scaleOctaves(entry, fallbackOctaves);
   const attrs = [`${octaves}oct`];
   if (motion === 'contrary') attrs.push('contrary');
+  if (interval !== 'unison') attrs.push(interval === 'third' ? '3rds' : interval === 'sixth' ? '6ths' : '10ths');
   return `${name} (${attrs.join(', ')})`;
 }
 

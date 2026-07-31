@@ -67,6 +67,16 @@ export const MOTION_LABELS = {
   contrary: 'Contrary',
 };
 
+// Interval apart — 'unison' is the default (hands playing the same notes)
+// and covers all pre-existing data. Cycles through in the ScalesPicker chip.
+export const INTERVAL_OPTIONS = ['unison', 'third', 'sixth', 'tenth'];
+export const INTERVAL_LABELS = {
+  unison: 'Unison',
+  third: 'In 3rds',
+  sixth: 'In 6ths',
+  tenth: 'In 10ths',
+};
+
 export const CHALLENGE_TAGS = [
   'hand-coordination',
   'left-hand',

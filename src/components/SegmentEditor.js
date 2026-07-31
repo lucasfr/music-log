@@ -4,8 +4,8 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
-import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS } from '../constants';
-import { scaleName, scaleMotion, scaleOctaves } from '../utils';
+import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS } from '../constants';
+import { scaleName, scaleMotion, scaleOctaves, scaleInterval } from '../utils';
 
 // ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
 
@@ -53,14 +53,14 @@ function ScalesPicker({ selected = [], onChange }) {
   function toggle(scale) {
     onChange(selectedNames.includes(scale)
       ? selected.filter(s => scaleName(s) !== scale)
-      : [...selected, { scale, motion: 'parallel', octaves: 1 }]
+      : [...selected, { scale, motion: 'parallel', octaves: 1, interval: 'unison' }]
     );
   }
 
   function toggleMotion(scale) {
     onChange(selected.map(s =>
       scaleName(s) === scale
-        ? { scale, motion: scaleMotion(s) === 'contrary' ? 'parallel' : 'contrary', octaves: scaleOctaves(s) }
+        ? { scale, motion: scaleMotion(s) === 'contrary' ? 'parallel' : 'contrary', octaves: scaleOctaves(s), interval: scaleInterval(s) }
         : s
     ));
   }
@@ -68,20 +68,30 @@ function ScalesPicker({ selected = [], onChange }) {
   function toggleOctaves(scale) {
     onChange(selected.map(s =>
       scaleName(s) === scale
-        ? { scale, motion: scaleMotion(s), octaves: scaleOctaves(s) === 2 ? 1 : 2 }
+        ? { scale, motion: scaleMotion(s), octaves: scaleOctaves(s) === 2 ? 1 : 2, interval: scaleInterval(s) }
         : s
     ));
   }
 
+  function cycleInterval(scale) {
+    onChange(selected.map(s => {
+      if (scaleName(s) !== scale) return s;
+      const idx = INTERVAL_OPTIONS.indexOf(scaleInterval(s));
+      const next = INTERVAL_OPTIONS[(idx + 1) % INTERVAL_OPTIONS.length];
+      return { scale, motion: scaleMotion(s), octaves: scaleOctaves(s), interval: next };
+    }));
+  }
+
   return (
     <View>
-      {/* Selected chips — tap the name to toggle contrary/parallel motion, tap the octave badge to toggle 1/2 octaves, ✕ to remove */}
+      {/* Selected chips — tap the name to toggle contrary/parallel motion, tap the interval badge to cycle unison/3rds/6ths/10ths, tap the octave badge to toggle 1/2 octaves, ✕ to remove */}
       {selected.length > 0 && (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
           {selected.map(s => {
             const name = scaleName(s);
             const isContrary = scaleMotion(s) === 'contrary';
             const octaves = scaleOctaves(s);
+            const interval = scaleInterval(s);
             return (
               <View
                 key={name}
@@ -96,6 +106,13 @@ function ScalesPicker({ selected = [], onChange }) {
                   {isContrary && (
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.danger }}>⇄ contrary</Text>
                   )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => cycleInterval(name)}
+                  activeOpacity={0.75}
+                  style={{ paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
+                >
+                  <Text style={{ fontFamily: interval !== 'unison' ? 'Lato-Bold' : 'Lato', fontSize: interval !== 'unison' ? 10 : 10, color: interval !== 'unison' ? COLOURS.tealBorder : COLOURS.textDim }}>{INTERVAL_LABELS[interval]}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggleOctaves(name)}
