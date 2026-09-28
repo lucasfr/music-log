@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -10,6 +10,45 @@ import { useKeepAwake } from '../utils/useKeepAwake';
 import { usePracticeTimer } from '../utils/usePracticeTimer';
 import { scheduleSegmentEndNotification, cancelScheduledNotification } from '../utils/segmentNotifications';
 import { MetronomeControl } from './MetronomeControl';
+
+// Isolated from PracticeTimerScreen for the same reason MetronomeControl is
+// memoized against it: the countdown ring's remaining-time display forces
+// PracticeTimerScreen to re-render every 250ms (usePracticeTimer's own
+// internal UI-refresh tick), and that 250ms cadence doesn't divide evenly
+// into most bpm intervals — so periodically a metronome tick's setTimeout
+// callback lands right when the parent is also re-rendering and competing
+// for the same JS thread, causing exactly the kind of intermittent (not
+// immediate) irregularity reported. Memoizing MetronomeControl itself
+// stops IT from re-rendering, but the parent's own render pass — walking
+// through creating this section's elements — still costs real JS-thread
+// time every 250ms unless this section is memoized too, with props that
+// stay referentially stable across pure countdown ticks.
+const MetronomeSection = React.memo(function MetronomeSection({ showMetronome, onToggle, composition, segmentKey }) {
+  return (
+    <>
+      <TouchableOpacity
+        onPress={onToggle}
+        activeOpacity={0.75}
+        style={{
+          paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.pill,
+          backgroundColor: showMetronome ? COLOURS.navy : 'transparent',
+          borderWidth: showMetronome ? 0 : 1, borderColor: 'rgba(9,99,126,0.35)',
+          marginBottom: showMetronome ? 14 : 0,
+        }}
+      >
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: showMetronome ? '#fff' : COLOURS.steel }}>
+          Metronome
+        </Text>
+      </TouchableOpacity>
+
+      {showMetronome && (
+        <View style={{ width: '100%', maxWidth: 320 }}>
+          <MetronomeControl key={segmentKey} composition={composition} />
+        </View>
+      )}
+    </>
+  );
+});
 
 const RING_SIZE = 220;
 const RING_R = 92;
@@ -32,6 +71,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
   const timer = usePracticeTimer(initialSegments);
   useKeepAwake(visible && timer.isRunning);
   const [showMetronome, setShowMetronome] = useState(false);
+  const toggleMetronome = useCallback(() => setShowMetronome(s => !s), []);
 
   // Bumped on every play/pause/skip/+minutes so the notification effect
   // below knows to reschedule against the new deadline — deliberately not
@@ -180,26 +220,12 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
               </Text>
             )}
 
-            <TouchableOpacity
-              onPress={() => setShowMetronome(s => !s)}
-              activeOpacity={0.75}
-              style={{
-                paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.pill,
-                backgroundColor: showMetronome ? COLOURS.navy : 'transparent',
-                borderWidth: showMetronome ? 0 : 1, borderColor: 'rgba(9,99,126,0.35)',
-                marginBottom: showMetronome ? 14 : 0,
-              }}
-            >
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: showMetronome ? '#fff' : COLOURS.steel }}>
-                Metronome
-              </Text>
-            </TouchableOpacity>
-
-            {showMetronome && (
-              <View style={{ width: '100%', maxWidth: 320 }}>
-                <MetronomeControl key={timer.currentIndex} composition={linkedComposition} />
-              </View>
-            )}
+            <MetronomeSection
+              showMetronome={showMetronome}
+              onToggle={toggleMetronome}
+              composition={linkedComposition}
+              segmentKey={timer.currentIndex}
+            />
           </ScrollView>
         </SafeAreaView>
       </View>
