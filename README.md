@@ -5,6 +5,7 @@
 [![Built with Expo](https://img.shields.io/badge/Expo-54-000020?logo=expo)](https://expo.dev)
 [![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react)](https://reactnative.dev)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://music-log.netlify.app)
+[![Version](https://img.shields.io/badge/version-1.1.0-088395)](./CHANGELOG.md)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
 ---
@@ -13,7 +14,7 @@
 
 music.log is a practice journal built for adult piano learners. It replaces free-text notes with structured session logs — segmented by technique work and repertoire, tagged with challenges and progress markers, and linked to a composition library that tracks status, grade, teacher notes, and full session history per piece.
 
-It runs as an installable PWA in any browser and as a native iOS/Android app via Expo. All data is stored locally — IndexedDB on web, SQLite on native — with no account or backend required.
+It runs as an installable PWA in any browser and as a native iOS/Android app via Expo. All data is stored locally — IndexedDB on web, SQLite on native — with no account required by default; optional Supabase sync is available for keeping data in step across devices.
 
 ---
 
@@ -23,6 +24,9 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 📅 **Calendar** — monthly grid with practice and lesson markers, month stats (sessions, lessons, minutes, avg energy), streak counter, and a day-detail panel on desktop
 - 📖 **History** — chronological feed of all sessions and lessons, fully expanded inline with complete segment detail, wins, and next-focus notes
 - 🎓 **Lessons** — log lessons separately with teacher, duration, per-piece feedback, assignments, overall notes, wins, and focus for next time
+- ⏱️ **Practice timer** — pomodoro-style segmented sessions: build a plan of technique/repertoire segments (each with its own minutes dial), confirm and collapse each one as you set it up, then run through them with a countdown ring, pause/skip/+5min controls, and automatic session logging when you finish
+- 🥁 **Metronome** — built into the timer screen: adjustable tempo (tap ±5 / hold ±1, named tempo markings from Largo to Presto), time signatures from 2/4 to 12/8 (compound meters felt in their conventional main pulses, not literal numerator), quarter-through-16th-note subdivisions, and a "use piece tempo" shortcut that reads a linked library piece's stored tempo/time signature. Runs on a real audio-engine clock (react-native-audio-api) rather than JS timers, for steady timing independent of anything else happening in the app
+- 🔄 **Optional cloud sync** — push/pull sessions, lessons, and compositions to a Supabase project of your own, with GitHub or magic-link sign-in; works the same on web and native
 - 🎼 **Segment logging** — sessions split into technique segments (Hanon, Scales, Arpeggios, Sight-reading) and repertoire segments, each with notes, felt difficulty, challenge tags, and progress tags
 - 🎹 **Scale & arpeggio detail tracking** — scales/arpeggios tracked individually with parallel/contrary motion, unison/3rds/6ths/10ths interval apart, and 1–4 octaves per entry, backward-compatible with older plain-string entries. Catalogue covers major/natural/harmonic/melodic minor, modes, pentatonic, chromatic (all 12 keys), whole tone, diminished, augmented, blues, and dominant/diminished 7th arpeggios (all 12 keys)
 - 🗂️ **Composition library** — per-piece tracking of status, 🎹 difficulty, keys, time signatures, grade, arrangement, collection, year, tags, dates, teacher notes, study notes, and session history
@@ -31,7 +35,7 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🗓️ **Timeline** — Gantt-style view of the composition library over time, coloured by status history, with a per-piece detail panel (stage history, sessions, time logged) and status filters
 - 🖥️ **Desktop two-column layout** — sidebar navigation, inline log forms and detail panels, no modals
 - 📤 **JSON export** — share any session as structured JSON via native share sheet or browser download
-- 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; no account or network required
+- 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; works fully without an account or network, with sync as an opt-in extra
 - 🌐 **PWA-ready** — installable from any browser including iOS Safari, service worker caching, Netlify deploy
 
 ---
@@ -58,20 +62,30 @@ music-log/
     ├── utils.js                    # uid(), fmtDate(), confirmDelete(), scale motion/octave/interval helpers, local prefs
     ├── theme/
     │   └── index.js                # Colour tokens, radius, sizes
+    ├── context/
+    │   └── NavScrollContext.js     # Scroll-aware collapse state for the floating tab pill
+    ├── lib/
+    │   └── supabase.js             # Supabase client + credential/session storage (AsyncStorage native, localStorage web)
     ├── db/
     │   ├── index.js                # SQLite (native) + IndexedDB (web) data layer
-    │   └── hooks.js                # useSessions, useCompositions, useLessons
+    │   ├── hooks.js                # useSessions, useCompositions, useLessons — local save/load + auto push/pull sync
+    │   └── sync.js                 # Supabase push/pull/merge — safe no-ops when not signed in
     ├── components/
     │   ├── Background.js           # Dot-grid SVG background
     │   ├── UI.js                   # GlassCard, Btn, SectionTitle, StatusPill, etc.
     │   ├── Form.js                 # TextF, NumberF, SelectF, DatePickerF, ZeldaBar
-    │   ├── FAB.js                  # Shared floating action button (practice + lesson)
+    │   ├── FAB.js                  # Shared floating action button (practice + lesson + timer)
+    │   ├── CustomTabBar.js         # Floating pill nav bar with scroll-aware collapse
     │   ├── Sidebar.js              # Desktop sidebar navigation
     │   ├── SegmentEditor.js        # Technique / repertoire segment editor
     │   ├── LogModal.js             # Session log form (pageSheet modal or inline)
     │   ├── LessonModal.js          # Lesson log form (pageSheet modal or inline)
     │   ├── SessionDetailModal.js   # Session detail with export + delete (mobile)
-    │   └── LessonDetailModal.js    # Lesson detail with export + delete (mobile)
+    │   ├── LessonDetailModal.js    # Lesson detail with export + delete (mobile)
+    │   ├── TimerSetupModal.js      # Build a practice-timer plan: add/confirm/collapse segments
+    │   ├── PracticeTimerScreen.js  # Countdown ring, pause/skip/+5min, metronome toggle
+    │   ├── MetronomeControl.js     # Tempo/time-sig/subdivision metronome, audio-engine-clock scheduling
+    │   └── MinutesDial.js          # Drag-to-set minutes dial used in the timer setup segments
     ├── screens/
     │   ├── HomeScreen.js           # Journal feed + today summary + FAB
     │   ├── CalendarScreen.js       # Monthly calendar with day-detail panel
@@ -79,12 +93,19 @@ music-log/
     │   ├── CompositionsScreen.js   # Composition library with full template
     │   ├── StatsScreen.js          # Overview stats, charts, library breakdown
     │   ├── TimelineScreen.js       # Gantt-style composition timeline with status history
-    │   ├── SettingsScreen.js       # App settings
+    │   ├── SettingsScreen.js       # App settings + Supabase sync setup/sign-in
     │   ├── AboutScreen.js          # About screen
     │   ├── OnboardingScreen.js     # First-run onboarding
     │   └── LogScreen.js            # Standalone log screen (mobile)
     └── utils/
-        └── export.js               # JSON export: Blob (web) / share sheet (native)
+        ├── export.js                # JSON export: Blob (web) / share sheet (native)
+        ├── usePracticeTimer.js      # Segment timer engine: real-timestamp elapsed time, subscribeTick display hook
+        ├── metronomeSounds.js       # Embedded click samples + base64→ArrayBuffer decode
+        ├── chime.js                 # Segment-end / session-end chime
+        ├── dialFeedback.js           # Haptic + tick sound for the minutes dial
+        ├── dialTickSound.js          # Embedded tick sample for the minutes dial
+        ├── useKeepAwake.js           # Keeps the screen on while the timer is running
+        └── segmentNotifications.js   # Local notification when a segment ends (native)
 ```
 
 ---
@@ -126,6 +147,10 @@ npx serve dist         # preview locally
 
 Connect the repo to Netlify — it will pick up `netlify.toml` automatically and run `npm run build:web` on every push to `main`.
 
+### Optional: cloud sync
+
+music.log works fully offline with no setup. To sync across devices, create a free [Supabase](https://supabase.com) project, then enter its Project URL and anon key in **Settings → Sync** and sign in (GitHub or email magic link). Nothing is sent anywhere until you do this.
+
 ---
 
 ## 📦 Dependencies
@@ -138,11 +163,18 @@ Connect the repo to Netlify — it will pick up `netlify.toml` automatically and
 | `expo-font` | ~13 | Custom font loading |
 | `expo-file-system` | ~18 | Temp file write for JSON export (native) |
 | `expo-sharing` | ~12 | Native share sheet for JSON export |
+| `expo-audio` | ~1.1 | Dial-drag and segment-change tick sounds |
+| `expo-haptics` | ~15 | Haptic feedback on the metronome and minutes dial |
+| `expo-keep-awake` | ~15 | Keeps the screen on during a practice timer session |
+| `expo-notifications` | ~0.32 | Local notification when a segment ends (native) |
+| `react-native-audio-api` | ^0.13 | Metronome's audio-engine-clock scheduling (real Web Audio API on native + web) |
 | `react-native-web` | ~0.20 | Web render target |
-| `react-native-svg` | ~15 | Circle of fifths, charts, dot-grid background |
+| `react-native-svg` | ~15 | Circle of fifths, charts, dot-grid background, metronome/dial rings |
 | `@expo/vector-icons` | ~14 | Ionicons used throughout UI |
 | `@react-navigation/bottom-tabs` | ^7 | Tab bar navigation |
 | `@react-native-picker/picker` | ~2.11 | Native select inputs |
+| `@react-native-async-storage/async-storage` | ^2.2 | Supabase credential/session storage (native) |
+| `@supabase/supabase-js` | ^2 | Optional cloud sync client |
 | `@expo-google-fonts/cormorant-garamond` | ~0.3 | Serif display font |
 | `@expo-google-fonts/lato` | ~0.3 | Body and UI font |
 
