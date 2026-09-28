@@ -1,12 +1,28 @@
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { createAudioPlayer } from 'expo-audio';
+import { DIAL_TICK_URI } from './dialTickSound';
 
 // A light "click" for each notch the dial passes through while dragging —
 // distinct from chime.js's session-completion cue, which is a separate,
-// more noticeable event. Native uses a selection haptic (the same subtle
-// tick iOS uses for its own picker wheels); web reuses one AudioContext
-// across ticks rather than creating a new one per call, since browsers can
-// throttle/refuse rapid-fire context creation.
+// more noticeable event. Native gets both a selection haptic (the same
+// subtle tick iOS uses for its own picker wheels) and an audible click;
+// web gets the click only, reusing one AudioContext across ticks rather
+// than creating a new one per call, since browsers can throttle/refuse
+// rapid-fire context creation.
+
+let nativePlayer = null;
+function getNativePlayer() {
+  if (!nativePlayer) {
+    try {
+      nativePlayer = createAudioPlayer({ uri: DIAL_TICK_URI });
+    } catch (e) {
+      nativePlayer = false; // tried and failed — don't retry every tick
+    }
+  }
+  return nativePlayer || null;
+}
+
 let audioCtx = null;
 function getAudioCtx() {
   if (typeof window === 'undefined') return null;
@@ -19,6 +35,16 @@ function getAudioCtx() {
 export function dialTick() {
   if (Platform.OS !== 'web') {
     Haptics.selectionAsync().catch(() => {});
+    const player = getNativePlayer();
+    if (player) {
+      try {
+        player.seekTo(0);
+        player.play();
+      } catch (e) {
+        // Playback hiccup — the haptic above already fired, so the drag
+        // still feels responsive even if the click itself drops a beat.
+      }
+    }
     return;
   }
   const ctx = getAudioCtx();
