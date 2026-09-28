@@ -44,7 +44,8 @@
     "plugins": [
       "expo-sqlite",
       "expo-font",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-audio"
     ]
   }
 }
