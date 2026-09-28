@@ -1612,7 +1612,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         {/* Stat tiles */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24, alignItems: 'stretch' }}>
           {statItems.map((item, i) => (
-            <View key={i} style={{ flexBasis: '11%', flexGrow: 1, minWidth: isDesktop ? 0 : '22%' }}>
+            <View key={i} style={{ flexBasis: '11%', flexGrow: 1, minWidth: isDesktop ? 0 : '30%' }}>
               <BlurView intensity={50} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadowMd, shadowOffset:{width:0,height:4}, shadowOpacity:1, shadowRadius:16, elevation:4, flex: 1 }}>
                 <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 16, paddingHorizontal: 10, alignItems: 'center', flex: 1, justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.6)' }}>
                   <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8 }}>{item.emoji}</Text>
@@ -1688,7 +1688,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                 intensity={44}
                 tint="light"
                 style={{
-                  flex: 1, borderRadius: RADIUS.md, overflow: 'hidden',
+                  flexGrow: 1, minWidth: isDesktop ? 100 : '30%', borderRadius: RADIUS.md, overflow: 'hidden',
                   shadowColor: sc.border || COLOURS.accentMid,
                   shadowOffset: { width: 0, height: 3 },
                   shadowOpacity: 0.7, shadowRadius: 12, elevation: 3,
