@@ -5,7 +5,7 @@ import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { AudioContext } from 'react-native-audio-api';
 import { COLOURS, RADIUS } from '../theme';
-import { ensureClickFiles } from '../utils/metronomeSounds';
+import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
 
 // Compound meters are conventionally felt in fewer main pulses than their
 // numerator — 6/8 as 2 (each a dotted quarter), 12/8 as 4 — rather than
@@ -213,10 +213,11 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const SCHEDULER_INTERVAL_MS = 30;
 
   // Loads the AudioContext and decodes both click buffers exactly once,
-  // reused for the life of this component. react-native-audio-api's
-  // decodeAudioDataSource needs a real file on disk, not a data URI, so
-  // the actual WAV bytes are written to the cache directory once by
-  // ensureClickFiles() (see metronomeSounds.js) and decoded from there.
+  // reused for the life of this component. decodeAudioData accepts a
+  // plain ArrayBuffer directly on both web and native — no filesystem
+  // step needed at all, which is what the earlier expo-file-system-based
+  // version got wrong (and which fails outright on web, since that API
+  // isn't implemented there).
   function ensureAudioReady() {
     if (!readyPromiseRef.current) {
       readyPromiseRef.current = (async () => {
@@ -224,10 +225,9 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
           const ctx = audioCtxRef.current;
           if (ctx.state === 'suspended') await ctx.resume();
-          const { accentPath, subPath } = await ensureClickFiles();
           const [accent, sub] = await Promise.all([
-            ctx.decodeAudioDataSource(accentPath),
-            ctx.decodeAudioDataSource(subPath),
+            ctx.decodeAudioData(base64ToArrayBuffer(ACCENT_CLICK_B64)),
+            ctx.decodeAudioData(base64ToArrayBuffer(SUB_CLICK_B64)),
           ]);
           buffersRef.current = { accent, sub };
           return ctx;
