@@ -190,6 +190,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const [playing, setPlaying] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [audioError, setAudioError] = useState(null);
 
   const mainBeats = mainBeatsFor(sig);
   const dotsRef = useRef(null);
@@ -219,16 +220,27 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   function ensureAudioReady() {
     if (!readyPromiseRef.current) {
       readyPromiseRef.current = (async () => {
-        if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
-        const ctx = audioCtxRef.current;
-        if (ctx.state === 'suspended') await ctx.resume();
-        const { accentPath, subPath } = await ensureClickFiles();
-        const [accent, sub] = await Promise.all([
-          ctx.decodeAudioDataSource(accentPath),
-          ctx.decodeAudioDataSource(subPath),
-        ]);
-        buffersRef.current = { accent, sub };
-        return ctx;
+        try {
+          if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+          const ctx = audioCtxRef.current;
+          if (ctx.state === 'suspended') await ctx.resume();
+          const { accentPath, subPath } = await ensureClickFiles();
+          const [accent, sub] = await Promise.all([
+            ctx.decodeAudioDataSource(accentPath),
+            ctx.decodeAudioDataSource(subPath),
+          ]);
+          buffersRef.current = { accent, sub };
+          return ctx;
+        } catch (e) {
+          // Surfaced in the UI below rather than failing silently — a
+          // rejected promise here previously meant nothing ever scheduled
+          // and nothing ever explained why, on both the audio and visual
+          // side, since the visual loop also waits on this succeeding.
+          console.error('[Metronome] audio init failed:', e);
+          setAudioError(String(e?.message || e));
+          readyPromiseRef.current = null; // allow retrying on next play press
+          throw e;
+        }
       })();
     }
     return readyPromiseRef.current;
@@ -275,7 +287,12 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   // file couldn't fully remove: the audio engine's clock times the click,
   // not JS.
   async function startAudioScheduler(stepSec, mySessionId, currentSubdivision, currentMainBeats) {
-    const ctx = await ensureAudioReady();
+    let ctx;
+    try {
+      ctx = await ensureAudioReady();
+    } catch (e) {
+      return; // already logged and surfaced by ensureAudioReady
+    }
     if (sessionIdRef.current !== mySessionId) return; // superseded while loading
 
     startTimeRef.current = ctx.currentTime + 0.05;
@@ -284,10 +301,16 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
 
     function fillQueue() {
       if (sessionIdRef.current !== mySessionId) return;
-      while (nextNoteTimeRef.current < ctx.currentTime + LOOKAHEAD_SEC) {
-        scheduleClickAt(ctx, nextNoteTimeRef.current, stepIndexRef.current, currentSubdivision, currentMainBeats);
-        stepIndexRef.current += 1;
-        nextNoteTimeRef.current += stepSec;
+      try {
+        while (nextNoteTimeRef.current < ctx.currentTime + LOOKAHEAD_SEC) {
+          scheduleClickAt(ctx, nextNoteTimeRef.current, stepIndexRef.current, currentSubdivision, currentMainBeats);
+          stepIndexRef.current += 1;
+          nextNoteTimeRef.current += stepSec;
+        }
+      } catch (e) {
+        console.error('[Metronome] scheduling failed:', e);
+        setAudioError(String(e?.message || e));
+        return;
       }
       schedulerTimerRef.current = setTimeout(fillQueue, SCHEDULER_INTERVAL_MS);
     }
@@ -353,6 +376,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     dotsRef.current?.reset();
 
     if (playing) {
+      setAudioError(null);
       startAudioScheduler((60 / bpm) / subdivision, mySessionId, subdivision, mainBeats);
     }
 
@@ -417,6 +441,12 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           </TouchableOpacity>
         ) : null}
       </View>
+
+      {audioError ? (
+        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: '#B3261E', marginBottom: 8, textAlign: 'center' }}>
+          Audio engine failed to start: {audioError}
+        </Text>
+      ) : null}
 
       <BeatDotsRow ref={dotsRef} mainBeats={mainBeats} />
 
