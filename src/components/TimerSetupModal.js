@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { GlassCard, SectionTitle, Btn } from './UI';
-import { Field, TextF, NumberF, SelectF } from './Form';
+import { Field, TextF, SelectF } from './Form';
+import { MinutesDial } from './MinutesDial';
 import { TECH_GROUPS } from '../constants';
 import { uid } from '../utils';
 
@@ -72,11 +73,8 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
         </View>
       )}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, flex: 1 }}>Minutes</Text>
-        <View style={{ width: 90 }}>
-          <NumberF value={segment.plannedMinutes || ''} onChange={v => field('plannedMinutes', v.replace(/[^0-9]/g, ''))} placeholder="0" />
-        </View>
+      <View style={{ alignItems: 'center', marginTop: 4 }}>
+        <MinutesDial value={segment.plannedMinutes || 10} onChange={v => field('plannedMinutes', v)} />
       </View>
     </View>
   );
@@ -86,7 +84,7 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
   const [draftSegments, setDraftSegments] = useState([]);
 
   function addSegment(type) {
-    setDraftSegments(s => [...s, { id: uid(), type, title: '', compositionId: '', plannedMinutes: '' }]);
+    setDraftSegments(s => [...s, { id: uid(), type, title: '', compositionId: '', plannedMinutes: 10 }]);
   }
   function updateSegment(id, val) { setDraftSegments(s => s.map(seg => (seg.id === id ? val : seg))); }
   function removeSegment(id) { setDraftSegments(s => s.filter(seg => seg.id !== id)); }
