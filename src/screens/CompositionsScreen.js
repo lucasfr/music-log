@@ -814,7 +814,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
         activeOpacity={0.85}
         style={{
           position: 'absolute',
-          bottom: Platform.OS === 'web' ? 24 : Platform.OS === 'ios' ? 140 : 120,
+          bottom: Platform.OS === 'web' ? 100 : Platform.OS === 'ios' ? 140 : 120,
           right: 20,
           width: 58, height: 58, borderRadius: 29,
           backgroundColor: 'rgba(255,255,255,0.92)',
