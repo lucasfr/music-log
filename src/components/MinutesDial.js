@@ -6,7 +6,15 @@ import { dialTick } from '../utils/dialFeedback';
 
 const SIZE = 216;
 const STROKE = 16;
-const R = (SIZE - STROKE) / 2;
+const KNOB_R = STROKE / 2 + 4;
+// The knob's radius (STROKE/2 + 4) is larger than the ring's own half-
+// stroke, so it overhangs the ring's outer edge slightly. R used to be
+// (SIZE - STROKE) / 2, which put the ring's outer edge exactly on the
+// box's boundary with zero margin — so that overhang got clipped by the
+// container. Pulling the radius in by the knob's excess (plus a small
+// buffer) keeps the same 216px footprint but leaves room for the knob to
+// sit fully inside it at every angle.
+const R = SIZE / 2 - KNOB_R - 2;
 const CENTER = SIZE / 2;
 const CIRC = 2 * Math.PI * R;
 
@@ -95,7 +103,7 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
         <Circle
           cx={CENTER + R * Math.cos(knobRad)}
           cy={CENTER + R * Math.sin(knobRad)}
-          r={STROKE / 2 + 4}
+          r={KNOB_R}
           fill="#ffffff" stroke={COLOURS.navy} strokeWidth={2}
         />
       </Svg>
