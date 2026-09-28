@@ -115,21 +115,24 @@ const BeatDotsRow = forwardRef(function BeatDotsRow({ mainBeats }, ref) {
 
   useImperativeHandle(ref, () => ({
     pulse(index, flashMs) {
+      // Never call .setValue() directly on these once they've been driven
+      // by useNativeDriver — mixing JS-side setValue with native-driven
+      // Animated.timing desyncs the value from its native counterpart
+      // after the first animation runs. Every change, including the
+      // instant snap to 1, goes through Animated.timing instead.
       animsRef.current.forEach((v, i) => {
         if (i !== index) {
-          v.stopAnimation();
-          v.setValue(0);
+          Animated.timing(v, { toValue: 0, duration: 0, useNativeDriver: true }).start();
         }
       });
-      const v = animsRef.current[index];
-      v.stopAnimation();
-      v.setValue(1);
-      Animated.timing(v, { toValue: 0, duration: flashMs, useNativeDriver: true }).start();
+      Animated.sequence([
+        Animated.timing(animsRef.current[index], { toValue: 1, duration: 0, useNativeDriver: true }),
+        Animated.timing(animsRef.current[index], { toValue: 0, duration: flashMs, useNativeDriver: true }),
+      ]).start();
     },
     reset() {
       animsRef.current.forEach(v => {
-        v.stopAnimation();
-        v.setValue(0);
+        Animated.timing(v, { toValue: 0, duration: 0, useNativeDriver: true }).start();
       });
     },
   }));
