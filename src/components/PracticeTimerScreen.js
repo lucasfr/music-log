@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 import Svg, { Circle } from 'react-native-svg';
 import { COLOURS, RADIUS } from '../theme';
+import { AppBackground } from './Background';
 import { playChime } from '../utils/chime';
 import { useKeepAwake } from '../utils/useKeepAwake';
 import { usePracticeTimer } from '../utils/usePracticeTimer';
@@ -100,13 +102,16 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => timer.finishNow()}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
+        <AppBackground />
         <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 8 }}>
-            <TouchableOpacity onPress={() => timer.finishNow()} activeOpacity={0.75}
-              style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.textDim, fontSize: 13 }}>Finish</Text>
-            </TouchableOpacity>
-          </View>
+          <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10, backgroundColor: COLOURS.glass }}>
+              <TouchableOpacity onPress={() => timer.finishNow()} activeOpacity={0.75}
+                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.textDim, fontSize: 13 }}>Finish</Text>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
 
           <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 20 }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 4 }}>

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { createAudioPlayer } from 'expo-audio';
@@ -240,7 +241,8 @@ export function MetronomeControl({ composition }) {
   const currentTempoName = tempoName(bpm);
 
   return (
-    <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 14, borderWidth: 0.5, borderColor: 'rgba(9,99,126,0.15)' }}>
+    <BlurView intensity={44} tint="light" style={{ borderRadius: 16, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 18, elevation: 4 }}>
+    <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>metronome</Text>
@@ -360,5 +362,6 @@ export function MetronomeControl({ composition }) {
         </TouchableOpacity>
       </View>
     </View>
+    </BlurView>
   );
 }
