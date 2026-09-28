@@ -13,6 +13,8 @@ import { fmtDate, confirmDelete, formatScaleEntry } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
+import { TimerSetupModal } from '../components/TimerSetupModal';
+import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
@@ -524,6 +526,9 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [detailLesson,    setDetailLesson]    = useState(null);
   const [rightPanel,      setRightPanel]      = useState(null); // 'detail-session' | 'detail-lesson' | 'log-session' | 'log-lesson'
   const [showAbout,       setShowAbout]       = useState(false);
+  const [timerSetupVisible, setTimerSetupVisible] = useState(false);
+  const [timerSegments,     setTimerSegments]     = useState(null); // non-null while a timed session is running
+  const [sessionKey,        setSessionKey]        = useState(0);   // bumped per session so PracticeTimerScreen remounts cleanly
   const onNavScroll = useNavScrollHandler(); // must be called unconditionally, before the isDesktop early return below
 
   function openSession(s)  { if (isDesktop) { setDetailSession(s); setDetailLesson(null); setRightPanel('detail-session'); } else setDetailSession(s); }
@@ -537,6 +542,37 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     else { setLessonModalLesson(lesson || null); setLessonModalDate(date || today); }
   }
   function closeRight() { setRightPanel(null); setDetailSession(null); setDetailLesson(null); setLogModalDate(null); setLogModalSession(null); setLessonModalDate(null); setLessonModalLesson(null); }
+
+  function handleTimerStart(segments) {
+    setTimerSegments(segments);
+    setSessionKey(k => k + 1);
+    setTimerSetupVisible(false);
+  }
+
+  function handleTimerCancel() {
+    const discard = () => setTimerSegments(null);
+    if (Platform.OS === 'web') {
+      if (window.confirm('End this timed session? Progress on the current segment will be lost.')) discard();
+    } else {
+      Alert.alert('End session?', 'Progress on the current segment will be lost.', [
+        { text: 'Keep going', style: 'cancel' },
+        { text: 'End session', style: 'destructive', onPress: discard },
+      ]);
+    }
+  }
+
+  function handleTimerFinish(timer) {
+    const prefilled = timer.segments.map((s, i) => ({
+      id: s.id,
+      type: s.type,
+      title: s.title || '',
+      compositionId: s.compositionId || '',
+      duration: timer.actualMinutesFor(i),
+      notes: '', challenges: [], progress: [],
+    }));
+    setTimerSegments(null);
+    openLogSession(today, { date: today, segments: prefilled });
+  }
 
   const todaySessions = useMemo(() => sessions.filter(s => s.date === today), [sessions, today]);
   const todayLessons  = useMemo(() => (lessons || []).filter(l => l.date === today), [lessons, today]);
@@ -794,7 +830,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </TouchableOpacity>
         {feedContent}
       </ScrollView>
-      <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} />
+      <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} onTimer={() => setTimerSetupVisible(true)} />
       {modals}
       <Modal visible={showAbout} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowAbout(false)}>
         <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
@@ -807,6 +843,21 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           <AboutScreen isDesktop={false} />
         </View>
       </Modal>
+      <TimerSetupModal
+        visible={timerSetupVisible}
+        onClose={() => setTimerSetupVisible(false)}
+        onStart={handleTimerStart}
+        compositions={compositions}
+      />
+      {timerSegments && (
+        <PracticeTimerScreen
+          key={sessionKey}
+          visible={true}
+          initialSegments={timerSegments}
+          onCancel={handleTimerCancel}
+          onFinish={handleTimerFinish}
+        />
+      )}
     </SafeAreaView>
   );
 }
