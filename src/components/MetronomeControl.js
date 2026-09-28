@@ -409,7 +409,34 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     clearInterval(holdIntervalRef.current);
   }
 
+  // iOS Safari (including installed PWAs) only counts AudioContext.resume()
+  // as gesture-authorized if it happens synchronously inside the tap
+  // handler itself — waiting for a useEffect to fire after the state
+  // update commits loses that gesture association, and the context stays
+  // silently suspended. This runs directly from the play button's onPress,
+  // before setPlaying, so it's still inside the original tap.
+  //
+  // Separately: iOS treats Web Audio as a "ringtone" category by default,
+  // which the hardware mute switch silences — unlike native playback apps.
+  // navigator.audioSession.type = 'playback' (iOS 16.4+) asks Safari to
+  // treat it as media playback instead, so it plays through the switch.
+  // Web-only API; guarded since it doesn't exist in the RN native runtime.
+  function unlockAudioSession() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.audioSession) {
+        navigator.audioSession.type = 'playback';
+      }
+    } catch (e) {}
+    try {
+      if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume().catch(() => {});
+      }
+    } catch (e) {}
+  }
+
   function togglePlay() {
+    unlockAudioSession();
     setPlaying(p => !p);
   }
 
