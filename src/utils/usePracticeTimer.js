@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
 
-const TICK_MS = 250;
+const TICK_MS = 1000;
 
 // Drives a pomodoro-style practice session: a list of segments, each with
 // its own planned duration, timed one at a time.
@@ -26,6 +26,13 @@ const TICK_MS = 250;
 //      (the countdown ring) can refresh on its own, in isolation
 //   2. checks via refs whether the current segment's time has run out, and
 //      only then calls goTo() — a real, infrequent state change
+// TICK_MS itself is 1000ms rather than the finer 250ms it used to be:
+// the ring text only changes once per whole second anyway (fmtClock
+// rounds to seconds), and a segment auto-advancing up to ~1s late is
+// imperceptible — but a 4x lower background-check frequency means 4x
+// fewer chances to collide with anything else precisely timed elsewhere
+// in the same screen, independent of what that other thing's own period
+// happens to be.
 //
 // segments: [{ id, title, type, compositionId, plannedMinutes }]
 export function usePracticeTimer(initialSegments = []) {
