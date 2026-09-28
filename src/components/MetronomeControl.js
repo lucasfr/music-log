@@ -3,9 +3,9 @@ import { View, Text, TouchableOpacity, Platform, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { createAudioPlayer } from 'expo-audio';
+import { AudioContext } from 'react-native-audio-api';
 import { COLOURS, RADIUS } from '../theme';
-import { ACCENT_CLICK_URI, SUB_CLICK_URI } from '../utils/metronomeSounds';
+import { ensureClickFiles } from '../utils/metronomeSounds';
 
 // Compound meters are conventionally felt in fewer main pulses than their
 // numerator — 6/8 as 2 (each a dotted quarter), 12/8 as 4 — rather than
@@ -99,17 +99,20 @@ function NoteIcon({ sub, color }) {
 }
 
 // Isolated on purpose: this is the only piece of the metronome that
-// changes continuously while playing. Deliberately has no animation
-// library involvement at all — it's driven by plain setValue() calls from
-// an independent rAF polling loop in the parent (see the visual sync
-// effect below), which recomputes "where should the beat indicator be
-// right now" from real elapsed time on every frame rather than being
-// triggered by the audio scheduler's tick function. That decoupling is
-// the actual fix: previously the same tick() call did both the audio
-// playback AND the visual update, so any hiccup in one dragged down the
-// other. Now audio keeps its own steady, self-contained schedule, and the
-// visuals independently sync to it by polling, so a stall in either one
-// can't propagate into the other.
+// changes continuously while playing. The parent's rAF loop below detects
+// *when* the active beat changes by polling elapsed time (fully decoupled
+// from the audio scheduler) and calls pulse() once per change; the actual
+// fade itself runs via a native-driver Animated.timing so that once
+// started, it keeps animating smoothly on the UI thread even if the JS
+// thread hiccups afterward — a plain per-frame setValue() is only ever as
+// smooth as the JS thread's ability to fire that exact frame on time.
+// Never mix raw .setValue() with native-driven values once they've been
+// animated with useNativeDriver — that desyncs them from their native
+// counterpart (a real bug from an earlier version of this file). Every
+// change here, including instant snaps, goes through Animated.timing.
+// Only the previously-lit dot is ever touched on a given pulse, not all
+// MAX_DOTS of them — firing native animation starts on slots that were
+// already at 0 is wasted native-side work that compounds over a session.
 const MAX_DOTS = 8;
 const BeatDotsRow = forwardRef(function BeatDotsRow({ mainBeats }, ref) {
   const animsRef = useRef(null);
@@ -119,15 +122,21 @@ const BeatDotsRow = forwardRef(function BeatDotsRow({ mainBeats }, ref) {
   }
 
   useImperativeHandle(ref, () => ({
-    setBeat(index, intensity) {
-      if (lastIndexRef.current !== null && lastIndexRef.current !== index) {
-        animsRef.current[lastIndexRef.current].setValue(0);
+    pulse(index, flashMs) {
+      const prev = lastIndexRef.current;
+      if (prev !== null && prev !== index) {
+        Animated.timing(animsRef.current[prev], { toValue: 0, duration: 0, useNativeDriver: true }).start();
       }
-      animsRef.current[index].setValue(intensity);
       lastIndexRef.current = index;
+      Animated.sequence([
+        Animated.timing(animsRef.current[index], { toValue: 1, duration: 0, useNativeDriver: true }),
+        Animated.timing(animsRef.current[index], { toValue: 0, duration: flashMs, useNativeDriver: true }),
+      ]).start();
     },
     reset() {
-      if (lastIndexRef.current !== null) animsRef.current[lastIndexRef.current].setValue(0);
+      if (lastIndexRef.current !== null) {
+        Animated.timing(animsRef.current[lastIndexRef.current], { toValue: 0, duration: 0, useNativeDriver: true }).start();
+      }
       lastIndexRef.current = null;
     },
   }));
@@ -185,109 +194,142 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const mainBeats = mainBeatsFor(sig);
   const dotsRef = useRef(null);
 
-  const audioTimerRef = useRef(null);
+  const audioCtxRef = useRef(null);
+  const buffersRef = useRef({ accent: null, sub: null });
+  const readyPromiseRef = useRef(null);
+  const schedulerTimerRef = useRef(null);
+  const nextNoteTimeRef = useRef(0);
+  const stepIndexRef = useRef(0);
+  const startTimeRef = useRef(null);
+  const scheduledNodesRef = useRef([]);
+  const sessionIdRef = useRef(0);
   const rafRef = useRef(null);
-  const anchorRef = useRef(0);
-  const audioStepRef = useRef(0);
+  const lastBeatIndexRef = useRef(-1);
   const holdTimeoutRef = useRef(null);
   const holdIntervalRef = useRef(null);
-  const accentPlayersRef = useRef([]);
-  const subPlayersRef = useRef([]);
-  const accentIdxRef = useRef(0);
-  const subIdxRef = useRef(0);
 
-  // A small round-robin pool per click type, rather than one reused player.
-  // At high bpm (especially with subdivisions on), the gap between ticks
-  // can shrink close to or below the click sample's own playback time —
-  // calling seekTo(0)+play() again on a player that's still mid-playback
-  // is exactly the kind of retrigger that causes audio glitches/dropouts.
-  // Cycling through a few instances gives each one a full rotation's worth
-  // of time to finish before it's reused.
-  const POOL_SIZE = 4;
+  const LOOKAHEAD_SEC = 0.12;
+  const SCHEDULER_INTERVAL_MS = 30;
 
-  function getNextPlayer(poolRef, idxRef, uri) {
-    if (poolRef.current.length < POOL_SIZE) {
-      try { poolRef.current.push(createAudioPlayer({ uri })); }
-      catch (e) { return null; }
+  // Loads the AudioContext and decodes both click buffers exactly once,
+  // reused for the life of this component. react-native-audio-api's
+  // decodeAudioDataSource needs a real file on disk, not a data URI, so
+  // the actual WAV bytes are written to the cache directory once by
+  // ensureClickFiles() (see metronomeSounds.js) and decoded from there.
+  function ensureAudioReady() {
+    if (!readyPromiseRef.current) {
+      readyPromiseRef.current = (async () => {
+        if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+        const ctx = audioCtxRef.current;
+        if (ctx.state === 'suspended') await ctx.resume();
+        const { accentPath, subPath } = await ensureClickFiles();
+        const [accent, sub] = await Promise.all([
+          ctx.decodeAudioDataSource(accentPath),
+          ctx.decodeAudioDataSource(subPath),
+        ]);
+        buffersRef.current = { accent, sub };
+        return ctx;
+      })();
     }
-    const player = poolRef.current[idxRef.current];
-    idxRef.current = (idxRef.current + 1) % POOL_SIZE;
-    return player || null;
+    return readyPromiseRef.current;
   }
 
-  function playClick(isMain) {
-    const player = isMain
-      ? getNextPlayer(accentPlayersRef, accentIdxRef, ACCENT_CLICK_URI)
-      : getNextPlayer(subPlayersRef, subIdxRef, SUB_CLICK_URI);
-    if (player) {
-      try { player.seekTo(0); player.play(); } catch (e) {}
-    }
-  }
+  // Schedules exactly one click at an absolute AudioContext time — the
+  // context's own clock, not Date.now() or setTimeout, handles the actual
+  // playback moment. AudioBufferSourceNode is single-use, so a fresh node
+  // is created per click; each is tracked so a reset/pause can stop any
+  // already-scheduled-but-not-yet-played nodes still sitting in the small
+  // lookahead window.
+  function scheduleClickAt(ctx, time, stepIndex, currentSubdivision, currentMainBeats) {
+    const isMain = stepIndex % currentSubdivision === 0;
+    const buffer = isMain ? buffersRef.current.accent : buffersRef.current.sub;
+    if (!buffer) return;
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start(time);
+    scheduledNodesRef.current.push(source);
 
-  // Audio: entirely self-contained. Its scheduler only ever calls
-  // playClick() and advances a raw step counter — it has no knowledge of
-  // the beat-dot visuals at all, so nothing on the visual side can ever
-  // block or delay it.
-  function audioTick(stepIndex) {
-    const isMain = stepIndex % subdivision === 0;
     if (isMain) {
-      playClick(true);
-      const mainTickNumber = Math.floor(stepIndex / subdivision);
-      if (mainTickNumber % mainBeats === 0) Haptics.selectionAsync().catch(() => {});
-    } else {
-      playClick(false);
+      const mainTickNumber = Math.floor(stepIndex / currentSubdivision);
+      if (mainTickNumber % currentMainBeats === 0) {
+        // Haptics can't be scheduled on the audio clock, so it's fired via
+        // a plain setTimeout aimed at the right moment instead — haptic
+        // timing tolerance is far looser than audio, so the small amount
+        // of JS-timer jitter here is genuinely fine, unlike for the click
+        // sound itself.
+        const delayMs = Math.max(0, (time - ctx.currentTime) * 1000);
+        setTimeout(() => Haptics.selectionAsync().catch(() => {}), delayMs);
+      }
     }
   }
 
-  // Anchor-based scheduler: every tick's target time is computed fresh as
-  // anchor + n*stepMs (never compounded from the previous tick), so there
-  // is no drift to correct in the first place. If a stall makes real time
-  // run ahead of the schedule by more than one step, we jump the step
-  // counter forward to match — silently skipping the missed clicks rather
-  // than firing a burst to catch up, which is what actually caused the
-  // audio glitching in earlier attempts.
-  function startAudioScheduler(stepMs) {
-    anchorRef.current = Date.now();
-    audioStepRef.current = 0;
-    audioTick(0);
-    audioStepRef.current = 1;
+  // Lookahead scheduler (the standard "Tale of Two Clocks" pattern): a
+  // coarse setTimeout loop (every 30ms) whose only job is to keep the
+  // queue of *scheduled* clicks topped up ~120ms ahead of the audio
+  // clock's current time. The actual playback moment for every click is
+  // set once, up front, on the audio context's own clock — so once a
+  // click is scheduled, nothing the JS thread does afterward (a render, a
+  // GC pause, anything) can shift when it actually plays. This is the
+  // real fix for the jitter every earlier setTimeout-only attempt in this
+  // file couldn't fully remove: the audio engine's clock times the click,
+  // not JS.
+  async function startAudioScheduler(stepSec, mySessionId, currentSubdivision, currentMainBeats) {
+    const ctx = await ensureAudioReady();
+    if (sessionIdRef.current !== mySessionId) return; // superseded while loading
 
-    function scheduleNext() {
-      const now = Date.now();
-      const elapsedSteps = Math.floor((now - anchorRef.current) / stepMs);
-      if (elapsedSteps > audioStepRef.current) audioStepRef.current = elapsedSteps;
-      const targetTime = anchorRef.current + audioStepRef.current * stepMs;
-      const delay = Math.max(0, targetTime - now);
-      audioTimerRef.current = setTimeout(() => {
-        audioTick(audioStepRef.current);
-        audioStepRef.current += 1;
-        scheduleNext();
-      }, delay);
+    startTimeRef.current = ctx.currentTime + 0.05;
+    nextNoteTimeRef.current = startTimeRef.current;
+    stepIndexRef.current = 0;
+
+    function fillQueue() {
+      if (sessionIdRef.current !== mySessionId) return;
+      while (nextNoteTimeRef.current < ctx.currentTime + LOOKAHEAD_SEC) {
+        scheduleClickAt(ctx, nextNoteTimeRef.current, stepIndexRef.current, currentSubdivision, currentMainBeats);
+        stepIndexRef.current += 1;
+        nextNoteTimeRef.current += stepSec;
+      }
+      schedulerTimerRef.current = setTimeout(fillQueue, SCHEDULER_INTERVAL_MS);
     }
-    scheduleNext();
+    fillQueue();
+  }
+
+  function stopAudioScheduler() {
+    if (schedulerTimerRef.current) clearTimeout(schedulerTimerRef.current);
+    schedulerTimerRef.current = null;
+    scheduledNodesRef.current.forEach(node => {
+      try { node.stop(); } catch (e) {}
+    });
+    scheduledNodesRef.current = [];
   }
 
   // Visual: an independent rAF polling loop, not triggered by the audio
-  // scheduler at all. Every frame it asks "given real elapsed time since
-  // the same anchor, which beat should be showing and how far through its
-  // flash is it" and pushes that straight to the dots component via
-  // setValue. Because it recomputes from absolute elapsed time rather than
-  // incrementally stepping, a skipped or late frame just shows a slightly
-  // different instant next frame — it can never accumulate desync, and it
-  // has no way to affect the audio scheduler in the other direction either.
+  // scheduler at all. Every frame it computes "which beat should be active
+  // right now" from the SAME audio-context clock the scheduler uses
+  // (ctx.currentTime, not Date.now()) — fully decoupled, so a stall on
+  // either side can't drag down the other, and both sides agree on
+  // exactly the same notion of "now". It only calls pulse() when that
+  // beat actually changes (once per beat, not once per frame), handing
+  // the fade itself to a native-driver animation that keeps running
+  // smoothly on the UI thread regardless of any subsequent JS-thread
+  // hiccup.
   useEffect(() => {
     if (!playing) return;
-    const stepMs = (60000 / bpm) / subdivision;
-    const flashMs = Math.min(110, stepMs * 0.6);
+    const stepSec = (60 / bpm) / subdivision;
+    const flashMs = Math.min(110, stepSec * 1000 * 0.6);
 
     function frame() {
-      const elapsed = Math.max(0, Date.now() - anchorRef.current);
-      const stepIndex = Math.floor(elapsed / stepMs);
-      const mainTickNumber = Math.floor(stepIndex / subdivision);
-      const beatIndex = ((mainTickNumber % mainBeats) + mainBeats) % mainBeats;
-      const msSinceMainTick = elapsed - mainTickNumber * subdivision * stepMs;
-      const intensity = msSinceMainTick < flashMs ? 1 - msSinceMainTick / flashMs : 0;
-      dotsRef.current?.setBeat(beatIndex, intensity);
+      const ctx = audioCtxRef.current;
+      if (ctx && startTimeRef.current !== null) {
+        const elapsed = Math.max(0, ctx.currentTime - startTimeRef.current);
+        const stepIndex = Math.floor(elapsed / stepSec);
+        const mainTickNumber = Math.floor(stepIndex / subdivision);
+        const beatIndex = ((mainTickNumber % mainBeats) + mainBeats) % mainBeats;
+        if (beatIndex !== lastBeatIndexRef.current) {
+          lastBeatIndexRef.current = beatIndex;
+          dotsRef.current?.pulse(beatIndex, flashMs);
+        }
+      }
       rafRef.current = requestAnimationFrame(frame);
     }
     rafRef.current = requestAnimationFrame(frame);
@@ -299,19 +341,24 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
 
   // Single source of truth for "reset the beat cycle": runs whenever bpm,
   // time signature, subdivision, or play state changes — i.e. every
-  // settings change and every play/pause press. Resets the shared anchor
-  // and (if playing) starts the audio scheduler; the visual effect above
-  // picks up the same anchor independently.
+  // settings change and every play/pause press. sessionIdRef guards
+  // against the async ensureAudioReady() from a previous, now-superseded
+  // call resolving late and starting a scheduler nobody asked for anymore.
   useEffect(() => {
-    if (audioTimerRef.current) clearTimeout(audioTimerRef.current);
+    sessionIdRef.current += 1;
+    const mySessionId = sessionIdRef.current;
+    stopAudioScheduler();
+    lastBeatIndexRef.current = -1;
+    startTimeRef.current = null;
     dotsRef.current?.reset();
 
     if (playing) {
-      startAudioScheduler((60000 / bpm) / subdivision);
+      startAudioScheduler((60 / bpm) / subdivision, mySessionId, subdivision, mainBeats);
     }
 
     return () => {
-      if (audioTimerRef.current) clearTimeout(audioTimerRef.current);
+      sessionIdRef.current += 1; // invalidate any in-flight async setup
+      stopAudioScheduler();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bpm, sig, subdivision, playing]);
