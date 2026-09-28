@@ -109,28 +109,30 @@ function NoteIcon({ sub, color }) {
 const MAX_DOTS = 8;
 const BeatDotsRow = forwardRef(function BeatDotsRow({ mainBeats }, ref) {
   const animsRef = useRef(null);
+  const lastIndexRef = useRef(null);
   if (!animsRef.current) {
     animsRef.current = Array.from({ length: MAX_DOTS }, () => new Animated.Value(0));
   }
 
   useImperativeHandle(ref, () => ({
     pulse(index, flashMs) {
-      // Never call .setValue() directly on these once they've been driven
-      // by useNativeDriver — mixing JS-side setValue with native-driven
-      // Animated.timing desyncs the value from its native counterpart
-      // after the first animation runs. Every change, including the
-      // instant snap to 1, goes through Animated.timing instead.
-      animsRef.current.forEach((v, i) => {
-        if (i !== index) {
-          Animated.timing(v, { toValue: 0, duration: 0, useNativeDriver: true }).start();
-        }
-      });
+      // Only touch the dot that was actually lit last time, not all
+      // MAX_DOTS of them — firing 7 unnecessary native animation starts
+      // per tick (on indices that were already at 0) is exactly the kind
+      // of accumulating native-side work that would degrade progressively
+      // over a session rather than break outright on tick one.
+      const prev = lastIndexRef.current;
+      if (prev !== null && prev !== index) {
+        Animated.timing(animsRef.current[prev], { toValue: 0, duration: 0, useNativeDriver: true }).start();
+      }
+      lastIndexRef.current = index;
       Animated.sequence([
         Animated.timing(animsRef.current[index], { toValue: 1, duration: 0, useNativeDriver: true }),
         Animated.timing(animsRef.current[index], { toValue: 0, duration: flashMs, useNativeDriver: true }),
       ]).start();
     },
     reset() {
+      lastIndexRef.current = null;
       animsRef.current.forEach(v => {
         Animated.timing(v, { toValue: 0, duration: 0, useNativeDriver: true }).start();
       });
