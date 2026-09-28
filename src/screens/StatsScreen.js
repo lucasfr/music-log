@@ -1587,7 +1587,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: isDesktop ? 40 : 120 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 }}>
           <SectionTitle style={{ marginBottom: 0 }}>Overview</SectionTitle>
           <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -1774,7 +1774,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   <View style={{ height: 3, backgroundColor: COLOURS.bg2, borderRadius: 2, marginBottom: 8 }}>
                     <View style={{ height: '100%', width: `${((pieceSort === 'time' ? mins : count) / activePieceMax) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
                   </View>
-                  <View style={{ flexDirection: 'row', gap: 16 }}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
                     <View style={{ gap: 3 }}>
                       <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Session</Text>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
