@@ -172,28 +172,41 @@ export function MetronomeControl({ composition }) {
     tickCountRef.current = (tickCountRef.current + 1) % subdivision;
   }
 
-  function restart(nextBpm, nextSubdivision) {
+  // Single source of truth for "reset the beat cycle": runs whenever bpm,
+  // time signature, subdivision, or play state changes — i.e. every
+  // settings change and every play/pause press, per the actual request.
+  // Always clears any running interval, snaps the visual/audio state back
+  // to beat 1, and (if playing) fires an immediate fresh tick before
+  // resuming the interval at the current settings. Centralising this here
+  // avoids the stale-closure risk of computing intervals inside individual
+  // change handlers.
+  useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
+    tickCountRef.current = 0;
+    beatIndexRef.current = 0;
+    setBeatIndex(0);
+    setFlashMain(false);
+
     if (playing) {
-      const intervalMs = (60000 / (nextBpm ?? bpm)) / (nextSubdivision ?? subdivision);
-      timerRef.current = setInterval(tick, intervalMs);
+      tick();
+      timerRef.current = setInterval(tick, (60000 / bpm) / subdivision);
     }
-  }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bpm, sig, subdivision, playing]);
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
       clearTimeout(holdTimeoutRef.current);
       clearInterval(holdIntervalRef.current);
     };
   }, []);
 
   function changeBpm(delta) {
-    setBpm(b => {
-      const next = Math.max(30, Math.min(240, b + delta));
-      restart(next, undefined);
-      return next;
-    });
+    setBpm(b => Math.max(30, Math.min(240, b + delta)));
   }
 
   function startHold(delta) {
@@ -208,40 +221,20 @@ export function MetronomeControl({ composition }) {
   }
 
   function togglePlay() {
-    setPlaying(p => {
-      const next = !p;
-      tickCountRef.current = 0;
-      beatIndexRef.current = 0;
-      setBeatIndex(0);
-      if (next) {
-        setTimeout(tick, 0);
-        if (timerRef.current) clearInterval(timerRef.current);
-        timerRef.current = setInterval(tick, (60000 / bpm) / subdivision);
-      } else if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      return next;
-    });
+    setPlaying(p => !p);
   }
 
   function usePieceTempo() {
     setBpm(defaultBpm);
     setSig(defaultSig);
-    beatIndexRef.current = 0;
-    setBeatIndex(0);
-    restart(defaultBpm, subdivision);
   }
 
   function selectSig(newSig) {
     setSig(newSig);
-    beatIndexRef.current = 0;
-    setBeatIndex(0);
   }
 
   function selectSubdivision(n) {
     setSubdivision(n);
-    tickCountRef.current = 0;
-    restart(undefined, n);
   }
 
   const currentTempoName = tempoName(bpm);
@@ -313,7 +306,7 @@ export function MetronomeControl({ composition }) {
             return (
               <TouchableOpacity
                 key={p.name}
-                onPress={() => { setBpm(p.value); restart(p.value, undefined); }}
+                onPress={() => setBpm(p.value)}
                 activeOpacity={0.75}
                 style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4, borderRadius: 8, backgroundColor: active ? 'rgba(9,99,126,0.08)' : 'transparent' }}
               >
