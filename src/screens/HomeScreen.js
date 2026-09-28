@@ -13,6 +13,7 @@ import { fmtDate, confirmDelete, formatScaleEntry } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
+import { useNavScrollHandler } from '../context/NavScrollContext';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
@@ -75,13 +76,13 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
             {(techNames.length > 0 || pieceNames.length > 0) && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
                 {techNames.map(t => (
-                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill }}>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.practiceText }}>{t}</Text>
+                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(9,99,126,0.08)', borderRadius: RADIUS.pill }}>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text>
                   </View>
                 ))}
                 {pieceNames.map(p => (
-                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.practiceBg, borderRadius: RADIUS.pill }}>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.practiceText }}>{p}</Text>
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.tealAccent, borderRadius: RADIUS.pill }}>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>{p}</Text>
                   </View>
                 ))}
               </View>
@@ -140,8 +141,8 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
             {pieceNames.length > 0 && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
                 {pieceNames.map(p => (
-                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.lessonBg, borderRadius: RADIUS.pill }}>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.lessonText }}>{p}</Text>
+                  <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.tealAccent, borderRadius: RADIUS.pill }}>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>{p}</Text>
                   </View>
                 ))}
                 {newPieces.map(p => {
@@ -523,6 +524,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [detailLesson,    setDetailLesson]    = useState(null);
   const [rightPanel,      setRightPanel]      = useState(null); // 'detail-session' | 'detail-lesson' | 'log-session' | 'log-lesson'
   const [showAbout,       setShowAbout]       = useState(false);
+  const onNavScroll = useNavScrollHandler(); // must be called unconditionally, before the isDesktop early return below
 
   function openSession(s)  { if (isDesktop) { setDetailSession(s); setDetailLesson(null); setRightPanel('detail-session'); } else setDetailSession(s); }
   function openLesson(l)   { if (isDesktop) { setDetailLesson(l); setDetailSession(null); setRightPanel('detail-lesson'); } else setDetailLesson(l); }
@@ -770,7 +772,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   // ── Mobile single-column layout ─────────────────────────────────────────────
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        onScroll={onNavScroll}
+        scrollEventThrottle={16}
+      >
         <TouchableOpacity
           onPress={() => setShowAbout(true)}
           activeOpacity={0.7}

@@ -2,8 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import {
@@ -31,34 +30,12 @@ import AboutScreen from './src/screens/AboutScreen';
 import { AppBackground } from './src/components/Background';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
+import { CustomTabBar } from './src/components/CustomTabBar';
+import { NavScrollProvider } from './src/context/NavScrollContext';
 import { useLayout } from './src/utils/useLayout';
 import { COLOURS } from './src/theme';
 
 const Tab = createBottomTabNavigator();
-
-const TAB_ICONS = {
-  Home:     { active: 'home',                inactive: 'home-outline' },
-  Calendar: { active: 'calendar',            inactive: 'calendar-outline' },
-  History:  { active: 'time',                inactive: 'time-outline' },
-  Pieces:   { active: 'musical-notes',       inactive: 'musical-notes-outline' },
-  Stats:    { active: 'bar-chart',           inactive: 'bar-chart-outline' },
-  Timeline: { active: 'git-branch',          inactive: 'git-branch-outline' },
-  Settings: { active: 'settings',            inactive: 'settings-outline' },
-};
-
-function TabIcon({ name, focused }) {
-  const icons = TAB_ICONS[name] || { active: 'ellipse', inactive: 'ellipse-outline' };
-  return (
-    <View style={{
-      width: 44, height: 44,
-      borderRadius: 12,
-      backgroundColor: focused ? COLOURS.navy : 'rgba(9,99,126,0.12)',
-      alignItems: 'center', justifyContent: 'center',
-    }}>
-      <Ionicons name={focused ? icons.active : icons.inactive} size={24} color="#ffffff" />
-    </View>
-  );
-}
 
 const isStandalone =
   Platform.OS === 'web' &&
@@ -69,7 +46,6 @@ const isStandalone =
   );
 
 function AppInner({ fontsLoaded }) {
-  const insets = useSafeAreaInsets();
   const [ready, setReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -178,6 +154,7 @@ function AppInner({ fontsLoaded }) {
 
   // ── Mobile layout: bottom tab navigator ────────────────────────────────────
   const mobileContent = (
+    <NavScrollProvider>
     <View style={{ flex: 1, backgroundColor: COLOURS.bg }} onLayout={onLayout}>
       <AppBackground />
       <NavigationContainer
@@ -195,29 +172,10 @@ function AppInner({ fontsLoaded }) {
       >
         <Tab.Navigator
           sceneContainerStyle={{ backgroundColor: 'transparent' }}
-          screenOptions={({ route }) => ({
+          tabBar={props => <CustomTabBar {...props} />}
+          screenOptions={{
             headerShown: false,
-            tabBarActiveTintColor:   COLOURS.navy,
-            tabBarInactiveTintColor: COLOURS.textDim,
-            tabBarHideOnKeyboard: true,
-            tabBarStyle: {
-              backgroundColor: 'rgba(234,240,245,0.95)',
-              borderTopWidth: 0,
-              position: 'absolute',
-              height: Platform.OS === 'web' ? 92 : (72 + insets.bottom),
-              paddingTop: 18,
-              paddingBottom: Platform.OS === 'web' ? 20 : (insets.bottom || 8),
-              shadowColor: COLOURS.glassShadow,
-              shadowOffset: { width: 0, height: -4 },
-              shadowOpacity: 1,
-              shadowRadius: 16,
-              elevation: 10,
-            },
-            tabBarShowLabel: false,
-            tabBarIcon: ({ focused, size }) => (
-              <TabIcon name={route.name} focused={focused} size={size} />
-            ),
-          })}
+          }}
         >
           <Tab.Screen name="Home">
             {() => <HomeScreen     {...screenProps} />}
@@ -243,6 +201,7 @@ function AppInner({ fontsLoaded }) {
         </Tab.Navigator>
       </NavigationContainer>
     </View>
+    </NavScrollProvider>
   );
 
   return (
