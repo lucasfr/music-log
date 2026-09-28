@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web && node patch-dist.js && cp web/service-worker.js dist/service-worker.js && cp assets/apple-touch-icon.png dist/apple-touch-icon.png && cp assets/apple-touch-icon-152.png dist/apple-touch-icon-152.png && cp assets/apple-touch-icon-120.png dist/apple-touch-icon-120.png"
   },
@@ -21,7 +21,9 @@
     "expo-blur": "~14.0.3",
     "expo-file-system": "~18.0.7",
     "expo-font": "~13.0.4",
+    "expo-haptics": "~15.0.8",
     "expo-keep-awake": "~15.0.8",
+    "expo-notifications": "~0.32.17",
     "expo-sharing": "~12.0.1",
     "expo-sqlite": "~15.1.2",
     "expo-status-bar": "~3.0.9",

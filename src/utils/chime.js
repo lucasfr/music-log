@@ -1,11 +1,18 @@
 import { Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
-// Lightweight completion cue — web only for now. Native (iOS/Android) needs
-// expo-haptics and/or expo-av added as dependencies before it can vibrate or
-// play a sound; deliberately left as a no-op there rather than half-wiring
-// something that would need a native rebuild to actually work.
+// Completion cue for segment transitions and session end.
+// Native (iOS/Android): a haptic pulse via expo-haptics — no sound asset
+// needed, works even with the phone silenced.
+// Web: a short beep via the Web Audio API, since there's no haptics API
+// in a browser tab.
 export function playChime() {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+  if (Platform.OS !== 'web') {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    return;
+  }
+
+  if (typeof window === 'undefined') return;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return;
   try {

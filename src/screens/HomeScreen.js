@@ -750,7 +750,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             </View>
             {feedContent}
           </ScrollView>
-          <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} />
+          <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} onTimer={() => setTimerSetupVisible(true)} />
         </View>
 
         {/* Right: detail / inline form panel */}
@@ -800,6 +800,21 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         </View>
 
         {modals}
+        <TimerSetupModal
+          visible={timerSetupVisible}
+          onClose={() => setTimerSetupVisible(false)}
+          onStart={handleTimerStart}
+          compositions={compositions}
+        />
+        {timerSegments && (
+          <PracticeTimerScreen
+            key={sessionKey}
+            visible={true}
+            initialSegments={timerSegments}
+            onCancel={handleTimerCancel}
+            onFinish={handleTimerFinish}
+          />
+        )}
         </View>
       </View>
     );

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -6,6 +6,7 @@ import { COLOURS, RADIUS } from '../theme';
 import { playChime } from '../utils/chime';
 import { useKeepAwake } from '../utils/useKeepAwake';
 import { usePracticeTimer } from '../utils/usePracticeTimer';
+import { scheduleSegmentEndNotification, cancelScheduledNotification } from '../utils/segmentNotifications';
 
 const RING_SIZE = 220;
 const RING_R = 92;
@@ -28,6 +29,17 @@ export function PracticeTimerScreen({ visible, initialSegments, onCancel, onFini
   const timer = usePracticeTimer(initialSegments);
   useKeepAwake(visible && timer.isRunning);
 
+  // Bumped on every play/pause/skip/+minutes so the notification effect
+  // below knows to reschedule against the new deadline — deliberately not
+  // tied to timer.remainingMs directly, since that changes every tick.
+  const [notifyGen, setNotifyGen] = useState(0);
+  const scheduledIdRef = useRef(null);
+
+  function handleStart() { timer.start(); setNotifyGen(g => g + 1); }
+  function handlePause() { timer.pause(); setNotifyGen(g => g + 1); }
+  function handleSkip() { timer.skip(); setNotifyGen(g => g + 1); }
+  function handleAddMinutes(mins) { timer.addMinutes(mins); setNotifyGen(g => g + 1); }
+
   const prevIndex = useRef(timer.currentIndex);
   useEffect(() => {
     if (timer.currentIndex !== prevIndex.current) {
@@ -46,10 +58,36 @@ export function PracticeTimerScreen({ visible, initialSegments, onCancel, onFini
   useEffect(() => {
     if (visible && !timer.isRunning && !timer.isFinished && timer.segments.length > 0) {
       timer.start();
+      setNotifyGen(g => g + 1);
     }
     // Only auto-start once, right when the screen opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  // Reschedule the "segment ending" local notification whenever the
+  // deadline changes (play, pause, skip, +minutes). Cancels whatever was
+  // previously scheduled first, so a paused/skipped segment never fires
+  // a stale notification later.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (scheduledIdRef.current) {
+        await cancelScheduledNotification(scheduledIdRef.current);
+        scheduledIdRef.current = null;
+      }
+      if (cancelled) return;
+      if (timer.isRunning && timer.currentSegment && timer.remainingMs > 0) {
+        const id = await scheduleSegmentEndNotification(timer.currentSegment.title, timer.remainingMs);
+        if (!cancelled) scheduledIdRef.current = id;
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifyGen]);
+
+  useEffect(() => () => {
+    if (scheduledIdRef.current) cancelScheduledNotification(scheduledIdRef.current);
+  }, []);
 
   if (!visible || !timer.currentSegment) return null;
 
@@ -98,7 +136,7 @@ export function PracticeTimerScreen({ visible, initialSegments, onCancel, onFini
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 32 }}>
               <TouchableOpacity
-                onPress={() => (timer.isRunning ? timer.pause() : timer.start())}
+                onPress={() => (timer.isRunning ? handlePause() : handleStart())}
                 activeOpacity={0.85}
                 style={{
                   width: 52, height: 52, borderRadius: 26,
@@ -109,14 +147,14 @@ export function PracticeTimerScreen({ visible, initialSegments, onCancel, onFini
                 <Text style={{ fontSize: 18, color: '#fff' }}>{timer.isRunning ? '⏸' : '▶'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => timer.addMinutes(5)}
+                onPress={() => handleAddMinutes(5)}
                 activeOpacity={0.85}
                 style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(247,127,0,0.14)', alignItems: 'center', justifyContent: 'center' }}
               >
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#7A3A00' }}>+5 min</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => timer.skip()}
+                onPress={handleSkip}
                 activeOpacity={0.85}
                 style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(140,32,69,0.10)', alignItems: 'center', justifyContent: 'center' }}
               >
