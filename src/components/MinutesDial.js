@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, Text, PanResponder } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { COLOURS } from '../theme';
 import { dialTick } from '../utils/dialFeedback';
 
@@ -21,6 +21,18 @@ const CIRC = 2 * Math.PI * R;
 function angleForValue(value, max) {
   return (Math.max(0, Math.min(max, value)) / max) * 360;
 }
+
+// SVG gradients are always linear or radial in flat 2D space — there's no
+// way to make one follow a curved path, so "opacity increases along the
+// arc" can't be a single <Stop>-based gradient at all. This fakes a
+// smooth angular sweep by drawing the filled arc as many thin adjacent
+// segments, each a fraction of a degree wide, with opacity stepped from
+// low (at the start of the arc, angle 0) to fully solid (at the current
+// value's position, matching the knob). Fine-grained enough (a segment
+// every ~3°) that adjacent segments blend into what reads as a smooth
+// gradient rather than visible bands.
+const SEGMENTS_PER_360 = 120;
+const SEGMENT_ANGLE = 360 / SEGMENTS_PER_360;
 
 function valueForAngle(angle, max, step) {
   const raw = (angle / 360) * max;
@@ -76,8 +88,9 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
   ).current;
 
   const angle = angleForValue(value, max);
-  const progressLen = (angle / 360) * CIRC;
   const knobRad = ((angle - 90) * Math.PI) / 180;
+  const filledSegments = Math.max(1, Math.round(angle / SEGMENT_ANGLE));
+  const segmentDashLen = (CIRC * SEGMENT_ANGLE) / 360;
 
   return (
     <View
@@ -91,21 +104,25 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
       style={{ width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' }}
     >
       <Svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} pointerEvents="none">
-        <Defs>
-          <LinearGradient id="dialGrad" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={COLOURS.gold} />
-            <Stop offset="1" stopColor={COLOURS.amber} />
-          </LinearGradient>
-        </Defs>
         <Circle cx={CENTER} cy={CENTER} r={R} stroke="rgba(9,99,126,0.12)" strokeWidth={STROKE} fill="none" />
-        <Circle
-          cx={CENTER} cy={CENTER} r={R}
-          stroke="url(#dialGrad)" strokeWidth={STROKE} fill="none"
-          strokeDasharray={`${progressLen} ${CIRC}`}
-          strokeLinecap="round"
-          rotation={-90}
-          origin={`${CENTER}, ${CENTER}`}
-        />
+        {Array.from({ length: filledSegments }, (_, i) => {
+          const segStart = i * SEGMENT_ANGLE;
+          const opacity = filledSegments > 1 ? 0.12 + (0.88 * i) / (filledSegments - 1) : 1;
+          const isFirst = i === 0;
+          const isLast = i === filledSegments - 1;
+          return (
+            <Circle
+              key={i}
+              cx={CENTER} cy={CENTER} r={R}
+              stroke={COLOURS.amber} strokeOpacity={opacity}
+              strokeWidth={STROKE} fill="none"
+              strokeDasharray={`${segmentDashLen} ${CIRC - segmentDashLen}`}
+              strokeLinecap={isFirst || isLast ? 'round' : 'butt'}
+              rotation={-90 + segStart}
+              origin={`${CENTER}, ${CENTER}`}
+            />
+          );
+        })}
         <Circle
           cx={CENTER + R * Math.cos(knobRad)}
           cy={CENTER + R * Math.sin(knobRad)}
