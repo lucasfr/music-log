@@ -168,7 +168,17 @@ function SigChip({ sig, active, onPress }) {
 // composition: the linked library piece for the current segment, or null.
 // Reads composition.tempo (bpm) and composition.timeSigs[0] as defaults —
 // falls back to 90bpm / 4/4 if the piece has no stored tempo/time sig yet.
-export function MetronomeControl({ composition }) {
+//
+// Wrapped in React.memo deliberately: PracticeTimerScreen re-renders every
+// 250ms to refresh the countdown ring's remaining-time display, which is
+// entirely unrelated to the metronome's own beat scheduling. Without memo,
+// every one of those parent re-renders was cascading down and re-rendering
+// this whole card (BlurView, every button, every icon) on a schedule that
+// had nothing to do with bpm — occasionally colliding with the metronome's
+// own tick/animation state and knocking the visuals out of sync with the
+// audio, which kept ticking fine underneath since its scheduler lives in a
+// ref-held closure unaffected by re-renders.
+export const MetronomeControl = React.memo(function MetronomeControl({ composition }) {
   const defaultBpm = Number(composition?.tempo) || 90;
   const defaultSig = (composition?.timeSigs && composition.timeSigs[0]) || '4/4';
 
@@ -435,4 +445,4 @@ export function MetronomeControl({ composition }) {
     </View>
     </BlurView>
   );
-}
+});
