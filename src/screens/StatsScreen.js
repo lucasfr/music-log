@@ -1638,7 +1638,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 16 }}>{period === '7d' ? 'Daily' : 'Weekly'} trends & session quality ({periodLabel})</SectionTitle>
         <GlassCard>
-          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
               <Label>Practice volume</Label>
               <PracticeVolumeChart sessions={sessions} period={period} />
@@ -1663,7 +1663,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 16 }}>Technique & scales ({periodLabel})</SectionTitle>
         <GlassCard>
-          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: 1, minWidth: 0, paddingRight: isDesktop ? 20 : 0 }}>
               <Label>Groups</Label>
               <TechniqueBreakdown sessions={periodSessions} />
@@ -1715,7 +1715,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 16 }}>Library growth & streak history</SectionTitle>
         <GlassCard>
-          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
               <Label>Library growth</Label>
               <LibraryGrowthChart compositions={compositions} sessions={sessions} lessons={lessons} />
@@ -1730,7 +1730,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle style={{ marginTop: 16 }}>Most practised & wins ({periodLabel})</SectionTitle>
         <GlassCard>
-          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: 'flex-start' }}>
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <Label style={{ marginBottom: 0 }}>Most practised</Label>
