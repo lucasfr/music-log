@@ -27,6 +27,16 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
   const layoutRef = useRef({ pageX: 0, pageY: 0, size: SIZE });
   const lastValueRef = useRef(value);
 
+  // The PanResponder below is created once (via useRef) so its identity
+  // stays stable across re-renders. Its handlers must NOT close directly
+  // over onChange/max/step, or they'd forever call back with whatever
+  // those props were on the very first render — stale by the time a later
+  // drag fires, silently reverting anything changed on the segment since
+  // (e.g. picking a piece) back to that first snapshot. Reading through a
+  // ref that's reassigned every render keeps the handlers current.
+  const propsRef = useRef({ onChange, max, step });
+  propsRef.current = { onChange, max, step };
+
   function angleFromTouch(pageX, pageY) {
     const { pageX: ox, pageY: oy, size } = layoutRef.current;
     const cx = ox + size / 2;
@@ -39,12 +49,13 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
   }
 
   function applyTouch(pageX, pageY) {
-    const v = valueForAngle(angleFromTouch(pageX, pageY), max, step);
+    const { onChange: cb, max: mx, step: st } = propsRef.current;
+    const v = valueForAngle(angleFromTouch(pageX, pageY), mx, st);
     if (v !== lastValueRef.current) {
       dialTick();
       lastValueRef.current = v;
     }
-    onChange(v);
+    cb(v);
   }
 
   const panResponder = useRef(
