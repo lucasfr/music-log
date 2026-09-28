@@ -67,6 +67,50 @@ function fmtMinutes(ms) {
   return `${totalMin}:00`;
 }
 
+// Isolated for the same reason as MetronomeSection above, and it's the
+// actual root cause that section was defending against: usePracticeTimer
+// used to force its caller (this whole screen) to re-render every 250ms
+// just to refresh this ring. Now the hook's interval never touches React
+// state on its own — this component explicitly opts in via subscribeTick
+// and manages its own local re-render, so PracticeTimerScreen itself no
+// longer re-renders on a timer at all, only on real events (play/pause/
+// skip/segment change).
+function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) {
+  const [remainingMs, setRemainingMs] = useState(getRemainingMs());
+
+  useEffect(() => {
+    setRemainingMs(getRemainingMs());
+    if (!isRunning) return;
+    return subscribeTick(() => setRemainingMs(getRemainingMs()));
+  }, [subscribeTick, getRemainingMs, isRunning, plannedMs]);
+
+  const fractionRemaining = plannedMs > 0 ? Math.max(0, Math.min(1, remainingMs / plannedMs)) : 0;
+  const visibleLength = CIRCUMFERENCE * fractionRemaining;
+
+  return (
+    <View style={{ width: RING_SIZE, height: RING_SIZE, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
+        <Circle
+          cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
+          stroke="rgba(9,99,126,0.12)" strokeWidth={RING_STROKE} fill="none"
+        />
+        <Circle
+          cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
+          stroke={COLOURS.amber} strokeWidth={RING_STROKE} fill="none"
+          strokeDasharray={`${visibleLength} ${CIRCUMFERENCE}`}
+          strokeLinecap="round"
+          rotation={-90}
+          origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}
+        />
+      </Svg>
+      <View style={{ position: 'absolute', alignItems: 'center' }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 36, color: COLOURS.text }}>{fmtClock(remainingMs)}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>of {fmtMinutes(plannedMs)}</Text>
+      </View>
+    </View>
+  );
+}
+
 export function PracticeTimerScreen({ visible, initialSegments, compositions, onFinish }) {
   const timer = usePracticeTimer(initialSegments);
   useKeepAwake(visible && timer.isRunning);
@@ -135,8 +179,6 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
 
   if (!visible || !timer.currentSegment) return null;
 
-  const fractionRemaining = timer.plannedMs > 0 ? Math.max(0, Math.min(1, timer.remainingMs / timer.plannedMs)) : 0;
-  const visibleLength = CIRCUMFERENCE * fractionRemaining;
   const linkedComposition = (compositions || []).find(c => c.id === timer.currentSegment.compositionId) || null;
 
   return (
@@ -161,26 +203,12 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
               {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
             </Text>
 
-            <View style={{ width: RING_SIZE, height: RING_SIZE, alignItems: 'center', justifyContent: 'center' }}>
-              <Svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
-                <Circle
-                  cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
-                  stroke="rgba(9,99,126,0.12)" strokeWidth={RING_STROKE} fill="none"
-                />
-                <Circle
-                  cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
-                  stroke={COLOURS.amber} strokeWidth={RING_STROKE} fill="none"
-                  strokeDasharray={`${visibleLength} ${CIRCUMFERENCE}`}
-                  strokeLinecap="round"
-                  rotation={-90}
-                  origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}
-                />
-              </Svg>
-              <View style={{ position: 'absolute', alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 36, color: COLOURS.text }}>{fmtClock(timer.remainingMs)}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>of {fmtMinutes(timer.plannedMs)}</Text>
-              </View>
-            </View>
+            <CountdownRing
+              getRemainingMs={timer.getRemainingMs}
+              plannedMs={timer.plannedMs}
+              subscribeTick={timer.subscribeTick}
+              isRunning={timer.isRunning}
+            />
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 32 }}>
               <TouchableOpacity

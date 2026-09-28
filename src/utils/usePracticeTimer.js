@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useReducer } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
 
 const TICK_MS = 250;
@@ -12,6 +12,21 @@ const TICK_MS = 250;
 // the very next tick recomputes correctly from how much wall-clock time
 // actually passed.
 //
+// The internal 250ms interval deliberately never dispatches any React
+// state update itself. It used to (via a useReducer "forceTick"), which
+// forced this hook's *caller* to fully re-render every 250ms just to
+// refresh the countdown display — a real, measurable cost (BlurView,
+// SVG ring, surrounding layout) that competed for the same JS thread as
+// anything else on a tight schedule elsewhere in the same screen (e.g. a
+// metronome's own setTimeout scheduling), on a cadence that doesn't evenly
+// divide most tempos, producing intermittent-feeling interference. Now the
+// interval only does two things, neither of which touches React state
+// unless something actually needs to change:
+//   1. notifies subscribeTick() listeners directly, so a display component
+//      (the countdown ring) can refresh on its own, in isolation
+//   2. checks via refs whether the current segment's time has run out, and
+//      only then calls goTo() — a real, infrequent state change
+//
 // segments: [{ id, title, type, compositionId, plannedMinutes }]
 export function usePracticeTimer(initialSegments = []) {
   const [segments, setSegments] = useState(initialSegments);
@@ -22,25 +37,6 @@ export function usePracticeTimer(initialSegments = []) {
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const runStartRef = useRef(null);
-  const [tick, forceTick] = useReducer(x => x + 1, 0);
-
-  // Re-render on an interval while running, purely to refresh the displayed
-  // countdown — the actual time math never depends on how many ticks fired.
-  useEffect(() => {
-    if (!isRunning) return;
-    const id = setInterval(forceTick, TICK_MS);
-    return () => clearInterval(id);
-  }, [isRunning]);
-
-  // Force an immediate recompute on foreground instead of waiting up to
-  // TICK_MS for the next interval — avoids a stale-looking countdown for a
-  // beat right after unlocking the phone.
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', state => {
-      if (state === 'active') forceTick();
-    });
-    return () => sub.remove();
-  }, []);
 
   const plannedMsFor = idx => (segments[idx]?.plannedMinutes || 0) * 60000;
 
@@ -50,7 +46,10 @@ export function usePracticeTimer(initialSegments = []) {
     return base;
   }, [elapsedMs, currentIndex, isRunning]);
 
-  const currentRemainingMs = () => Math.max(0, plannedMsFor(currentIndex) - currentElapsedMs());
+  const currentRemainingMs = useCallback(
+    () => Math.max(0, plannedMsFor(currentIndex) - currentElapsedMs()),
+    [currentIndex, currentElapsedMs, segments]
+  );
 
   // Folds whatever time has run in the current segment into elapsedMs and
   // stops the live clock — called before pausing, skipping, or finishing.
@@ -105,15 +104,44 @@ export function usePracticeTimer(initialSegments = []) {
     setSegments(prev => prev.map((s, i) => (i === currentIndex ? { ...s, plannedMinutes: (s.plannedMinutes || 0) + mins } : s)));
   }, [currentIndex]);
 
-  // Auto-advance the moment a segment's planned time runs out.
+  // Lets a display component (the countdown ring) opt into frequent
+  // refreshes without forcing this hook's caller to re-render — the
+  // interval below calls every registered listener directly, and the
+  // listener itself decides what to do with that (typically: read
+  // getRemainingMs() and setState locally, isolated to that component).
+  const listenersRef = useRef(new Set());
+  const subscribeTick = useCallback((cb) => {
+    listenersRef.current.add(cb);
+    return () => listenersRef.current.delete(cb);
+  }, []);
+
+  // Always-fresh mirror of whatever the interval below needs to check for
+  // auto-advance, updated via plain assignment every render rather than an
+  // effect — this interval is only re-created when isRunning toggles, so
+  // without this it would read stale currentIndex/goTo closures from
+  // whenever isRunning last changed, not the current segment.
+  const latestRef = useRef();
+  latestRef.current = { currentIndex, isRunning, currentRemainingMs, goTo };
+
   useEffect(() => {
-    if (isRunning && currentRemainingMs() <= 0) {
-      goTo(currentIndex + 1);
-    }
-    // Deliberately keyed on `tick`, not on the values read inside — this
-    // effect exists purely to react to time passing.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick]);
+    if (!isRunning) return;
+    const id = setInterval(() => {
+      listenersRef.current.forEach(cb => cb());
+      const { isRunning: stillRunning, currentIndex: idx, currentRemainingMs: getRemaining, goTo: go } = latestRef.current;
+      if (stillRunning && getRemaining() <= 0) go(idx + 1);
+    }, TICK_MS);
+    return () => clearInterval(id);
+  }, [isRunning]);
+
+  // Notify listeners immediately on foreground instead of waiting up to
+  // TICK_MS for the next interval — avoids a stale-looking countdown for a
+  // beat right after unlocking the phone.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') listenersRef.current.forEach(cb => cb());
+    });
+    return () => sub.remove();
+  }, []);
 
   function actualMinutesFor(idx) {
     const ms = idx === currentIndex ? currentElapsedMs() : (elapsedMs[idx] || 0);
@@ -129,6 +157,8 @@ export function usePracticeTimer(initialSegments = []) {
     isFinished,
     remainingMs: currentRemainingMs(),
     plannedMs: plannedMsFor(currentIndex),
+    getRemainingMs: currentRemainingMs,
+    subscribeTick,
     start,
     pause,
     skip,
