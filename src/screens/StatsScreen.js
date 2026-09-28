@@ -1639,22 +1639,22 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle style={{ marginTop: 16 }}>{period === '7d' ? 'Daily' : 'Weekly'} trends & session quality ({periodLabel})</SectionTitle>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
-            <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingRight: isDesktop ? 20 : 0 }}>
               <Label>Practice volume</Label>
               <PracticeVolumeChart sessions={sessions} period={period} />
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
-            <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>{period === '7d' ? 'Daily' : 'Weekly'} trends</Label>
               <WeeklyTrendChart sessions={sessions} period={period} />
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
-            <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>Session quality</Label>
               <ScatterPlot sessions={periodSessions} />
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
-            <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>Day of week (all time)</Label>
               <DayOfWeekChart sessions={sessions} />
             </View>
@@ -1664,7 +1664,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle style={{ marginTop: 16 }}>Technique & scales ({periodLabel})</SectionTitle>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
-            <View style={{ flex: 1, minWidth: 0, paddingRight: isDesktop ? 20 : 0 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, minWidth: 0, paddingRight: isDesktop ? 20 : 0 }}>
               <Label>Groups</Label>
               <TechniqueBreakdown sessions={periodSessions} />
             </View>
@@ -1716,12 +1716,12 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle style={{ marginTop: 16 }}>Library growth & streak history</SectionTitle>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
-            <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingRight: isDesktop ? 20 : 0 }}>
               <Label>Library growth</Label>
               <LibraryGrowthChart compositions={compositions} sessions={sessions} lessons={lessons} />
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
-            <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>Streak history ({periodLabel})</Label>
               <StreakHistory sessions={periodSessions} />
             </View>
@@ -1731,7 +1731,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <SectionTitle style={{ marginTop: 16 }}>Most practised & wins ({periodLabel})</SectionTitle>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
-            <View style={{ flex: 1, paddingRight: isDesktop ? 20 : 0 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingRight: isDesktop ? 20 : 0 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <Label style={{ marginBottom: 0 }}>Most practised</Label>
                 <View style={{ flexDirection: 'row', gap: 5 }}>
@@ -1796,7 +1796,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               )}
             </View>
             {isDesktop && <View style={{ width: 1, backgroundColor: COLOURS.glassBorderSubtle, alignSelf: 'stretch', marginHorizontal: 4 }} />}
-            <View style={{ flex: 1, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
+            <View style={{ flex: isDesktop ? 1 : undefined, paddingLeft: isDesktop ? 20 : 0, marginTop: isDesktop ? 0 : 16 }}>
               <Label>Wins</Label>
               <WinsTimeline sessions={sessions} period={period} />
               <View style={{ height: 1, backgroundColor: COLOURS.glassBorderSubtle, marginVertical: 14 }} />
