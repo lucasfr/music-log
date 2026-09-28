@@ -133,26 +133,35 @@ export function MetronomeControl({ composition }) {
   const beatIndexRef = useRef(0);
   const holdTimeoutRef = useRef(null);
   const holdIntervalRef = useRef(null);
-  const accentPlayerRef = useRef(null);
-  const subPlayerRef = useRef(null);
+  const flashTimeoutRef = useRef(null);
+  const accentPlayersRef = useRef([]);
+  const subPlayersRef = useRef([]);
+  const accentIdxRef = useRef(0);
+  const subIdxRef = useRef(0);
 
-  function getAccentPlayer() {
-    if (!accentPlayerRef.current) {
-      try { accentPlayerRef.current = createAudioPlayer({ uri: ACCENT_CLICK_URI }); }
-      catch (e) { accentPlayerRef.current = false; }
+  // A small round-robin pool per click type, rather than one reused player.
+  // At high bpm (especially with subdivisions on), the gap between ticks
+  // can shrink close to or below the click sample's own playback time —
+  // calling seekTo(0)+play() again on a player that's still mid-playback
+  // is exactly the kind of retrigger that causes audio glitches/dropouts.
+  // Cycling through a few instances gives each one a full rotation's worth
+  // of time to finish before it's reused.
+  const POOL_SIZE = 4;
+
+  function getNextPlayer(poolRef, idxRef, uri) {
+    if (poolRef.current.length < POOL_SIZE) {
+      try { poolRef.current.push(createAudioPlayer({ uri })); }
+      catch (e) { return null; }
     }
-    return accentPlayerRef.current || null;
-  }
-  function getSubPlayer() {
-    if (!subPlayerRef.current) {
-      try { subPlayerRef.current = createAudioPlayer({ uri: SUB_CLICK_URI }); }
-      catch (e) { subPlayerRef.current = false; }
-    }
-    return subPlayerRef.current || null;
+    const player = poolRef.current[idxRef.current];
+    idxRef.current = (idxRef.current + 1) % POOL_SIZE;
+    return player || null;
   }
 
   function playClick(isMain) {
-    const player = isMain ? getAccentPlayer() : getSubPlayer();
+    const player = isMain
+      ? getNextPlayer(accentPlayersRef, accentIdxRef, ACCENT_CLICK_URI)
+      : getNextPlayer(subPlayersRef, subIdxRef, SUB_CLICK_URI);
     if (player) {
       try { player.seekTo(0); player.play(); } catch (e) {}
     }
@@ -165,7 +174,12 @@ export function MetronomeControl({ composition }) {
       if (beatIndexRef.current === 0) Haptics.selectionAsync().catch(() => {});
       setBeatIndex(beatIndexRef.current);
       setFlashMain(true);
-      setTimeout(() => setFlashMain(false), 110);
+      // Capped below the actual tick interval so the "turn the flash off"
+      // timeout can never outlive the next tick and pile up at high bpm.
+      const intervalMs = (60000 / bpm) / subdivision;
+      const flashMs = Math.min(110, intervalMs * 0.6);
+      clearTimeout(flashTimeoutRef.current);
+      flashTimeoutRef.current = setTimeout(() => setFlashMain(false), flashMs);
       beatIndexRef.current = (beatIndexRef.current + 1) % mainBeats;
     } else {
       playClick(false);
@@ -203,6 +217,7 @@ export function MetronomeControl({ composition }) {
     return () => {
       clearTimeout(holdTimeoutRef.current);
       clearInterval(holdIntervalRef.current);
+      clearTimeout(flashTimeoutRef.current);
     };
   }, []);
 
