@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
@@ -98,6 +98,47 @@ function NoteIcon({ sub, color }) {
   );
 }
 
+// Isolated on purpose: this is the only piece of the metronome that changes
+// every single tick. Keeping its state here (rather than lifting it into
+// MetronomeControl) means ticking never re-renders the BlurView glass card
+// or any of the buttons/icons around it — only these few Views update.
+// Native blur re-renders are expensive enough that doing one per tick was
+// fighting the JS thread for the same time budget setTimeout needs to fire
+// on schedule, which is what was actually causing the glitching at every
+// tempo, not just high ones.
+const BeatDotsRow = forwardRef(function BeatDotsRow({ mainBeats }, ref) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [lit, setLit] = useState(false);
+  const flashTimeoutRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    pulse(index, flashMs) {
+      clearTimeout(flashTimeoutRef.current);
+      setActiveIndex(index);
+      setLit(true);
+      flashTimeoutRef.current = setTimeout(() => setLit(false), flashMs);
+    },
+    reset() {
+      clearTimeout(flashTimeoutRef.current);
+      setActiveIndex(0);
+      setLit(false);
+    },
+  }));
+
+  useEffect(() => () => clearTimeout(flashTimeoutRef.current), []);
+
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
+      {Array.from({ length: mainBeats }, (_, i) => (
+        <View key={i} style={{
+          width: 14, height: 14, borderRadius: 7,
+          backgroundColor: (lit && i === activeIndex) ? COLOURS.amber : 'rgba(247,127,0,0.22)',
+        }} />
+      ))}
+    </View>
+  );
+});
+
 function SigChip({ sig, active, onPress }) {
   const [num, den] = sig.split('/');
   const color = active ? '#fff' : COLOURS.steel;
@@ -123,17 +164,15 @@ export function MetronomeControl({ composition }) {
   const [playing, setPlaying] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [beatIndex, setBeatIndex] = useState(0);
-  const [flashMain, setFlashMain] = useState(false);
 
   const mainBeats = mainBeatsFor(sig);
+  const dotsRef = useRef(null);
 
   const timerRef = useRef(null);
   const tickCountRef = useRef(0);
   const beatIndexRef = useRef(0);
   const holdTimeoutRef = useRef(null);
   const holdIntervalRef = useRef(null);
-  const flashTimeoutRef = useRef(null);
   const accentPlayersRef = useRef([]);
   const subPlayersRef = useRef([]);
   const accentIdxRef = useRef(0);
@@ -172,14 +211,9 @@ export function MetronomeControl({ composition }) {
     if (isMain) {
       playClick(true);
       if (beatIndexRef.current === 0) Haptics.selectionAsync().catch(() => {});
-      setBeatIndex(beatIndexRef.current);
-      setFlashMain(true);
-      // Capped below the actual tick interval so the "turn the flash off"
-      // timeout can never outlive the next tick and pile up at high bpm.
       const intervalMs = (60000 / bpm) / subdivision;
       const flashMs = Math.min(110, intervalMs * 0.6);
-      clearTimeout(flashTimeoutRef.current);
-      flashTimeoutRef.current = setTimeout(() => setFlashMain(false), flashMs);
+      dotsRef.current?.pulse(beatIndexRef.current, flashMs);
       beatIndexRef.current = (beatIndexRef.current + 1) % mainBeats;
     } else {
       playClick(false);
@@ -187,28 +221,47 @@ export function MetronomeControl({ composition }) {
     tickCountRef.current = (tickCountRef.current + 1) % subdivision;
   }
 
+  // Drift-corrected scheduler instead of a naive setInterval. setInterval
+  // just requests "call me again in N ms" with no memory of how late the
+  // previous call actually landed — any JS-thread stall (a render, a GC
+  // pause, a bridge round-trip) makes every subsequent tick permanently
+  // late by that same amount, compounding over a long session. This tracks
+  // the *expected* wall-clock time of each tick and shrinks the next delay
+  // by however much the previous one overshot, so timing self-corrects
+  // instead of drifting.
+  function startScheduler(intervalMs) {
+    let expected = Date.now() + intervalMs;
+    function step() {
+      tick();
+      const drift = Date.now() - expected;
+      const nextDelay = Math.max(0, intervalMs - drift);
+      expected += intervalMs;
+      timerRef.current = setTimeout(step, nextDelay);
+    }
+    timerRef.current = setTimeout(step, intervalMs);
+  }
+
   // Single source of truth for "reset the beat cycle": runs whenever bpm,
   // time signature, subdivision, or play state changes — i.e. every
   // settings change and every play/pause press, per the actual request.
-  // Always clears any running interval, snaps the visual/audio state back
-  // to beat 1, and (if playing) fires an immediate fresh tick before
-  // resuming the interval at the current settings. Centralising this here
-  // avoids the stale-closure risk of computing intervals inside individual
-  // change handlers.
+  // Always clears any running timer, snaps the visual/audio state back to
+  // beat 1 via the isolated dots component, and (if playing) fires an
+  // immediate fresh tick before starting the scheduler at the current
+  // settings. Centralising this here avoids the stale-closure risk of
+  // computing intervals inside individual change handlers.
   useEffect(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
     tickCountRef.current = 0;
     beatIndexRef.current = 0;
-    setBeatIndex(0);
-    setFlashMain(false);
+    dotsRef.current?.reset();
 
     if (playing) {
       tick();
-      timerRef.current = setInterval(tick, (60000 / bpm) / subdivision);
+      startScheduler((60000 / bpm) / subdivision);
     }
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bpm, sig, subdivision, playing]);
@@ -217,7 +270,6 @@ export function MetronomeControl({ composition }) {
     return () => {
       clearTimeout(holdTimeoutRef.current);
       clearInterval(holdIntervalRef.current);
-      clearTimeout(flashTimeoutRef.current);
     };
   }, []);
 
@@ -269,17 +321,7 @@ export function MetronomeControl({ composition }) {
         ) : null}
       </View>
 
-      <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
-        {Array.from({ length: mainBeats }, (_, i) => {
-          const lit = playing && i === beatIndex && flashMain;
-          return (
-            <View key={i} style={{
-              width: 14, height: 14, borderRadius: 7,
-              backgroundColor: lit ? COLOURS.amber : 'rgba(247,127,0,0.22)',
-            }} />
-          );
-        })}
-      </View>
+      <BeatDotsRow ref={dotsRef} mainBeats={mainBeats} />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
         <TouchableOpacity
