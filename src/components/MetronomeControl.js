@@ -461,12 +461,22 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>metronome</Text>
-        {composition ? (
-          <TouchableOpacity onPress={usePieceTempo} activeOpacity={0.75}
-            style={{ paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(8,131,149,0.10)' }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.steel }}>Use piece tempo</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {composition ? (
+            <TouchableOpacity onPress={usePieceTempo} activeOpacity={0.75}
+              style={{ paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(8,131,149,0.10)' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.steel }}>Use piece tempo</Text>
+            </TouchableOpacity>
+          ) : null}
+          {/* Play/pause lives here, in the header, rather than at the foot of
+              the card — the card can grow tall once presets/more-time-sigs are
+              expanded, and the most-tapped control shouldn't require
+              scrolling past all of that to reach. */}
+          <TouchableOpacity onPress={togglePlay} activeOpacity={0.85}
+            style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: COLOURS.amber, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 13, color: '#fff' }}>{playing ? '❙❙' : '▶'}</Text>
           </TouchableOpacity>
-        ) : null}
+        </View>
       </View>
 
       {audioError ? (
@@ -564,13 +574,6 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             </TouchableOpacity>
           );
         })}
-      </View>
-
-      <View style={{ alignItems: 'center' }}>
-        <TouchableOpacity onPress={togglePlay} activeOpacity={0.85}
-          style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: COLOURS.amber, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontSize: 15, color: '#fff' }}>{playing ? '❙❙' : '▶'}</Text>
-        </TouchableOpacity>
       </View>
     </View>
     </BlurView>

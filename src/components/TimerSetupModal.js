@@ -14,6 +14,48 @@ import { uid } from '../utils';
 function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
   const isTech = segment.type === 'technique';
   const field = (k, v) => onChange({ ...segment, [k]: v });
+  const isValid = Number(segment.plannedMinutes) > 0 && (isTech ? !!segment.title : !!segment.compositionId);
+
+  // Confirmed segments collapse to a single compact summary row — with
+  // several segments in a plan, each carrying a full technique-group
+  // picker or piece picker plus a large drag dial, reviewing the whole
+  // plan before starting meant a lot of scrolling past segments you'd
+  // already finished setting up. Collapsing the ones you're done with
+  // keeps only what still needs attention expanded.
+  if (segment.confirmed) {
+    return (
+      <View style={{
+        flexDirection: 'row', alignItems: 'center',
+        borderRadius: RADIUS.md,
+        backgroundColor: 'rgba(255,255,255,0.55)',
+        paddingHorizontal: 12, paddingVertical: 10,
+        marginBottom: 10,
+        shadowColor: COLOURS.glassShadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 8,
+        elevation: 2,
+      }}>
+        <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.tealAccent, marginRight: 10 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 9, color: COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            {isTech ? 'technique' : 'repertoire'}
+          </Text>
+        </View>
+        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
+          {segment.title || 'Untitled'}
+        </Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 12 }}>
+          {segment.plannedMinutes} min
+        </Text>
+        <TouchableOpacity onPress={() => field('confirmed', false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginRight: 14 }}>
+          <Text style={{ fontSize: 13, color: COLOURS.steel }}>✎</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={{
@@ -87,6 +129,20 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
       <View style={{ alignItems: 'center', marginTop: 4 }}>
         <MinutesDial value={segment.plannedMinutes || 10} onChange={v => field('plannedMinutes', v)} />
       </View>
+
+      <TouchableOpacity
+        onPress={() => field('confirmed', true)}
+        activeOpacity={0.75}
+        disabled={!isValid}
+        style={{
+          marginTop: 12, paddingVertical: 9, borderRadius: RADIUS.pill, alignItems: 'center',
+          backgroundColor: isValid ? COLOURS.navy : 'rgba(9,99,126,0.15)',
+        }}
+      >
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: isValid ? '#fff' : COLOURS.textDim }}>
+          Confirm
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -104,7 +160,7 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
   const canStart = draftSegments.length > 0 && draftSegments.every(s => Number(s.plannedMinutes) > 0 && (s.type === 'technique' ? s.title : s.compositionId));
 
   function handleStart() {
-    onStart(draftSegments.map(s => ({ ...s, plannedMinutes: Number(s.plannedMinutes) })));
+    onStart(draftSegments.map(({ confirmed, ...s }) => ({ ...s, plannedMinutes: Number(s.plannedMinutes) })));
     setDraftSegments([]);
   }
 
