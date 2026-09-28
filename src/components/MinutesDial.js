@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, Text, PanResponder } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { COLOURS } from '../theme';
 import { dialTick } from '../utils/dialFeedback';
 
@@ -91,10 +91,16 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
       style={{ width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' }}
     >
       <Svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} pointerEvents="none">
+        <Defs>
+          <LinearGradient id="dialGrad" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={COLOURS.gold} />
+            <Stop offset="1" stopColor={COLOURS.amber} />
+          </LinearGradient>
+        </Defs>
         <Circle cx={CENTER} cy={CENTER} r={R} stroke="rgba(9,99,126,0.12)" strokeWidth={STROKE} fill="none" />
         <Circle
           cx={CENTER} cy={CENTER} r={R}
-          stroke={COLOURS.amber} strokeWidth={STROKE} fill="none"
+          stroke="url(#dialGrad)" strokeWidth={STROKE} fill="none"
           strokeDasharray={`${progressLen} ${CIRC}`}
           strokeLinecap="round"
           rotation={-90}
