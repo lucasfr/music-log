@@ -337,6 +337,16 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                 value={data.timeSigs || (data.timeSig ? [data.timeSig] : [])}
                 onChange={v => f('timeSigs', v)}
               />
+              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-end' }}>
+                <View style={{ flex: 1 }}>
+                  <Field label="♪ Reference tempo (bpm)">
+                    <TextF value={data.tempo ? String(data.tempo) : ''} onChange={v => f('tempo', v.replace(/[^0-9]/g, ''))} placeholder="e.g. 92" />
+                  </Field>
+                </View>
+                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, flex: 1, marginBottom: 14 }}>
+                  Drives the metronome default when you time a practice segment on this piece.
+                </Text>
+              </View>
               <DifficultyPicker value={data.difficulty || 0} onChange={v => f('difficulty', v)} />
               <Field label="⭐ Liking" style={{ marginBottom: 0 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>

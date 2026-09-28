@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { COLOURS, RADIUS } from '../theme';
@@ -7,6 +7,7 @@ import { playChime } from '../utils/chime';
 import { useKeepAwake } from '../utils/useKeepAwake';
 import { usePracticeTimer } from '../utils/usePracticeTimer';
 import { scheduleSegmentEndNotification, cancelScheduledNotification } from '../utils/segmentNotifications';
+import { MetronomeControl } from './MetronomeControl';
 
 const RING_SIZE = 220;
 const RING_R = 92;
@@ -25,9 +26,10 @@ function fmtMinutes(ms) {
   return `${totalMin}:00`;
 }
 
-export function PracticeTimerScreen({ visible, initialSegments, onFinish }) {
+export function PracticeTimerScreen({ visible, initialSegments, compositions, onFinish }) {
   const timer = usePracticeTimer(initialSegments);
   useKeepAwake(visible && timer.isRunning);
+  const [showMetronome, setShowMetronome] = useState(false);
 
   // Bumped on every play/pause/skip/+minutes so the notification effect
   // below knows to reschedule against the new deadline — deliberately not
@@ -93,6 +95,7 @@ export function PracticeTimerScreen({ visible, initialSegments, onFinish }) {
 
   const fractionRemaining = timer.plannedMs > 0 ? Math.max(0, Math.min(1, timer.remainingMs / timer.plannedMs)) : 0;
   const visibleLength = CIRCUMFERENCE * fractionRemaining;
+  const linkedComposition = (compositions || []).find(c => c.id === timer.currentSegment.compositionId) || null;
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => timer.finishNow()}>
@@ -105,7 +108,7 @@ export function PracticeTimerScreen({ visible, initialSegments, onFinish }) {
             </TouchableOpacity>
           </View>
 
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 20 }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 4 }}>
               segment {timer.currentIndex + 1} of {timer.segments.length}
             </Text>
@@ -163,15 +166,36 @@ export function PracticeTimerScreen({ visible, initialSegments, onFinish }) {
             </View>
 
             {timer.nextSegment ? (
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 22 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 22, marginBottom: 18 }}>
                 up next: {timer.nextSegment.title} · {timer.nextSegment.plannedMinutes} min
               </Text>
             ) : (
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 22 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 22, marginBottom: 18 }}>
                 last segment — session ends after this
               </Text>
             )}
-          </View>
+
+            <TouchableOpacity
+              onPress={() => setShowMetronome(s => !s)}
+              activeOpacity={0.75}
+              style={{
+                paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.pill,
+                backgroundColor: showMetronome ? COLOURS.navy : 'transparent',
+                borderWidth: showMetronome ? 0 : 1, borderColor: 'rgba(9,99,126,0.35)',
+                marginBottom: showMetronome ? 14 : 0,
+              }}
+            >
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: showMetronome ? '#fff' : COLOURS.steel }}>
+                Metronome
+              </Text>
+            </TouchableOpacity>
+
+            {showMetronome && (
+              <View style={{ width: '100%', maxWidth: 320 }}>
+                <MetronomeControl key={timer.currentIndex} composition={linkedComposition} />
+              </View>
+            )}
+          </ScrollView>
         </SafeAreaView>
       </View>
     </Modal>

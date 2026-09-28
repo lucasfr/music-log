@@ -799,6 +799,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             key={sessionKey}
             visible={true}
             initialSegments={timerSegments}
+            compositions={compositions}
             onFinish={handleTimerFinish}
           />
         )}
@@ -856,6 +857,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           key={sessionKey}
           visible={true}
           initialSegments={timerSegments}
+          compositions={compositions}
           onFinish={handleTimerFinish}
         />
       )}
