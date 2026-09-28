@@ -8,7 +8,7 @@ import { getClient, getSession } from '../lib/supabase';
 async function authedClient() {
   const session = await getSession();
   if (!session) return null;
-  return getClient();
+  return await getClient();
 }
 
 function userId(session) {
@@ -49,7 +49,7 @@ export async function pushRecord(table, record) {
   try {
     const session = await getSession();
     if (!session) return;
-    const client = getClient();
+    const client = await getClient();
     const row = toRow(table, record, userId(session));
     const { error } = await client.from(table).upsert(row, { onConflict: 'id' });
     if (error) console.warn(`[sync] push ${table} failed:`, error.message, error.details);
@@ -81,7 +81,7 @@ export async function pullTable(table) {
   try {
     const session = await getSession();
     if (!session) return null;
-    const client = getClient();
+    const client = await getClient();
     const PAGE_SIZE = 1000;
     let allData = [];
     let from = 0;

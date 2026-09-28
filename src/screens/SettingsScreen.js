@@ -164,7 +164,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   const [error,        setError]        = useState(null);
 
   const loadState = useCallback(async () => {
-    const { url: savedUrl, anonKey: savedKey } = getSupabaseCredentials();
+    const { url: savedUrl, anonKey: savedKey } = await getSupabaseCredentials();
     if (savedUrl) setUrl(savedUrl);
     if (savedKey) setAnonKey(savedKey);
     setCredsSaved(!!(savedUrl && savedKey));
@@ -178,7 +178,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const handler = async () => {
-      const client = getClient();
+      const client = await getClient();
       if (!client) return;
       const s = await getSession();
       if (s) { setSession(s); setPhase('idle'); }
@@ -190,7 +190,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   async function handleSaveCredentials() {
     setError(null);
     if (!url.trim() || !anonKey.trim()) { setError('Both fields are required.'); return; }
-    saveSupabaseCredentials(url, anonKey);
+    await saveSupabaseCredentials(url, anonKey);
     setCredsSaved(true);
     setSavedBanner(true);
     setTimeout(() => setSavedBanner(false), 2500);
@@ -246,8 +246,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     } catch (e) { setError(e.message || 'Import failed.'); }
   }
 
-  function handleClearCredentials() {
-    clearSupabaseCredentials();
+  async function handleClearCredentials() {
+    await clearSupabaseCredentials();
     setUrl(''); setAnonKey(''); setCredsSaved(false); setSession(null);
   }
 
