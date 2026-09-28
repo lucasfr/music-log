@@ -50,16 +50,32 @@ export function dialTick() {
   const ctx = getAudioCtx();
   if (!ctx) return;
   try {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'square';
-    osc.frequency.value = 1400;
-    gain.gain.value = 0.06;
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.025);
-    osc.stop(ctx.currentTime + 0.03);
+    const now = ctx.currentTime;
+
+    // Body: a low sine 'tock', matching the native WAV's character
+    const body = ctx.createOscillator();
+    const bodyGain = ctx.createGain();
+    body.type = 'sine';
+    body.frequency.value = 220;
+    bodyGain.gain.value = 0.11;
+    body.connect(bodyGain);
+    bodyGain.connect(ctx.destination);
+    body.start(now);
+    bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+    body.stop(now + 0.055);
+
+    // Transient: a brief higher tone for onset definition, quieter and
+    // much shorter so it reads as attack rather than pitch
+    const click = ctx.createOscillator();
+    const clickGain = ctx.createGain();
+    click.type = 'sine';
+    click.frequency.value = 700;
+    clickGain.gain.value = 0.05;
+    click.connect(clickGain);
+    clickGain.connect(ctx.destination);
+    click.start(now);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
+    click.stop(now + 0.02);
   } catch (e) {
     // Non-fatal — the dial still works perfectly well silently.
   }
