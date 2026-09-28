@@ -245,21 +245,24 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     tickCountRef.current = (tickCountRef.current + 1) % subdivision;
   }
 
-  // Drift-corrected scheduler instead of a naive setInterval. setInterval
-  // just requests "call me again in N ms" with no memory of how late the
-  // previous call actually landed — any JS-thread stall (a render, a GC
-  // pause, a bridge round-trip) makes every subsequent tick permanently
-  // late by that same amount, compounding over a long session. This tracks
-  // the *expected* wall-clock time of each tick and shrinks the next delay
-  // by however much the previous one overshot, so timing self-corrects
-  // instead of drifting.
+  // Drift-corrected scheduler instead of a naive setInterval, but capped
+  // deliberately: if a JS-thread stall (a render, a GC pause, a bridge
+  // round-trip) ever makes us fall behind by more than one full interval,
+  // we resync to "now" instead of trying to make up the lost time. Naively
+  // shrinking the next delay to claw back drift means a big enough stall
+  // clamps nextDelay to ~0 and the scheduler fires a burst of ticks back-
+  // to-back with no gap between them — audio clicks piling up and the
+  // Animated pulse on each dot interrupting the previous one before it's
+  // visually settled. A brief pause followed by clean resumption reads far
+  // better on a practice metronome than perfect long-run tempo accuracy.
   function startScheduler(intervalMs) {
     let expected = Date.now() + intervalMs;
     function step() {
       tick();
-      const drift = Date.now() - expected;
-      const nextDelay = Math.max(0, intervalMs - drift);
-      expected += intervalMs;
+      const now = Date.now();
+      const drift = now - expected;
+      expected = drift > intervalMs ? now + intervalMs : expected + intervalMs;
+      const nextDelay = Math.max(0, expected - now);
       timerRef.current = setTimeout(step, nextDelay);
     }
     timerRef.current = setTimeout(step, intervalMs);
