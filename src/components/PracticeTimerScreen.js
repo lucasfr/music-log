@@ -50,9 +50,9 @@ const MetronomeSection = React.memo(function MetronomeSection({ showMetronome, o
   );
 });
 
-const RING_SIZE = 220;
-const RING_R = 92;
-const RING_STROKE = 12;
+const RING_SIZE = 190;
+const RING_R = 80;
+const RING_STROKE = 11;
 const CIRCUMFERENCE = 2 * Math.PI * RING_R;
 
 function fmtClock(ms) {
@@ -104,7 +104,7 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
         />
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center' }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 36, color: COLOURS.text }}>{fmtClock(remainingMs)}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 32, color: COLOURS.text }}>{fmtClock(remainingMs)}</Text>
         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>of {fmtMinutes(plannedMs)}</Text>
       </View>
     </View>
@@ -195,12 +195,13 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
             </View>
           </BlurView>
 
-          <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 20 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 4 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 10 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 2 }}>
               segment {timer.currentIndex + 1} of {timer.segments.length}
             </Text>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text, marginBottom: 24, textAlign: 'center' }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text, marginBottom: 8, textAlign: 'center' }}>
               {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
+              {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
             </Text>
 
             <CountdownRing
@@ -210,7 +211,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
               isRunning={timer.isRunning}
             />
 
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 32 }}>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
               <TouchableOpacity
                 onPress={() => (timer.isRunning ? handlePause() : handleStart())}
                 activeOpacity={0.85}
@@ -239,11 +240,11 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
             </View>
 
             {timer.nextSegment ? (
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 22, marginBottom: 18 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
                 up next: {timer.nextSegment.title} · {timer.nextSegment.plannedMinutes} min
               </Text>
             ) : (
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 22, marginBottom: 18 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
                 last segment — session ends after this
               </Text>
             )}
