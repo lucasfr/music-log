@@ -43,6 +43,9 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
         </View>
         <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
           {segment.title || 'Untitled'}
+          {isTech && segment.compositionId
+            ? ` · ${(compositions.find(c => c.id === segment.compositionId) || {}).title || ''}`
+            : ''}
         </Text>
         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 12 }}>
           {segment.plannedMinutes} min

@@ -550,14 +550,25 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   }
 
   function handleTimerFinish(timer) {
-    const prefilled = timer.segments.map((s, i) => ({
-      id: s.id,
-      type: s.type,
-      title: s.title || '',
-      compositionId: s.compositionId || '',
-      duration: timer.actualMinutesFor(i),
-      notes: '', challenges: [], progress: [],
-    }));
+    // SegmentEditor's technique-group pills read segment.group (set via its
+    // own field('group', g)), not segment.title — title there is only the
+    // optional free-text label underneath. The timer's own group picker
+    // (TimerSetupModal) stores the chosen group in title, so it has to be
+    // remapped to group here or the pill shows nothing selected when the
+    // log form opens, and saving without manually re-clicking it drops the
+    // technique group entirely.
+    const prefilled = timer.segments.map((s, i) => {
+      const isTech = s.type === 'technique';
+      return {
+        id: s.id,
+        type: s.type,
+        group: isTech ? (s.title || '') : undefined,
+        title: isTech ? '' : (s.title || ''),
+        compositionId: s.compositionId || '',
+        duration: timer.actualMinutesFor(i),
+        notes: '', challenges: [], progress: [],
+      };
+    });
     setTimerSegments(null);
     openLogSession(today, { date: today, segments: prefilled });
   }
