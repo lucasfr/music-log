@@ -5,7 +5,7 @@ import { COLOURS, RADIUS } from '../theme';
 export function FAB({ onPractice, onLesson, onTimer }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <View style={{ position: 'absolute', bottom: Platform.OS === 'web' ? 24 : Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
+    <View style={{ position: 'absolute', bottom: Platform.OS === 'web' ? 100 : Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
       {expanded && (
         <>
           {onTimer && (
