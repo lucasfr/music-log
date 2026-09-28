@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -99,41 +99,50 @@ function NoteIcon({ sub, color }) {
 }
 
 // Isolated on purpose: this is the only piece of the metronome that changes
-// every single tick. Keeping its state here (rather than lifting it into
-// MetronomeControl) means ticking never re-renders the BlurView glass card
-// or any of the buttons/icons around it — only these few Views update.
-// Native blur re-renders are expensive enough that doing one per tick was
-// fighting the JS thread for the same time budget setTimeout needs to fire
-// on schedule, which is what was actually causing the glitching at every
-// tempo, not just high ones.
+// every single tick. The flash itself is driven entirely by a native-
+// driver Animated opacity fade rather than React state + backgroundColor
+// — backgroundColor changes aren't eligible for the native driver, so
+// that version still forced a JS-thread re-render on every beat, which
+// competes with the same JS thread the audio scheduler needs to fire on
+// time. This version never re-renders from ticking at all; the fade runs
+// entirely on the UI thread via useNativeDriver.
+const MAX_DOTS = 8;
 const BeatDotsRow = forwardRef(function BeatDotsRow({ mainBeats }, ref) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [lit, setLit] = useState(false);
-  const flashTimeoutRef = useRef(null);
+  const animsRef = useRef(null);
+  if (!animsRef.current) {
+    animsRef.current = Array.from({ length: MAX_DOTS }, () => new Animated.Value(0));
+  }
 
   useImperativeHandle(ref, () => ({
     pulse(index, flashMs) {
-      clearTimeout(flashTimeoutRef.current);
-      setActiveIndex(index);
-      setLit(true);
-      flashTimeoutRef.current = setTimeout(() => setLit(false), flashMs);
+      animsRef.current.forEach((v, i) => {
+        if (i !== index) {
+          v.stopAnimation();
+          v.setValue(0);
+        }
+      });
+      const v = animsRef.current[index];
+      v.stopAnimation();
+      v.setValue(1);
+      Animated.timing(v, { toValue: 0, duration: flashMs, useNativeDriver: true }).start();
     },
     reset() {
-      clearTimeout(flashTimeoutRef.current);
-      setActiveIndex(0);
-      setLit(false);
+      animsRef.current.forEach(v => {
+        v.stopAnimation();
+        v.setValue(0);
+      });
     },
   }));
-
-  useEffect(() => () => clearTimeout(flashTimeoutRef.current), []);
 
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
       {Array.from({ length: mainBeats }, (_, i) => (
-        <View key={i} style={{
-          width: 14, height: 14, borderRadius: 7,
-          backgroundColor: (lit && i === activeIndex) ? COLOURS.amber : 'rgba(247,127,0,0.22)',
-        }} />
+        <View key={i} style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: 'rgba(247,127,0,0.22)', overflow: 'hidden' }}>
+          <Animated.View style={{
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 7,
+            backgroundColor: COLOURS.amber, opacity: animsRef.current[i],
+          }} />
+        </View>
       ))}
     </View>
   );
