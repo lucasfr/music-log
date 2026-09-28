@@ -39,25 +39,36 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
       </View>
 
       {isTech ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-          {TECH_GROUPS.map(g => {
-            const active = segment.title === g;
-            return (
-              <TouchableOpacity
-                key={g}
-                onPress={() => field('title', g)}
-                activeOpacity={0.75}
-                style={{
-                  paddingHorizontal: 10, paddingVertical: 5,
-                  borderRadius: RADIUS.pill,
-                  backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.65)',
-                }}
-              >
-                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+            {TECH_GROUPS.map(g => {
+              const active = segment.title === g;
+              return (
+                <TouchableOpacity
+                  key={g}
+                  onPress={() => field('title', g)}
+                  activeOpacity={0.75}
+                  style={{
+                    paddingHorizontal: 10, paddingVertical: 5,
+                    borderRadius: RADIUS.pill,
+                    backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.65)',
+                  }}
+                >
+                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <View style={{ marginBottom: 8 }}>
+            <SelectF
+              label=""
+              value={segment.compositionId || ''}
+              onChange={id => field('compositionId', id)}
+              options={compositions.map(c => ({ value: c.id, label: c.title }))}
+              placeholder="Link a library piece (optional)…"
+            />
+          </View>
+        </>
       ) : (
         <View style={{ marginBottom: 8 }}>
           <SelectF

@@ -2,9 +2,10 @@ import React, { useRef } from 'react';
 import { View, Text, PanResponder } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { COLOURS } from '../theme';
+import { dialTick } from '../utils/dialFeedback';
 
-const SIZE = 148;
-const STROKE = 12;
+const SIZE = 216;
+const STROKE = 16;
 const R = (SIZE - STROKE) / 2;
 const CENTER = SIZE / 2;
 const CIRC = 2 * Math.PI * R;
@@ -24,6 +25,7 @@ function valueForAngle(angle, max, step) {
 export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min' }) {
   const viewRef = useRef(null);
   const layoutRef = useRef({ pageX: 0, pageY: 0, size: SIZE });
+  const lastValueRef = useRef(value);
 
   function angleFromTouch(pageX, pageY) {
     const { pageX: ox, pageY: oy, size } = layoutRef.current;
@@ -36,18 +38,21 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
     return deg;
   }
 
+  function applyTouch(pageX, pageY) {
+    const v = valueForAngle(angleFromTouch(pageX, pageY), max, step);
+    if (v !== lastValueRef.current) {
+      dialTick();
+      lastValueRef.current = v;
+    }
+    onChange(v);
+  }
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (e) => {
-        const { pageX, pageY } = e.nativeEvent;
-        onChange(valueForAngle(angleFromTouch(pageX, pageY), max, step));
-      },
-      onPanResponderMove: (e) => {
-        const { pageX, pageY } = e.nativeEvent;
-        onChange(valueForAngle(angleFromTouch(pageX, pageY), max, step));
-      },
+      onPanResponderGrant: (e) => applyTouch(e.nativeEvent.pageX, e.nativeEvent.pageY),
+      onPanResponderMove: (e) => applyTouch(e.nativeEvent.pageX, e.nativeEvent.pageY),
     })
   ).current;
 
@@ -84,8 +89,8 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
         />
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center' }} pointerEvents="none">
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 26, color: COLOURS.navy }}>{value}</Text>
-        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{label}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 38, color: COLOURS.navy }}>{value}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{label}</Text>
       </View>
     </View>
   );

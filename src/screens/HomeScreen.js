@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Platform, Image, Alert, Modal,
+  View, Text, ScrollView, TouchableOpacity, Image, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -549,18 +549,6 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     setTimerSetupVisible(false);
   }
 
-  function handleTimerCancel() {
-    const discard = () => setTimerSegments(null);
-    if (Platform.OS === 'web') {
-      if (window.confirm('End this timed session? Progress on the current segment will be lost.')) discard();
-    } else {
-      Alert.alert('End session?', 'Progress on the current segment will be lost.', [
-        { text: 'Keep going', style: 'cancel' },
-        { text: 'End session', style: 'destructive', onPress: discard },
-      ]);
-    }
-  }
-
   function handleTimerFinish(timer) {
     const prefilled = timer.segments.map((s, i) => ({
       id: s.id,
@@ -811,7 +799,6 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             key={sessionKey}
             visible={true}
             initialSegments={timerSegments}
-            onCancel={handleTimerCancel}
             onFinish={handleTimerFinish}
           />
         )}
@@ -869,7 +856,6 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           key={sessionKey}
           visible={true}
           initialSegments={timerSegments}
-          onCancel={handleTimerCancel}
           onFinish={handleTimerFinish}
         />
       )}

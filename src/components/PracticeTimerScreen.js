@@ -25,7 +25,7 @@ function fmtMinutes(ms) {
   return `${totalMin}:00`;
 }
 
-export function PracticeTimerScreen({ visible, initialSegments, onCancel, onFinish }) {
+export function PracticeTimerScreen({ visible, initialSegments, onFinish }) {
   const timer = usePracticeTimer(initialSegments);
   useKeepAwake(visible && timer.isRunning);
 
@@ -95,13 +95,13 @@ export function PracticeTimerScreen({ visible, initialSegments, onCancel, onFini
   const visibleLength = CIRCUMFERENCE * fractionRemaining;
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onCancel}>
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => timer.finishNow()}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 8 }}>
-            <TouchableOpacity onPress={onCancel} activeOpacity={0.75}
+            <TouchableOpacity onPress={() => timer.finishNow()} activeOpacity={0.75}
               style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.textDim, fontSize: 13 }}>End session</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.textDim, fontSize: 13 }}>Finish</Text>
             </TouchableOpacity>
           </View>
 

@@ -89,6 +89,18 @@ export function usePracticeTimer(initialSegments = []) {
 
   const skip = useCallback(() => goTo(currentIndex + 1), [goTo, currentIndex]);
 
+  // Ends the session right now, wherever it is — freezes whatever time has
+  // accumulated on the current segment and marks the session finished, same
+  // as running out the last segment naturally. This is the only "stop"
+  // affordance the timer screen needs: the caller's onFinish handler opens
+  // LogModal with the real elapsed time, and LogModal's own Cancel button
+  // covers genuinely discarding it.
+  const finishNow = useCallback(() => {
+    freezeCurrent();
+    setIsFinished(true);
+    setIsRunning(false);
+  }, [freezeCurrent]);
+
   const addMinutes = useCallback((mins) => {
     setSegments(prev => prev.map((s, i) => (i === currentIndex ? { ...s, plannedMinutes: (s.plannedMinutes || 0) + mins } : s)));
   }, [currentIndex]);
@@ -120,6 +132,7 @@ export function usePracticeTimer(initialSegments = []) {
     start,
     pause,
     skip,
+    finishNow,
     addMinutes,
     goTo,
     actualMinutesFor,
