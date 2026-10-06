@@ -749,7 +749,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             </View>
             {feedContent}
           </ScrollView>
-          <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} onTimer={() => setTimerSetupVisible(true)} />
+          <FAB onPractice={() => openLogSession(today)} onLesson={() => openLogLesson(today)} onTimer={() => setTimerSetupVisible(true)} isDesktop />
         </View>
 
         {/* Right: detail / inline form panel */}

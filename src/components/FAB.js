@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { COLOURS, RADIUS } from '../theme';
 
-export function FAB({ onPractice, onLesson, onTimer }) {
+export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
   const [expanded, setExpanded] = useState(false);
+  // The +100 bump (from the original 24) only matters on mobile web, to
+  // clear the floating pill nav bar — desktop uses the sidebar instead and
+  // never had a pill to clear, so bumping it there just left the FAB
+  // sitting oddly high for no reason.
+  const bottom = isDesktop ? 24 : Platform.OS === 'web' ? 100 : Platform.OS === 'ios' ? 140 : 120;
   return (
-    <View style={{ position: 'absolute', bottom: Platform.OS === 'web' ? 100 : Platform.OS === 'ios' ? 140 : 120, right: 20, alignItems: 'flex-end', gap: 10 }}>
+    <View style={{ position: 'absolute', bottom, right: 20, alignItems: 'flex-end', gap: 10 }}>
       {expanded && (
         <>
           {onTimer && (
