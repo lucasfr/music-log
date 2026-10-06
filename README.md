@@ -24,9 +24,9 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 📅 **Calendar** — monthly grid with practice and lesson markers, month stats (sessions, lessons, minutes, avg energy), streak counter, and a day-detail panel on desktop
 - 📖 **History** — chronological feed of all sessions and lessons, fully expanded inline with complete segment detail, wins, and next-focus notes
 - 🎓 **Lessons** — log lessons separately with teacher, duration, per-piece feedback, assignments, overall notes, wins, and focus for next time
-- ⏱️ **Practice timer** — pomodoro-style segmented sessions: build a plan of technique/repertoire segments (each with its own minutes dial), confirm and collapse each one as you set it up, then run through them with a countdown ring, pause/skip/+5min controls, and automatic session logging when you finish
-- 🥁 **Metronome** — built into the timer screen: adjustable tempo (tap ±5 / hold ±1, named tempo markings from Largo to Presto), time signatures from 2/4 to 12/8 (compound meters felt in their conventional main pulses, not literal numerator), quarter-through-16th-note subdivisions, and a "use piece tempo" shortcut that reads a linked library piece's stored tempo/time signature. Runs on a real audio-engine clock (react-native-audio-api) rather than JS timers, for steady timing independent of anything else happening in the app
-- 🔄 **Optional cloud sync** — push/pull sessions, lessons, and compositions to a Supabase project of your own, with GitHub or magic-link sign-in; works the same on web and native
+- ⏱️ **Practice timer** — pomodoro-style segmented sessions: build a plan of technique/repertoire segments (each with its own minutes dial, reorderable with ↑/↓), confirm and collapse each one as you set it up, then run through them with a countdown ring, pause/skip/+5min controls, and automatic session logging when you finish
+- 🥁 **Metronome** — built into the timer screen: adjustable tempo (tap ±5 / hold ±1, named tempo markings from Largo to Presto), time signatures from 2/4 to 12/8 (compound meters felt in their conventional main pulses, not literal numerator), quarter-through-16th-note subdivisions, a "use piece tempo" shortcut that reads a linked library piece's stored tempo/time signature, and an optional tempo ramp (auto-increases bpm toward a target every N bars — useful for bringing a hard passage up to speed). Runs on a real audio-engine clock (react-native-audio-api) rather than JS timers, for steady timing independent of anything else happening in the app, and resumes correctly if the app is backgrounded mid-session
+- 🔄 **Optional cloud sync** — push/pull sessions, lessons, and compositions to a Supabase project of your own, with GitHub or magic-link sign-in; works the same on web and native, with a last-synced / sync-error indicator in Settings
 - 🎼 **Segment logging** — sessions split into technique segments (Hanon, Scales, Arpeggios, Sight-reading) and repertoire segments, each with notes, felt difficulty, challenge tags, and progress tags
 - 🎹 **Scale & arpeggio detail tracking** — scales/arpeggios tracked individually with parallel/contrary motion, unison/3rds/6ths/10ths interval apart, and 1–4 octaves per entry, backward-compatible with older plain-string entries. Catalogue covers major/natural/harmonic/melodic minor, modes, pentatonic, chromatic (all 12 keys), whole tone, diminished, augmented, blues, and dominant/diminished 7th arpeggios (all 12 keys)
 - 🗂️ **Composition library** — per-piece tracking of status, 🎹 difficulty, keys, time signatures, grade, arrangement, collection, year, tags, dates, teacher notes, study notes, and session history
@@ -69,7 +69,9 @@ music-log/
     ├── db/
     │   ├── index.js                # SQLite (native) + IndexedDB (web) data layer
     │   ├── hooks.js                # useSessions, useCompositions, useLessons — local save/load + auto push/pull sync
-    │   └── sync.js                 # Supabase push/pull/merge — safe no-ops when not signed in
+    │   ├── sync.js                 # Supabase push/pull/merge — safe no-ops when not signed in
+    │   ├── syncStatus.js           # Pub-sub for push/pull outcomes, feeds the Settings sync indicator
+    │   └── migrations.js           # One-time, flag-guarded data fixes (e.g. technique-group backfill)
     ├── components/
     │   ├── Background.js           # Dot-grid SVG background
     │   ├── UI.js                   # GlassCard, Btn, SectionTitle, StatusPill, etc.
@@ -100,9 +102,9 @@ music-log/
     └── utils/
         ├── export.js                # JSON export: Blob (web) / share sheet (native)
         ├── usePracticeTimer.js      # Segment timer engine: real-timestamp elapsed time, subscribeTick display hook
-        ├── metronomeSounds.js       # Embedded click samples + base64→ArrayBuffer decode
+        ├── metronomeSounds.js       # Embedded click samples + base64→ArrayBuffer decode (shared by the metronome and the dial tick)
         ├── chime.js                 # Segment-end / session-end chime
-        ├── dialFeedback.js           # Haptic + tick sound for the minutes dial
+        ├── dialFeedback.js           # Haptic + tick sound for the minutes dial (react-native-audio-api on native, Web Audio on web)
         ├── dialTickSound.js          # Embedded tick sample for the minutes dial
         ├── useKeepAwake.js           # Keeps the screen on while the timer is running
         └── segmentNotifications.js   # Local notification when a segment ends (native)
@@ -163,7 +165,6 @@ music.log works fully offline with no setup. To sync across devices, create a fr
 | `expo-font` | ~13 | Custom font loading |
 | `expo-file-system` | ~18 | Temp file write for JSON export (native) |
 | `expo-sharing` | ~12 | Native share sheet for JSON export |
-| `expo-audio` | ~1.1 | Dial-drag and segment-change tick sounds |
 | `expo-haptics` | ~15 | Haptic feedback on the metronome and minutes dial |
 | `expo-keep-awake` | ~15 | Keeps the screen on during a practice timer session |
 | `expo-notifications` | ~0.32 | Local notification when a segment ends (native) |

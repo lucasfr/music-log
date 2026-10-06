@@ -43,7 +43,7 @@ export default function AboutScreen({ isDesktop }) {
             music<Text style={{ color: COLOURS.practiceText }}>.</Text>
             <Text style={{ color: COLOURS.lessonText }}>log</Text>
           </Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, letterSpacing: 1.4, marginTop: 2 }}>v1.0.0</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, letterSpacing: 1.4, marginTop: 2 }}>v1.1.0</Text>
         </View>
 
         {/* Why this exists */}
@@ -59,9 +59,11 @@ export default function AboutScreen({ isDesktop }) {
           <CardLabel>How it works</CardLabel>
           {[
             ['🎹', 'Log a session',   'Record duration, energy, pieces practised, and what you worked on in each segment.'],
+            ['⏱️', 'Timed practice',   'Build a plan of segments and run through them with a countdown ring, a built-in metronome, and automatic logging when you finish.'],
             ['🎓', 'Log lessons',      'Capture teacher feedback, assignments, and what was covered — before you forget.'],
             ['📜', 'Build a library',  'Keep a catalogue of your repertoire with status, key, and time signature.'],
             ['📊', 'Track over time',  'Charts, streaks, and monthly stats show you the bigger picture.'],
+            ['🔄', 'Sync (optional)',  'Connect your own Supabase project to keep sessions, lessons, and your library in step across devices.'],
           ].map(([icon, title, body]) => (
             <View key={title} style={{ flexDirection: 'row', gap: 14, marginBottom: 14, alignItems: 'flex-start' }}>
               <Text style={{ fontSize: 22, width: 28, textAlign: 'center', marginTop: 1 }}>{icon}</Text>
