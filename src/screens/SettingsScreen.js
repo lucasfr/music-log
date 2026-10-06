@@ -15,7 +15,20 @@ import {
   signOut,
 } from '../lib/supabase';
 import { pushRecord } from '../db/sync';
+import { getSyncStatus, subscribeSyncStatus } from '../db/syncStatus';
 import { exportAllJSON, copyAllJSON, parseImportJSON, pickJSONFile } from '../utils/export';
+
+function timeAgo(iso) {
+  if (!iso) return null;
+  const diffSec = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+  if (diffSec < 10) return 'just now';
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.round(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  return `${Math.round(diffHr / 24)}d ago`;
+}
 
 // ─── Design primitives ────────────────────────────────────────────────────────
 
@@ -162,6 +175,13 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   const [syncResult,  setSyncResult]  = useState(null);
   const [importResult, setImportResult] = useState(null);
   const [error,        setError]        = useState(null);
+  const [syncStatus,   setSyncStatus]   = useState(getSyncStatus());
+
+  // Sync is fire-and-forget by design (push/pull shouldn't block whatever
+  // UI triggered them), which previously meant a failure was only ever a
+  // silent console.warn — no signal anywhere that a session never actually
+  // reached Supabase short of noticing it missing on another device later.
+  useEffect(() => subscribeSyncStatus(setSyncStatus), []);
 
   const loadState = useCallback(async () => {
     const { url: savedUrl, anonKey: savedKey } = await getSupabaseCredentials();
@@ -253,6 +273,15 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
 
   const isSignedIn = !!session;
   const totalRecords = sessions.length + lessons.length + compositions.length;
+  const syncSublabel = !isSignedIn
+    ? 'Device sync'
+    : syncStatus.lastError
+      ? `Sync error: ${syncStatus.lastError}`
+      : syncStatus.pending > 0
+        ? 'Syncing…'
+        : syncStatus.lastSuccessAt
+          ? `Last synced ${timeAgo(syncStatus.lastSuccessAt)}`
+          : 'Device sync';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
@@ -270,7 +299,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           <Row
             icon="cloud-outline"
             label="Supabase"
-            sublabel="Device sync"
+            sublabel={syncSublabel}
             right={<StatusDot connected={isSignedIn} />}
             first last noBorder
           />

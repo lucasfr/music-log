@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Platform, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, Animated, AppState } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -191,6 +191,9 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const [presetsOpen, setPresetsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [audioError, setAudioError] = useState(null);
+  const [rampEnabled, setRampEnabled] = useState(false);
+  const [rampTarget, setRampTarget] = useState(() => Math.min(240, defaultBpm + 40));
+  const [rampEveryBars, setRampEveryBars] = useState(4);
 
   const mainBeats = mainBeatsFor(sig);
   const dotsRef = useRef(null);
@@ -208,6 +211,17 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const lastBeatIndexRef = useRef(-1);
   const holdTimeoutRef = useRef(null);
   const holdIntervalRef = useRef(null);
+  const barCountRef = useRef(0);
+  // Always-fresh mirrors of the ramp settings for the rAF loop below, the
+  // same "useLatest" pattern usePracticeTimer uses — the loop's effect only
+  // re-runs on [playing, bpm, sig, subdivision, mainBeats], so without this
+  // it would read stale ramp settings if they're changed mid-playback.
+  const rampEnabledRef = useRef(rampEnabled);
+  const rampTargetRef = useRef(rampTarget);
+  const rampEveryBarsRef = useRef(rampEveryBars);
+  rampEnabledRef.current = rampEnabled;
+  rampTargetRef.current = rampTarget;
+  rampEveryBarsRef.current = rampEveryBars;
 
   const LOOKAHEAD_SEC = 0.12;
   const SCHEDULER_INTERVAL_MS = 30;
@@ -349,8 +363,28 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
         const mainTickNumber = Math.floor(stepIndex / subdivision);
         const beatIndex = ((mainTickNumber % mainBeats) + mainBeats) % mainBeats;
         if (beatIndex !== lastBeatIndexRef.current) {
+          const wrappedToStart = beatIndex === 0 && lastBeatIndexRef.current !== -1;
           lastBeatIndexRef.current = beatIndex;
           dotsRef.current?.pulse(beatIndex, flashMs);
+
+          // Tempo ramp: counts completed bars (not ticks) here, in the same
+          // clock-driven loop that already detects bar boundaries for the
+          // beat dots, rather than adding a second timer. Bumping bpm here
+          // feeds back into the settings-reset effect below exactly like a
+          // manual bpm change would, restarting the scheduler cleanly at
+          // the bar boundary instead of fading the tempo mid-bar.
+          if (wrappedToStart && rampEnabledRef.current) {
+            barCountRef.current += 1;
+            if (barCountRef.current >= rampEveryBarsRef.current) {
+              barCountRef.current = 0;
+              const target = rampTargetRef.current;
+              setBpm(b => {
+                if (target > b) return Math.min(target, b + 5);
+                if (target < b) return Math.max(target, b - 5);
+                return b;
+              });
+            }
+          }
         }
       }
       rafRef.current = requestAnimationFrame(frame);
@@ -373,6 +407,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     stopAudioScheduler();
     lastBeatIndexRef.current = -1;
     startTimeRef.current = null;
+    barCountRef.current = 0;
     dotsRef.current?.reset();
 
     if (playing) {
@@ -393,6 +428,34 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
       clearInterval(holdIntervalRef.current);
     };
   }, []);
+
+  // iOS suspends the AudioContext when the app backgrounds (screen lock,
+  // app switch) — the same restriction that requires gesture-unlocking it
+  // in the first place. Rather than trying to precisely resume mid-stream
+  // after however long the app was away, this just resumes the context and
+  // restarts the scheduler fresh at the bar boundary, same as any other
+  // settings change.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active' || !playing) return;
+      sessionIdRef.current += 1;
+      const mySessionId = sessionIdRef.current;
+      stopAudioScheduler();
+      lastBeatIndexRef.current = -1;
+      startTimeRef.current = null;
+      barCountRef.current = 0;
+      dotsRef.current?.reset();
+      (async () => {
+        try {
+          if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+            await audioCtxRef.current.resume();
+          }
+        } catch (e) {}
+        startAudioScheduler((60 / bpm) / subdivision, mySessionId, subdivision, mainBeats);
+      })();
+    });
+    return () => sub.remove();
+  }, [playing, bpm, subdivision, mainBeats]);
 
   function changeBpm(delta) {
     setBpm(b => Math.max(30, Math.min(240, b + delta)));
@@ -560,7 +623,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
         )}
       </View>
 
-      <View style={{ flexDirection: 'row', gap: 5, marginBottom: 10 }}>
+      <View style={{ flexDirection: 'row', gap: 5, marginBottom: rampEnabled ? 8 : 10 }}>
         {[1, 2, 3, 4].map(n => {
           const active = subdivision === n;
           return (
@@ -574,6 +637,48 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             </TouchableOpacity>
           );
         })}
+      </View>
+
+      <View>
+        <TouchableOpacity onPress={() => setRampEnabled(e => !e)} activeOpacity={0.75}
+          style={{
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+            paddingVertical: 7, borderRadius: 10,
+            backgroundColor: rampEnabled ? 'rgba(8,131,149,0.12)' : 'rgba(9,99,126,0.06)',
+          }}>
+          <Text style={{ fontSize: 12 }}>📈</Text>
+          <Text style={{ fontFamily: rampEnabled ? 'Lato-Bold' : 'Lato', fontSize: 12, color: rampEnabled ? COLOURS.steel : COLOURS.textDim }}>
+            {rampEnabled ? `Ramping to ${rampTarget} bpm, +5 every ${rampEveryBars} bar${rampEveryBars === 1 ? '' : 's'}` : 'Ramp tempo'}
+          </Text>
+        </TouchableOpacity>
+        {rampEnabled && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 18, marginTop: 8 }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginBottom: 3 }}>target bpm</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setRampTarget(t => Math.max(bpm, t - 5))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                  <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>
+                </TouchableOpacity>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, minWidth: 28, textAlign: 'center' }}>{rampTarget}</Text>
+                <TouchableOpacity onPress={() => setRampTarget(t => Math.min(240, t + 5))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                  <Text style={{ fontSize: 14, color: COLOURS.navy }}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginBottom: 3 }}>every N bars</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.max(1, n - 1))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                  <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>
+                </TouchableOpacity>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, minWidth: 16, textAlign: 'center' }}>{rampEveryBars}</Text>
+                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.min(32, n + 1))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                  <Text style={{ fontSize: 14, color: COLOURS.navy }}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
     </View>
     </BlurView>

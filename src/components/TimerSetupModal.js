@@ -11,7 +11,7 @@ import { MinutesDial } from './MinutesDial';
 import { TECH_GROUPS } from '../constants';
 import { uid } from '../utils';
 
-function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
+function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, onMoveDown }) {
   const isTech = segment.type === 'technique';
   const field = (k, v) => onChange({ ...segment, [k]: v });
   const isValid = Number(segment.plannedMinutes) > 0 && (isTech ? !!segment.title : !!segment.compositionId);
@@ -50,12 +50,24 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 12 }}>
           {segment.plannedMinutes} min
         </Text>
-        <TouchableOpacity onPress={() => field('confirmed', false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginRight: 14 }}>
-          <Text style={{ fontSize: 13, color: COLOURS.steel }}>✎</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          {onMoveUp ? (
+            <TouchableOpacity onPress={onMoveUp} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
+            </TouchableOpacity>
+          ) : <View style={{ width: 15 }} />}
+          {onMoveDown ? (
+            <TouchableOpacity onPress={onMoveDown} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
+            </TouchableOpacity>
+          ) : <View style={{ width: 15 }} />}
+          <TouchableOpacity onPress={() => field('confirmed', false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={{ fontSize: 13, color: COLOURS.steel }}>✎</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -78,9 +90,21 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove }) {
             {isTech ? 'technique' : 'repertoire'}
           </Text>
         </View>
-        <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          {onMoveUp ? (
+            <TouchableOpacity onPress={onMoveUp} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
+            </TouchableOpacity>
+          ) : <View style={{ width: 15 }} />}
+          {onMoveDown ? (
+            <TouchableOpacity onPress={onMoveDown} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
+            </TouchableOpacity>
+          ) : <View style={{ width: 15 }} />}
+          <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {isTech ? (
@@ -158,6 +182,15 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
   }
   function updateSegment(id, val) { setDraftSegments(s => s.map(seg => (seg.id === id ? val : seg))); }
   function removeSegment(id) { setDraftSegments(s => s.filter(seg => seg.id !== id)); }
+  function moveSegment(index, dir) {
+    setDraftSegments(s => {
+      const next = [...s];
+      const j = index + dir;
+      if (j < 0 || j >= next.length) return s;
+      [next[index], next[j]] = [next[j], next[index]];
+      return next;
+    });
+  }
 
   const totalMin = draftSegments.reduce((sum, s) => sum + (Number(s.plannedMinutes) || 0), 0);
   const canStart = draftSegments.length > 0 && draftSegments.every(s => Number(s.plannedMinutes) > 0 && (s.type === 'technique' ? s.title : s.compositionId));
@@ -212,13 +245,15 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
               </View>
             )}
 
-            {draftSegments.map(seg => (
+            {draftSegments.map((seg, i) => (
               <DraftSegmentRow
                 key={seg.id}
                 segment={seg}
                 compositions={compositions}
                 onChange={val => updateSegment(seg.id, val)}
                 onRemove={() => removeSegment(seg.id)}
+                onMoveUp={i > 0 ? () => moveSegment(i, -1) : null}
+                onMoveDown={i < draftSegments.length - 1 ? () => moveSegment(i, 1) : null}
               />
             ))}
 

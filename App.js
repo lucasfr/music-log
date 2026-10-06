@@ -18,6 +18,7 @@ import {
 } from '@expo-google-fonts/lato';
 
 import { useSessions, useCompositions, useLessons } from './src/db/hooks';
+import { backfillTechniqueGroups } from './src/db/migrations';
 import { deriveCompositionStatus } from './src/utils';
 import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
@@ -73,10 +74,18 @@ function AppInner({ fontsLoaded }) {
     }
   }, []);
 
-  const { sessions, save: saveSession, remove: deleteSession } = useSessions();
+  const { sessions, save: saveSession, remove: deleteSession, reload: reloadSessions } = useSessions();
   const { compositions, save: saveComp, remove: deleteComp }   = useCompositions();
   const { lessons, save: saveLesson, remove: deleteLesson }    = useLessons();
   const { width, onLayout, isDesktop }                         = useLayout();
+
+  // One-time data fix, see migrations.js for why. Runs once this session is
+  // ready to render and refreshes the sessions list if it touched anything,
+  // so the fix is visible immediately rather than needing a relaunch.
+  useEffect(() => {
+    if (!ready) return;
+    backfillTechniqueGroups().then(reloadSessions);
+  }, [ready, reloadSessions]);
 
   // Status is derived, not stored — computed once here from sessions/lessons
   // and threaded through as `compositions` to every screen below, so no

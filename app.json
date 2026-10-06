@@ -45,7 +45,6 @@
       "expo-sqlite",
       "expo-font",
       "expo-notifications",
-      "expo-audio",
       "react-native-audio-api"
     ]
   }

@@ -1,7 +1,8 @@
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { createAudioPlayer } from 'expo-audio';
-import { DIAL_TICK_URI } from './dialTickSound';
+import { AudioContext } from 'react-native-audio-api';
+import { base64ToArrayBuffer } from './metronomeSounds';
+import { DIAL_TICK_B64 } from './dialTickSound';
 
 // A light "click" for each notch the dial passes through while dragging —
 // distinct from chime.js's session-completion cue, which is a separate,
@@ -10,17 +11,27 @@ import { DIAL_TICK_URI } from './dialTickSound';
 // web gets the click only, reusing one AudioContext across ticks rather
 // than creating a new one per call, since browsers can throttle/refuse
 // rapid-fire context creation.
+//
+// Native playback goes through react-native-audio-api (the same engine
+// MetronomeControl uses), not expo-audio — consolidating onto one audio
+// library rather than two, now that this is the only other spot that
+// used expo-audio at all (chime.js never did: haptics only on native).
+// Drag ticks aren't tempo-critical the way the metronome's clicks are, so
+// there's no lookahead scheduler here — just decode the buffer once and
+// fire a fresh BufferSourceNode immediately per tick.
 
-let nativePlayer = null;
-function getNativePlayer() {
-  if (!nativePlayer) {
-    try {
-      nativePlayer = createAudioPlayer({ uri: DIAL_TICK_URI });
-    } catch (e) {
-      nativePlayer = false; // tried and failed — don't retry every tick
-    }
+let nativeCtx = null;
+let nativeBufferPromise = null;
+
+function ensureNativeBuffer() {
+  if (!nativeBufferPromise) {
+    nativeBufferPromise = (async () => {
+      if (!nativeCtx) nativeCtx = new AudioContext();
+      if (nativeCtx.state === 'suspended') await nativeCtx.resume().catch(() => {});
+      return nativeCtx.decodeAudioData(base64ToArrayBuffer(DIAL_TICK_B64));
+    })();
   }
-  return nativePlayer || null;
+  return nativeBufferPromise;
 }
 
 let audioCtx = null;
@@ -35,16 +46,20 @@ function getAudioCtx() {
 export function dialTick() {
   if (Platform.OS !== 'web') {
     Haptics.selectionAsync().catch(() => {});
-    const player = getNativePlayer();
-    if (player) {
-      try {
-        player.seekTo(0);
-        player.play();
-      } catch (e) {
-        // Playback hiccup — the haptic above already fired, so the drag
-        // still feels responsive even if the click itself drops a beat.
-      }
-    }
+    ensureNativeBuffer()
+      .then(buffer => {
+        if (!nativeCtx) return;
+        try {
+          const source = nativeCtx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(nativeCtx.destination);
+          source.start(nativeCtx.currentTime);
+        } catch (e) {
+          // Playback hiccup — the haptic above already fired, so the drag
+          // still feels responsive even if the click itself drops a beat.
+        }
+      })
+      .catch(() => {});
     return;
   }
   const ctx = getAudioCtx();

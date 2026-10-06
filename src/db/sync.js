@@ -2,6 +2,7 @@
 // All functions are safe to call when not signed in (no-ops).
 
 import { getClient, getSession } from '../lib/supabase';
+import { reportSyncStart, reportSyncSuccess, reportSyncError } from './syncStatus';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,12 +50,19 @@ export async function pushRecord(table, record) {
   try {
     const session = await getSession();
     if (!session) return;
+    reportSyncStart();
     const client = await getClient();
     const row = toRow(table, record, userId(session));
     const { error } = await client.from(table).upsert(row, { onConflict: 'id' });
-    if (error) console.warn(`[sync] push ${table} failed:`, error.message, error.details);
+    if (error) {
+      console.warn(`[sync] push ${table} failed:`, error.message, error.details);
+      reportSyncError(error.message);
+    } else {
+      reportSyncSuccess();
+    }
   } catch (e) {
     console.warn(`[sync] push ${table} exception:`, e.message);
+    reportSyncError(e.message);
   }
 }
 
@@ -81,6 +89,7 @@ export async function pullTable(table) {
   try {
     const session = await getSession();
     if (!session) return null;
+    reportSyncStart();
     const client = await getClient();
     const PAGE_SIZE = 1000;
     let allData = [];
@@ -92,15 +101,21 @@ export async function pullTable(table) {
         .eq('user_id', userId(session))
         .order('created_at', { ascending: true })
         .range(from, from + PAGE_SIZE - 1);
-      if (error) { console.warn(`[sync] pull ${table} failed:`, error.message); return null; }
+      if (error) {
+        console.warn(`[sync] pull ${table} failed:`, error.message);
+        reportSyncError(error.message);
+        return null;
+      }
       if (!data || data.length === 0) break;
       allData = allData.concat(data);
       if (data.length < PAGE_SIZE) break; // last page
       from += PAGE_SIZE;
     }
+    reportSyncSuccess();
     return allData;
   } catch (e) {
     console.warn(`[sync] pull ${table} exception:`, e.message);
+    reportSyncError(e.message);
     return null;
   }
 }
