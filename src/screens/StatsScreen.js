@@ -83,15 +83,20 @@ function ActivityGrid({ sessions, lessons }) {
 
   const months = buildYear(year, dateMap);
 
-  // Cell size: fit 12 months × (max 6 weeks) + 11 gaps between months into width
-  // Each month takes (weeks * (cell+GAP) - GAP), but we size by max weeks = 6
-  // Total = 12 * (6*cell + 5*GAP) + 11 * monthGap
+  // Months are sized by their widest case (6 weeks), so n months in a row need
+  //   n * (6*cell + 5*GAP) + (n-1) * MONTH_GAP  of width.
+  // Try one row of 12 first (wide screens); if that would make cells smaller than
+  // MIN_CELL, wrap into 2 rows of 6, 3 rows of 4, or 4 rows of 3 instead.
   const MONTH_GAP = 6;
+  const ROW_GAP   = 14;
+  const MIN_CELL  = 9;
   const maxWeeks  = 6;
-  // cell = (width - 11*MONTH_GAP - 12*(5*GAP)) / (12 * 6)
-  const cell = width > 0
-    ? Math.max(4, Math.floor((width - 11 * MONTH_GAP - 12 * 5 * GAP) / (12 * maxWeeks)))
-    : 11;
+  const cellFor = n => Math.floor((width - (n - 1) * MONTH_GAP - n * 5 * GAP) / (n * maxWeeks));
+  const perRow = width > 0 ? ([12, 6, 4, 3].find(n => cellFor(n) >= MIN_CELL) || 3) : 12;
+  const wrapped = perRow < 12;
+  const cell = width > 0 ? Math.max(4, cellFor(perRow)) : 11;
+  // Wrapped rows use a fixed slot per month so the columns line up across rows
+  const slotW = maxWeeks * (cell + GAP) - GAP;
 
   const totalHeight = 7 * (cell + GAP) - GAP;
   const dayLabelW   = cell + 2;
@@ -131,16 +136,16 @@ function ActivityGrid({ sessions, lessons }) {
       </View>
 
       {width > 0 && (
-        <View style={{ flexDirection: 'row', gap: MONTH_GAP }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: MONTH_GAP, rowGap: wrapped ? ROW_GAP : 0 }}>
           {months.map((weeks, mi) => {
             const monthW = weeks.length * (cell + GAP) - GAP;
             return (
-              <View key={mi} style={{ width: monthW }}>
+              <View key={mi} style={{ width: wrapped ? slotW : monthW }}>
                 {/* Month label */}
                 <Text style={{
                   fontFamily: 'Lato-Bold', fontSize: Math.max(7, cell - 2),
                   color: COLOURS.textDim, letterSpacing: 0.2,
-                  marginBottom: 4, textAlign: 'center',
+                  marginBottom: 4, textAlign: 'center', width: monthW,
                 }}>{MONTHS_SHORT[mi]}</Text>
 
                 {/* Week columns */}
