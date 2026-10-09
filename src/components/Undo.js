@@ -14,7 +14,7 @@
 // Render `toast` somewhere inside the screen; it positions itself absolutely.
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, Text, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, Animated, TouchableOpacity, AppState } from 'react-native';
 import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
 
 export function UndoToast({ message, onUndo, bottom = 24 }) {
@@ -101,18 +101,34 @@ export function useUndoableDelete({ duration = 5000, bottom = 24 } = {}) {
     clearPending(id);
   }, [clearPending]);
 
-  // Never lose a delete just because the user navigated away.
-  useEffect(() => () => {
-    Object.keys(timers.current).forEach(id => {
+  // Never lose a delete: commit anything still pending if the screen unmounts, the
+  // tab is closed, or the app goes to the background before the undo window ends.
+  // (Ids stay hidden afterwards; the toast just goes away since Undo can no longer help.)
+  const flushAll = useCallback(() => {
+    const ids = Object.keys(timers.current);
+    if (!ids.length) return;
+    ids.forEach(id => {
       const e = timers.current[id];
       clearTimeout(e.t);
       e.commit();
     });
     timers.current = {};
+    setLast(null);
   }, []);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', s => { if (s !== 'active') flushAll(); });
+    const onUnload = () => flushAll();
+    if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('beforeunload', onUnload);
+    return () => {
+      if (sub && sub.remove) sub.remove();
+      if (typeof window !== 'undefined' && window.removeEventListener) window.removeEventListener('beforeunload', onUnload);
+      flushAll();
+    };
+  }, [flushAll]);
 
   const toast = last
     ? <UndoToast key={last.id} message={`${last.label} removed`} bottom={bottom} onUndo={() => undo(last.id)} />
     : null;
-  return { isPending: (id) => !!pending[id], schedule, toast };
+  return { isPending: (id) => !!pending[id], pending, schedule, toast };
 }

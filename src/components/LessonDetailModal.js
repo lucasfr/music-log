@@ -261,7 +261,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
 
           <BtnRow>
             <Btn label="Delete" variant="danger" onPress={() =>
-              confirmDelete('Delete lesson?', fmtDate(lesson.date), () => { onDelete(lesson.id); onClose(); })
+              { onDelete(lesson.id); onClose(); }
             } />
             <Btn label="Export JSON" onPress={() =>
               exportSessionJSON(lesson, compositions).catch(e => Alert.alert('Export failed', e.message))

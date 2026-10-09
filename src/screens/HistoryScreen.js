@@ -6,7 +6,6 @@ import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, EmptyState } from '../components/UI';
 import { SwipeRow } from '../components/Gestures';
 import { TextF } from '../components/Form';
-import { useUndoableDelete } from '../components/Undo';
 import { fmtDate, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
@@ -145,8 +144,6 @@ function LessonEntry({ lesson, compositions, onDeleteLesson }) {
 export default function HistoryScreen({ sessions, lessons, compositions, onDelete, onDeleteLesson, isDesktop }) {
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState('all');   // all | practice | lesson
-  // Deletes are hidden at once but only committed after the undo window closes.
-  const undo = useUndoableDelete({ bottom: isDesktop ? 24 : 100 });
 
   const feedItems = useMemo(() => {
     const s = (sessions  || []).map(s => ({ ...s, _type: 'practice' }));
@@ -174,7 +171,6 @@ export default function HistoryScreen({ sessions, lessons, compositions, onDelet
   const rows = [];
   let lastLabel = null;
   filtered.forEach(item => {
-    if (undo.isPending(item.id)) return;
     const [y, m] = item.date.split('-');
     const label = new Date(Number(y), Number(m) - 1, 1)
       .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
@@ -201,9 +197,7 @@ export default function HistoryScreen({ sessions, lessons, compositions, onDelet
     }
     const item = row.item;
     const isLesson = item._type === 'lesson';
-    const remove = isLesson
-      ? () => undo.schedule(item.id, 'Lesson', () => onDeleteLesson(item.id))
-      : () => undo.schedule(item.id, 'Session', () => onDelete(item.id));
+    const remove = isLesson ? () => onDeleteLesson(item.id) : () => onDelete(item.id);
     return (
       <SwipeRow bottomInset={12} hint={row.key === firstEntryKey} onDelete={remove}>
         {isLesson
@@ -246,7 +240,6 @@ export default function HistoryScreen({ sessions, lessons, compositions, onDelet
         windowSize={7}
         contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 120 }}
       />
-      {undo.toast}
     </SafeAreaView>
   );
 }

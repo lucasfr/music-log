@@ -225,7 +225,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
 
           <BtnRow>
             <Btn label="Delete" variant="danger" onPress={() =>
-              confirmDelete('Delete session?', fmtDate(session.date), () => { onDelete(session.id); onClose(); })
+              { onDelete(session.id); onClose(); }
             } />
             <Btn label="Export JSON" onPress={() =>
               exportSessionJSON(session, compositions).catch(e => Alert.alert('Export failed', e.message))

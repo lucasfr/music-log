@@ -34,6 +34,7 @@ import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
 import { CustomTabBar } from './src/components/CustomTabBar';
 import { NavScrollProvider } from './src/context/NavScrollContext';
 import { useLayout } from './src/utils/useLayout';
+import { useUndoableDelete } from './src/components/Undo';
 import { COLOURS } from './src/theme';
 
 const Tab = createBottomTabNavigator();
@@ -74,10 +75,24 @@ function AppInner({ fontsLoaded }) {
     }
   }, []);
 
-  const { sessions, save: saveSession, remove: deleteSession, reload: reloadSessions } = useSessions();
-  const { compositions, save: saveComp, remove: deleteComp }   = useCompositions();
-  const { lessons, save: saveLesson, remove: deleteLesson }    = useLessons();
+  const { sessions: allSessions, save: saveSession, remove: removeSession, reload: reloadSessions } = useSessions();
+  const { compositions: allCompositions, save: saveComp, remove: removeComp }   = useCompositions();
+  const { lessons: allLessons, save: saveLesson, remove: removeLesson }    = useLessons();
   const { width, onLayout, isDesktop }                         = useLayout();
+
+  // Deletes are undoable app-wide: the item disappears at once but is only really
+  // deleted when the undo window closes. Every screen below sees the filtered lists,
+  // so swipe-delete, in-card Delete buttons and the detail modals all behave the same.
+  // On mobile the toast sits above the add button so the two never overlap.
+  const undo = useUndoableDelete({
+    bottom: isDesktop ? 24 : Platform.OS === 'web' ? 170 : Platform.OS === 'ios' ? 210 : 190,
+  });
+  const sessions     = useMemo(() => (allSessions || []).filter(s => !undo.isPending(s.id)), [allSessions, undo.pending]);
+  const lessons      = useMemo(() => (allLessons || []).filter(l => !undo.isPending(l.id)), [allLessons, undo.pending]);
+  const compositions = useMemo(() => (allCompositions || []).filter(c => !undo.isPending(c.id)), [allCompositions, undo.pending]);
+  const deleteSession = id => undo.schedule(id, 'Session', () => removeSession(id));
+  const deleteLesson  = id => undo.schedule(id, 'Lesson',  () => removeLesson(id));
+  const deleteComp    = id => undo.schedule(id, 'Piece',   () => removeComp(id));
 
   // One-time data fix, see migrations.js for why. Runs once this session is
   // ready to render and refreshes the sessions list if it touched anything,
@@ -156,6 +171,7 @@ function AppInner({ fontsLoaded }) {
             </View>
           </View>
           {showOnboarding && <OnboardingScreen onComplete={completeOnboarding} />}
+          {undo.toast}
         </View>
       </>
     );
@@ -209,6 +225,7 @@ function AppInner({ fontsLoaded }) {
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>
+      {undo.toast}
     </View>
     </NavScrollProvider>
   );

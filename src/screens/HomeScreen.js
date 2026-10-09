@@ -363,7 +363,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
           <GlassBtn label="Export JSON" small onPress={() => exportSessionJSON(session, compositions).catch(() => {})} color={COLOURS.steel} />
           <GlassBtn label="Copy JSON" small onPress={() => copySessionJSON(session, compositions).catch(() => {})} color={COLOURS.steel} />
-          <GlassBtn label="Delete" danger small onPress={() => confirmDelete('Delete session?', fmtDate(session.date), () => onDeleteSession(session.id))} color={COLOURS.red} />
+          <GlassBtn label="Delete" danger small onPress={() => onDeleteSession(session.id)} color={COLOURS.red} />
         </View>
       </View>
     );
@@ -525,7 +525,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
           <GlassBtn label="Export JSON" small onPress={() => exportSessionJSON(lesson, compositions).catch(() => {})} color={COLOURS.steel} />
           <GlassBtn label="Copy JSON" small onPress={() => copySessionJSON(lesson, compositions).catch(() => {})} color={COLOURS.steel} />
-          <GlassBtn label="Delete" danger small onPress={() => confirmDelete('Delete lesson?', fmtDate(lesson.date), () => onDeleteLesson(lesson.id))} color={COLOURS.red} />
+          <GlassBtn label="Delete" danger small onPress={() => onDeleteLesson(lesson.id)} color={COLOURS.red} />
         </View>
       </View>
     );
