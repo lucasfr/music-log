@@ -40,12 +40,14 @@ export function snapOffset(keys, layouts, from, over) {
   return off;
 }
 
-// Keep the drag inside the list.
-export function clampDy(keys, layouts, from, dy) {
+// Keep the drag inside the list. `heldH` is how tall the thing under the finger actually
+// is (a held card shrinks to a short preview); it defaults to the card's full height.
+export function clampDy(keys, layouts, from, dy, heldH) {
   const first = layouts[keys[0]];
   const last = layouts[keys[keys.length - 1]];
   const me = layouts[keys[from]];
+  const h = heldH == null ? me.h : Math.min(heldH, me.h);
   const min = first.y - me.y;
-  const max = last.y + last.h - me.h - me.y;
+  const max = last.y + last.h - h - me.y;
   return Math.max(min, Math.min(max, dy));
 }
