@@ -114,13 +114,13 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
     <View>
       {/* Month nav */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>
-        <TouchableOpacity onPress={onPrevMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+        <TouchableOpacity onPress={onPrevMonth} hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
           <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
         </TouchableOpacity>
         <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>
           {MONTHS[viewMonth]} {viewYear}
         </Text>
-        <TouchableOpacity onPress={onNextMonth} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+        <TouchableOpacity onPress={onNextMonth} hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
           <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
         </TouchableOpacity>
       </View>

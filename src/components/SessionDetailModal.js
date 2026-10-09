@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, SIZES } from '../theme';
+import { COLOURS, RADIUS, SIZES, HIT_TEXT } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
 import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 import { exportSessionJSON, copySessionJSON } from '../utils/export';
@@ -54,11 +54,11 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>{fmtDate(session.date)}</Text>
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
                 {onEdit && (
-                  <TouchableOpacity onPress={() => { onClose(); onEdit(session); }}>
+                  <TouchableOpacity onPress={() => { onClose(); onEdit(session); }} hitSlop={HIT_TEXT}>
                     <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.steel, fontSize: 16 }}>Edit</Text>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity onPress={onClose}>
+                <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT}>
                   <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
                 </TouchableOpacity>
               </View>

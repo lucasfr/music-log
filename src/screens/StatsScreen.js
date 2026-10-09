@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
+import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
@@ -113,7 +113,7 @@ function ActivityGrid({ sessions, lessons }) {
           const active = mode === m.key;
           return (
             <TouchableOpacity key={m.key} onPress={() => setMode(m.key)} activeOpacity={0.75}
-              style={{
+              hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
                 backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
                 shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
@@ -1137,7 +1137,7 @@ function PillToggle({ options, value, onChange }) {
         const active = value === o.key;
         return (
           <TouchableOpacity key={o.key} onPress={() => onChange(o.key)} activeOpacity={0.75}
-            style={{
+            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
               paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill,
               backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
               shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
@@ -1471,7 +1471,7 @@ function DayOfWeekChart({ sessions }) {
 function TouchableYear({ onPress, label }) {
   return (
     <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
-      style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+      style={{ ...TOUCH_PILL, minWidth: TOUCH.min, alignItems: 'center', paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>{label}</Text>
     </TouchableOpacity>
   );
@@ -1643,7 +1643,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               const active = period === p.key;
               return (
                 <TouchableOpacity key={p.key} onPress={() => setPeriod(p.key)} activeOpacity={0.75}
-                  style={{
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                     paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
                     backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
                     shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
@@ -1787,7 +1787,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                     const active = pieceSort === opt.key;
                     return (
                       <TouchableOpacity key={opt.key} onPress={() => setPieceSort(opt.key)} activeOpacity={0.75}
-                        style={{
+                        hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                           paddingHorizontal: 9, paddingVertical: 4, borderRadius: RADIUS.pill,
                           backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
                           shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,

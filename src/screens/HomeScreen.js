@@ -872,7 +872,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
           <TouchableOpacity
             onPress={() => setShowAbout(false)}
-            style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(9,99,126,0.12)', alignItems: 'center', justifyContent: 'center' }}
+            hitSlop={{ top: 2, bottom: 2, left: 2, right: 2 }}
+            style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(9,99,126,0.12)', alignItems: 'center', justifyContent: 'center' }}
           >
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 16, color: COLOURS.navy }}>✕</Text>
           </TouchableOpacity>

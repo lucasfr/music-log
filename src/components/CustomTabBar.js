@@ -19,8 +19,8 @@ const TAB_ICONS = {
 // a permanent slot in the floating pill — keeps the bar from feeling crowded.
 const HIDDEN_ROUTES = ['Timeline'];
 
-const ICON_SIZE = 40;
-const ICON_GAP  = 6;
+const ICON_SIZE = 44;
+const ICON_GAP  = 4;
 
 export function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();

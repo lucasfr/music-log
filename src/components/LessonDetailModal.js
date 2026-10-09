@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
 import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 import { exportSessionJSON } from '../utils/export';
@@ -57,11 +57,11 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
               </View>
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
                 {onEdit && (
-                  <TouchableOpacity onPress={() => { onClose(); onEdit(lesson); }}>
+                  <TouchableOpacity onPress={() => { onClose(); onEdit(lesson); }} hitSlop={HIT_TEXT}>
                     <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.steel, fontSize: 16 }}>Edit</Text>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity onPress={onClose}>
+                <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT}>
                   <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
                 </TouchableOpacity>
               </View>

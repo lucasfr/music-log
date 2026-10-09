@@ -15,16 +15,16 @@ export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
         <>
           {onTimer && (
             <TouchableOpacity onPress={() => { setExpanded(false); onTimer(); }} activeOpacity={0.85}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.tealBorder, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
+              style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.tealBorder, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>{'⏱ Start timer'}</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.accent2Mid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
+            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.accent2Mid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => { setExpanded(false); onPractice(); }} activeOpacity={0.85}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
+            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
           </TouchableOpacity>
         </>

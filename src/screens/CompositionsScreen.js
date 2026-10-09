@@ -6,7 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
@@ -49,7 +49,7 @@ function DifficultyPicker({ value, onChange }) {
           ))}
         </View>
         {value > 0 && (
-          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={HIT_TEXT}>
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
           </TouchableOpacity>
         )}
@@ -136,6 +136,8 @@ function AutocompleteField({ label, value, onChange, placeholder, suggestions })
                 activeOpacity={0.75}
                 style={{
                   paddingHorizontal: 12,
+                  minHeight: 44,
+                  justifyContent: 'center',
                   paddingVertical: 10,
                   borderTopWidth: i > 0 ? 1 : 0,
                   borderTopColor: COLOURS.glassBorderSubtle,
@@ -194,7 +196,7 @@ function KeysPicker({ value = [], onChange }) {
             </View>
             <TouchableOpacity
               onPress={() => removeKey(i)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              hitSlop={{ top: 12, bottom: 4, left: 14, right: 14 }}
               style={{ paddingBottom: 14 }}
             >
               <Text style={{ fontSize: 16, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
@@ -281,7 +283,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
               <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 19, color: COLOURS.text }}>
                 {comp.title ? 'Edit piece' : 'Add piece'}
               </Text>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -352,13 +354,13 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <View style={{ flexDirection: 'row', gap: 2 }}>
                     {[1,2,3,4,5].map(n => (
-                      <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75}>
+                      <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75} hitSlop={{ top: 9, bottom: 9, left: 2, right: 2 }}>
                         <Text style={{ fontSize: 26, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                   {(data.liking || 0) > 0 && (
-                    <TouchableOpacity onPress={() => f('liking', 0)} activeOpacity={0.7} hitSlop={{ top:8, bottom:8, left:8, right:8 }}>
+                    <TouchableOpacity onPress={() => f('liking', 0)} activeOpacity={0.7} hitSlop={{ top: 14, bottom: 14, left: 6, right: 12 }}>
                       <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>clear</Text>
                     </TouchableOpacity>
                   )}

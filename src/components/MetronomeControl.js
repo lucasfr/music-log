@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { AudioContext } from 'react-native-audio-api';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
 
 // Compound meters are conventionally felt in fewer main pulses than their
@@ -160,7 +160,7 @@ function SigChip({ sig, active, onPress }) {
   const color = active ? '#fff' : COLOURS.steel;
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.75}
-      style={{ flex: 1, paddingVertical: 6, borderRadius: 10, backgroundColor: active ? COLOURS.navy : 'rgba(9,99,126,0.08)', alignItems: 'center' }}>
+      style={{ flex: 1, minHeight: 44, justifyContent: 'center', paddingVertical: 6, borderRadius: 10, backgroundColor: active ? COLOURS.navy : 'rgba(9,99,126,0.08)', alignItems: 'center' }}>
       <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif', fontWeight: '700', fontSize: 16, color, lineHeight: 17 }}>{num}</Text>
       <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif', fontWeight: '700', fontSize: 16, color, lineHeight: 17 }}>{den}</Text>
     </TouchableOpacity>
@@ -527,7 +527,8 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {composition ? (
             <TouchableOpacity onPress={usePieceTempo} activeOpacity={0.75}
-              style={{ paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(8,131,149,0.10)' }}>
+              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(8,131,149,0.10)' }}>
               <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.steel }}>Use piece tempo</Text>
             </TouchableOpacity>
           ) : null}
@@ -536,7 +537,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               expanded, and the most-tapped control shouldn't require
               scrolling past all of that to reach. */}
           <TouchableOpacity onPress={togglePlay} activeOpacity={0.85}
-            style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: COLOURS.amber, alignItems: 'center', justifyContent: 'center' }}>
+            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: COLOURS.amber, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 13, color: '#fff' }}>{playing ? '❙❙' : '▶'}</Text>
           </TouchableOpacity>
         </View>
@@ -555,7 +556,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           onPressIn={() => startHold(-1)}
           onPressOut={stopHold}
           activeOpacity={0.7}
-          style={{ width: 32, height: 32, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(9,99,126,0.25)', alignItems: 'center', justifyContent: 'center' }}
+          hitSlop={hitFor(40)} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(9,99,126,0.25)', alignItems: 'center', justifyContent: 'center' }}
         >
           <Text style={{ fontSize: 16, color: COLOURS.navy }}>−</Text>
         </TouchableOpacity>
@@ -566,7 +567,8 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>bpm</Text>
           </View>
           <TouchableOpacity onPress={() => setPresetsOpen(o => !o)} activeOpacity={0.7}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 2 }}>
+            hitSlop={{ top: 10, bottom: 10, left: 12, right: 12 }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 6 }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>{currentTempoName}</Text>
             <Text style={{ fontSize: 9, color: COLOURS.steel }}>{presetsOpen ? '▲' : '▼'}</Text>
           </TouchableOpacity>
@@ -576,7 +578,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           onPressIn={() => startHold(1)}
           onPressOut={stopHold}
           activeOpacity={0.7}
-          style={{ width: 32, height: 32, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(9,99,126,0.25)', alignItems: 'center', justifyContent: 'center' }}
+          hitSlop={hitFor(40)} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(9,99,126,0.25)', alignItems: 'center', justifyContent: 'center' }}
         >
           <Text style={{ fontSize: 16, color: COLOURS.navy }}>+</Text>
         </TouchableOpacity>
@@ -594,7 +596,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
                 key={p.name}
                 onPress={() => setBpm(p.value)}
                 activeOpacity={0.75}
-                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4, borderRadius: 8, backgroundColor: active ? 'rgba(9,99,126,0.08)' : 'transparent' }}
+                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 40, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 8, backgroundColor: active ? 'rgba(9,99,126,0.08)' : 'transparent' }}
               >
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: active ? COLOURS.navy : COLOURS.text }}>{p.name}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{p.range} bpm</Text>
@@ -610,7 +612,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <SigChip key={s} sig={s} active={sig === s} onPress={() => selectSig(s)} />
           ))}
           <TouchableOpacity onPress={() => setMoreOpen(o => !o)} activeOpacity={0.75}
-            style={{ width: 36, borderRadius: 10, backgroundColor: 'rgba(9,99,126,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ width: 44, borderRadius: 10, backgroundColor: 'rgba(9,99,126,0.08)', alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 12, color: COLOURS.navy }}>{moreOpen ? '▲' : '▼'}</Text>
           </TouchableOpacity>
         </View>
@@ -631,7 +633,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               key={n}
               onPress={() => selectSubdivision(n)}
               activeOpacity={0.75}
-              style={{ flex: 1, height: 38, borderRadius: 10, backgroundColor: active ? COLOURS.navy : 'rgba(9,99,126,0.08)', alignItems: 'center', justifyContent: 'center' }}
+              style={{ flex: 1, height: 44, borderRadius: 10, backgroundColor: active ? COLOURS.navy : 'rgba(9,99,126,0.08)', alignItems: 'center', justifyContent: 'center' }}
             >
               <NoteIcon sub={n} color={active ? '#fff' : 'rgba(9,99,126,0.55)'} />
             </TouchableOpacity>
@@ -643,7 +645,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
         <TouchableOpacity onPress={() => setRampEnabled(e => !e)} activeOpacity={0.75}
           style={{
             flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-            paddingVertical: 7, borderRadius: 10,
+            minHeight: 44, paddingVertical: 7, borderRadius: 10,
             backgroundColor: rampEnabled ? 'rgba(8,131,149,0.12)' : 'rgba(9,99,126,0.06)',
           }}>
           <Text style={{ fontSize: 12 }}>📈</Text>
@@ -656,11 +658,11 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginBottom: 3 }}>target bpm</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <TouchableOpacity onPress={() => setRampTarget(t => Math.max(bpm, t - 5))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                <TouchableOpacity onPress={() => setRampTarget(t => Math.max(bpm, t - 5))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>
                 </TouchableOpacity>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, minWidth: 28, textAlign: 'center' }}>{rampTarget}</Text>
-                <TouchableOpacity onPress={() => setRampTarget(t => Math.min(240, t + 5))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                <TouchableOpacity onPress={() => setRampTarget(t => Math.min(240, t + 5))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -668,11 +670,11 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginBottom: 3 }}>every N bars</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.max(1, n - 1))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.max(1, n - 1))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>
                 </TouchableOpacity>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, minWidth: 16, textAlign: 'center' }}>{rampEveryBars}</Text>
-                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.min(32, n + 1))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.min(32, n + 1))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>+</Text>
                 </TouchableOpacity>
               </View>

@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, Activity
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
 import {
   getSupabaseCredentials,
   saveSupabaseCredentials,
@@ -376,7 +376,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                   <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, textAlign: 'center', lineHeight: 20 }}>
                     Click the link from Supabase, then come back here.
                   </Text>
-                  <TouchableOpacity onPress={() => { setPhase('idle'); loadState(); }} style={{ marginTop: 4 }}>
+                  <TouchableOpacity onPress={() => { setPhase('idle'); loadState(); }} hitSlop={HIT_TEXT} style={{ marginTop: 4 }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>I've clicked the link ↗</Text>
                   </TouchableOpacity>
                 </View>
