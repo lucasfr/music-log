@@ -247,11 +247,11 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
       </View>
 
       {timer.nextSegment ? (
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
           up next: {timer.nextSegment.title} · {timer.nextSegment.plannedMinutes} min
         </Text>
       ) : (
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
           last segment — session ends after this
         </Text>
       )}
@@ -310,7 +310,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
               >
                 <Text style={{ fontSize: 26, color: '#fff' }}>▶</Text>
               </TouchableOpacity>
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14 }}>tap to start</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14 }}>tap to start</Text>
             </View>
           ) : isDesktop ? (
           // Side by side on desktop rather than stacked — there's width to

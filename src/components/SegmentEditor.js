@@ -106,7 +106,7 @@ function ScalesPicker({ selected = [], onChange }) {
                 >
                   <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{name}</Text>
                   {isContrary && (
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.danger }}>⇄ contrary</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.danger }}>⇄ contrary</Text>
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -114,14 +114,14 @@ function ScalesPicker({ selected = [], onChange }) {
                   activeOpacity={0.75}
                   hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
                 >
-                  <Text style={{ fontFamily: interval !== 'unison' ? 'Lato-Bold' : 'Lato', fontSize: interval !== 'unison' ? 10 : 10, color: interval !== 'unison' ? COLOURS.tealBorder : COLOURS.textDim }}>{INTERVAL_LABELS[interval]}</Text>
+                  <Text style={{ fontFamily: interval !== 'unison' ? 'Lato-Bold' : 'Lato', fontSize: interval !== 'unison' ? 11 : 11, color: interval !== 'unison' ? COLOURS.tealBorder : COLOURS.textDim }}>{INTERVAL_LABELS[interval]}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggleOctaves(name)}
                   activeOpacity={0.75}
                   hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
                 >
-                  <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{octaves}oct</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{octaves}oct</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggle(name)}
@@ -129,7 +129,7 @@ function ScalesPicker({ selected = [], onChange }) {
                   hitSlop={HIT_PILL}
                   style={{ ...TOUCH_PILL, paddingHorizontal: 12 }}
                 >
-                  <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
+                  <Text style={{ fontSize: 12, color: COLOURS.textDim }}>✕</Text>
                 </TouchableOpacity>
               </View>
             );
@@ -163,7 +163,7 @@ function ScalesPicker({ selected = [], onChange }) {
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
               }}
             >
-              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
             </TouchableOpacity>
           );
         })}
@@ -173,7 +173,7 @@ function ScalesPicker({ selected = [], onChange }) {
             activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
           >
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ more</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -233,7 +233,7 @@ export function ArticulationPicker({ value, onChange }) {
     );
   }
 
-  const handLabel = { fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 };
+  const handLabel = { fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 };
 
   return (
     <View>
@@ -248,7 +248,7 @@ export function ArticulationPicker({ value, onChange }) {
         pills(rh, v => commit(v, v))
       )}
       <TouchableOpacity onPress={toggleSeparate} activeOpacity={0.75} hitSlop={HIT_TEXT} style={{ alignSelf: 'flex-start', marginTop: 10 }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.steel }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.steel }}>
           {separate ? 'Same for both hands' : 'Hands separately'}
         </Text>
       </TouchableOpacity>
@@ -304,7 +304,7 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.accentLight }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: accentColor, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: accentColor, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                 {isTech ? 'technique' : 'repertoire'}
               </Text>
             </View>
@@ -313,11 +313,11 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
             </Text>
           </View>
           {segment.duration ? (
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{segment.duration} min</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{segment.duration} min</Text>
           ) : null}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{ fontSize: 11, color: COLOURS.textDim, marginRight: 2 }}>{open ? '▲' : '▼'}</Text>
+          <Text style={{ fontSize: 12, color: COLOURS.textDim, marginRight: 2 }}>{open ? '▲' : '▼'}</Text>
           {dragHandle}
         </View>
       </TouchableOpacity>

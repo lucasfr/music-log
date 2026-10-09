@@ -120,7 +120,7 @@ export const SIZES = {
   cardTitle:    18,   // piece title, session date in card
   body:         16,   // primary body text
   bodySmall:    14,   // secondary body, subtitles
-  label:        12,   // uppercase labels, tags, pills
-  labelSmall:   11,   // timestamps, meta
-  tiny:         10,   // calendar day headers, legend
+  label:        13,   // uppercase labels, tags, pills
+  labelSmall:   12,   // timestamps, meta
+  tiny:         11,   // calendar day headers, legend
 };

@@ -162,12 +162,12 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
         {/* Row label */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 2, marginTop: 2 }}>
           <Text
-            style={{ fontFamily: selected ? 'Lato-Bold' : 'Lato', fontSize: 11, color: selected ? COLOURS.navy : COLOURS.textMuted, flex: 1 }}
+            style={{ fontFamily: selected ? 'Lato-Bold' : 'Lato', fontSize: 12, color: selected ? COLOURS.navy : COLOURS.textMuted, flex: 1 }}
             numberOfLines={1}
           >
             {comp.title}{comp.composer ? ` — ${comp.composer}` : ''}
           </Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginLeft: 8 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginLeft: 8 }}>
             {started ? formatDate(comp.dateStarted) : '?'}
             {' → '}
             {completed ? formatDate(comp.dateCompleted) : 'ongoing'}
@@ -211,32 +211,32 @@ function DetailPanel({ comp, sessions, lessons }) {
           📜 {comp.title}
         </Text>
         {comp.composer    ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted }}>{comp.composer}</Text> : null}
-        {comp.arrangement ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>arr. {comp.arrangement}</Text> : null}
+        {comp.arrangement ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 1 }}>arr. {comp.arrangement}</Text> : null}
 
         <View style={{ flexDirection: 'row', gap: 16, marginTop: 10, flexWrap: 'wrap' }}>
           {comp.grade ? (
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Grade</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Grade</Text>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.navy }}>{comp.grade}</Text>
             </View>
           ) : null}
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Started</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Started</Text>
             <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.text }}>{formatDate(comp.dateStarted) || '—'}</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Completed</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Completed</Text>
             <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.text }}>{formatDate(comp.dateCompleted) || 'ongoing'}</Text>
           </View>
           {compSessions.length > 0 && (
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Sessions</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Sessions</Text>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.navy }}>{compSessions.length}</Text>
             </View>
           )}
           {totalMins > 0 && (
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Time logged</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Time logged</Text>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.navy }}>{totalMins} min</Text>
             </View>
           )}
@@ -247,14 +247,14 @@ function DetailPanel({ comp, sessions, lessons }) {
             marginTop: 10, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4,
             borderRadius: RADIUS.pill, backgroundColor: sc.track,
           }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: sc.label }}>{comp.status}</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: sc.label }}>{comp.status}</Text>
           </View>
         )}
 
         {/* Stage history — compact multi-colour bar + per-stage breakdown */}
         {history.length > 0 && (
           <View style={{ marginTop: 14 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
               Stage history
             </Text>
 
@@ -286,13 +286,13 @@ function DetailPanel({ comp, sessions, lessons }) {
                 return (
                   <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: segSc.fill }} />
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.text, width: 108 }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, width: 108 }}>
                       {isShelved ? 'shelved (gap)' : seg.status}
                     </Text>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, flex: 1 }} numberOfLines={1}>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, flex: 1 }} numberOfLines={1}>
                       {formatDay(seg.start)} → {endLabel}
                     </Text>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted, marginLeft: 8 }}>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginLeft: 8 }}>
                       {isShelved ? `${days}d quiet` : `${seg.count}× · ${seg.minutes}m`}
                     </Text>
                   </View>
@@ -387,7 +387,7 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
             <View key={`mt-${year}-${label}-${i}`} style={{
               position: 'absolute', left: `${x * 100}%`, top: 0, alignItems: 'flex-start',
             }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, letterSpacing: 0.3 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, letterSpacing: 0.3 }}>
                 {label}
               </Text>
             </View>
@@ -397,7 +397,7 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
           <View key={`yr-${year}`} style={{
             position: 'absolute', left: `${x * 100}%`, top: 14, alignItems: 'flex-start',
           }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 9, color: COLOURS.textDim }}>↑{year}</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim }}>↑{year}</Text>
           </View>
         ))}
       </View>
@@ -459,17 +459,17 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
           return (
             <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
               <View style={{ width: 12, height: 8, borderRadius: 4, backgroundColor: sc.border || COLOURS.steel }} />
-              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{s}</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{s}</Text>
             </View>
           );
         })}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 0, height: 12, borderLeftWidth: 1.5, borderLeftColor: COLOURS.accent2, borderStyle: 'dashed', opacity: 0.7 }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>lesson</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>lesson</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 2, height: 12, backgroundColor: COLOURS.red, opacity: 0.55 }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>today</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>today</Text>
         </View>
       </View>
     </View>
@@ -524,7 +524,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
               shadowRadius: activeFilters.length === 0 ? 10 : 6,
               elevation: activeFilters.length === 0 ? 4 : 1,
             }}>
-            <Text style={{ fontFamily: activeFilters.length === 0 ? 'Lato-Bold' : 'Lato', fontSize: 12, color: activeFilters.length === 0 ? COLOURS.navy : COLOURS.textMuted }}>all</Text>
+            <Text style={{ fontFamily: activeFilters.length === 0 ? 'Lato-Bold' : 'Lato', fontSize: 13, color: activeFilters.length === 0 ? COLOURS.navy : COLOURS.textMuted }}>all</Text>
           </TouchableOpacity>
 
           {STATUS_OPTIONS.map(s => {
@@ -543,7 +543,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
                   shadowRadius: active ? 10 : 6,
                   elevation: active ? 4 : 1,
                 }}>
-                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? sc.text : COLOURS.textMuted }}>{s}</Text>
+                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? sc.text : COLOURS.textMuted }}>{s}</Text>
               </TouchableOpacity>
             );
           })}
@@ -571,7 +571,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
             marginTop: 12, padding: 12, borderRadius: RADIUS.md,
             backgroundColor: 'rgba(255,255,255,0.40)',
           }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>
               💡 {undatedCount} piece{undatedCount !== 1 ? 's' : ''} without a start date show as a thin marker at today. Add a date started in the Pieces screen to place them properly.
             </Text>
           </View>

@@ -83,14 +83,14 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
           {/* Zelda bars for energy + enjoyment */}
           <View style={{ flexDirection: 'row', gap: 24, marginBottom: 20 }}>
             <View style={{ gap: 6 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                 ⚡ Energy · {session.energy > 0 ? `+${session.energy}` : session.energy} {energyLabel}
               </Text>
               <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} />
             </View>
             {session.enjoyment ? (
               <View style={{ gap: 6 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                   ❤️ Enjoyment
                 </Text>
                 <ZeldaMini emoji="❤️" value={session.enjoyment} />
@@ -101,38 +101,38 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
           {/* Technique segments */}
           {techSegs.length > 0 && (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
               {techSegs.map(seg => (
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 14 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.title || seg.group || 'Technical work'}</Text>
                     {seg.group ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{seg.group}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{seg.group}</Text>
                       </View>
                     ) : null}
                     {formatArticulation(seg) ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)' }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
                       </View>
                     ) : null}
                     {seg.duration ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
                       </View>
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
                   )}
                   {seg.feltDifficulty ? (
                     <View style={{ marginTop: 4 }}>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 2 }}>Difficulty</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 2 }}>Difficulty</Text>
                       <StarRow value={seg.feltDifficulty} emoji="🎵" />
                     </View>
                   ) : null}
@@ -141,7 +141,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                       {seg.challenges.map(t => (
                         <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}>
-                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text>
+                          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text>
                         </View>
                       ))}
                     </View>
@@ -150,7 +150,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                       {seg.progress.map(t => (
                         <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
-                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>{t}</Text>
+                          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text>
                         </View>
                       ))}
                     </View>
@@ -163,7 +163,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
           {/* Repertoire segments */}
           {repSegs.length > 0 && (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
               {repSegs.map(seg => {
                 const name = seg.compositionId ? compName(seg.compositionId) : seg.title;
                 return (
@@ -172,14 +172,14 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
                       {seg.duration ? (
                         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
+                          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
                         </View>
                       ) : null}
                     </View>
-                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                     {seg.feltDifficulty ? (
                       <View style={{ marginTop: 4 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 2 }}>Felt difficulty</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 2 }}>Felt difficulty</Text>
                         <StarRow value={seg.feltDifficulty} emoji="🎵" />
                       </View>
                     ) : null}
@@ -188,7 +188,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                         {seg.challenges.map(t => (
                           <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}>
-                            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text>
+                            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text>
                           </View>
                         ))}
                       </View>
@@ -197,7 +197,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                         {seg.progress.map(t => (
                           <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
-                            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>{t}</Text>
+                            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text>
                           </View>
                         ))}
                       </View>
@@ -211,14 +211,14 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
           {/* Wins + focus */}
           {session.wins ? (
             <View style={{ marginBottom: 16, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.wins}</Text>
             </View>
           ) : null}
 
           {session.tomorrowFocus ? (
             <View style={{ marginBottom: 20, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text>
             </View>
           ) : null}

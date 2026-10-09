@@ -157,14 +157,17 @@ export function DragHandle({ handleProps, active = false }) {
   );
 }
 
-export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragChange }) {
+export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragChange, itemGap = 10 }) {
   const layouts    = useRef({});   // key -> { y, h } (original, un-shifted)
   const shifts     = useRef({});   // key -> Animated.Value (translateY)
   const responders = useRef({});   // key -> PanResponder
   const drag       = useRef(null); // { key, index, keys, h, startY, over }
   const latest     = useRef({});
-  latest.current = { data, keyExtractor, onReorder, onDragChange };
+  latest.current = { data, keyExtractor, onReorder, onDragChange, itemGap };
   const [activeKey, setActiveKey] = useState(null);
+  // The dashed "drop here" placeholder that glides to wherever the card will land.
+  const [slotH, setSlotH] = useState(0);
+  const slotTop = useRef(new Animated.Value(0)).current;
 
   const getShift = (key) => {
     if (!shifts.current[key]) shifts.current[key] = new Animated.Value(0);
@@ -178,6 +181,8 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
     const L = layouts.current[key];
     if (index < 0 || !L) return;
     drag.current = { key, index, keys, h: L.h, startY: L.y, over: index };
+    slotTop.setValue(L.y);
+    setSlotH(Math.max(0, L.h - latest.current.itemGap));
     setActiveKey(key);
     if (odc) odc(true);
     buzz();
@@ -192,6 +197,11 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
     if (over !== s.over) {
       s.over = over;
       buzz();
+      Animated.timing(slotTop, {
+        toValue: s.startY + snapOffset(s.keys, layouts.current, s.index, over),
+        duration: 140,
+        useNativeDriver: false,
+      }).start();
       s.keys.forEach((k, i) => {
         if (k === s.key) return;
         Animated.timing(getShift(k), {
@@ -246,6 +256,17 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
 
   return (
     <View>
+      {activeKey != null && (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute', left: 0, right: 0, top: slotTop, height: slotH,
+            borderRadius: RADIUS.md,
+            borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(9,99,126,0.5)',
+            backgroundColor: 'rgba(9,99,126,0.08)',
+          }}
+        />
+      )}
       {data.map((item, index) => {
         const key = keyExtractor(item);
         const isActive = key === activeKey;
@@ -254,9 +275,13 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
             key={key}
             onLayout={e => { layouts.current[key] = e.nativeEvent.layout; }}
             style={{
-              transform: [{ translateY: getShift(key) }, { scale: isActive ? 1.02 : 1 }],
-              zIndex: isActive ? 20 : 0,
-              opacity: isActive ? 0.96 : 1,
+              transform: [{ translateY: getShift(key) }, { scale: isActive ? 1.03 : 1 }],
+              zIndex: isActive ? 20 : 1,
+              // Lifted: a deeper shadow makes the held card read as floating above the list.
+              ...(isActive ? {
+                shadowColor: COLOURS.navy, shadowOffset: { width: 0, height: 12 },
+                shadowOpacity: 0.35, shadowRadius: 18, elevation: 14,
+              } : null),
             }}
           >
             {renderItem({ item, index, isActive, handleProps: getResponder(key).panHandlers })}

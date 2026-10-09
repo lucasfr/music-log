@@ -523,13 +523,13 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>metronome</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>metronome</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {composition ? (
             <TouchableOpacity onPress={usePieceTempo} activeOpacity={0.75}
               hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
               style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(8,131,149,0.10)' }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.steel }}>Use piece tempo</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>Use piece tempo</Text>
             </TouchableOpacity>
           ) : null}
           {/* Play/pause lives here, in the header, rather than at the foot of
@@ -544,7 +544,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
       </View>
 
       {audioError ? (
-        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: '#B3261E', marginBottom: 8, textAlign: 'center' }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: '#B3261E', marginBottom: 8, textAlign: 'center' }}>
           Audio engine failed to start: {audioError}
         </Text>
       ) : null}
@@ -564,13 +564,13 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
         <View style={{ alignItems: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 26, color: COLOURS.text }}>{bpm}</Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>bpm</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>bpm</Text>
           </View>
           <TouchableOpacity onPress={() => setPresetsOpen(o => !o)} activeOpacity={0.7}
             hitSlop={{ top: 10, bottom: 10, left: 12, right: 12 }}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 6 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>{currentTempoName}</Text>
-            <Text style={{ fontSize: 9, color: COLOURS.steel }}>{presetsOpen ? '▲' : '▼'}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{currentTempoName}</Text>
+            <Text style={{ fontSize: 11, color: COLOURS.steel }}>{presetsOpen ? '▲' : '▼'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -583,7 +583,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           <Text style={{ fontSize: 16, color: COLOURS.navy }}>+</Text>
         </TouchableOpacity>
       </View>
-      <Text style={{ textAlign: 'center', fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginTop: 2, marginBottom: 8 }}>
+      <Text style={{ textAlign: 'center', fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2, marginBottom: 8 }}>
         tap ±5 · hold for ±1
       </Text>
 
@@ -599,7 +599,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
                 style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 40, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 8, backgroundColor: active ? 'rgba(9,99,126,0.08)' : 'transparent' }}
               >
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: active ? COLOURS.navy : COLOURS.text }}>{p.name}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{p.range} bpm</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{p.range} bpm</Text>
               </TouchableOpacity>
             );
           })}
@@ -613,7 +613,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           ))}
           <TouchableOpacity onPress={() => setMoreOpen(o => !o)} activeOpacity={0.75}
             style={{ width: 44, borderRadius: 10, backgroundColor: 'rgba(9,99,126,0.08)', alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontSize: 12, color: COLOURS.navy }}>{moreOpen ? '▲' : '▼'}</Text>
+            <Text style={{ fontSize: 13, color: COLOURS.navy }}>{moreOpen ? '▲' : '▼'}</Text>
           </TouchableOpacity>
         </View>
         {moreOpen && (
@@ -648,15 +648,15 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             minHeight: 44, paddingVertical: 7, borderRadius: 10,
             backgroundColor: rampEnabled ? 'rgba(8,131,149,0.12)' : 'rgba(9,99,126,0.06)',
           }}>
-          <Text style={{ fontSize: 12 }}>📈</Text>
-          <Text style={{ fontFamily: rampEnabled ? 'Lato-Bold' : 'Lato', fontSize: 12, color: rampEnabled ? COLOURS.steel : COLOURS.textDim }}>
+          <Text style={{ fontSize: 13 }}>📈</Text>
+          <Text style={{ fontFamily: rampEnabled ? 'Lato-Bold' : 'Lato', fontSize: 13, color: rampEnabled ? COLOURS.steel : COLOURS.textDim }}>
             {rampEnabled ? `Ramping to ${rampTarget} bpm, +5 every ${rampEveryBars} bar${rampEveryBars === 1 ? '' : 's'}` : 'Ramp tempo'}
           </Text>
         </TouchableOpacity>
         {rampEnabled && (
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 18, marginTop: 8 }}>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginBottom: 3 }}>target bpm</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 3 }}>target bpm</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => setRampTarget(t => Math.max(bpm, t - 5))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>
@@ -668,7 +668,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               </View>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 9, color: COLOURS.textDim, marginBottom: 3 }}>every N bars</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 3 }}>every N bars</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => setRampEveryBars(n => Math.max(1, n - 1))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>

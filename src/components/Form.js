@@ -112,7 +112,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
             <Text style={{ fontSize: SIZES.body, fontFamily: 'Lato', color: value ? COLOURS.text : COLOURS.textDim }}>
               {display}
             </Text>
-            <Text style={{ fontSize: 12, color: COLOURS.textDim }}>▾</Text>
+            <Text style={{ fontSize: 13, color: COLOURS.textDim }}>▾</Text>
           </TouchableOpacity>
         </Field>
         <Modal visible={open} transparent animationType="slide">
@@ -228,7 +228,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
         <View style={{ flexDirection: 'row', marginBottom: 4 }}>
           {DAYS_SHORT.map((d, i) => (
             <View key={i} style={{ width: CELL_W, alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.5 }}>{d}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.5 }}>{d}</Text>
             </View>
           ))}
         </View>

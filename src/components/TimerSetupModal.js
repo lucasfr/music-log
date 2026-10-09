@@ -40,7 +40,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
         elevation: 2,
       }}>
         <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.tealAccent, marginRight: 10 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 9, color: COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {isTech ? 'technique' : 'repertoire'}
           </Text>
         </View>
@@ -51,11 +51,11 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
             : ''}
         </Text>
         {isTech && formatArticulation(segment) ? (
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel, marginRight: 10 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.steel, marginRight: 10 }}>
             {formatArticulation(segment)}
           </Text>
         ) : null}
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 12 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginRight: 12 }}>
           {segment.plannedMinutes} min
         </Text>
         <Text style={{ fontSize: 13, color: COLOURS.steel, marginRight: 2 }}>✎</Text>
@@ -78,7 +78,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
     }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.tealAccent }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: isTech ? COLOURS.steel : COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.6 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: isTech ? COLOURS.steel : COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.6 }}>
             {isTech ? 'technique' : 'repertoire'}
           </Text>
         </View>
@@ -101,14 +101,14 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
                     backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.65)',
                   }}
                 >
-                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
+                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
           {segment.title !== 'Sight-reading' && (
             <View style={{ marginBottom: 10 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Articulation</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Articulation</Text>
               <ArticulationPicker
                 value={segment.articulation}
                 onChange={v => field('articulation', v)}

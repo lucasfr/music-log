@@ -55,7 +55,7 @@ function SectionHeader({ children }) {
   return (
     <Text style={{
       fontFamily: 'Lato-Bold',
-      fontSize: 11,
+      fontSize: 12,
       color: COLOURS.textDim,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
@@ -93,7 +93,7 @@ function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBor
           {label}
         </Text>
         {sublabel ? (
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>{sublabel}</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 1 }}>{sublabel}</Text>
         ) : null}
       </View>
       {right ?? (onPress ? <Ionicons name="chevron-forward" size={16} color={COLOURS.textDim} /> : null)}
@@ -111,7 +111,7 @@ function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBor
 function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, keyboardType }) {
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 14 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>
         {label}
       </Text>
       <TextInput
@@ -143,7 +143,7 @@ function StatusDot({ connected }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: connected ? '#00B478' : COLOURS.textDim }} />
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: connected ? '#00825A' : COLOURS.textDim }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: connected ? '#00825A' : COLOURS.textDim }}>
         {connected ? 'Connected' : 'Not connected'}
       </Text>
     </View>
@@ -349,11 +349,11 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                     <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(9,99,126,0.10)' }} />
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>or</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>or</Text>
                     <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(9,99,126,0.10)' }} />
                   </View>
                   <View style={{ marginBottom: 8 }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Email</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Email</Text>
                     <TextInput
                       value={email} onChangeText={setEmail}
                       placeholder="you@example.com" placeholderTextColor={COLOURS.textDim}

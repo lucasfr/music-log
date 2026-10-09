@@ -16,7 +16,7 @@ import { uid, confirmDelete } from '../utils';
 function ZeldaBar({ label, emoji, value, onChange }) {
   return (
     <View style={{ marginBottom: 0 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
         {label}
       </Text>
       <View style={{ flexDirection: 'row', gap: 2 }}>

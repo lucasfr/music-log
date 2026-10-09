@@ -51,7 +51,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <View>
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>{fmtDate(lesson.date)}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 1 }}>
                   🎓 Lesson{lesson.teacher ? ` · ${lesson.teacher}` : ''}{lesson.duration ? ` · ${lesson.duration} min` : ''}
                 </Text>
               </View>
@@ -87,7 +87,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
           <View style={{ flexDirection: 'row', gap: 24, marginBottom: 20 }}>
             {lesson.energy != null && (
               <View style={{ gap: 6 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                   ⚡ Energy{energyLabel ? ` · ${energyLabel}` : ''}
                 </Text>
                 <ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} />
@@ -95,7 +95,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
             )}
             {lesson.enjoyment ? (
               <View style={{ gap: 6 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                   ❤️ Enjoyment
                 </Text>
                 <ZeldaMini emoji="❤️" value={lesson.enjoyment} />
@@ -106,39 +106,39 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
           {/* Technique segments */}
           {techSegs.length > 0 && (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
               {techSegs.map(seg => (
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 14 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
                     {formatArticulation(seg) ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)' }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
                       </View>
                     ) : null}
                     {seg.duration ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
                       </View>
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
                   )}
                   {seg.feedback ? (
                     <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>💬 Feedback</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>💬 Feedback</Text>
                       <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text>
                     </View>
                   ) : null}
                   {seg.assignment ? (
                     <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>📚 Assignment</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>📚 Assignment</Text>
                       <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text>
                     </View>
                   ) : null}
@@ -147,7 +147,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                       {seg.challenges.map(t => (
                         <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}>
-                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text>
+                          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text>
                         </View>
                       ))}
                     </View>
@@ -156,7 +156,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                       {seg.progress.map(t => (
                         <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
-                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>{t}</Text>
+                          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text>
                         </View>
                       ))}
                     </View>
@@ -169,7 +169,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
           {/* Repertoire segments */}
           {repSegs.length > 0 && (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
               {repSegs.map(seg => {
                 const name = seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName);
                 return (
@@ -178,37 +178,37 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
                       {seg.isNew && (
                         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}>
-                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: '#5C2D6E' }}>new</Text>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#5C2D6E' }}>new</Text>
                         </View>
                       )}
                       {seg.duration ? (
                         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-                          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
+                          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
                         </View>
                       ) : null}
                     </View>
-                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                     {seg.feedback ? (
                       <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>💬 Feedback</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>💬 Feedback</Text>
                         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text>
                       </View>
                     ) : null}
                     {seg.assignment ? (
                       <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>📚 Assignment</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>📚 Assignment</Text>
                         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text>
                       </View>
                     ) : null}
                     {seg.feltDifficulty ? (
                       <View style={{ marginTop: 6 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 2 }}>Felt difficulty</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 2 }}>Felt difficulty</Text>
                         <StarRow value={seg.feltDifficulty} emoji="🎵" />
                       </View>
                     ) : null}
                     {seg.liking ? (
                       <View style={{ marginTop: 6 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 2 }}>Liking</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 2 }}>Liking</Text>
                         <StarRow value={seg.liking} emoji="⭐" />
                       </View>
                     ) : null}
@@ -217,7 +217,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                         {seg.challenges.map(t => (
                           <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}>
-                            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textMuted }}>{t}</Text>
+                            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text>
                           </View>
                         ))}
                       </View>
@@ -226,7 +226,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                         {seg.progress.map(t => (
                           <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
-                            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.navy }}>{t}</Text>
+                            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text>
                           </View>
                         ))}
                       </View>
@@ -240,21 +240,21 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
           {/* Lesson-level notes */}
           {lesson.overallNotes ? (
             <View style={{ marginBottom: 16, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Lesson notes</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Lesson notes</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text>
             </View>
           ) : null}
 
           {lesson.wins ? (
             <View style={{ marginBottom: 16, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.wins}</Text>
             </View>
           ) : null}
 
           {lesson.nextFocus ? (
             <View style={{ marginBottom: 20, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text>
             </View>
           ) : null}

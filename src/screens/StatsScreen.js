@@ -120,7 +120,7 @@ function ActivityGrid({ sessions, lessons }) {
                 shadowOffset: { width: 0, height: active ? 3 : 1 },
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
               }}>
-              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? '#fff' : COLOURS.textMuted }}>{m.label}</Text>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? '#fff' : COLOURS.textMuted }}>{m.label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -143,7 +143,7 @@ function ActivityGrid({ sessions, lessons }) {
               <View key={mi} style={{ width: wrapped ? slotW : monthW }}>
                 {/* Month label */}
                 <Text style={{
-                  fontFamily: 'Lato-Bold', fontSize: Math.max(7, cell - 2),
+                  fontFamily: 'Lato-Bold', fontSize: Math.max(11, Math.min(13, cell)),
                   color: COLOURS.textDim, letterSpacing: 0.2,
                   marginBottom: 4, textAlign: 'center', width: monthW,
                 }}>{MONTHS_SHORT[mi]}</Text>
@@ -186,7 +186,7 @@ function ActivityGrid({ sessions, lessons }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12, justifyContent: 'flex-end' }}>
         {mode !== 'lessons' && (
           <>
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
             {[0, 15, 35, 55, 75].map(d => (
               <View key={d} style={{
                 width: cell, height: cell,
@@ -194,13 +194,13 @@ function ActivityGrid({ sessions, lessons }) {
                 backgroundColor: d === 0 ? 'rgba(140,32,69,0.07)' : cellColor(d),
               }} />
             ))}
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginLeft: 2, marginRight: mode !== 'practice' ? 8 : 0 }}>More</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginLeft: 2, marginRight: mode !== 'practice' ? 8 : 0 }}>More</Text>
           </>
         )}
         {mode !== 'practice' && (
           <>
             <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: 'rgba(247,127,0,0.55)' }} />
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Lesson</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Lesson</Text>
           </>
         )}
       </View>
@@ -323,7 +323,7 @@ function PracticeVolumeChart({ sessions, period }) {
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>
         avg {timeStr(avgMin)} / {isDaily ? 'day' : 'week'} · {timeStr(totalMin)} total
       </Text>
       {width > 0 && (
@@ -340,7 +340,7 @@ function PracticeVolumeChart({ sessions, period }) {
                   fill={isMax ? COLOURS.steel : 'rgba(8,131,149,0.38)'}
                 />
                 {isMax && (
-                  <SvgText x={x + barW / 2} y={y - 3} textAnchor="middle" fontSize="8" fill={COLOURS.text} fontFamily="Lato">
+                  <SvgText x={x + barW / 2} y={y - 3} textAnchor="middle" fontSize="11" fill={COLOURS.text} fontFamily="Lato">
                     {timeStr(m)}
                   </SvgText>
                 )}
@@ -348,13 +348,13 @@ function PracticeVolumeChart({ sessions, period }) {
             );
           })}
           <Line x1={0} y1={avgY} x2={width} y2={avgY} stroke={COLOURS.amber} strokeWidth="1" strokeDasharray="3,3" />
-          <SvgText x={width - 2} y={avgY - 3} textAnchor="end" fontSize="7" fill={COLOURS.amber} fontFamily="Lato">avg</SvgText>
+          <SvgText x={width - 2} y={avgY - 3} textAnchor="end" fontSize="10" fill={COLOURS.amber} fontFamily="Lato">avg</SvgText>
           {visible.map((key, i) => {
             const label = xLabel(key, i);
             if (!label) return null;
             const x = i * (barW + barGap) + barW / 2;
             return (
-              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
+              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
             );
           })}
         </Svg>
@@ -467,11 +467,11 @@ function WeeklyTrendChart({ sessions, period }) {
         <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
           {/* Left axis — energy (−2…+2) */}
           {[-2, -1, 0, 1, 2].map(v => (
-            <SvgText key={v} x={padL - 4} y={toYEnergy(v) + 3} textAnchor="end" fontSize="8" fill={COLOURS.amber} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
+            <SvgText key={v} x={padL - 4} y={toYEnergy(v) + 3} textAnchor="end" fontSize="11" fill={COLOURS.amber} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
           ))}
           {/* Right axis — liking (1…5) */}
           {[1, 2, 3, 4, 5].map(v => (
-            <SvgText key={v} x={width - padR + 4} y={toYLiking(v) + 3} textAnchor="start" fontSize="8" fill="#E87EA1" fontFamily="Lato">{v}</SvgText>
+            <SvgText key={v} x={width - padR + 4} y={toYLiking(v) + 3} textAnchor="start" fontSize="11" fill="#E87EA1" fontFamily="Lato">{v}</SvgText>
           ))}
           {/* Zero line for energy */}
           <Line x1={padL} y1={toYEnergy(0)} x2={width - padR} y2={toYEnergy(0)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
@@ -492,7 +492,7 @@ function WeeklyTrendChart({ sessions, period }) {
             if (!label) return null;
             const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
             return (
-              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
+              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
             );
           })}
         </Svg>
@@ -543,7 +543,7 @@ function ScatterPlot({ sessions }) {
         <Svg width={width} height={H} viewBox={`0 0 ${width} ${H}`}>
           {/* Y-axis labels */}
           {[-2, -1, 0, 1, 2].map(v => (
-            <SvgText key={v} x={padL - 4} y={toY(v) + 3} textAnchor="end" fontSize="7" fill={COLOURS.textDim} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
+            <SvgText key={v} x={padL - 4} y={toY(v) + 3} textAnchor="end" fontSize="10" fill={COLOURS.textDim} fontFamily="Lato">{v > 0 ? `+${v}` : v}</SvgText>
           ))}
           {/* Zero line */}
           <Line x1={padL} y1={toY(0)} x2={width - padR} y2={toY(0)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
@@ -563,7 +563,7 @@ function ScatterPlot({ sessions }) {
             />
           ))}
           {/* X-axis label */}
-          <SvgText x={width / 2} y={H - 2} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">duration (min)</SvgText>
+          <SvgText x={width / 2} y={H - 2} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">duration (min)</SvgText>
         </Svg>
       )}
       {/* Legend */}
@@ -571,7 +571,7 @@ function ScatterPlot({ sessions }) {
         {['-2','-1','0','1','2'].map(v => (
           <View key={v} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ENERGY_COLOURS[v] }} />
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{v > 0 ? `+${v}` : v}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{v > 0 ? `+${v}` : v}</Text>
           </View>
         ))}
       </View>
@@ -644,9 +644,9 @@ function NeglectedPieces({ sessions, compositions }) {
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 3 }}>
               <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[status]?.bg || COLOURS.tealAccent }}>
-                <Text style={{ fontFamily: 'Lato', fontSize: 11, color: STATUS_COLOURS[status]?.text || COLOURS.navy }}>{status}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: STATUS_COLOURS[status]?.text || COLOURS.navy }}>{status}</Text>
               </View>
-              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: urgencyColour(daysSince), fontStyle: 'italic' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: urgencyColour(daysSince), fontStyle: 'italic' }}>
                 {sinceLabel(daysSince)}
               </Text>
             </View>
@@ -683,7 +683,7 @@ function WinsTimeline({ sessions, period }) {
             {i < wins.length - 1 && <View style={{ width: 1, flex: 1, backgroundColor: COLOURS.glassBorderSubtle, marginTop: 4 }} />}
           </View>
           <View style={{ flex: 1, paddingBottom: 4 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 3 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 3 }}>
               {new Date(s.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
             </Text>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>“{s.wins}”</Text>
@@ -809,18 +809,18 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
       <View style={{ flexDirection: 'row', gap: 20, marginBottom: 16 }}>
         {avgEnergy !== null && (
           <View style={{ gap: 4 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Avg energy</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Avg energy</Text>
             <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={16} />
           </View>
         )}
         {avgEnjoyment !== null && (
           <View style={{ gap: 4 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Avg enjoyment</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Avg enjoyment</Text>
             <ZeldaBarFractional emoji="❤️" fill={avgEnjoyment} size={16} />
           </View>
         )}
         <View style={{ gap: 4 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Lessons</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Lessons</Text>
           <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy }}>{periodLessons.length}</Text>
         </View>
       </View>
@@ -835,7 +835,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
               <View style={{ width: 80, height: 6, backgroundColor: COLOURS.bg2, borderRadius: 3 }}>
                 <View style={{ height: '100%', width: `${(count / maxCount) * 100}%`, backgroundColor: COLOURS.amber, borderRadius: 3 }} />
               </View>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, width: 24, textAlign: 'right' }}>{count}×</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim, width: 30, textAlign: 'right' }}>{count}×</Text>
             </View>
           ))}
         </View>
@@ -845,7 +845,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
       {lessonOnlyPieces.length > 0 && (
         <View>
           <Label>Lesson-only pieces</Label>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>Covered in lessons but not yet self-practised</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 8, fontStyle: 'italic' }}>Covered in lessons but not yet self-practised</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
             {lessonOnlyPieces.map(({ id, title }) => (
               <View key={id} style={{
@@ -855,7 +855,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
                 shadowColor: COLOURS.lessonBorder,
                 shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1,
               }}>
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.lessonText }}>📜 {title}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.lessonText }}>📜 {title}</Text>
               </View>
             ))}
           </View>
@@ -957,24 +957,24 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
             const step = labelStep(pts.length, width);
             if (i % step !== 0 && i !== pts.length - 1) return null;
             return (
-              <SvgText key={p.m} x={toX(i)} y={H - 4} textAnchor="middle" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">
+              <SvgText key={p.m} x={toX(i)} y={H - 4} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">
                 {new Date(p.m + '-15').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })}
               </SvgText>
             );
           })}
           {/* Y-axis max label */}
-          <SvgText x={padL} y={padT + 6} textAnchor="start" fontSize="8" fill={COLOURS.textDim} fontFamily="Lato">{maxY}</SvgText>
+          <SvgText x={padL} y={padT + 6} textAnchor="start" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{maxY}</SvgText>
         </Svg>
       )}
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 16, height: 2, backgroundColor: COLOURS.amber, borderRadius: 1 }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Total</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Total</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 16, height: 2, backgroundColor: COLOURS.steel, borderRadius: 1 }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>Active</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Active</Text>
         </View>
       </View>
     </View>
@@ -1048,7 +1048,7 @@ function TechniqueBreakdown({ sessions }) {
               <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 7 }} />
             </View>
             <View style={{ alignItems: 'flex-end', gap: 3, width: 80, flexShrink: 0 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>
               {avgDiff !== null && <View style={{ marginTop: 8 }}><ZeldaBarFractional emoji="🎵" fill={avgDiff} size={13} /></View>}
             </View>
           </View>
@@ -1144,7 +1144,7 @@ function PillToggle({ options, value, onChange }) {
               shadowOffset: { width: 0, height: active ? 2 : 1 },
               shadowOpacity: 1, shadowRadius: active ? 6 : 3, elevation: active ? 2 : 1,
             }}>
-            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 11, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
+            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
           </TouchableOpacity>
         );
       })}
@@ -1295,14 +1295,14 @@ function ScaleCoverage({ sessions }) {
                   x={cx + (R1 + R2) / 2 * Math.cos(midRad)}
                   y={cy + (R1 + R2) / 2 * Math.sin(midRad)}
                   textAnchor="middle" dominantBaseline="central"
-                  fontSize={size * 0.038} fontWeight="500"
+                  fontSize={size * 0.048} fontWeight="500"
                   fill={COLOURS.text} fontFamily="Lato"
                 >{key === 'F#' ? 'F#/Gb' : key}</SvgText>
                 <SvgText
                   x={cx + (R2 + R3) / 2 * Math.cos(midRad)}
                   y={cy + (R2 + R3) / 2 * Math.sin(midRad)}
                   textAnchor="middle" dominantBaseline="central"
-                  fontSize={size * 0.028}
+                  fontSize={size * 0.038}
                   fill={COLOURS.textDim} fontFamily="Lato"
                 >{COF_MINORS[i]}</SvgText>
               </G>
@@ -1317,26 +1317,26 @@ function ScaleCoverage({ sessions }) {
           {/* Centre stats */}
           {!sel ? (
             <G>
-              <SvgText x={cx} y={cy - size*0.068} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.034} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⏱ {timeStr(totalScaleMins)}</SvgText>
-              <SvgText x={cx} y={cy - size*0.024} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.030} fill={COLOURS.textDim} fontFamily="Lato">total scale time</SvgText>
-              <SvgText x={cx} y={cy + size*0.028} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {totalScaleSess} sessions</SvgText>
+              <SvgText x={cx} y={cy - size*0.074} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.040} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⏱ {timeStr(totalScaleMins)}</SvgText>
+              <SvgText x={cx} y={cy - size*0.028} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.036} fill={COLOURS.textDim} fontFamily="Lato">total scale time</SvgText>
+              <SvgText x={cx} y={cy + size*0.022} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {totalScaleSess} sessions</SvgText>
               <SvgText x={cx} y={cy + size*0.072} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
+                fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
 
             </G>
           ) : (
             <G>
-              <SvgText x={cx} y={cy - size*0.088} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.044} fontWeight="500" fill={COLOURS.text} fontFamily="CormorantGaramond">{selKey}</SvgText>
-              <SvgText x={cx} y={cy - size*0.038} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.032} fill={COLOURS.textDim} fontFamily="Lato">{sel.ring === 'major' ? 'major' : 'minor'}</SvgText>
-              <SvgText x={cx} y={cy + size*0.01} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.030} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {selData?.sessions || 0} sessions</SvgText>
-              <SvgText x={cx} y={cy + size*0.052} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.032} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
+              <SvgText x={cx} y={cy - size*0.092} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.054} fontWeight="500" fill={COLOURS.text} fontFamily="CormorantGaramond">{selKey}</SvgText>
+              <SvgText x={cx} y={cy - size*0.040} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.038} fill={COLOURS.textDim} fontFamily="Lato">{sel.ring === 'major' ? 'major' : 'minor'}</SvgText>
+              <SvgText x={cx} y={cy + size*0.012} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {selData?.sessions || 0} sessions</SvgText>
+              <SvgText x={cx} y={cy + size*0.058} textAnchor="middle" dominantBaseline="central"
+                fontSize={size*0.038} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
 
             </G>
           )}
@@ -1352,7 +1352,7 @@ function ScaleCoverage({ sessions }) {
           }}>
             {selAvgDiff !== null
               ? <ZeldaBarFractional emoji="🎵" fill={selAvgDiff} size={size * 0.038} />
-              : <Text style={{ fontFamily: 'Lato', fontSize: size * 0.030, color: COLOURS.textDim, fontStyle: 'italic' }}>no difficulty data</Text>
+              : <Text style={{ fontFamily: 'Lato', fontSize: size * 0.036, color: COLOURS.textDim, fontStyle: 'italic' }}>no difficulty data</Text>
             }
           </View>
         )}
@@ -1363,13 +1363,13 @@ function ScaleCoverage({ sessions }) {
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#EF9F27' }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>major</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>major</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#5DCAA5' }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>minor</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>minor</Text>
         </View>
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>
       </View>
     </View>
   );
@@ -1405,7 +1405,7 @@ function DayOfWeekChart({ sessions }) {
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 10, fontStyle: 'italic' }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 10, fontStyle: 'italic' }}>
         Most active: {DOW_LABELS[bestDay]} ({byDay[bestDay].count} sessions)
       </Text>
       {width > 0 && (
@@ -1431,7 +1431,7 @@ function DayOfWeekChart({ sessions }) {
                 {d.count > 0 && (
                   <SvgText
                     x={x + barW / 2} y={y - 3}
-                    textAnchor="middle" fontSize="9"
+                    textAnchor="middle" fontSize="11"
                     fill={COLOURS.text} fontFamily="Lato"
                   >{d.count}</SvgText>
                 )}
@@ -1439,7 +1439,7 @@ function DayOfWeekChart({ sessions }) {
                 {avgE !== null && (
                   <SvgText
                     x={x + barW / 2} y={H - padB + 14}
-                    textAnchor="middle" fontSize="9"
+                    textAnchor="middle" fontSize="11"
                     fill={avgE >= 0 ? COLOURS.amber : COLOURS.red}
                     fontFamily="Lato"
                   >{avgE >= 0 ? `+${avgE.toFixed(1)}` : avgE.toFixed(1)}</SvgText>
@@ -1447,7 +1447,7 @@ function DayOfWeekChart({ sessions }) {
                 {/* Day label — row 2, always visible */}
                 <SvgText
                   x={x + barW / 2} y={H - 4}
-                  textAnchor="middle" fontSize="10"
+                  textAnchor="middle" fontSize="12"
                   fill={i === bestDay ? COLOURS.navy : COLOURS.textDim}
                   fontWeight={i === bestDay ? '700' : '400'}
                   fontFamily="Lato"
@@ -1460,9 +1460,9 @@ function DayOfWeekChart({ sessions }) {
       <View style={{ flexDirection: 'row', gap: 12, marginTop: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: COLOURS.amber }} />
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>most active day</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>most active day</Text>
         </View>
-        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, fontStyle: 'italic' }}>numbers = avg energy</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, fontStyle: 'italic' }}>numbers = avg energy</Text>
       </View>
     </View>
   );
@@ -1650,7 +1650,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                     shadowOffset: { width: 0, height: active ? 3 : 1 },
                     shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
                   }}>
-                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? '#fff' : COLOURS.textMuted }}>{p.label}</Text>
+                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? '#fff' : COLOURS.textMuted }}>{p.label}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -1671,8 +1671,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   ) : (
                     <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, color: item.urgent ? COLOURS.red : COLOURS.navy, lineHeight: 32 }}>{item.value}</Text>
                   )}
-                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 4, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
-                  {item.allTime ? <Text style={{ fontFamily: 'Lato', fontSize: 10, color: COLOURS.textDim, marginTop: 2, textAlign: 'center', opacity: 0.7 }}>{item.allTime}</Text> : null}
+                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 4, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
+                  {item.allTime ? <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2, textAlign: 'center', opacity: 0.7 }}>{item.allTime}</Text> : null}
                 </View>
               </BlurView>
             </View>
@@ -1749,7 +1749,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 30, color: sc.text || COLOURS.navy, lineHeight: 32 }}>
                     {count}
                   </Text>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: sc.text || COLOURS.textDim, marginTop: 4, letterSpacing: 0.3, opacity: 0.85 }}>{s}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: sc.text || COLOURS.textDim, marginTop: 4, letterSpacing: 0.3, opacity: 0.85 }}>{s}</Text>
                 </View>
               </BlurView>
             );
@@ -1794,7 +1794,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                           shadowOffset: { width: 0, height: active ? 2 : 1 },
                           shadowOpacity: 1, shadowRadius: active ? 6 : 3, elevation: active ? 2 : 1,
                         }}>
-                        <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 11, color: active ? '#fff' : COLOURS.textMuted }}>{opt.label}</Text>
+                        <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 12, color: active ? '#fff' : COLOURS.textMuted }}>{opt.label}</Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -1811,10 +1811,10 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
                     <View style={{ alignItems: 'flex-end', gap: 1 }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>
                         {pieceSort === 'time' ? timeStr(mins) : `${count}×`}
                       </Text>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>
                         {pieceSort === 'time' ? `${count}× sessions` : (mins > 0 ? `⏱ ${timeStr(mins)}` : '')}
                       </Text>
                     </View>
@@ -1824,14 +1824,14 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
                     <View style={{ gap: 3 }}>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Session</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Session</Text>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
                         {avgEnergy !== null && <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={12} />}
                         {avgSessionEnjoyment !== null && <ZeldaBarFractional emoji="❤️" fill={avgSessionEnjoyment} size={12} />}
                       </View>
                     </View>
                     <View style={{ gap: 3 }}>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Piece</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Piece</Text>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
                         {avgLiking !== null && <ZeldaBarFractional emoji="⭐" fill={avgLiking} size={12} />}
                         {avgDifficulty !== null && <ZeldaBarFractional emoji="🎵" fill={avgDifficulty} size={12} />}
