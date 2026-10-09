@@ -4,9 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
-import { STATUS_OPTIONS } from '../constants';
+import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName, scaleMotion, scaleOctaves, scaleInterval, getLocalPref, setLocalPref, deriveStatusHistory } from '../utils';
+import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -979,10 +979,36 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
 // ─── Technique breakdown ───────────────────────────────────────────────
 
 function TechniqueBreakdown({ sessions }) {
+  const [articulationFilter, setArticulationFilter] = useState('all');
+
+  // Filter pills only offer articulations actually present in this period's
+  // data, so the row doesn't appear at all until something has been logged
+  // with one. A segment matches if either hand uses the chosen articulation.
+  const used = new Set();
+  sessions.forEach(s => {
+    (s.segments || []).forEach(seg => {
+      if (seg.type !== 'technique') return;
+      const { rh, lh } = articulationOf(seg);
+      if (rh) used.add(rh);
+      if (lh) used.add(lh);
+    });
+  });
+  const filterOptions = [
+    { key: 'all', label: 'All' },
+    ...ARTICULATION_OPTIONS.filter(a => used.has(a)).map(a => ({ key: a, label: ARTICULATION_LABELS[a] })),
+  ];
+  // A previously chosen filter may have no data after switching period —
+  // fall back to 'all' rather than showing an empty chart with no way out.
+  const activeFilter = filterOptions.some(o => o.key === articulationFilter) ? articulationFilter : 'all';
+
   const groups = {};
   sessions.forEach(s => {
     (s.segments || []).forEach(seg => {
       if (seg.type !== 'technique') return;
+      if (activeFilter !== 'all') {
+        const { rh, lh } = articulationOf(seg);
+        if (rh !== activeFilter && lh !== activeFilter) return;
+      }
       const g = seg.group || seg.title || 'Technique';
       if (!groups[g]) groups[g] = { count: 0, minutes: 0, difficulty: [] };
       groups[g].count++;
@@ -1001,6 +1027,11 @@ function TechniqueBreakdown({ sessions }) {
 
   return (
     <View>
+      {filterOptions.length > 1 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+          <PillToggle options={filterOptions} value={activeFilter} onChange={setArticulationFilter} />
+        </ScrollView>
+      )}
       {sorted.map(([name, data]) => {
         const avgDiff = data.difficulty.length
           ? data.difficulty.reduce((a, v) => a + v, 0) / data.difficulty.length
