@@ -90,7 +90,7 @@ export default function LogScreen({ sessions, compositions, onSave }) {
                       flex: 1, paddingVertical: 10, alignItems: 'center',
                       borderRadius: RADIUS.sm, borderWidth: 1,
                       borderColor: active ? COLOURS.navy : COLOURS.glassBorder,
-                      backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.50)',
+                      backgroundColor: active ? COLOURS.navy : COLOURS.w(0.50),
                       shadowColor: active ? COLOURS.navy : 'transparent',
                       shadowOffset: { width: 0, height: 3 },
                       shadowOpacity: active ? 0.35 : 0,
@@ -143,7 +143,7 @@ export default function LogScreen({ sessions, compositions, onSave }) {
             <View style={{
               borderWidth: 1, borderStyle: 'dashed', borderColor: COLOURS.glassBorder,
               borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12,
-              backgroundColor: 'rgba(255,255,255,0.25)',
+              backgroundColor: COLOURS.w(0.25),
             }}>
               <Text style={{ fontFamily: 'SourceSans3', color: COLOURS.textDim, fontSize: 14 }}>
                 Add technique and repertoire segments above

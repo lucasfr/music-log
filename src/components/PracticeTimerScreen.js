@@ -32,7 +32,7 @@ const MetronomeSection = React.memo(function MetronomeSection({ showMetronome, o
         hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
           paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.pill,
           backgroundColor: showMetronome ? COLOURS.navy : 'transparent',
-          borderWidth: showMetronome ? 0 : 1, borderColor: 'rgba(9,99,126,0.35)',
+          borderWidth: showMetronome ? 0 : 1, borderColor: COLOURS.navyA(0.35),
           marginBottom: showMetronome ? 14 : 0,
         }}
       >
@@ -92,7 +92,7 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
       <Svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
         <Circle
           cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
-          stroke="rgba(9,99,126,0.12)" strokeWidth={RING_STROKE} fill="none"
+          stroke={COLOURS.navyA(0.12)} strokeWidth={RING_STROKE} fill="none"
         />
         <Circle
           cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
@@ -283,7 +283,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
               position: 'absolute', top: 8, right: 20, zIndex: 10,
               paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
-              backgroundColor: 'rgba(255,255,255,0.75)',
+              backgroundColor: COLOURS.w(0.75),
               shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 1, shadowRadius: 8, elevation: 3,
             }}

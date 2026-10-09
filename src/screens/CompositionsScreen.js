@@ -121,7 +121,7 @@ function AutocompleteField({ label, value, onChange, placeholder, suggestions })
           <View style={{
             borderBottomLeftRadius: RADIUS.sm,
             borderBottomRightRadius: RADIUS.sm,
-            backgroundColor: 'rgba(255,255,255,0.95)',
+            backgroundColor: COLOURS.float,
             overflow: 'hidden',
             shadowColor: COLOURS.glassShadow,
             shadowOffset: { width: 0, height: 4 },
@@ -209,7 +209,7 @@ function KeysPicker({ value = [], onChange }) {
           activeOpacity={0.75}
           hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
             paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
-            backgroundColor: 'rgba(255,255,255,0.55)', alignSelf: 'flex-start',
+            backgroundColor: COLOURS.w(0.55), alignSelf: 'flex-start',
             shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2,
           }}
         >
@@ -235,7 +235,7 @@ function TimeSigPicker({ value = [], onChange }) {
             <TouchableOpacity key={sig} onPress={() => toggle(sig)} activeOpacity={0.75}
               hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
-                backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.55),
                 shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
                 shadowOffset: { width: 0, height: active ? 3 : 1 },
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
@@ -279,7 +279,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
     <Modal visible animationType="slide" presentationStyle="pageSheet">
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
-          <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
+          <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 19, color: COLOURS.text }}>
                 {comp.title ? 'Edit piece' : 'Add piece'}
@@ -374,7 +374,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <View style={{
                     paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
-                    backgroundColor: (STATUS_COLOURS[data.status] || {}).bg || 'rgba(255,255,255,0.50)',
+                    backgroundColor: (STATUS_COLOURS[data.status] || {}).bg || COLOURS.w(0.50),
                   }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: (STATUS_COLOURS[data.status] || {}).text || COLOURS.textMuted }}>
                       {data.status || 'ambition'}
@@ -385,7 +385,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                     <TouchableOpacity
                       onPress={() => setData(d => ({ ...d, shelvedAt: todayISO(), status: 'shelved' }))}
                       activeOpacity={0.75}
-                      hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                      hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
                     >
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>📦 Shelve now</Text>
                     </TouchableOpacity>
@@ -395,7 +395,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                     <TouchableOpacity
                       onPress={() => setData(d => ({ ...d, shelvedAt: '' }))}
                       activeOpacity={0.75}
-                      hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                      hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
                     >
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>↺ Un-shelve</Text>
                     </TouchableOpacity>
@@ -506,7 +506,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
   const TABS = ['details', 'notes', 'study', 'resources', 'sessions'];
 
   return (
-    <BlurView intensity={32} tint="light" style={{
+    <BlurView intensity={32} tint={COLOURS.blurTint} style={{
       borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12,
       shadowColor: shadowColor, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 16, elevation: 5,
     }}>
@@ -554,15 +554,15 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
       </TouchableOpacity>
 
       {expanded && (
-        <View style={{ backgroundColor: 'rgba(255,255,255,0.30)' }}>
+        <View style={{ backgroundColor: COLOURS.w(0.30) }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ padding: 10, gap: 6, flexDirection: 'row' }}>
             {TABS.map(t => (
               <TouchableOpacity key={t} onPress={() => setTab(t)} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                   paddingVertical: 6, paddingHorizontal: 14,
                   borderRadius: RADIUS.pill,
-                  backgroundColor: tab === t ? COLOURS.navy : 'rgba(255,255,255,0.55)',
-                  shadowColor: tab === t ? 'rgba(9,99,126,0.3)' : COLOURS.glassShadow,
+                  backgroundColor: tab === t ? COLOURS.navy : COLOURS.w(0.55),
+                  shadowColor: tab === t ? COLOURS.navyA(0.3) : COLOURS.glassShadow,
                   shadowOffset: { width: 0, height: tab === t ? 3 : 1 },
                   shadowOpacity: 1, shadowRadius: tab === t ? 8 : 4, elevation: tab === t ? 3 : 1,
                 }}>
@@ -625,7 +625,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
                   const seg = (s.segments || []).find(sg => sg.compositionId === comp.id);
                   const energyBar = (s.energy ?? 0) + 3;
                   return (
-                    <View key={s.id} style={{ padding: 12, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 6, elevation: 2, marginBottom: 10 }}>
+                    <View key={s.id} style={{ padding: 12, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 6, elevation: 2, marginBottom: 10 }}>
 
                       {/* Header row: date + duration */}
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -637,7 +637,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
                             </View>
                           ) : null}
                           {s.duration ? (
-                            <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.6)' }}>
+                            <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.6) }}>
                               <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{s.duration} min total</Text>
                             </View>
                           ) : null}
@@ -783,7 +783,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
               <TouchableOpacity key={s} onPress={() => setFilterStatus(s)} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
-                  backgroundColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.bg || 'rgba(247,127,0,0.14)') : active ? 'rgba(247,127,0,0.14)' : 'rgba(255,255,255,0.55)',
+                  backgroundColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.bg || 'rgba(247,127,0,0.14)') : active ? 'rgba(247,127,0,0.14)' : COLOURS.w(0.55),
                   shadowColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.border || COLOURS.accent2Mid) : active ? COLOURS.accent2Mid : COLOURS.glassShadow,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: active ? 0.6 : 0.5,
@@ -814,8 +814,8 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
           bottom: Platform.OS === 'web' ? 100 : Platform.OS === 'ios' ? 140 : 120,
           right: 20,
           width: 58, height: 58, borderRadius: 29,
-          backgroundColor: 'rgba(255,255,255,0.92)',
-          borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
+          backgroundColor: COLOURS.float,
+          borderWidth: 1, borderColor: COLOURS.w(0.9),
           alignItems: 'center', justifyContent: 'center',
           shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 },
           shadowOpacity: 0.55, shadowRadius: 16, elevation: 8,

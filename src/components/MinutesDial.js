@@ -104,7 +104,7 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
       style={{ width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' }}
     >
       <Svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} pointerEvents="none">
-        <Circle cx={CENTER} cy={CENTER} r={R} stroke="rgba(9,99,126,0.12)" strokeWidth={STROKE} fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={R} stroke={COLOURS.navyA(0.12)} strokeWidth={STROKE} fill="none" />
         {Array.from({ length: filledSegments }, (_, i) => {
           const segStart = i * SEGMENT_ANGLE;
           const opacity = filledSegments > 1 ? 0.12 + (0.88 * i) / (filledSegments - 1) : 1;

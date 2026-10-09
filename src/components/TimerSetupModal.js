@@ -31,7 +31,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
       <TouchableOpacity activeOpacity={0.85} onPress={() => field('confirmed', false)} style={{
         flexDirection: 'row', alignItems: 'center',
         borderRadius: RADIUS.md,
-        backgroundColor: 'rgba(255,255,255,0.55)',
+        backgroundColor: COLOURS.w(0.55),
         paddingHorizontal: 12, paddingVertical: 10,
         marginBottom: 10,
         shadowColor: COLOURS.glassShadow,
@@ -68,7 +68,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
   return (
     <View style={{
       borderRadius: RADIUS.md,
-      backgroundColor: 'rgba(255,255,255,0.55)',
+      backgroundColor: COLOURS.w(0.55),
       padding: 12,
       marginBottom: 10,
       shadowColor: COLOURS.glassShadow,
@@ -99,7 +99,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
                   hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                     paddingHorizontal: 10, paddingVertical: 5,
                     borderRadius: RADIUS.pill,
-                    backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.65)',
+                    backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.65),
                   }}
                 >
                   <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
@@ -151,7 +151,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
         disabled={!isValid}
         hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
           marginTop: 12, paddingVertical: 9, borderRadius: RADIUS.pill, alignItems: 'center',
-          backgroundColor: isValid ? COLOURS.navy : 'rgba(9,99,126,0.15)',
+          backgroundColor: isValid ? COLOURS.navy : COLOURS.navyA(0.15),
         }}
       >
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: isValid ? '#fff' : COLOURS.textDim }}>
@@ -216,11 +216,11 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={requestClose}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
-          <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
+          <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Set up timer</Text>
               <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
-                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -236,17 +236,17 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
             </View>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
               <TouchableOpacity onPress={() => addSegment('technique')} activeOpacity={0.75}
-                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Technique</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => addSegment('repertoire')} activeOpacity={0.75}
-                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Repertoire</Text>
               </TouchableOpacity>
             </View>
 
             {draftSegments.length === 0 && (
-              <View style={{ borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.35)' }}>
+              <View style={{ borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: COLOURS.w(0.35) }}>
                 <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14, textAlign: 'center' }}>
                   Add the segments you plan to work through, and how many minutes each gets.
                 </Text>

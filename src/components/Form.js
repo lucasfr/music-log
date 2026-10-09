@@ -119,7 +119,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
           <TouchableOpacity style={{ flex: 1 }} onPress={() => setOpen(false)} activeOpacity={1}>
             <View style={{
               position: 'absolute', bottom: 0, left: 0, right: 0,
-              backgroundColor: 'rgba(235,244,246,0.97)',
+              backgroundColor: COLOURS.sheet,
               borderTopLeftRadius: RADIUS.xl,
               borderTopRightRadius: RADIUS.xl,
               shadowColor: COLOURS.glassShadowMd,

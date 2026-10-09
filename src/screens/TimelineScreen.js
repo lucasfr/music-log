@@ -153,7 +153,7 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
               position: 'absolute',
               left: `${clampedEnd * 100}%`,
               width: 3, top: 0, bottom: 0,
-              backgroundColor: 'rgba(255,255,255,0.60)',
+              backgroundColor: COLOURS.w(0.60),
               transform: [{ translateX: -3 }],
             }} />
           )}
@@ -202,7 +202,7 @@ function DetailPanel({ comp, sessions, lessons }) {
   const histTotalMs = histStart && histEnd ? Math.max(1, histEnd - histStart) : 0;
 
   return (
-    <BlurView intensity={32} tint="light" style={{
+    <BlurView intensity={32} tint={COLOURS.blurTint} style={{
       borderRadius: RADIUS.md, overflow: 'hidden', marginTop: 12,
       shadowColor: sc.fill, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 4,
     }}>
@@ -517,7 +517,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
             activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
               paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
-              backgroundColor: activeFilters.length === 0 ? 'rgba(9,99,126,0.14)' : 'rgba(255,255,255,0.55)',
+              backgroundColor: activeFilters.length === 0 ? COLOURS.navyA(0.14) : COLOURS.w(0.55),
               shadowColor: activeFilters.length === 0 ? COLOURS.navy : COLOURS.glassShadow,
               shadowOffset: { width: 0, height: 0 },
               shadowOpacity: activeFilters.length === 0 ? 0.6 : 0.5,
@@ -534,7 +534,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
               <TouchableOpacity key={s} onPress={() => toggleFilter(s)} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
-                  backgroundColor: active ? sc.bg : 'rgba(255,255,255,0.55)',
+                  backgroundColor: active ? sc.bg : COLOURS.w(0.55),
                   borderWidth: active ? 1 : 0,
                   borderColor: active ? sc.border : 'transparent',
                   shadowColor: active ? sc.border : COLOURS.glassShadow,
@@ -569,7 +569,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
         {undatedCount > 0 && (
           <View style={{
             marginTop: 12, padding: 12, borderRadius: RADIUS.md,
-            backgroundColor: 'rgba(255,255,255,0.40)',
+            backgroundColor: COLOURS.w(0.40),
           }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>
               💡 {undatedCount} piece{undatedCount !== 1 ? 's' : ''} without a start date show as a thin marker at today. Add a date started in the Pieces screen to place them properly.

@@ -75,6 +75,7 @@ export const COLOURS = {
   blurTint:  'light',   // expo-blur tint
   statusBar: 'dark',    // expo-status-bar style (dark icons on a light background)
   float:     'rgba(255,255,255,0.92)',   // floating chrome (FAB, tab bar): stays near-opaque in every theme
+  sheet:     'rgba(235,244,246,0.97)',   // bottom sheets / pickers
   isDark:    false,
   __theme:   'light',
 };
@@ -111,6 +112,7 @@ const DARK = {
   steelA: a => `rgba(70,190,208,${+Math.min(1, a * 1.3).toFixed(3)})`,
   blurTint: 'dark', statusBar: 'light', isDark: true, __theme: 'dark',
   float: '#1C323A',
+  sheet: 'rgba(16,32,38,0.98)',
 };
 
 export const THEMES = {

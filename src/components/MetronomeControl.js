@@ -160,7 +160,7 @@ function SigChip({ sig, active, onPress }) {
   const color = active ? '#fff' : COLOURS.steel;
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.75}
-      style={{ flex: 1, minHeight: 44, justifyContent: 'center', paddingVertical: 6, borderRadius: 10, backgroundColor: active ? COLOURS.navy : 'rgba(9,99,126,0.08)', alignItems: 'center' }}>
+      style={{ flex: 1, minHeight: 44, justifyContent: 'center', paddingVertical: 6, borderRadius: 10, backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.08), alignItems: 'center' }}>
       <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif', fontWeight: '700', fontSize: 16, color, lineHeight: 17 }}>{num}</Text>
       <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif', fontWeight: '700', fontSize: 16, color, lineHeight: 17 }}>{den}</Text>
     </TouchableOpacity>
@@ -519,7 +519,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const currentTempoName = tempoName(bpm);
 
   return (
-    <BlurView intensity={44} tint="light" style={{ borderRadius: 16, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 18, elevation: 4 }}>
+    <BlurView intensity={44} tint={COLOURS.blurTint} style={{ borderRadius: 16, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 18, elevation: 4 }}>
     <View style={{ backgroundColor: COLOURS.glass, padding: 14 }}>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -528,7 +528,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           {composition ? (
             <TouchableOpacity onPress={usePieceTempo} activeOpacity={0.75}
               hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-              style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(8,131,149,0.10)' }}>
+              style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: COLOURS.steelA(0.10) }}>
               <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>Use piece tempo</Text>
             </TouchableOpacity>
           ) : null}
@@ -558,7 +558,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           onPressIn={() => startHold(-1)}
           onPressOut={stopHold}
           activeOpacity={0.7}
-          hitSlop={hitFor(40)} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(9,99,126,0.25)', alignItems: 'center', justifyContent: 'center' }}
+          hitSlop={hitFor(40)} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: COLOURS.navyA(0.25), alignItems: 'center', justifyContent: 'center' }}
         >
           <Text style={{ fontSize: 16, color: COLOURS.navy }}>−</Text>
         </TouchableOpacity>
@@ -581,7 +581,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           onPressIn={() => startHold(1)}
           onPressOut={stopHold}
           activeOpacity={0.7}
-          hitSlop={hitFor(40)} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(9,99,126,0.25)', alignItems: 'center', justifyContent: 'center' }}
+          hitSlop={hitFor(40)} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: COLOURS.navyA(0.25), alignItems: 'center', justifyContent: 'center' }}
         >
           <Text style={{ fontSize: 16, color: COLOURS.navy }}>+</Text>
         </TouchableOpacity>
@@ -591,7 +591,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
       </Text>
 
       {presetsOpen && (
-        <View style={{ borderTopWidth: 0.5, borderTopColor: 'rgba(9,99,126,0.12)', paddingTop: 8, marginBottom: 8 }}>
+        <View style={{ borderTopWidth: 0.5, borderTopColor: COLOURS.navyA(0.12), paddingTop: 8, marginBottom: 8 }}>
           {TEMPO_PRESETS.map(p => {
             const active = p.name === currentTempoName;
             return (
@@ -599,7 +599,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
                 key={p.name}
                 onPress={() => setBpm(p.value)}
                 activeOpacity={0.75}
-                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 40, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 8, backgroundColor: active ? 'rgba(9,99,126,0.08)' : 'transparent' }}
+                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 40, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 8, backgroundColor: active ? COLOURS.navyA(0.08) : 'transparent' }}
               >
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: active ? COLOURS.navy : COLOURS.text }}>{p.name}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{p.range} bpm</Text>
@@ -615,7 +615,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <SigChip key={s} sig={s} active={sig === s} onPress={() => selectSig(s)} />
           ))}
           <TouchableOpacity onPress={() => setMoreOpen(o => !o)} activeOpacity={0.75}
-            style={{ width: 44, borderRadius: 10, backgroundColor: 'rgba(9,99,126,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ width: 44, borderRadius: 10, backgroundColor: COLOURS.navyA(0.08), alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 13, color: COLOURS.navy }}>{moreOpen ? '▲' : '▼'}</Text>
           </TouchableOpacity>
         </View>
@@ -636,9 +636,9 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               key={n}
               onPress={() => selectSubdivision(n)}
               activeOpacity={0.75}
-              style={{ flex: 1, height: 44, borderRadius: 10, backgroundColor: active ? COLOURS.navy : 'rgba(9,99,126,0.08)', alignItems: 'center', justifyContent: 'center' }}
+              style={{ flex: 1, height: 44, borderRadius: 10, backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.08), alignItems: 'center', justifyContent: 'center' }}
             >
-              <NoteIcon sub={n} color={active ? '#fff' : 'rgba(9,99,126,0.55)'} />
+              <NoteIcon sub={n} color={active ? '#fff' : COLOURS.navyA(0.55)} />
             </TouchableOpacity>
           );
         })}
@@ -649,7 +649,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           style={{
             flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
             minHeight: 44, paddingVertical: 7, borderRadius: 10,
-            backgroundColor: rampEnabled ? 'rgba(8,131,149,0.12)' : 'rgba(9,99,126,0.06)',
+            backgroundColor: rampEnabled ? COLOURS.steelA(0.12) : COLOURS.navyA(0.06),
           }}>
           <Text style={{ fontSize: 13 }}>📈</Text>
           <Text style={{ fontFamily: rampEnabled ? 'Lato-Bold' : 'Lato', fontSize: 13, color: rampEnabled ? COLOURS.steel : COLOURS.textDim }}>

@@ -129,7 +129,7 @@ function ActivityGrid({ sessions, lessons, compositions }) {
             <TouchableOpacity key={m.key} onPress={() => setMode(m.key)} activeOpacity={0.75}
               hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
-                backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+                backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
                 shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
                 shadowOffset: { width: 0, height: active ? 3 : 1 },
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
@@ -215,7 +215,7 @@ function ActivityGrid({ sessions, lessons, compositions }) {
         if (daySessions.length) parts.push(`${daySessions.length} session${daySessions.length !== 1 ? 's' : ''} · ${mins} min`);
         if (dayLessons.length)  parts.push(`${dayLessons.length} lesson${dayLessons.length !== 1 ? 's' : ''}`);
         return (
-          <View style={{ marginTop: 12, padding: 12, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+          <View style={{ marginTop: 12, padding: 12, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.55) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, flex: 1 }}>{when}</Text>
               <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -388,7 +388,7 @@ function PracticeVolumeChart({ sessions, period }) {
               <G key={i}>
                 <Path
                   d={`M${x},${y} h${barW} v${barH} h${-barW} Z`}
-                  fill={isMax ? COLOURS.steel : 'rgba(8,131,149,0.38)'}
+                  fill={isMax ? COLOURS.steel : COLOURS.steelA(0.38)}
                 />
                 {isMax && (
                   <SvgText x={x + barW / 2} y={y - 3} textAnchor="middle" fontSize="11" fill={COLOURS.text} fontFamily="Lato">
@@ -1190,7 +1190,7 @@ function PillToggle({ options, value, onChange }) {
           <TouchableOpacity key={o.key} onPress={() => onChange(o.key)} activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
               paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill,
-              backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+              backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
               shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
               shadowOffset: { width: 0, height: active ? 2 : 1 },
               shadowOpacity: 1, shadowRadius: active ? 6 : 3, elevation: active ? 2 : 1,
@@ -1469,7 +1469,7 @@ function DayOfWeekChart({ sessions }) {
             const alpha = 0.35 + 0.65 * (d.count / maxCount);
             const fill  = i === bestDay
               ? COLOURS.amber
-              : `rgba(8,131,149,${alpha.toFixed(2)})`;
+              : COLOURS.steelA(alpha.toFixed(2));
             return (
               <G key={i}>
                 {/* Bar */}
@@ -1523,7 +1523,7 @@ function TouchableYear({ onPress, icon, label, disabled = false }) {
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }} activeOpacity={0.7}
       accessibilityRole="button" accessibilityLabel={label || (icon === 'chevron-back' ? 'Previous year' : 'Next year')}
-      style={{ ...TOUCH_PILL, width: 48, alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', opacity: disabled ? 0.3 : 1 }}>
+      style={{ ...TOUCH_PILL, width: 48, alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), opacity: disabled ? 0.3 : 1 }}>
       <Ionicons name={icon} size={24} color={COLOURS.navy} />
     </TouchableOpacity>
   );
@@ -1697,7 +1697,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                 <TouchableOpacity key={p.key} onPress={() => setPeriod(p.key)} activeOpacity={0.75}
                   hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                     paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
-                    backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+                    backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
                     shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
                     shadowOffset: { width: 0, height: active ? 3 : 1 },
                     shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
@@ -1713,8 +1713,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24, alignItems: 'stretch' }}>
           {statItems.map((item, i) => (
             <View key={i} style={{ flexBasis: '11%', flexGrow: 1, minWidth: isDesktop ? 0 : '30%' }}>
-              <BlurView intensity={50} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadowMd, shadowOffset:{width:0,height:4}, shadowOpacity:1, shadowRadius:16, elevation:4, flex: 1 }}>
-                <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 16, paddingHorizontal: 10, alignItems: 'center', flex: 1, justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.6)' }}>
+              <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadowMd, shadowOffset:{width:0,height:4}, shadowOpacity:1, shadowRadius:16, elevation:4, flex: 1 }}>
+                <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 16, paddingHorizontal: 10, alignItems: 'center', flex: 1, justifyContent: 'center', borderWidth: 1, borderColor: COLOURS.w(0.6) }}>
                   <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8 }}>{item.emoji}</Text>
                   {(item.type === 'energy' || item.type === 'enjoyment') ? (
                     item.fill !== null
@@ -1786,7 +1786,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <BlurView
                 key={s}
                 intensity={44}
-                tint="light"
+                tint={COLOURS.blurTint}
                 style={{
                   flexGrow: 1, minWidth: isDesktop ? 100 : '30%', borderRadius: RADIUS.md, overflow: 'hidden',
                   shadowColor: sc.border || COLOURS.accentMid,
@@ -1794,7 +1794,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   shadowOpacity: 0.7, shadowRadius: 12, elevation: 3,
                 }}
               >
-                <View style={{ backgroundColor: sc.bg || COLOURS.glass, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' }}>
+                <View style={{ backgroundColor: sc.bg || COLOURS.glass, padding: 16, borderWidth: 1, borderColor: COLOURS.w(0.5) }}>
                   <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8 }}>
                     {STATUS_EMOJI[s] || '🎵'}
                   </Text>
@@ -1841,7 +1841,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                       <TouchableOpacity key={opt.key} onPress={() => setPieceSort(opt.key)} activeOpacity={0.75}
                         hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                           paddingHorizontal: 9, paddingVertical: 4, borderRadius: RADIUS.pill,
-                          backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)',
+                          backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
                           shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
                           shadowOffset: { width: 0, height: active ? 2 : 1 },
                           shadowOpacity: 1, shadowRadius: active ? 6 : 3, elevation: active ? 2 : 1,

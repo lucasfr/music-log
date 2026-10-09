@@ -98,7 +98,7 @@ function ScalesPicker({ selected = [], onChange }) {
             return (
               <View
                 key={name}
-                style={{ flexDirection: 'row', alignItems: 'center', borderRadius: RADIUS.pill, overflow: 'hidden', backgroundColor: isContrary ? 'rgba(140,32,69,0.14)' : 'rgba(8,131,149,0.14)', shadowColor: isContrary ? COLOURS.danger : COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
+                style={{ flexDirection: 'row', alignItems: 'center', borderRadius: RADIUS.pill, overflow: 'hidden', backgroundColor: isContrary ? 'rgba(140,32,69,0.14)' : COLOURS.steelA(0.14), shadowColor: isContrary ? COLOURS.danger : COLOURS.tealBorder, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
               >
                 <TouchableOpacity
                   onPress={() => toggleMotion(name)}
@@ -113,14 +113,14 @@ function ScalesPicker({ selected = [], onChange }) {
                 <TouchableOpacity
                   onPress={() => cycleInterval(name)}
                   activeOpacity={0.75}
-                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: COLOURS.w(0.5) }}
                 >
                   <Text style={{ fontFamily: interval !== 'unison' ? 'Lato-Bold' : 'Lato', fontSize: interval !== 'unison' ? 11 : 11, color: interval !== 'unison' ? COLOURS.tealBorder : COLOURS.textDim }}>{INTERVAL_LABELS[interval]}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggleOctaves(name)}
                   activeOpacity={0.75}
-                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: COLOURS.w(0.5) }}
                 >
                   <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{octaves}oct</Text>
                 </TouchableOpacity>
@@ -158,7 +158,7 @@ function ScalesPicker({ selected = [], onChange }) {
               hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 10, paddingVertical: 5,
                 borderRadius: RADIUS.pill,
-                backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.55),
                 shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
                 shadowOffset: { width: 0, height: active ? 3 : 1 },
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
@@ -218,7 +218,7 @@ export function ArticulationPicker({ value, onChange }) {
               hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 12, paddingVertical: 6,
                 borderRadius: RADIUS.pill,
-                backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.55),
                 shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
                 shadowOffset: { width: 0, height: active ? 3 : 1 },
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
@@ -282,7 +282,7 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
   return (
     <BlurView
       intensity={36}
-      tint="light"
+      tint={COLOURS.blurTint}
       style={{
         borderRadius: RADIUS.md,
         borderWidth: 1,
@@ -324,7 +324,7 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
       </TouchableOpacity>
 
       {open && (
-        <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()} style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: 'rgba(255,255,255,0.30)' }}>
+        <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()} style={{ padding: 14, borderTopWidth: 1, borderTopColor: COLOURS.glassBorder, backgroundColor: COLOURS.w(0.30) }}>
           {isTech ? (
             <>
               <Field label="Technique group" icon="fitness-outline">
@@ -339,7 +339,7 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
                         hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                           paddingHorizontal: 12, paddingVertical: 6,
                           borderRadius: RADIUS.pill,
-                          backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                          backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.55),
                           shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
                           shadowOffset: { width: 0, height: active ? 3 : 1 },
                           shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
@@ -393,13 +393,13 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
               <Field label="Library piece (optional)" icon="library-outline">
                 {techLinked ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: 'rgba(255,255,255,0.62)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
+                    <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: COLOURS.w(0.62), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:2 }}>
                       <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text }}>{linkedComp.title}</Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => field('compositionId', '')}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                      style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
                     >
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>✕ Unlink</Text>
                     </TouchableOpacity>

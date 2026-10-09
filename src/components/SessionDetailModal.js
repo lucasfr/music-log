@@ -49,7 +49,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
-          <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
+          <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 19, color: COLOURS.text }}>{fmtDate(session.date)}</Text>
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
@@ -74,7 +74,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 practice</Text>
             </View>
             {session.duration ? (
-              <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+              <View style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {session.duration} min</Text>
               </View>
             ) : null}
@@ -107,22 +107,22 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.title || seg.group || 'Technical work'}</Text>
                     {seg.group ? (
-                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{seg.group}</Text>
                       </View>
                     ) : null}
                     {formatArticulation(seg) ? (
-                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)' }}>
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
                         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
-                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
                       </View>
                     ) : null}
                     {seg.duration ? (
-                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
                       </View>
                     ) : null}
@@ -171,7 +171,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
                       {seg.duration ? (
-                        <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                        <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                           <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>
                         </View>
                       ) : null}
@@ -210,14 +210,14 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
 
           {/* Wins + focus */}
           {session.wins ? (
-            <View style={{ marginBottom: 16, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+            <View style={{ marginBottom: 16, padding: 14, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.wins}</Text>
             </View>
           ) : null}
 
           {session.tomorrowFocus ? (
-            <View style={{ marginBottom: 20, padding: 14, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+            <View style={{ marginBottom: 20, padding: 14, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text>
             </View>

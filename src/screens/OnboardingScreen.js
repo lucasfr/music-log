@@ -38,7 +38,7 @@ function Dots({ total, active }) {
           width: i === active ? 20 : 6,
           height: 6,
           borderRadius: 3,
-          backgroundColor: i === active ? COLOURS.navy : 'rgba(9,99,126,0.25)',
+          backgroundColor: i === active ? COLOURS.navy : COLOURS.navyA(0.25),
         }} />
       ))}
     </View>
@@ -77,18 +77,18 @@ export function OnboardingScreen({ onComplete }) {
   const isDesktopWeb = Platform.OS === 'web' && typeof window !== 'undefined' && window.innerWidth >= 768;
 
   const card = (
-    <BlurView intensity={60} tint="light" style={{
+    <BlurView intensity={60} tint={COLOURS.blurTint} style={{
       borderRadius: 24,
       overflow: 'hidden',
       width: isDesktopWeb ? 420 : '100%',
-      shadowColor: 'rgba(9,99,126,0.20)',
+      shadowColor: COLOURS.navyA(0.20),
       shadowOffset: { width: 0, height: 16 },
       shadowOpacity: 1,
       shadowRadius: 48,
       elevation: 20,
     }}>
       <View style={{
-        backgroundColor: 'rgba(255,255,255,0.60)',
+        backgroundColor: COLOURS.w(0.60),
         padding: 36,
         paddingBottom: 32,
       }} {...panResponder.panHandlers}>
@@ -126,7 +126,7 @@ export function OnboardingScreen({ onComplete }) {
             borderRadius: RADIUS.pill,
             backgroundColor: COLOURS.navy,
             alignItems: 'center',
-            shadowColor: 'rgba(9,99,126,0.35)',
+            shadowColor: COLOURS.navyA(0.35),
             shadowOffset: { width: 0, height: 6 },
             shadowOpacity: 1, shadowRadius: 16, elevation: 6,
           }}

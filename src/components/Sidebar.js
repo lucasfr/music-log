@@ -22,7 +22,7 @@ const BOTTOM_ITEMS = [
 
 export function Sidebar({ activeTab, onNavigate }) {
   return (
-    <BlurView intensity={40} tint="light" style={styles.sidebar}>
+    <BlurView intensity={40} tint={COLOURS.blurTint} style={styles.sidebar}>
       {/* Logo */}
       <View style={styles.logoRow}>
         <Image
@@ -98,10 +98,10 @@ const styles = live(() => StyleSheet.create({
     marginRight: 12,
     marginBottom: 24,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: COLOURS.w(0.28),
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.55)',
-    shadowColor: 'rgba(9,99,126,0.12)',
+    borderColor: COLOURS.w(0.55),
+    shadowColor: COLOURS.navyA(0.12),
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 1,
     shadowRadius: 24,
@@ -135,12 +135,12 @@ const styles = live(() => StyleSheet.create({
   },
   navContainer: {
     gap: 2,
-    backgroundColor: 'rgba(255,255,255,0.50)',
+    backgroundColor: COLOURS.w(0.50),
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.70)',
+    borderColor: COLOURS.w(0.70),
     padding: 6,
-    shadowColor: 'rgba(9,99,126,0.10)',
+    shadowColor: COLOURS.navyA(0.10),
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 12,
@@ -155,13 +155,13 @@ const styles = live(() => StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   navItemActive: {
-    backgroundColor: 'rgba(9,99,126,0.12)',
+    backgroundColor: COLOURS.navyA(0.12),
   },
   iconWrap: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: 'rgba(9,99,126,0.12)',
+    backgroundColor: COLOURS.navyA(0.12),
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -318,8 +318,8 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
           style={{
             position: 'absolute', left: 0, right: 0, top: slotTop, height: slotH,
             borderRadius: RADIUS.md,
-            borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(9,99,126,0.5)',
-            backgroundColor: 'rgba(9,99,126,0.08)',
+            borderWidth: 2, borderStyle: 'dashed', borderColor: COLOURS.navyA(0.5),
+            backgroundColor: COLOURS.navyA(0.08),
           }}
         />
       )}
