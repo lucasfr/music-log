@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
+import { useNavScrollHandler } from '../context/NavScrollContext';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
@@ -1530,6 +1531,7 @@ function TouchableYear({ onPress, icon, label, disabled = false }) {
 }
 
 export default function StatsScreen({ sessions, compositions, lessons, isDesktop }) {
+  const onNavScroll = useNavScrollHandler(); // collapses the floating tab pill on scroll, like Home
   const [period, setPeriod] = useState('30d');
   const [pieceSort, setPieceSort] = useState('count');
 
@@ -1687,7 +1689,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: isDesktop ? 40 : 120 }}>
+      <ScrollView onScroll={onNavScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: isDesktop ? 40 : 120 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 }}>
           <SectionTitle style={{ marginBottom: 0 }}>Overview</SectionTitle>
           <View style={{ flexDirection: 'row', gap: 6 }}>
