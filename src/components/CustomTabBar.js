@@ -62,7 +62,7 @@ export function CustomTabBar({ state, navigation }) {
           alignItems: 'center',
           gap: ICON_GAP,
           paddingHorizontal: 12,
-          backgroundColor: 'rgba(255,255,255,0.92)',
+          backgroundColor: COLOURS.float,
           borderRadius: RADIUS.pill,
           shadowColor: COLOURS.glassShadowMd,
           shadowOffset: { width: 0, height: 6 },
@@ -89,7 +89,7 @@ export function CustomTabBar({ state, navigation }) {
                 width: focused ? LABEL_W : ICON_SIZE,
                 height: focused ? ICON_SIZE + 8 : ICON_SIZE,
                 borderRadius: focused ? 22 : ICON_SIZE / 2,
-                backgroundColor: focused ? COLOURS.navy : 'rgba(9,99,126,0.10)',
+                backgroundColor: focused ? COLOURS.navy : COLOURS.navyA(0.10),
                 alignItems: 'center', justifyContent: 'center',
               }}
             >

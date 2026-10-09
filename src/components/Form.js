@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Picker } from '@react-native-picker/picker';
-import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, HIT_TEXT, live } from '../theme';
 import { Label } from './UI';
 
 // ─── Helpers for DatePickerF ─────────────────────────────────────────────────────
@@ -46,8 +46,8 @@ export function Field({ label, children, style, icon }) {
 }
 
 // Shared input surface — frosted, no border, shadow lift
-const inputStyle = {
-  backgroundColor: 'rgba(255,255,255,0.62)',
+const inputStyle = live(() => ({
+  backgroundColor: COLOURS.w(0.62),
   borderRadius: RADIUS.sm,
   paddingHorizontal: 12,
   paddingVertical: 10,
@@ -59,7 +59,7 @@ const inputStyle = {
   shadowOpacity: 1,
   shadowRadius: 10,
   elevation: 2,
-};
+}));
 
 export function TextF({ value, onChange, placeholder, multiline, style }) {
   return (
@@ -206,11 +206,11 @@ export function DatePickerF({ label, value, onChange, icon }) {
   const CELL_H = CELL_W;
 
   const calendar = (
-    <BlurView intensity={60} tint="light" style={{
+    <BlurView intensity={60} tint={COLOURS.blurTint} style={{
       borderRadius: 20, overflow: 'hidden',
-      shadowColor: 'rgba(9,99,126,0.18)', shadowOffset:{width:0,height:12}, shadowOpacity:1, shadowRadius:32, elevation:16,
+      shadowColor: COLOURS.navyA(0.18), shadowOffset:{width:0,height:12}, shadowOpacity:1, shadowRadius:32, elevation:16,
     }}>
-      <View style={{ backgroundColor: 'rgba(255,255,255,0.65)', padding: 16 }}>
+      <View style={{ backgroundColor: COLOURS.w(0.65), padding: 16 }}>
         {/* Month nav */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <TouchableOpacity onPress={prevMonth} accessibilityRole="button" accessibilityLabel="Previous month" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
@@ -254,7 +254,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
                     backgroundColor: isSelected
                       ? COLOURS.navy
                       : isToday
-                        ? 'rgba(9,99,126,0.10)'
+                        ? COLOURS.navyA(0.10)
                         : 'transparent',
                   }}
                 >
@@ -280,7 +280,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
           onPress={() => { onChange(today); setOpen(false); }}
           activeOpacity={0.75}
           hitSlop={HIT_PILL}
-          style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+          style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
         >
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Today</Text>
         </TouchableOpacity>

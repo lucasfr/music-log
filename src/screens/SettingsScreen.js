@@ -3,7 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, Activity
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
+import { COLOURS, RADIUS, HIT_TEXT, TOUCH_PILL, HIT_PILL } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import {
   getSupabaseCredentials,
   saveSupabaseCredentials,
@@ -34,17 +35,17 @@ function timeAgo(iso) {
 
 function GlassCard({ children, style }) {
   return (
-    <BlurView intensity={40} tint="light" style={[{
+    <BlurView intensity={40} tint={COLOURS.blurTint} style={[{
       borderRadius: 18,
       overflow: 'hidden',
       marginBottom: 12,
-      shadowColor: 'rgba(9,99,126,0.10)',
+      shadowColor: COLOURS.navyA(0.10),
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 1,
       shadowRadius: 16,
       elevation: 4,
     }, style]}>
-      <View style={{ backgroundColor: 'rgba(255,255,255,0.58)' }}>
+      <View style={{ backgroundColor: COLOURS.w(0.58) }}>
         {children}
       </View>
     </BlurView>
@@ -76,12 +77,12 @@ function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBor
       flexDirection: 'row', alignItems: 'center',
       paddingHorizontal: 16, paddingVertical: 14,
       borderBottomWidth: noBorder || last ? 0 : 1,
-      borderBottomColor: 'rgba(9,99,126,0.07)',
+      borderBottomColor: COLOURS.navyA(0.07),
     }, radius]}>
       {icon && (
         <View style={{
           width: 34, height: 34, borderRadius: 10,
-          backgroundColor: danger ? 'rgba(214,40,40,0.10)' : 'rgba(9,99,126,0.10)',
+          backgroundColor: danger ? 'rgba(214,40,40,0.10)' : COLOURS.navyA(0.10),
           alignItems: 'center', justifyContent: 'center',
           marginRight: 12,
         }}>
@@ -127,12 +128,12 @@ function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, 
           fontFamily: 'Lato',
           fontSize: 14,
           color: COLOURS.text,
-          backgroundColor: 'rgba(9,99,126,0.06)',
+          backgroundColor: COLOURS.navyA(0.06),
           paddingHorizontal: 14,
           paddingVertical: 11,
           borderRadius: 12,
           borderWidth: 1,
-          borderColor: 'rgba(9,99,126,0.10)',
+          borderColor: COLOURS.navyA(0.10),
         }}
       />
     </View>
@@ -283,6 +284,9 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           ? `Last synced ${timeAgo(syncStatus.lastSuccessAt)}`
           : 'Device sync';
 
+  const { pref: themePref, setTheme, options: themeOptions } = useTheme();
+  const THEME_ICONS = { system: 'phone-portrait-outline', light: 'sunny-outline', dark: 'moon-outline' };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingLeft: isDesktop ? 238 : 16, paddingTop: 8, paddingBottom: 60 }}>
@@ -291,6 +295,40 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
         <View style={{ marginBottom: 4, marginTop: 4 }}>
           <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 30, color: COLOURS.text, letterSpacing: -0.3 }}>Settings</Text>
         </View>
+
+        {/* Appearance: one chip per registered theme, plus System */}
+        <SectionHeader>Appearance</SectionHeader>
+        <GlassCard>
+          <View style={{ padding: 14 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {themeOptions.map(o => {
+                const active = themePref === o.key;
+                return (
+                  <TouchableOpacity
+                    key={o.key}
+                    onPress={() => { if (!active) setTheme(o.key, { resume: 'Settings' }); }}
+                    activeOpacity={0.75}
+                    hitSlop={HIT_PILL}
+                    accessibilityRole="radio"
+                    accessibilityLabel={`${o.label} theme`}
+                    accessibilityState={{ selected: active }}
+                    style={{
+                      ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6,
+                      paddingHorizontal: 14, borderRadius: RADIUS.pill,
+                      backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.10),
+                    }}
+                  >
+                    <Ionicons name={THEME_ICONS[o.key] || 'color-palette-outline'} size={16} color={active ? '#fff' : COLOURS.textMuted} />
+                    <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 14, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 10 }}>
+              System follows your device's light or dark setting.
+            </Text>
+          </View>
+        </GlassCard>
 
         {/* ── Sync section ─────────────────────────────────────────── */}
         <SectionHeader>Sync</SectionHeader>
@@ -348,9 +386,9 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>🐙  Continue with GitHub</Text>
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(9,99,126,0.10)' }} />
+                    <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.navyA(0.10) }} />
                     <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>or</Text>
-                    <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(9,99,126,0.10)' }} />
+                    <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.navyA(0.10) }} />
                   </View>
                   <View style={{ marginBottom: 8 }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Email</Text>
@@ -358,10 +396,10 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                       value={email} onChangeText={setEmail}
                       placeholder="you@example.com" placeholderTextColor={COLOURS.textDim}
                       autoCapitalize="none" autoCorrect={false} keyboardType="email-address"
-                      style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, backgroundColor: 'rgba(9,99,126,0.06)', paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(9,99,126,0.10)', marginBottom: 10 }}
+                      style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, backgroundColor: COLOURS.navyA(0.06), paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: COLOURS.navyA(0.10), marginBottom: 10 }}
                     />
                     <TouchableOpacity onPress={handleSendMagicLink} activeOpacity={0.8} disabled={phase === 'sending'}
-                      style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: 'rgba(9,99,126,0.10)', alignItems: 'center' }}>
+                      style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center' }}>
                       {phase === 'sending'
                         ? <ActivityIndicator color={COLOURS.navy} size="small" />
                         : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>Send magic link</Text>

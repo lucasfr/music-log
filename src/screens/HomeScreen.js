@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, live } from '../theme';
 import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
@@ -47,7 +47,7 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <BlurView intensity={isSelected ? 50 : 36} tint="light" style={{
+      <BlurView intensity={isSelected ? 50 : 36} tint={COLOURS.blurTint} style={{
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
         shadowColor: isSelected ? COLOURS.accentMid : COLOURS.accentMid,
         shadowOffset: { width: 0, height: 0 },
@@ -78,7 +78,7 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
             {(techNames.length > 0 || pieceNames.length > 0) && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
                 {techNames.map(t => (
-                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(9,99,126,0.08)', borderRadius: RADIUS.pill }}>
+                  <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.navyA(0.08), borderRadius: RADIUS.pill }}>
                     <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text>
                   </View>
                 ))}
@@ -112,7 +112,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <BlurView intensity={isSelected ? 50 : 36} tint="light" style={{
+      <BlurView intensity={isSelected ? 50 : 36} tint={COLOURS.blurTint} style={{
         borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
         shadowColor: isSelected ? COLOURS.accent2Mid : COLOURS.accent2Mid,
         shadowOffset: { width: 0, height: 0 },
@@ -171,22 +171,22 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
 
 // ─── Shared glass helpers ────────────────────────────────────────────────────
 
-const glass = {
+const glass = live(() => ({
   card: {
     borderRadius: RADIUS.md,
     overflow: 'hidden',
     marginBottom: 12,
-    shadowColor: 'rgba(9,99,126,0.08)',
+    shadowColor: COLOURS.navyA(0.08),
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 10,
     elevation: 2,
   },
   inner: {
-    backgroundColor: 'rgba(255,255,255,0.45)',
+    backgroundColor: COLOURS.w(0.45),
     padding: 14,
   },
-};
+}));
 
 function GlassBtn({ label, onPress, color, danger, small }) {
   return (
@@ -194,8 +194,8 @@ function GlassBtn({ label, onPress, color, danger, small }) {
       paddingHorizontal: small ? 10 : 16, paddingVertical: 8,
       alignSelf: small ? 'flex-start' : 'auto',
       borderRadius: RADIUS.pill,
-      backgroundColor: danger ? 'rgba(214,40,40,0.07)' : 'rgba(255,255,255,0.55)',
-      shadowColor: danger ? 'rgba(214,40,40,0.10)' : 'rgba(9,99,126,0.08)',
+      backgroundColor: danger ? 'rgba(214,40,40,0.07)' : COLOURS.w(0.55),
+      shadowColor: danger ? 'rgba(214,40,40,0.10)' : COLOURS.navyA(0.08),
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 1, shadowRadius: 6, elevation: 2,
     }}>
@@ -230,14 +230,14 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 practice</Text>
           </View>
           {session.duration ? (
-            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.65)', shadowColor: 'rgba(9,99,126,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.navyA(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {session.duration} min</Text>
             </View>
           ) : null}
         </View>
 
         {/* Energy + enjoyment glass card */}
-        <BlurView intensity={40} tint="light" style={glass.card}>
+        <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
           <View style={glass.inner}>
             <View style={{ flexDirection: 'row', gap: 28 }}>
               <View style={{ gap: 6 }}>
@@ -256,7 +256,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Technique segments */}
         {techSegs.length > 0 && (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
               {techSegs.map(seg => (
@@ -266,12 +266,12 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                       {compName(seg.compositionId) || seg.group || seg.title || 'Technical work'}
                     </Text>
                     {formatArticulation(seg) ? (
-                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)' }}>
+                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
                         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
-                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}>
+                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
                       </View>
                     ) : null}
@@ -280,7 +280,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{seg.group || seg.title}</Text>
                       </View>
                     ) : null}
-                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                   </View>
                   {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>}
                   {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
@@ -298,7 +298,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Repertoire segments */}
         {repSegs.length > 0 && (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
               {repSegs.map(seg => {
@@ -307,7 +307,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                   <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
-                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                     </View>
                     {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                     {seg.feltDifficulty ? (
@@ -342,7 +342,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Wins */}
         {session.wins ? (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textMuted, lineHeight: 22 }}>{session.wins}</Text>
@@ -352,7 +352,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Next focus */}
         {session.tomorrowFocus ? (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text>
@@ -394,7 +394,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 lesson</Text>
           </View>
           {lesson.duration ? (
-            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.65)', shadowColor: 'rgba(9,99,126,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.navyA(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {lesson.duration} min</Text>
             </View>
           ) : null}
@@ -402,7 +402,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Energy + enjoyment */}
         {(lesson.energy != null || lesson.enjoyment) ? (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
               <View style={{ flexDirection: 'row', gap: 28 }}>
                 {lesson.energy != null ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy{energyLabel ? ` · ${energyLabel}` : ''}</Text><ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} size={22} /></View> : null}
@@ -414,7 +414,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Technique segments */}
         {techSegs.length > 0 && (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
               {techSegs.map(seg => (
@@ -422,16 +422,16 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
                     {formatArticulation(seg) ? (
-                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)' }}>
+                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
                         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
-                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}>
+                      <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
                       </View>
                     ) : null}
-                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                   </View>
                   {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>}
                   {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
@@ -451,7 +451,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Repertoire segments */}
         {repSegs.length > 0 && (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
               {repSegs.map(seg => {
@@ -461,7 +461,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
                       {seg.isNew && <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#5C2D6E' }}>new</Text></View>}
-                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.7)' }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                     </View>
                     {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                     {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
@@ -494,7 +494,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Lesson notes */}
         {lesson.overallNotes ? (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Lesson notes</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text>
@@ -504,7 +504,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Wins */}
         {lesson.wins ? (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textMuted, lineHeight: 22 }}>{lesson.wins}</Text>
@@ -514,7 +514,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
         {/* Next focus */}
         {lesson.nextFocus ? (
-          <BlurView intensity={40} tint="light" style={glass.card}>
+          <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text>
@@ -672,7 +672,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Today</Text>
           {currentStreak > 0 && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 9, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 9, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}>
               <Text style={{ fontSize: 12 }}>🔥</Text>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{currentStreak} day{currentStreak !== 1 ? 's' : ''}</Text>
             </View>
@@ -698,11 +698,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity onPress={() => openLogSession(today)} activeOpacity={0.8}
-                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:0}, shadowOpacity:0.45, shadowRadius:12, elevation:3 }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:0}, shadowOpacity:0.45, shadowRadius:12, elevation:3 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => openLogLesson(today)} activeOpacity={0.8}
-                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:0}, shadowOpacity:0.45, shadowRadius:12, elevation:3 }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:0}, shadowOpacity:0.45, shadowRadius:12, elevation:3 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
               </TouchableOpacity>
             </View>
@@ -749,10 +749,10 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           position: 'absolute',
           left: 0, right: '50%', top: 12, bottom: 12,
           borderRadius: 20,
-          backgroundColor: 'rgba(255,255,255,0.28)',
+          backgroundColor: COLOURS.w(0.28),
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.55)',
-          shadowColor: 'rgba(9,99,126,0.12)',
+          borderColor: COLOURS.w(0.55),
+          shadowColor: COLOURS.navyA(0.12),
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 24,
@@ -876,7 +876,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             onPress={() => setShowAbout(false)}
             accessibilityRole="button" accessibilityLabel="Close"
             hitSlop={{ top: 2, bottom: 2, left: 2, right: 2 }}
-            style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(9,99,126,0.12)', alignItems: 'center', justifyContent: 'center' }}
+            style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: COLOURS.navyA(0.12), alignItems: 'center', justifyContent: 'center' }}
           >
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 16, color: COLOURS.navy }}>✕</Text>
           </TouchableOpacity>

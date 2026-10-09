@@ -35,7 +35,8 @@ import { CustomTabBar } from './src/components/CustomTabBar';
 import { NavScrollProvider } from './src/context/NavScrollContext';
 import { useLayout } from './src/utils/useLayout';
 import { useUndoableDelete } from './src/components/Undo';
-import { COLOURS } from './src/theme';
+import { COLOURS, live } from './src/theme';
+import { ThemeProvider, useTheme, takeResumeRoute } from './src/theme/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -48,6 +49,9 @@ const isStandalone =
   );
 
 function AppInner({ fontsLoaded }) {
+  const { resolved } = useTheme();
+  // After a theme change the visual tree remounts; land back on the tab the switch lives on.
+  const resumeRoute = useMemo(() => takeResumeRoute() || 'Home', [resolved]);
   const [ready, setReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -127,7 +131,7 @@ function AppInner({ fontsLoaded }) {
   if (showOnboarding && !(Platform.OS === 'web' && typeof window !== 'undefined' && window.innerWidth >= 768)) {
     return (
       <>
-        <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
+        <StatusBar style={COLOURS.statusBar} backgroundColor={COLOURS.bg} translucent={false} />
         <View style={{ flex: 1 }}>
           <AppBackground />
           <OnboardingScreen onComplete={completeOnboarding} />
@@ -161,8 +165,8 @@ function AppInner({ fontsLoaded }) {
 
     return (
       <>
-        <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
-        <View style={styles.desktopOuter} onLayout={onLayout}>
+        <StatusBar style={COLOURS.statusBar} backgroundColor={COLOURS.bg} translucent={false} />
+        <View key={resolved} style={styles.desktopOuter} onLayout={onLayout}>
           <AppBackground />
           <View style={styles.desktopLayout}>
             <Sidebar activeTab={activeTab} onNavigate={setActiveTab} />
@@ -180,11 +184,11 @@ function AppInner({ fontsLoaded }) {
   // ── Mobile layout: bottom tab navigator ────────────────────────────────────
   const mobileContent = (
     <NavScrollProvider>
-    <View style={{ flex: 1, backgroundColor: COLOURS.bg }} onLayout={onLayout}>
+    <View key={resolved} style={{ flex: 1, backgroundColor: COLOURS.bg }} onLayout={onLayout}>
       <AppBackground />
       <NavigationContainer
         theme={{
-          dark: false,
+          dark: COLOURS.isDark,
           colors: {
             primary:      COLOURS.navy,
             background:   COLOURS.bg,
@@ -196,6 +200,7 @@ function AppInner({ fontsLoaded }) {
         }}
       >
         <Tab.Navigator
+          initialRouteName={resumeRoute}
           sceneContainerStyle={{ backgroundColor: 'transparent' }}
           tabBar={props => <CustomTabBar {...props} />}
           screenOptions={{
@@ -232,7 +237,7 @@ function AppInner({ fontsLoaded }) {
 
   return (
     <>
-      <StatusBar style="dark" backgroundColor={COLOURS.bg} translucent={false} />
+      <StatusBar style={COLOURS.statusBar} backgroundColor={COLOURS.bg} translucent={false} />
       {Platform.OS === 'web' ? (
         isStandalone ? (
           <View style={styles.webStandalone}>{mobileContent}</View>
@@ -243,6 +248,17 @@ function AppInner({ fontsLoaded }) {
         )
       ) : mobileContent}
     </>
+  );
+}
+
+// Inside the provider so the theme is applied before anything reads COLOURS, and
+// subscribed to it so the safe-area background follows a theme change.
+function Root({ fontsLoaded }) {
+  useTheme();
+  return (
+    <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
+      <AppInner fontsLoaded={fontsLoaded} />
+    </SafeAreaProvider>
   );
 }
 
@@ -258,13 +274,13 @@ export default function App() {
   });
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
-      <AppInner fontsLoaded={fontsLoaded} />
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <Root fontsLoaded={fontsLoaded} />
+    </ThemeProvider>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = live(() => StyleSheet.create({
   // Mobile web
   webOuter:       { flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center' },
   webInner:       { flex: 1, width: '100%', maxWidth: 520, overflow: 'hidden' },
@@ -273,4 +289,4 @@ const styles = StyleSheet.create({
   desktopOuter:   { flex: 1, backgroundColor: COLOURS.bg },
   desktopLayout:  { flex: 1, flexDirection: 'row', alignItems: 'stretch', position: 'relative' },
   desktopContent: { flex: 1, overflow: 'hidden' },
-});
+}));

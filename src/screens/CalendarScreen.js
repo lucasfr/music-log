@@ -129,7 +129,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16, marginTop: 4 }}>
         <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>Calendar</Text>
         {streak > 0 && (
-          <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:4 }}>
+          <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{streak} day streak 🔥</Text>
           </View>
         )}
@@ -137,7 +137,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
 
       {/* Month stats */}
       {(monthSessions.length > 0 || monthLessons.length > 0) && (
-        <BlurView intensity={36} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 16, shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 14, elevation: 4 }}>
+        <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 16, shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 14, elevation: 4 }}>
           <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 14, paddingHorizontal: 8, flexDirection: 'row' }}>
             {[
               { value: monthSessions.length, label: 'sessions', emoji: '🎹' },
@@ -156,7 +156,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       )}
 
       {/* Calendar grid */}
-      <BlurView intensity={32} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 6 }}>
+      <BlurView intensity={32} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 6 }}>
         <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
           <View style={{ flexDirection: 'row', marginBottom: 6 }}>
             {DAYS.map((d, i) => (
@@ -181,7 +181,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
                   <TouchableOpacity key={col} onPress={() => !isFuture && onDayPress(day, iso)}
                     activeOpacity={isFuture ? 1 : 0.7}
                     style={{ flex: 1, height: cellH, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 8, borderRadius: RADIUS.sm, position: 'relative',
-                      backgroundColor: isSelected ? 'rgba(9,99,126,0.15)' : isToday ? 'rgba(9,99,126,0.08)' : 'transparent' }}>
+                      backgroundColor: isSelected ? COLOURS.navyA(0.15) : isToday ? COLOURS.navyA(0.08) : 'transparent' }}>
                     <DayDots hasPractice={daySessions.length > 0} hasLesson={dayLessons.length > 0} />
                     <Text style={{ fontFamily: isToday ? 'Lato-Bold' : 'Lato', fontSize: Math.max(SIZES.body, Math.round(cellW * 0.28)),
                       color: isFuture ? COLOURS.textDim : isToday ? COLOURS.navy : hasData ? COLOURS.text : COLOURS.textMuted }}>
@@ -298,10 +298,10 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           marginBottom: 12,
           borderRadius: 20,
           overflow: 'hidden',
-          backgroundColor: 'rgba(255,255,255,0.28)',
+          backgroundColor: COLOURS.w(0.28),
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.55)',
-          shadowColor: 'rgba(9,99,126,0.12)',
+          borderColor: COLOURS.w(0.55),
+          shadowColor: COLOURS.navyA(0.12),
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 24,
@@ -349,7 +349,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                 const techSegs = allSegs.filter(s => s.type === 'technique');
                 const repSegs  = allSegs.filter(s => s.type === 'repertoire' || !s.type);
                 return (
-                  <BlurView key={l.id} intensity={40} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
+                  <BlurView key={l.id} intensity={40} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
                     <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
                       <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
                       <View style={{ flex: 1 }}>
@@ -400,9 +400,9 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                           })}
                         </View>
                       )}
-                      {l.wins ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
-                      {l.overallNotes ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.overallNotes}</Text></View> : null}
-                      {l.nextFocus ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.nextFocus}</Text></View> : null}
+                      {l.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
+                      {l.overallNotes ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.overallNotes}</Text></View> : null}
+                      {l.nextFocus ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.nextFocus}</Text></View> : null}
                     </View>
                   </BlurView>
                 );
@@ -412,7 +412,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                 const techSegs = (s.segments || []).filter(sg => sg.type === 'technique');
                 const repSegs  = (s.segments || []).filter(sg => sg.type === 'repertoire');
                 return (
-                  <BlurView key={s.id} intensity={40} tint="light" style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
+                  <BlurView key={s.id} intensity={40} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
                     <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
                       <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
                       <View style={{ flex: 1 }}>
@@ -453,7 +453,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                           ))}
                         </View>
                       )}
-                      {s.wins ? <View style={{ padding: 10, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{s.wins}</Text></View> : null}
+                      {s.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{s.wins}</Text></View> : null}
                     </View>
                   </BlurView>
                 );

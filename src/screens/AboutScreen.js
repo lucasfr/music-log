@@ -8,12 +8,12 @@ const YEAR = new Date().getFullYear();
 
 function GlassCard({ children }) {
   return (
-    <BlurView intensity={40} tint="light" style={{
+    <BlurView intensity={40} tint={COLOURS.blurTint} style={{
       borderRadius: 18, overflow: 'hidden', marginBottom: 12,
-      shadowColor: 'rgba(9,99,126,0.10)', shadowOffset: { width: 0, height: 4 },
+      shadowColor: COLOURS.navyA(0.10), shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 1, shadowRadius: 16, elevation: 4,
     }}>
-      <View style={{ backgroundColor: 'rgba(255,255,255,0.58)', padding: 18 }}>
+      <View style={{ backgroundColor: COLOURS.w(0.58), padding: 18 }}>
         {children}
       </View>
     </BlurView>
@@ -79,7 +79,7 @@ export default function AboutScreen({ isDesktop }) {
         <GlassCard>
           <View style={{ alignItems: 'center' }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 14 }}>Made with ❤️ and 🎹</Text>
-            <View style={{ height: 1, backgroundColor: 'rgba(9,99,126,0.08)', width: '100%', marginBottom: 14 }} />
+            <View style={{ height: 1, backgroundColor: COLOURS.navyA(0.08), width: '100%', marginBottom: 14 }} />
             <View style={{ alignItems: 'center', gap: 8, marginBottom: 14 }}>
               <View style={{ paddingVertical: 3, paddingHorizontal: 10, backgroundColor: COLOURS.navy, borderRadius: 6 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', letterSpacing: 0.5 }}>MIT</Text>

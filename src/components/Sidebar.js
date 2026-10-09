@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, live } from '../theme';
 
 const SIDEBAR_W = 200;
 
@@ -86,7 +86,7 @@ export function Sidebar({ activeTab, onNavigate }) {
 
 export { SIDEBAR_W };
 
-const styles = StyleSheet.create({
+const styles = live(() => StyleSheet.create({
   sidebar: {
     width: SIDEBAR_W,
     position: 'absolute',
@@ -176,4 +176,4 @@ const styles = StyleSheet.create({
   navLabelActive: {
     color: COLOURS.navy,
   },
-});
+}));

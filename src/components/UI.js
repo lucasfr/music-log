@@ -10,7 +10,7 @@ export function GlassCard({ children, style, intensity = 50 }) {
   return (
     <BlurView
       intensity={intensity}
-      tint="light"
+      tint={COLOURS.blurTint}
       style={[{
         borderRadius: RADIUS.md,
         overflow: 'hidden',
@@ -109,7 +109,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           paddingVertical: 16,
           paddingHorizontal: 20,
           alignItems: 'center',
-          shadowColor: 'rgba(9,99,126,0.35)',
+          shadowColor: COLOURS.navyA(0.35),
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 16,
@@ -147,7 +147,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75} hitSlop={HIT_PILL}
       style={[{
-        backgroundColor: 'rgba(255,255,255,0.50)',
+        backgroundColor: COLOURS.w(0.50),
         minHeight: TOUCH.pill,
         justifyContent: 'center',
         borderRadius: RADIUS.sm,
@@ -202,7 +202,7 @@ export function MetaChip({ label }) {
     <View style={{
       paddingHorizontal: 9, paddingVertical: 3,
       borderRadius: RADIUS.sm,
-      backgroundColor: 'rgba(255,255,255,0.55)',
+      backgroundColor: COLOURS.w(0.55),
       shadowColor: COLOURS.glassShadow,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 1,
@@ -233,7 +233,7 @@ export function TagCloud({ tags, selected, onToggle }) {
               paddingHorizontal: 11,
               paddingVertical: 5,
               borderRadius: RADIUS.pill,
-              backgroundColor: active ? 'rgba(247,127,0,0.14)' : 'rgba(255,255,255,0.55)',
+              backgroundColor: active ? 'rgba(247,127,0,0.14)' : COLOURS.w(0.55),
               shadowColor: active ? COLOURS.accent2Mid : COLOURS.glassShadow,
               shadowOffset: { width: 0, height: active ? 3 : 1 },
               shadowOpacity: 1,
