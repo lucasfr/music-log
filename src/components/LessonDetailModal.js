@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
-import { fmtDate, confirmDelete, formatScaleEntry } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation } from '../utils';
 import { exportSessionJSON } from '../utils/export';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
@@ -111,6 +111,11 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 14 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
+                    {formatArticulation(seg) ? (
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)' }}>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
+                      </View>
+                    ) : null}
                     {seg.duration ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>⏱ {seg.duration} min</Text>

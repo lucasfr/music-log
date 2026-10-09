@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
-import { fmtDate, confirmDelete, formatScaleEntry } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation } from '../utils';
 import { exportSessionJSON, copySessionJSON } from '../utils/export';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
@@ -109,6 +109,11 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     {seg.group ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{seg.group}</Text>
+                      </View>
+                    ) : null}
+                    {formatArticulation(seg) ? (
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: 'rgba(8,131,149,0.14)' }}>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
                       </View>
                     ) : null}
                     {seg.duration ? (
