@@ -1,5 +1,12 @@
 // Pure helpers for drag-to-reorder lists. No React Native imports, so the
-// maths can be unit-tested in plain Node.
+// maths can be unit-tested in plain Node (see tests/reorder.test.mjs).
+
+// React Native reports a measured view as { x, y, width, height }; every helper below
+// works with { y, h }. Convert at the boundary: reading `.h` straight off a raw layout
+// gives undefined, which silently turns all the maths into NaN.
+export function toSlot(layout) {
+  return { y: layout.y, h: layout.height };
+}
 
 // Move one item from `from` to `to`, returning a new array.
 export function reorder(arr, from, to) {

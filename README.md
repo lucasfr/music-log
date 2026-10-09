@@ -55,6 +55,8 @@ music-log/
 ├── app.json                        # Expo config + PWA metadata
 ├── netlify.toml                    # Netlify build config
 ├── patch-dist.js                   # Post-build patch for PWA routing
+├── tests/
+│   └── reorder.test.mjs            # Unit tests for the drag-to-reorder maths (node:test, no extra deps)
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
 │   └── service-worker.js           # Cache-first service worker
@@ -110,7 +112,7 @@ music-log/
     │   ├── OnboardingScreen.js     # First-run onboarding
     │   └── LogScreen.js            # Standalone log screen (mobile)
     └── utils/
-        ├── reorder.js               # Pure drag-to-reorder maths (which slot, how far others shift) — unit-testable in plain Node
+        ├── reorder.js               # Pure drag-to-reorder maths (which slot, how far others shift, toSlot layout conversion) — unit-tested in plain Node (`npm test`)
         ├── useDirtyGuard.js         # Tracks unsaved changes in a form against the values it loaded with
         ├── export.js                # JSON export: Blob (web) / share sheet (native)
         ├── usePracticeTimer.js      # Segment timer engine: real-timestamp elapsed time, subscribeTick display hook
@@ -196,6 +198,14 @@ npx serve dist         # preview locally
 ```
 
 Connect the repo to Netlify — it will pick up `netlify.toml` automatically and run `npm run build:web` on every push to `main`.
+
+### Tests
+
+```bash
+npm test
+```
+
+Runs the drag-to-reorder maths tests with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
 
 ### Optional: cloud sync
 

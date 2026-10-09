@@ -19,7 +19,7 @@ import { View, Text, Animated, PanResponder, TouchableOpacity, StyleSheet, Platf
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLOURS, RADIUS, TOUCH } from '../theme';
-import { overIndex, shiftFor, snapOffset, clampDy } from '../utils/reorder';
+import { overIndex, shiftFor, snapOffset, clampDy, toSlot } from '../utils/reorder';
 import { getLocalPref, setLocalPref } from '../utils';
 
 const IS_WEB = Platform.OS === 'web';
@@ -324,7 +324,7 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
           <Animated.View
             key={key}
             // React Native reports { x, y, width, height }; the reorder maths wants { y, h }.
-            onLayout={e => { const { y, height } = e.nativeEvent.layout; layouts.current[key] = { y, h: height }; }}
+            onLayout={e => { layouts.current[key] = toSlot(e.nativeEvent.layout); }}
             style={{
               transform: [{ translateY: getShift(key) }, { scale: isActive ? 1.02 : 1 }],
               zIndex: isActive ? 20 : 1,
