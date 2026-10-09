@@ -5,9 +5,14 @@ export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
-export function todayISO() {
-  const d = new Date();
+// Local-calendar YYYY-MM-DD for a Date. Don't use toISOString() for this: it
+// converts to UTC first, so a local-midnight Date in BST lands on the previous day.
+export function localISO(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+export function todayISO() {
+  return localISO(new Date());
 }
 
 export function fmtDate(iso) {

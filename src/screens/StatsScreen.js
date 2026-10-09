@@ -6,7 +6,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory } from '../utils';
+import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -33,8 +33,7 @@ function cellColor(duration) {
 
 function buildYear(year, dateMap) {
   // Returns array of 12 months, each an array of weeks, each an array of 7 days (Mon–Sun)
-  const today = new Date();
-  const todayISO = today.toISOString().slice(0, 10);
+  const todayStr = todayISO();
   const months = [];
 
   for (let m = 0; m < 12; m++) {
@@ -47,8 +46,8 @@ function buildYear(year, dateMap) {
 
     for (let d = 1; d <= lastDay.getDate(); d++) {
       const date = new Date(year, m, d);
-      const iso  = date.toISOString().slice(0, 10);
-      const isFuture = iso > todayISO;
+      const iso  = localISO(date);
+      const isFuture = iso > todayStr;
       week.push({ iso, duration: isFuture ? -1 : (dateMap[iso] || 0), isFuture });
       if (week.length === 7) { weeks.push(week); week = []; }
     }
@@ -82,6 +81,7 @@ function ActivityGrid({ sessions, lessons }) {
   const lessonDates = mode !== 'practice' ? new Set((lessons || []).map(l => l.date)) : new Set();
 
   const months = buildYear(year, dateMap);
+  const todayStr = todayISO();
 
   // Months are sized by their widest case (6 weeks), so n months in a row need
   //   n * (6*cell + 5*GAP) + (n-1) * MONTH_GAP  of width.
@@ -155,7 +155,7 @@ function ActivityGrid({ sessions, lessons }) {
                       {week.map((day, di) => {
                         if (!day) return <View key={di} style={{ width: cell, height: cell }} />;
                         const isLesson = lessonDates.has(day.iso);
-                        const isToday = day.iso === new Date().toISOString().slice(0, 10);
+                        const isToday = day.iso === todayStr;
                         const color = day.isFuture
                           ? 'rgba(0,0,0,0.05)'
                           : isLesson
