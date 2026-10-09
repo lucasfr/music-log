@@ -9,6 +9,7 @@ import { useKeepAwake } from '../utils/useKeepAwake';
 import { usePracticeTimer } from '../utils/usePracticeTimer';
 import { scheduleSegmentEndNotification, cancelScheduledNotification } from '../utils/segmentNotifications';
 import { MetronomeControl } from './MetronomeControl';
+import { formatArticulation } from '../utils';
 
 // Isolated from PracticeTimerScreen for the same reason MetronomeControl is
 // memoized against it: the countdown ring's remaining-time display forces
@@ -203,6 +204,12 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
         {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
         {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
       </Text>
+
+      {timer.currentSegment.type === 'technique' && formatArticulation(timer.currentSegment) ? (
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.steel, marginTop: -2, marginBottom: 10 }}>
+          {formatArticulation(timer.currentSegment)}
+        </Text>
+      ) : null}
 
       <CountdownRing
         getRemainingMs={timer.getRemainingMs}

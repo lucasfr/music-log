@@ -566,6 +566,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         title: isTech ? '' : (s.title || ''),
         compositionId: s.compositionId || '',
         duration: timer.actualMinutesFor(i),
+        articulation: isTech ? (s.articulation || null) : undefined,
         notes: '', challenges: [], progress: [],
       };
     });

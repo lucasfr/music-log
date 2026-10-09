@@ -186,7 +186,7 @@ function ScalesPicker({ selected = [], onChange }) {
 // hands are given different touches. Tapping the active pill clears it.
 // Opens in separate mode automatically when the stored hands differ.
 
-function ArticulationPicker({ value, onChange }) {
+export function ArticulationPicker({ value, onChange }) {
   const { rh, lh } = articulationOf({ articulation: value });
   const [separate, setSeparate] = useState(rh !== lh);
 

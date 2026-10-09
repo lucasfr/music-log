@@ -7,9 +7,10 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES } from '../theme';
 import { GlassCard, SectionTitle, Btn } from './UI';
 import { Field, TextF, SelectF } from './Form';
+import { ArticulationPicker } from './SegmentEditor';
 import { MinutesDial } from './MinutesDial';
 import { TECH_GROUPS } from '../constants';
-import { uid } from '../utils';
+import { uid, formatArticulation } from '../utils';
 
 function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, onMoveDown }) {
   const isTech = segment.type === 'technique';
@@ -47,6 +48,11 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
             ? ` · ${(compositions.find(c => c.id === segment.compositionId) || {}).title || ''}`
             : ''}
         </Text>
+        {isTech && formatArticulation(segment) ? (
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel, marginRight: 10 }}>
+            {formatArticulation(segment)}
+          </Text>
+        ) : null}
         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 12 }}>
           {segment.plannedMinutes} min
         </Text>
@@ -128,6 +134,15 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
               );
             })}
           </View>
+          {segment.title !== 'Sight-reading' && (
+            <View style={{ marginBottom: 10 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Articulation</Text>
+              <ArticulationPicker
+                value={segment.articulation}
+                onChange={v => field('articulation', v)}
+              />
+            </View>
+          )}
           <View style={{ marginBottom: 8 }}>
             <SelectF
               label=""
