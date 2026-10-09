@@ -99,7 +99,7 @@ export function CustomTabBar({ state, navigation }) {
                 color={focused ? '#ffffff' : COLOURS.textDim}
               />
               {focused ? (
-                <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', marginTop: 1 }}>
+                <Text numberOfLines={1} maxFontSizeMultiplier={1.1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', marginTop: 1 }}>
                   {TAB_LABELS[route.name] || route.name}
                 </Text>
               ) : null}

@@ -37,7 +37,7 @@ export function UndoToast({ message, onUndo, bottom = 24 }) {
         borderRadius: RADIUS.pill, backgroundColor: COLOURS.ink,
         shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 14, elevation: 12,
       }}>
-        <Text style={{ fontFamily: 'Lato', fontSize: 14, color: '#fff', flexShrink: 1 }} numberOfLines={1}>{message}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: 14, color: '#fff', flexShrink: 1 }} numberOfLines={1} maxFontSizeMultiplier={1.3}>{message}</Text>
         <TouchableOpacity
           onPress={onUndo}
           hitSlop={HIT_TEXT}
@@ -45,7 +45,7 @@ export function UndoToast({ message, onUndo, bottom = 24 }) {
           accessibilityLabel="Undo"
           style={{ minHeight: 40, paddingHorizontal: 14, justifyContent: 'center' }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.gold, letterSpacing: 0.4 }}>UNDO</Text>
+          <Text maxFontSizeMultiplier={1.3} style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.gold, letterSpacing: 0.4 }}>UNDO</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>

@@ -103,6 +103,18 @@ function ActivityGrid({ sessions, lessons, compositions }) {
   const totalHeight = 7 * (cell + GAP) - GAP;
   const dayLabelW   = cell + 2;
 
+  // The cells are small, so after tapping roughly the right day you can nudge it a
+  // day at a time from the detail card instead of aiming at a 10px square.
+  function stepDay(delta) {
+    if (!selectedDay) return;
+    const d = new Date(selectedDay + 'T12:00:00');
+    d.setDate(d.getDate() + delta);
+    const iso = localISO(d);
+    if (iso > todayStr) return;
+    setSelectedDay(iso);
+    if (d.getFullYear() !== year) setYear(d.getFullYear());
+  }
+
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
       {/* View mode toggle */}
@@ -204,7 +216,13 @@ function ActivityGrid({ sessions, lessons, compositions }) {
         if (dayLessons.length)  parts.push(`${dayLessons.length} lesson${dayLessons.length !== 1 ? 's' : ''}`);
         return (
           <View style={{ marginTop: 12, padding: 12, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{when}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, flex: 1 }}>{when}</Text>
+              <View style={{ flexDirection: 'row', gap: 6 }}>
+                <TouchableYear icon="chevron-back" label="Previous day" onPress={() => stepDay(-1)} />
+                <TouchableYear icon="chevron-forward" label="Next day" onPress={() => stepDay(1)} disabled={selectedDay >= todayStr} />
+              </View>
+            </View>
             <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2 }}>
               {parts.length ? parts.join('   ') : 'Nothing logged'}
             </Text>
@@ -1501,10 +1519,10 @@ function DayOfWeekChart({ sessions }) {
   );
 }
 
-function TouchableYear({ onPress, icon, disabled = false }) {
+function TouchableYear({ onPress, icon, label, disabled = false }) {
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }} activeOpacity={0.7}
-      accessibilityRole="button" accessibilityLabel={icon === 'chevron-back' ? 'Previous year' : 'Next year'}
+      accessibilityRole="button" accessibilityLabel={label || (icon === 'chevron-back' ? 'Previous year' : 'Next year')}
       style={{ ...TOUCH_PILL, width: 48, alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', opacity: disabled ? 0.3 : 1 }}>
       <Ionicons name={icon} size={24} color={COLOURS.navy} />
     </TouchableOpacity>
