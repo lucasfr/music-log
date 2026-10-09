@@ -178,12 +178,6 @@ export function DragHandle({ handleProps, active = false }) {
   );
 }
 
-// How much of a held card stays visible while it's being dragged. The full card can be
-// hundreds of pixels tall and would hide both the slot it's heading for and the cards
-// around it, so the held card shrinks to roughly its header while its real space stays
-// reserved in the list (shown as the dashed slot).
-const DRAG_PREVIEW_H = 76;
-
 export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragChange, itemGap = 10, scrollRef, scrollOffset }) {
   const layouts    = useRef({});   // key -> { y, h } (original, un-shifted)
   const shifts     = useRef({});   // key -> Animated.Value (translateY)
@@ -196,7 +190,6 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
   const [slotH, setSlotH] = useState(0);
   const slotTop = useRef(new Animated.Value(0)).current;
   const [overIdx, setOverIdx] = useState(0);   // slot the held card is currently over, for the "2 of 4" label
-  const [activeH, setActiveH] = useState(0);   // full height of the held card, so its space stays reserved
 
   const getShift = (key) => {
     if (!shifts.current[key]) shifts.current[key] = new Animated.Value(0);
@@ -208,7 +201,7 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
     const keys = d.map(kx);
     const index = keys.indexOf(key);
     const L = layouts.current[key];
-    if (index < 0 || !L) return;
+    if (index < 0 || !L || !(L.h > 0)) return;
     const so = latest.current.scrollOffset;
     drag.current = {
       key, index, keys, h: L.h, startY: L.y, over: index,
@@ -218,7 +211,6 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
     if (latest.current.scrollRef) drag.current.timer = setInterval(autoScroll, 16);
     slotTop.setValue(L.y);
     setSlotH(Math.max(0, L.h - latest.current.itemGap));
-    setActiveH(L.h);
     setOverIdx(index);
     setActiveKey(key);
     if (odc) odc(true);
@@ -228,11 +220,9 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
   const move = (dy) => {
     const s = drag.current;
     if (!s) return;
-    // Judge the slot by the visible preview, not the full (possibly very tall) card.
-    const heldH = Math.min(s.h, DRAG_PREVIEW_H);
-    const cdy = clampDy(s.keys, layouts.current, s.index, dy, heldH);
+    const cdy = clampDy(s.keys, layouts.current, s.index, dy);
     getShift(s.key).setValue(cdy);
-    const over = overIndex(s.keys, layouts.current, s.key, s.startY + heldH / 2 + cdy);
+    const over = overIndex(s.keys, layouts.current, s.key, s.startY + s.h / 2 + cdy);
     if (over !== s.over) {
       s.over = over;
       setOverIdx(over);
@@ -324,53 +314,52 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
   }, [orderSig]);
 
   return (
-    <View>
-      {activeKey != null && (
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: 'absolute', left: 0, right: 0, top: slotTop, height: slotH,
-            borderRadius: RADIUS.md,
-            borderWidth: 2, borderStyle: 'dashed', borderColor: COLOURS.navyA(0.6),
-            backgroundColor: COLOURS.navyA(0.12),
-            alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <View style={{ paddingHorizontal: 12, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: '#fff' }}>
-              Drop here · {overIdx + 1} of {data.length}
-            </Text>
-          </View>
-        </Animated.View>
-      )}
+    // While a card is held, lift the whole list above whatever follows it (like the Start
+    // button), otherwise the held card slides underneath its siblings.
+    <View style={{ zIndex: activeKey != null ? 100 : 0 }}>
       {data.map((item, index) => {
         const key = keyExtractor(item);
         const isActive = key === activeKey;
         return (
           <Animated.View
             key={key}
-            onLayout={e => { layouts.current[key] = e.nativeEvent.layout; }}
+            // React Native reports { x, y, width, height }; the reorder maths wants { y, h }.
+            onLayout={e => { const { y, height } = e.nativeEvent.layout; layouts.current[key] = { y, h: height }; }}
             style={{
               transform: [{ translateY: getShift(key) }, { scale: isActive ? 1.02 : 1 }],
               zIndex: isActive ? 20 : 1,
-              // The held card is taken out of flow, so keep its space reserved.
-              ...(isActive ? { minHeight: activeH } : null),
+              // Slightly see-through, so the drop outline stays visible where they overlap.
+              opacity: isActive ? 0.92 : 1,
+              ...(isActive ? {
+                borderRadius: RADIUS.md,   // so the shadow follows the card's corners, not a square
+                shadowColor: COLOURS.navy, shadowOffset: { width: 0, height: 12 },
+                shadowOpacity: 0.35, shadowRadius: 18, elevation: 14,
+              } : null),
             }}
           >
-            {/* Same wrappers whether held or not, so the drag handle inside never remounts mid-gesture. */}
-            <View style={isActive ? {
-              position: 'absolute', left: 0, right: 0, top: 0,
-              borderRadius: RADIUS.md, backgroundColor: COLOURS.float,
-              shadowColor: COLOURS.navy, shadowOffset: { width: 0, height: 12 },
-              shadowOpacity: 0.35, shadowRadius: 18, elevation: 14,
-            } : null}>
-              <View style={isActive ? { maxHeight: DRAG_PREVIEW_H, overflow: 'hidden', borderRadius: RADIUS.md } : null}>
-                {renderItem({ item, index, isActive, handleProps: getResponder(key).panHandlers })}
-              </View>
-            </View>
+            {renderItem({ item, index, isActive, handleProps: getResponder(key).panHandlers })}
           </Animated.View>
         );
       })}
+      {/* Drop slot: drawn last and above everything, so it's visible even under the held card. */}
+      {activeKey != null && (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute', left: 0, right: 0, top: slotTop, height: slotH, zIndex: 30,
+            borderRadius: RADIUS.md,
+            borderWidth: 3, borderStyle: 'dashed', borderColor: COLOURS.navy,
+            backgroundColor: COLOURS.navyA(0.06),
+            alignItems: 'center',
+          }}
+        >
+          <View style={{ position: 'absolute', top: -14, paddingHorizontal: 12, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: '#fff' }}>
+              Drop here · {overIdx + 1} of {data.length}
+            </Text>
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 }
