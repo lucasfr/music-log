@@ -71,6 +71,14 @@ export function formatScaleEntry(entry, fallbackOctaves = 1) {
 // segment.articulation is { rh, lh } (each a key of ARTICULATION_LABELS or
 // null), or absent on any segment logged before this field existed.
 
+// Clean tempo reached on a technique segment, entered by hand after
+// practising (not the metronome's setting — that is often not the tempo you
+// actually held). null when unset.
+export function formatTempo(seg) {
+  const n = Number(seg?.tempo);
+  return n > 0 ? `${n} bpm` : null;
+}
+
 export function articulationOf(seg) {
   const a = seg?.articulation;
   return { rh: a?.rh || null, lh: a?.lh || null };

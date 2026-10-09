@@ -396,6 +396,11 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
                     <NumberF value={segment.duration || ''} onChange={v => field('duration', v)} />
                   </Field>
                 </View>
+                <View style={{ width: 90 }}>
+                  <Field label="BPM">
+                    <NumberF value={segment.tempo || ''} onChange={v => field('tempo', v)} />
+                  </Field>
+                </View>
               </View>
 
               {/* Optional library link */}

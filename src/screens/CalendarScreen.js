@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, formatArticulation } from '../utils';
+import { fmtDate, formatArticulation, formatTempo } from '../utils';
 import { FAB } from '../components/FAB';
 
 const DAYS   = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -376,7 +376,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                             return (
                               <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 8 }}>
                                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{n}</Text>
-                                {formatArticulation(seg) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, marginTop: 1 }}>{formatArticulation(seg)}</Text> : null}
+                                {(formatArticulation(seg) || formatTempo(seg)) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, marginTop: 1 }}>{[formatArticulation(seg), formatTempo(seg)].filter(Boolean).join(' · ')}</Text> : null}
                                 {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
                                 {seg.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19, fontStyle: 'italic' }}>{seg.feedback}</Text> : null}
                               </View>
@@ -435,7 +435,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                           {techSegs.map(seg => (
                             <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 8 }}>
                               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{seg.title || seg.group || 'Technical work'}</Text>
-                              {formatArticulation(seg) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, marginTop: 1 }}>{formatArticulation(seg)}</Text> : null}
+                              {(formatArticulation(seg) || formatTempo(seg)) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, marginTop: 1 }}>{[formatArticulation(seg), formatTempo(seg)].filter(Boolean).join(' · ')}</Text> : null}
                               {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
                             </View>
                           ))}
