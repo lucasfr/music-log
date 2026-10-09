@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
@@ -130,8 +131,8 @@ function ActivityGrid({ sessions, lessons }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>{year}</Text>
         <View style={{ flexDirection: 'row', gap: 6 }}>
-          <TouchableYear onPress={() => setYear(y => y - 1)} label="‹" />
-          {year < currentYear && <TouchableYear onPress={() => setYear(y => y + 1)} label="›" />}
+          <TouchableYear onPress={() => setYear(y => y - 1)} icon="chevron-back" />
+          <TouchableYear onPress={() => setYear(y => y + 1)} icon="chevron-forward" disabled={year >= currentYear} />
         </View>
       </View>
 
@@ -1468,11 +1469,11 @@ function DayOfWeekChart({ sessions }) {
   );
 }
 
-function TouchableYear({ onPress, label }) {
+function TouchableYear({ onPress, icon, disabled = false }) {
   return (
-    <TouchableOpacity onPress={onPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7}
-      style={{ ...TOUCH_PILL, minWidth: TOUCH.min, alignItems: 'center', paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>{label}</Text>
+    <TouchableOpacity onPress={onPress} disabled={disabled} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }} activeOpacity={0.7}
+      style={{ ...TOUCH_PILL, width: 48, alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', opacity: disabled ? 0.3 : 1 }}>
+      <Ionicons name={icon} size={24} color={COLOURS.navy} />
     </TouchableOpacity>
   );
 }
