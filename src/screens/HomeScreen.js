@@ -812,6 +812,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             initialSegments={timerSegments}
             compositions={compositions}
             onFinish={handleTimerFinish}
+            isDesktop
           />
         )}
         </View>

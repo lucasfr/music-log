@@ -110,7 +110,7 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
   );
 }
 
-export function PracticeTimerScreen({ visible, initialSegments, compositions, onFinish }) {
+export function PracticeTimerScreen({ visible, initialSegments, compositions, onFinish, isDesktop }) {
   const timer = usePracticeTimer(initialSegments);
   useKeepAwake(visible && timer.isRunning);
   const [showMetronome, setShowMetronome] = useState(false);
@@ -194,6 +194,72 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
 
   const linkedComposition = (compositions || []).find(c => c.id === timer.currentSegment.compositionId) || null;
 
+  const timerColumn = (
+    <>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 2 }}>
+        segment {timer.currentIndex + 1} of {timer.segments.length}
+      </Text>
+      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text, marginBottom: 8, textAlign: 'center' }}>
+        {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
+        {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
+      </Text>
+
+      <CountdownRing
+        getRemainingMs={timer.getRemainingMs}
+        plannedMs={timer.plannedMs}
+        subscribeTick={timer.subscribeTick}
+        isRunning={timer.isRunning}
+      />
+
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
+        <TouchableOpacity
+          onPress={() => (timer.isRunning ? handlePause() : handleStart())}
+          activeOpacity={0.85}
+          style={{
+            width: 52, height: 52, borderRadius: 26,
+            backgroundColor: COLOURS.navy,
+            alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 18, color: '#fff' }}>{timer.isRunning ? '⏸' : '▶'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleAddMinutes(5)}
+          activeOpacity={0.85}
+          style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(247,127,0,0.14)', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#7A3A00' }}>+5 min</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleSkip}
+          activeOpacity={0.85}
+          style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(140,32,69,0.10)', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>Skip ›</Text>
+        </TouchableOpacity>
+      </View>
+
+      {timer.nextSegment ? (
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
+          up next: {timer.nextSegment.title} · {timer.nextSegment.plannedMinutes} min
+        </Text>
+      ) : (
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
+          last segment — session ends after this
+        </Text>
+      )}
+    </>
+  );
+
+  const metronomeColumn = (
+    <MetronomeSection
+      showMetronome={showMetronome}
+      onToggle={toggleMetronome}
+      composition={linkedComposition}
+      segmentKey={timer.currentIndex}
+    />
+  );
+
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => timer.finishNow()}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
@@ -239,67 +305,24 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
               </TouchableOpacity>
               <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14 }}>tap to start</Text>
             </View>
+          ) : isDesktop ? (
+          // Side by side on desktop rather than stacked — there's width to
+          // spare, and the metronome being always-visible alongside the
+          // timer (rather than buried below a toggle you have to scroll to)
+          // is a nicer fit for a mouse-and-big-screen context than the
+          // mobile vertical flow.
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 56, paddingHorizontal: 40 }}>
+            <View style={{ alignItems: 'center' }}>
+              {timerColumn}
+            </View>
+            <View style={{ width: 320 }}>
+              {metronomeColumn}
+            </View>
+          </View>
           ) : (
           <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 10 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 2 }}>
-              segment {timer.currentIndex + 1} of {timer.segments.length}
-            </Text>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text, marginBottom: 8, textAlign: 'center' }}>
-              {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
-              {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
-            </Text>
-
-            <CountdownRing
-              getRemainingMs={timer.getRemainingMs}
-              plannedMs={timer.plannedMs}
-              subscribeTick={timer.subscribeTick}
-              isRunning={timer.isRunning}
-            />
-
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
-              <TouchableOpacity
-                onPress={() => (timer.isRunning ? handlePause() : handleStart())}
-                activeOpacity={0.85}
-                style={{
-                  width: 52, height: 52, borderRadius: 26,
-                  backgroundColor: COLOURS.navy,
-                  alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <Text style={{ fontSize: 18, color: '#fff' }}>{timer.isRunning ? '⏸' : '▶'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleAddMinutes(5)}
-                activeOpacity={0.85}
-                style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(247,127,0,0.14)', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#7A3A00' }}>+5 min</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSkip}
-                activeOpacity={0.85}
-                style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(140,32,69,0.10)', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>Skip ›</Text>
-              </TouchableOpacity>
-            </View>
-
-            {timer.nextSegment ? (
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
-                up next: {timer.nextSegment.title} · {timer.nextSegment.plannedMinutes} min
-              </Text>
-            ) : (
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
-                last segment — session ends after this
-              </Text>
-            )}
-
-            <MetronomeSection
-              showMetronome={showMetronome}
-              onToggle={toggleMetronome}
-              composition={linkedComposition}
-              segmentKey={timer.currentIndex}
-            />
+            {timerColumn}
+            {metronomeColumn}
           </ScrollView>
           )}
         </SafeAreaView>
