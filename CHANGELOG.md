@@ -2,6 +2,20 @@
 
 All notable changes to music.log are documented here.
 
+## [Unreleased]
+
+### Added
+- **Articulation on technique segments**: record how an exercise was played — legato, non-legato, staccato, staccatissimo, portato, tenuto or accented — per hand. One tap sets both hands; "Hands separately" splits it into right and left rows for exercises where the hands get different touches (e.g. RH legato · LH staccato). Tapping the active option clears it, and the picker is hidden for Sight-reading. Stored as `segment.articulation = { rh, lh }`; segments logged before this existed simply have none, so no data migration was needed, and it syncs to Supabase without a schema change since segments are already stored as JSON.
+- Articulation can be chosen when setting up a practice timer segment, is shown under the segment title on the countdown screen, and is carried into the log form when the session finishes.
+- Articulation is shown on technique segments in the session and lesson detail modals, the desktop Home detail panel, the History feed, and the desktop Calendar day panel.
+- **Stats → Technique groups** can be filtered by articulation. The filter pills only appear once something has been logged with an articulation, offer only articulations present in the selected period, and match a segment if either hand uses the chosen one. The scale-coverage circle of fifths is unaffected.
+- **Manual tempo (BPM) on technique segments**: an optional clean-tempo field beside the minutes box, shown in the same detail views as articulation. Entered by hand after practising rather than captured from the metronome, since the metronome's setting is often not the tempo you actually held. Pairs with logging legato and staccato versions of the same exercise as separate segments, so each keeps its own tempo.
+- JSON export includes each segment's `articulation` and `tempo_bpm`; import reads them back.
+
+### Fixed
+- JSON import no longer drops or mislabels segment data. Segment durations (`duration_minutes`) were ignored entirely; felt difficulty was stored as `difficulty` rather than `feltDifficulty`, and progress tags as `progressTags` rather than `progress`, so none of them showed up in the editor, Stats, or composition-status derivation. Files imported before this fix keep the old keys.
+- Lesson teacher feedback was always exported as `null` because export read `teacherFeedback` while the editor writes `feedback`. It now exports (and re-imports) correctly.
+
 ## [1.1.0] — 2026-09-28
 
 ### Added
