@@ -4,8 +4,8 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
-import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS } from '../constants';
-import { scaleName, scaleMotion, scaleOctaves, scaleInterval } from '../utils';
+import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
+import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf } from '../utils';
 
 // ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
 
@@ -180,6 +180,81 @@ function ScalesPicker({ selected = [], onChange }) {
   );
 }
 
+// ─── Articulation picker ─────────────────────────────────────────────────────────────────
+// One value per hand. Default mode applies a single pill to both hands;
+// "Hands separately" splits it into RH / LH rows for exercises where the
+// hands are given different touches. Tapping the active pill clears it.
+// Opens in separate mode automatically when the stored hands differ.
+
+function ArticulationPicker({ value, onChange }) {
+  const { rh, lh } = articulationOf({ articulation: value });
+  const [separate, setSeparate] = useState(rh !== lh);
+
+  function commit(nextRh, nextLh) {
+    onChange(nextRh || nextLh ? { rh: nextRh || null, lh: nextLh || null } : null);
+  }
+
+  function toggleSeparate() {
+    if (separate) {
+      // Collapsing back to one value for both hands — keep whichever is set.
+      const keep = rh || lh;
+      commit(keep, keep);
+    }
+    setSeparate(s => !s);
+  }
+
+  function pills(current, onPick) {
+    return (
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+        {ARTICULATION_OPTIONS.map(a => {
+          const active = current === a;
+          return (
+            <TouchableOpacity
+              key={a}
+              onPress={() => onPick(active ? null : a)}
+              activeOpacity={0.75}
+              style={{
+                paddingHorizontal: 12, paddingVertical: 6,
+                borderRadius: RADIUS.pill,
+                backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
+                shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+                shadowOffset: { width: 0, height: active ? 3 : 1 },
+                shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+              }}
+            >
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>
+                {ARTICULATION_LABELS[a]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    );
+  }
+
+  const handLabel = { fontFamily: 'Lato-Bold', fontSize: 10, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 };
+
+  return (
+    <View>
+      {separate ? (
+        <>
+          <Text style={handLabel}>Right hand</Text>
+          {pills(rh, v => commit(v, lh))}
+          <Text style={[handLabel, { marginTop: 10 }]}>Left hand</Text>
+          {pills(lh, v => commit(rh, v))}
+        </>
+      ) : (
+        pills(rh, v => commit(v, v))
+      )}
+      <TouchableOpacity onPress={toggleSeparate} activeOpacity={0.75} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ alignSelf: 'flex-start', marginTop: 10 }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.steel }}>
+          {separate ? 'Same for both hands' : 'Hands separately'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDown, compositions, lessonMode = false }) {
   const [open, setOpen] = useState(true);
   const isTech = segment.type === 'technique';
@@ -292,6 +367,15 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
                   })}
                 </View>
               </Field>
+
+              {segment.group !== 'Sight-reading' && (
+                <Field label="Articulation" icon="hand-left-outline">
+                  <ArticulationPicker
+                    value={segment.articulation}
+                    onChange={v => field('articulation', v)}
+                  />
+                </Field>
+              )}
 
               {(segment.group === 'Scales' || segment.group === 'Arpeggios') && (
                 <Field label={`${segment.group} practised`} icon="musical-notes-outline">

@@ -20,6 +20,30 @@ export const TECH_GROUPS = [
   'Technical exercise',
 ];
 
+// Touch/articulation applied to a technique segment, per hand. Stored as
+// segment.articulation = { rh, lh } with values from this list; absent means
+// unspecified (all pre-existing data). Legato and staccato versions of the
+// same exercise are logged as separate segments so stats stay unambiguous.
+export const ARTICULATION_OPTIONS = [
+  'legato',
+  'non-legato',
+  'staccato',
+  'staccatissimo',
+  'portato',
+  'tenuto',
+  'accented',
+];
+
+export const ARTICULATION_LABELS = {
+  legato: 'Legato',
+  'non-legato': 'Non-legato',
+  staccato: 'Staccato',
+  staccatissimo: 'Staccatissimo',
+  portato: 'Portato',
+  tenuto: 'Tenuto',
+  accented: 'Accented',
+};
+
 export const SCALE_OPTIONS = [
   // ── Major (all 12, circle of 5ths) ──────────────────────────────────────
   'C major', 'G major', 'D major', 'A major', 'E major', 'B major',

@@ -1,5 +1,5 @@
 import { Alert, Platform } from 'react-native';
-import { PROGRESS_TAG_TO_STATUS, STATUS_RANK, RANK_TO_STATUS, SHELVED_AFTER_DAYS } from './constants';
+import { PROGRESS_TAG_TO_STATUS, STATUS_RANK, RANK_TO_STATUS, SHELVED_AFTER_DAYS, ARTICULATION_LABELS } from './constants';
 
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -65,6 +65,25 @@ export function formatScaleEntry(entry, fallbackOctaves = 1) {
   if (motion === 'contrary') attrs.push('contrary');
   if (interval !== 'unison') attrs.push(interval === 'third' ? '3rds' : interval === 'sixth' ? '6ths' : '10ths');
   return `${name} (${attrs.join(', ')})`;
+}
+
+// ─── Articulation ────────────────────────────────────────────────────────────
+// segment.articulation is { rh, lh } (each a key of ARTICULATION_LABELS or
+// null), or absent on any segment logged before this field existed.
+
+export function articulationOf(seg) {
+  const a = seg?.articulation;
+  return { rh: a?.rh || null, lh: a?.lh || null };
+}
+
+// 'Staccato' when both hands match, 'RH legato · LH staccato' when they
+// differ, null when nothing is set.
+export function formatArticulation(seg) {
+  const { rh, lh } = articulationOf(seg);
+  if (!rh && !lh) return null;
+  if (rh === lh) return ARTICULATION_LABELS[rh];
+  const part = v => (v ? ARTICULATION_LABELS[v].toLowerCase() : '—');
+  return `RH ${part(rh)} · LH ${part(lh)}`;
 }
 
 // ─── Local UI preferences ──────────────────────────────────────────
