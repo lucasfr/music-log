@@ -86,6 +86,34 @@ export const RADIUS = {
   pill: 99,
 };
 
+// ─── Touch targets ────────────────────────────────────────────────────────────
+// Apple HIG asks for 44pt and Material for 48dp. Rather than bloat every glass
+// pill to 44, pills are kept at a 36 minimum height and the rest is added as
+// invisible hit area (hitSlop). Slop on pills is vertical only, so neighbours in
+// a row never steal each other's taps.
+export const TOUCH = { min: 44, pill: 36 };
+
+// Spread into a pill's style to guarantee its visual height.
+export const TOUCH_PILL = { minHeight: TOUCH.pill, justifyContent: 'center' };
+
+// 36 pill + 4 + 4 = 44.
+export const HIT_PILL = { top: 4, bottom: 4, left: 0, right: 0 };
+
+// Bare text buttons (Cancel / Done / Edit / clear): ~16-20pt tall, no padding.
+export const HIT_TEXT = { top: 14, bottom: 14, left: 12, right: 12 };
+
+// Small glyph buttons (up / down / remove) sitting in a row: a fixed 36pt box,
+// with vertical slop to make up the remaining height.
+export const TOUCH_ICON = { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' };
+export const HIT_ICON   = { top: 4, bottom: 4, left: 0, right: 0 };
+
+// Pads a fixed-size control out to 44 on each axis (e.g. a 32pt round button).
+export function hitFor(w, h = w) {
+  const x = Math.max(0, (TOUCH.min - w) / 2);
+  const y = Math.max(0, (TOUCH.min - h) / 2);
+  return { top: y, bottom: y, left: x, right: x };
+}
+
 export const SIZES = {
   screenTitle:  28,   // music.log wordmark
   sectionTitle: 22,   // screen headings (Compositions, Calendar…)

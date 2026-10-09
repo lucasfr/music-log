@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, SIZES } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, TOUCH_ICON, HIT_ICON } from '../theme';
 import { GlassCard, SectionTitle, Btn } from './UI';
 import { Field, TextF, SelectF } from './Form';
 import { ArticulationPicker } from './SegmentEditor';
@@ -56,21 +56,21 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 12 }}>
           {segment.plannedMinutes} min
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 0 }}>
           {onMoveUp ? (
-            <TouchableOpacity onPress={onMoveUp} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={onMoveUp} hitSlop={HIT_ICON} style={TOUCH_ICON}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
             </TouchableOpacity>
-          ) : <View style={{ width: 15 }} />}
+          ) : <View style={{ width: 36 }} />}
           {onMoveDown ? (
-            <TouchableOpacity onPress={onMoveDown} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={onMoveDown} hitSlop={HIT_ICON} style={TOUCH_ICON}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
             </TouchableOpacity>
-          ) : <View style={{ width: 15 }} />}
-          <TouchableOpacity onPress={() => field('confirmed', false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          ) : <View style={{ width: 36 }} />}
+          <TouchableOpacity onPress={() => field('confirmed', false)} hitSlop={HIT_ICON} style={TOUCH_ICON}>
             <Text style={{ fontSize: 13, color: COLOURS.steel }}>✎</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={onRemove} hitSlop={HIT_ICON} style={TOUCH_ICON}>
             <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -96,18 +96,18 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
             {isTech ? 'technique' : 'repertoire'}
           </Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 0 }}>
           {onMoveUp ? (
-            <TouchableOpacity onPress={onMoveUp} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={onMoveUp} hitSlop={HIT_ICON} style={TOUCH_ICON}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
             </TouchableOpacity>
-          ) : <View style={{ width: 15 }} />}
+          ) : <View style={{ width: 36 }} />}
           {onMoveDown ? (
-            <TouchableOpacity onPress={onMoveDown} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={onMoveDown} hitSlop={HIT_ICON} style={TOUCH_ICON}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
             </TouchableOpacity>
-          ) : <View style={{ width: 15 }} />}
-          <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          ) : <View style={{ width: 36 }} />}
+          <TouchableOpacity onPress={onRemove} hitSlop={HIT_ICON} style={TOUCH_ICON}>
             <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -123,7 +123,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
                   key={g}
                   onPress={() => field('title', g)}
                   activeOpacity={0.75}
-                  style={{
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                     paddingHorizontal: 10, paddingVertical: 5,
                     borderRadius: RADIUS.pill,
                     backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.65)',
@@ -176,7 +176,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
         onPress={() => field('confirmed', true)}
         activeOpacity={0.75}
         disabled={!isValid}
-        style={{
+        hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
           marginTop: 12, paddingVertical: 9, borderRadius: RADIUS.pill, alignItems: 'center',
           backgroundColor: isValid ? COLOURS.navy : 'rgba(9,99,126,0.15)',
         }}
@@ -228,7 +228,7 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Set up timer</Text>
               <TouchableOpacity onPress={handleClose} activeOpacity={0.75}
-                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -243,11 +243,11 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
             </View>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
               <TouchableOpacity onPress={() => addSegment('technique')} activeOpacity={0.75}
-                style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Technique</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => addSegment('repertoire')} activeOpacity={0.75}
-                style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Repertoire</Text>
               </TouchableOpacity>
             </View>

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { COLOURS, RADIUS, SIZES, STATUS_COLOURS } from '../theme';
+import { COLOURS, RADIUS, SIZES, STATUS_COLOURS, TOUCH, HIT_PILL } from '../theme';
 
 // ─── Glass card ───────────────────────────────────────────────────────────────
 
@@ -123,9 +123,11 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
 
   if (isDanger) {
     return (
-      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75}
+      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75} hitSlop={HIT_PILL}
         style={[{
           backgroundColor: COLOURS.dangerLight,
+          minHeight: TOUCH.pill,
+          justifyContent: 'center',
           borderRadius: RADIUS.sm,
           paddingVertical: 9,
           paddingHorizontal: 14,
@@ -143,9 +145,11 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
   }
 
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75}
+    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75} hitSlop={HIT_PILL}
       style={[{
         backgroundColor: 'rgba(255,255,255,0.50)',
+        minHeight: TOUCH.pill,
+        justifyContent: 'center',
         borderRadius: RADIUS.sm,
         paddingVertical: 9,
         paddingHorizontal: 14,
@@ -222,7 +226,10 @@ export function TagCloud({ tags, selected, onToggle }) {
             key={t}
             onPress={() => onToggle(t)}
             activeOpacity={0.75}
+            hitSlop={HIT_PILL}
             style={{
+              minHeight: TOUCH.pill,
+              justifyContent: 'center',
               paddingHorizontal: 11,
               paddingVertical: 5,
               borderRadius: RADIUS.pill,

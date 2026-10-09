@@ -6,7 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
+import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
@@ -77,7 +77,7 @@ function TagInput({ value = [], onChange }) {
             key={t}
             onPress={() => onChange(value.filter(x => x !== t))}
             activeOpacity={0.75}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}
+            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}
           >
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text>
             <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
@@ -89,7 +89,7 @@ function TagInput({ value = [], onChange }) {
           <TextF value={input} onChange={setInput} placeholder="Add tag…" />
         </View>
         <TouchableOpacity onPress={addTag} activeOpacity={0.8}
-          style={{ paddingHorizontal: 14, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: COLOURS.navy, justifyContent: 'center', shadowColor: COLOURS.glassShadowMd, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 8, elevation: 3 }}>
+          hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: COLOURS.navy, justifyContent: 'center', shadowColor: COLOURS.glassShadowMd, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 8, elevation: 3 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: '#fff' }}>Add</Text>
         </TouchableOpacity>
       </View>
@@ -204,7 +204,7 @@ function KeysPicker({ value = [], onChange }) {
         <TouchableOpacity
           onPress={addKey}
           activeOpacity={0.75}
-          style={{
+          hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
             paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
             backgroundColor: 'rgba(255,255,255,0.55)', alignSelf: 'flex-start',
             shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2,
@@ -230,7 +230,7 @@ function TimeSigPicker({ value = [], onChange }) {
           const active = value.includes(sig);
           return (
             <TouchableOpacity key={sig} onPress={() => toggle(sig)} activeOpacity={0.75}
-              style={{
+              hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
                 backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
                 shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
@@ -382,7 +382,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                     <TouchableOpacity
                       onPress={() => setData(d => ({ ...d, shelvedAt: todayISO(), status: 'shelved' }))}
                       activeOpacity={0.75}
-                      style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                      hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
                     >
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>📦 Shelve now</Text>
                     </TouchableOpacity>
@@ -392,7 +392,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                     <TouchableOpacity
                       onPress={() => setData(d => ({ ...d, shelvedAt: '' }))}
                       activeOpacity={0.75}
-                      style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+                      hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
                     >
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>↺ Un-shelve</Text>
                     </TouchableOpacity>
@@ -555,7 +555,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ padding: 10, gap: 6, flexDirection: 'row' }}>
             {TABS.map(t => (
               <TouchableOpacity key={t} onPress={() => setTab(t)} activeOpacity={0.75}
-                style={{
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                   paddingVertical: 6, paddingHorizontal: 14,
                   borderRadius: RADIUS.pill,
                   backgroundColor: tab === t ? COLOURS.navy : 'rgba(255,255,255,0.55)',
@@ -787,7 +787,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
             const active = filterStatus === s;
             return (
               <TouchableOpacity key={s} onPress={() => setFilterStatus(s)} activeOpacity={0.75}
-                style={{
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
                   backgroundColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.bg || 'rgba(247,127,0,0.14)') : active ? 'rgba(247,127,0,0.14)' : 'rgba(255,255,255,0.55)',
                   shadowColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.border || COLOURS.accent2Mid) : active ? COLOURS.accent2Mid : COLOURS.glassShadow,

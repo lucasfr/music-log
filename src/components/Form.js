@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Picker } from '@react-native-picker/picker';
-import { COLOURS, RADIUS, SIZES } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { Label } from './UI';
 
 // ─── Helpers for DatePickerF ─────────────────────────────────────────────────────
@@ -129,7 +129,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
               elevation: 20,
             }}>
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 14, borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
-                <TouchableOpacity onPress={() => setOpen(false)}>
+                <TouchableOpacity onPress={() => setOpen(false)} hitSlop={HIT_TEXT}>
                   <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
                 </TouchableOpacity>
               </View>
@@ -213,13 +213,13 @@ export function DatePickerF({ label, value, onChange, icon }) {
       <View style={{ backgroundColor: 'rgba(255,255,255,0.65)', padding: 16 }}>
         {/* Month nav */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <TouchableOpacity onPress={prevMonth} hitSlop={{top:10,bottom:10,left:10,right:10}}>
+          <TouchableOpacity onPress={prevMonth} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
             <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>‹</Text>
           </TouchableOpacity>
           <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>
             {MONTHS_LONG[viewMonth]} {viewYear}
           </Text>
-          <TouchableOpacity onPress={nextMonth} hitSlop={{top:10,bottom:10,left:10,right:10}}>
+          <TouchableOpacity onPress={nextMonth} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
             <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>›</Text>
           </TouchableOpacity>
         </View>
@@ -279,7 +279,8 @@ export function DatePickerF({ label, value, onChange, icon }) {
         <TouchableOpacity
           onPress={() => { onChange(today); setOpen(false); }}
           activeOpacity={0.75}
-          style={{ alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+          hitSlop={HIT_PILL}
+          style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
         >
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Today</Text>
         </TouchableOpacity>

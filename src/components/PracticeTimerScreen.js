@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { AppBackground } from './Background';
 import { playChime } from '../utils/chime';
 import { useKeepAwake } from '../utils/useKeepAwake';
@@ -29,7 +29,7 @@ const MetronomeSection = React.memo(function MetronomeSection({ showMetronome, o
       <TouchableOpacity
         onPress={onToggle}
         activeOpacity={0.75}
-        style={{
+        hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
           paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.pill,
           backgroundColor: showMetronome ? COLOURS.navy : 'transparent',
           borderWidth: showMetronome ? 0 : 1, borderColor: 'rgba(9,99,126,0.35)',
@@ -280,7 +280,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
           <TouchableOpacity
             onPress={() => timer.finishNow()}
             activeOpacity={0.75}
-            style={{
+            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
               position: 'absolute', top: 8, right: 20, zIndex: 10,
               paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
               backgroundColor: 'rgba(255,255,255,0.75)',

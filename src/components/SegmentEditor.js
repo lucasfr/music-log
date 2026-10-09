@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL, HIT_TEXT, TOUCH_ICON, HIT_ICON } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
@@ -21,7 +21,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
             key={n}
             onPress={() => onChange(n === value ? 0 : n)}
             activeOpacity={0.7}
-            hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}
+            hitSlop={{ top: 9, bottom: 9, left: 2, right: 2 }}
           >
             <Text style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
               {emoji}
@@ -101,7 +101,7 @@ function ScalesPicker({ selected = [], onChange }) {
                 <TouchableOpacity
                   onPress={() => toggleMotion(name)}
                   activeOpacity={0.75}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5 }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5 }}
                 >
                   <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{name}</Text>
                   {isContrary && (
@@ -111,22 +111,22 @@ function ScalesPicker({ selected = [], onChange }) {
                 <TouchableOpacity
                   onPress={() => cycleInterval(name)}
                   activeOpacity={0.75}
-                  style={{ paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
                 >
                   <Text style={{ fontFamily: interval !== 'unison' ? 'Lato-Bold' : 'Lato', fontSize: interval !== 'unison' ? 10 : 10, color: interval !== 'unison' ? COLOURS.tealBorder : COLOURS.textDim }}>{INTERVAL_LABELS[interval]}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggleOctaves(name)}
                   activeOpacity={0.75}
-                  style={{ paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.5)' }}
                 >
                   <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{octaves}oct</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggle(name)}
                   activeOpacity={0.75}
-                  hitSlop={{ top: 6, bottom: 6, left: 2, right: 6 }}
-                  style={{ paddingHorizontal: 9, paddingVertical: 5 }}
+                  hitSlop={HIT_PILL}
+                  style={{ ...TOUCH_PILL, paddingHorizontal: 12 }}
                 >
                   <Text style={{ fontSize: 11, color: COLOURS.textDim }}>✕</Text>
                 </TouchableOpacity>
@@ -153,7 +153,7 @@ function ScalesPicker({ selected = [], onChange }) {
               key={s}
               onPress={() => toggle(s)}
               activeOpacity={0.75}
-              style={{
+              hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 10, paddingVertical: 5,
                 borderRadius: RADIUS.pill,
                 backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
@@ -170,7 +170,7 @@ function ScalesPicker({ selected = [], onChange }) {
           <TouchableOpacity
             onPress={() => setShowAll(true)}
             activeOpacity={0.75}
-            style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
+            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
           >
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>+ more</Text>
           </TouchableOpacity>
@@ -213,7 +213,7 @@ export function ArticulationPicker({ value, onChange }) {
               key={a}
               onPress={() => onPick(active ? null : a)}
               activeOpacity={0.75}
-              style={{
+              hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                 paddingHorizontal: 12, paddingVertical: 6,
                 borderRadius: RADIUS.pill,
                 backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',
@@ -246,7 +246,7 @@ export function ArticulationPicker({ value, onChange }) {
       ) : (
         pills(rh, v => commit(v, v))
       )}
-      <TouchableOpacity onPress={toggleSeparate} activeOpacity={0.75} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ alignSelf: 'flex-start', marginTop: 10 }}>
+      <TouchableOpacity onPress={toggleSeparate} activeOpacity={0.75} hitSlop={HIT_TEXT} style={{ alignSelf: 'flex-start', marginTop: 10 }}>
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.steel }}>
           {separate ? 'Same for both hands' : 'Hands separately'}
         </Text>
@@ -317,20 +317,20 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           {onMoveUp ? (
-            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveUp(); }} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveUp(); }} hitSlop={HIT_ICON} style={TOUCH_ICON}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
             </TouchableOpacity>
           ) : (
-            <View style={{ width: 15 }} />
+            <View style={{ width: 36 }} />
           )}
           {onMoveDown ? (
-            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveDown(); }} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveDown(); }} hitSlop={HIT_ICON} style={TOUCH_ICON}>
               <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
             </TouchableOpacity>
           ) : (
-            <View style={{ width: 15 }} />
+            <View style={{ width: 36 }} />
           )}
-          <TouchableOpacity onPress={e => { e.stopPropagation(); onRemove(); }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={e => { e.stopPropagation(); onRemove(); }} hitSlop={HIT_ICON} style={TOUCH_ICON}>
             <Text style={{ fontSize: 16, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
           </TouchableOpacity>
           <Text style={{ fontSize: 11, color: COLOURS.textDim }}>{open ? '▲' : '▼'}</Text>
@@ -350,7 +350,7 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
                         key={g}
                         onPress={() => field('group', g)}
                         activeOpacity={0.75}
-                        style={{
+                        hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                           paddingHorizontal: 12, paddingVertical: 6,
                           borderRadius: RADIUS.pill,
                           backgroundColor: active ? 'rgba(8,131,149,0.14)' : 'rgba(255,255,255,0.55)',

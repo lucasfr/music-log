@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, STATUS_COLOURS } from '../theme';
+import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, GlassCard } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
 import { deriveStatusTimeline, deriveStatusHistory } from '../utils';
@@ -515,7 +515,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
           <TouchableOpacity
             onPress={() => { setActiveFilters([]); setSelectedId(null); }}
             activeOpacity={0.75}
-            style={{
+            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
               paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
               backgroundColor: activeFilters.length === 0 ? 'rgba(9,99,126,0.14)' : 'rgba(255,255,255,0.55)',
               shadowColor: activeFilters.length === 0 ? COLOURS.navy : COLOURS.glassShadow,
@@ -532,7 +532,7 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
             const sc = STATUS_COLOURS[s] || {};
             return (
               <TouchableOpacity key={s} onPress={() => toggleFilter(s)} activeOpacity={0.75}
-                style={{
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
                   backgroundColor: active ? sc.bg : 'rgba(255,255,255,0.55)',
                   borderWidth: active ? 1 : 0,
