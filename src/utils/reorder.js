@@ -40,14 +40,17 @@ export function snapOffset(keys, layouts, from, over) {
   return off;
 }
 
-// Keep the drag inside the list. `heldH` is how tall the thing under the finger actually
-// is (a held card shrinks to a short preview); it defaults to the card's full height.
-export function clampDy(keys, layouts, from, dy, heldH) {
+// Keep the drag inside the list. The slot is decided by where the held card's CENTRE is,
+// so that is what we bound: it may travel anywhere from the top of the first card to the
+// bottom of the last. (Bounding the card's edges instead stops the centre exactly on the
+// last card's centre, which never counts as "past" it, so nothing could reach the end slot,
+// and a tall card couldn't reach most slots at all.)
+export function clampDy(keys, layouts, from, dy) {
   const first = layouts[keys[0]];
   const last = layouts[keys[keys.length - 1]];
   const me = layouts[keys[from]];
-  const h = heldH == null ? me.h : Math.min(heldH, me.h);
-  const min = first.y - me.y;
-  const max = last.y + last.h - h - me.y;
+  const centre = me.y + me.h / 2;
+  const min = first.y + 1 - centre;
+  const max = last.y + last.h - 1 - centre;
   return Math.max(min, Math.min(max, dy));
 }
