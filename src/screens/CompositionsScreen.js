@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
 import { SwipeRow } from '../components/Gestures';
+import { useUndoableDelete } from '../components/Undo';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate, todayISO } from '../utils';
@@ -756,6 +757,9 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedComp, setSelectedComp] = useState(null);
+  // Swipe-removing a piece hides it straight away; it's only deleted once the undo window closes.
+  // (Sits above the add-piece button on mobile.)
+  const undo = useUndoableDelete({ bottom: isDesktop ? 24 : 168 });
 
   const composerSuggestions = [...new Set(
     compositions.map(c => c.composer).filter(Boolean).sort()
@@ -783,7 +787,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
     const ms = c.title.toLowerCase().includes(search.toLowerCase())
       || (c.composer || '').toLowerCase().includes(search.toLowerCase())
       || (c.tags || []).some(t => t.includes(search.toLowerCase()));
-    return ms && (filterStatus === 'all' || c.status === filterStatus);
+    return ms && !undo.isPending(c.id) && (filterStatus === 'all' || c.status === filterStatus);
   });
 
   return (
@@ -819,9 +823,9 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
 
         {filtered.length === 0 && <EmptyState icon="♩" text="No pieces yet. Add your current repertoire." />}
 
-        {filtered.map(comp => (
-          <SwipeRow key={comp.id} bottomInset={12} fullSwipe={false} label="Remove"
-            onDelete={() => confirmRemovePiece(comp, onDelete)}>
+        {filtered.map((comp, idx) => (
+          <SwipeRow key={comp.id} bottomInset={12} hint={idx === 0} label="Remove"
+            onDelete={() => undo.schedule(comp.id, 'Piece', () => onDelete(comp.id))}>
             <CompCard comp={comp} sessions={sessions} onEdit={c => setModal({ ...c })} onDelete={onDelete} />
           </SwipeRow>
         ))}
@@ -844,6 +848,8 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
       >
         <Text style={{ fontSize: 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
       </TouchableOpacity>
+
+      {undo.toast}
 
       {modal && (
         <CompModal

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Animated, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, Animated, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLOURS, RADIUS } from '../theme';
@@ -21,18 +21,24 @@ const HIDDEN_ROUTES = ['Timeline'];
 
 const ICON_SIZE = 44;
 const ICON_GAP  = 4;
+// The active tab shows its name under the icon, so it's wider and a little taller.
+const LABEL_W   = 58;
+const TAB_LABELS = {
+  Home: 'Home', Calendar: 'Calendar', History: 'History', Pieces: 'Pieces',
+  Stats: 'Stats', Timeline: 'Timeline', Settings: 'Settings',
+};
 
 export function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
   const { compact } = useNavScrollContext();
 
   const visibleRoutes = state.routes.filter(r => !HIDDEN_ROUTES.includes(r.name));
-  const expandedWidth = visibleRoutes.length * ICON_SIZE + (visibleRoutes.length - 1) * ICON_GAP + 24;
+  const expandedWidth = visibleRoutes.length * ICON_SIZE + (visibleRoutes.length - 1) * ICON_GAP + 24 + (LABEL_W - ICON_SIZE);
   const widthAnim = useRef(new Animated.Value(expandedWidth)).current;
 
   useEffect(() => {
     Animated.timing(widthAnim, {
-      toValue: compact ? ICON_SIZE + 24 : expandedWidth,
+      toValue: compact ? LABEL_W + 24 : expandedWidth,
       duration: 280,
       useNativeDriver: false,
     }).start();
@@ -76,8 +82,13 @@ export function CustomTabBar({ state, navigation }) {
               key={route.key}
               onPress={() => navigation.navigate(route.name)}
               activeOpacity={0.75}
+              accessibilityRole="tab"
+              accessibilityLabel={TAB_LABELS[route.name] || route.name}
+              accessibilityState={{ selected: focused }}
               style={{
-                width: ICON_SIZE, height: ICON_SIZE, borderRadius: ICON_SIZE / 2,
+                width: focused ? LABEL_W : ICON_SIZE,
+                height: focused ? ICON_SIZE + 8 : ICON_SIZE,
+                borderRadius: focused ? 22 : ICON_SIZE / 2,
                 backgroundColor: focused ? COLOURS.navy : 'rgba(9,99,126,0.10)',
                 alignItems: 'center', justifyContent: 'center',
               }}
@@ -87,6 +98,11 @@ export function CustomTabBar({ state, navigation }) {
                 size={20}
                 color={focused ? '#ffffff' : COLOURS.textDim}
               />
+              {focused ? (
+                <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', marginTop: 1 }}>
+                  {TAB_LABELS[route.name] || route.name}
+                </Text>
+              ) : null}
             </TouchableOpacity>
           );
         })}

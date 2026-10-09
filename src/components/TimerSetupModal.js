@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
@@ -10,9 +10,10 @@ import { Field, TextF, SelectF } from './Form';
 import { ArticulationPicker } from './SegmentEditor';
 import { MinutesDial } from './MinutesDial';
 import { ReorderList, SwipeRow, DragHandle } from './Gestures';
+import { useUndoToast } from './Undo';
 import { reorder } from '../utils/reorder';
 import { TECH_GROUPS } from '../constants';
-import { uid, formatArticulation } from '../utils';
+import { uid, formatArticulation, confirmDiscard } from '../utils';
 
 function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle }) {
   const isTech = segment.type === 'technique';
@@ -173,12 +174,25 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
 export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
   const [draftSegments, setDraftSegments] = useState([]);
   const [dragging, setDragging] = useState(false);
+  const undo = useUndoToast();
+  const scrollRef = useRef(null);
+  const scrollY = useRef(0);
 
   function addSegment(type) {
     setDraftSegments(s => [...s, { id: uid(), type, title: '', compositionId: '', plannedMinutes: 10 }]);
   }
   function updateSegment(id, val) { setDraftSegments(s => s.map(seg => (seg.id === id ? val : seg))); }
-  function removeSegment(id) { setDraftSegments(s => s.filter(seg => seg.id !== id)); }
+  function removeSegment(id) {
+    const idx = draftSegments.findIndex(seg => seg.id === id);
+    if (idx < 0) return;
+    const item = draftSegments[idx];
+    setDraftSegments(s => s.filter(seg => seg.id !== id));
+    undo.show('Segment removed', () => setDraftSegments(s => {
+      const a = s.slice();
+      a.splice(Math.min(idx, a.length), 0, item);
+      return a;
+    }));
+  }
   function reorderSegments(from, to) { setDraftSegments(s => reorder(s, from, to)); }
 
   const totalMin = draftSegments.reduce((sum, s) => sum + (Number(s.plannedMinutes) || 0), 0);
@@ -193,15 +207,19 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
     setDraftSegments([]);
     onClose();
   }
+  // Ask first if there's a plan that would be thrown away.
+  function requestClose() {
+    if (draftSegments.length > 0) confirmDiscard(handleClose); else handleClose();
+  }
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={requestClose}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Set up timer</Text>
-              <TouchableOpacity onPress={handleClose} activeOpacity={0.75}
+              <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)' }}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
               </TouchableOpacity>
@@ -210,7 +228,8 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
         </SafeAreaView>
 
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
+          <View style={{ flex: 1 }}>
+          <ScrollView ref={scrollRef} onScroll={e => { scrollY.current = e.nativeEvent.contentOffset.y; }} scrollEventThrottle={16} contentContainerStyle={{ padding: 16, paddingBottom: 100 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <SectionTitle style={{ marginBottom: 0 }}>Segments{totalMin ? ` · ${totalMin} min total` : ''}</SectionTitle>
@@ -239,6 +258,8 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
               keyExtractor={seg => seg.id}
               onReorder={reorderSegments}
               onDragChange={setDragging}
+              scrollRef={scrollRef}
+              scrollOffset={scrollY}
               renderItem={({ item: seg, handleProps, isActive }) => (
                 <SwipeRow onDelete={() => removeSegment(seg.id)} bottomInset={10} disabled={!seg.confirmed}>
                   <DraftSegmentRow
@@ -254,6 +275,8 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
 
             <Btn label="Start timer" variant="primary" onPress={handleStart} disabled={!canStart} style={{ marginTop: 8 }} />
           </ScrollView>
+          {undo.toast}
+          </View>
         </KeyboardAvoidingView>
       </View>
     </Modal>

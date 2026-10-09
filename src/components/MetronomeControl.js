@@ -537,6 +537,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               expanded, and the most-tapped control shouldn't require
               scrolling past all of that to reach. */}
           <TouchableOpacity onPress={togglePlay} activeOpacity={0.85}
+            accessibilityRole="button" accessibilityLabel={playing ? 'Pause metronome' : 'Start metronome'}
             style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: COLOURS.amber, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 13, color: '#fff' }}>{playing ? '❙❙' : '▶'}</Text>
           </TouchableOpacity>
@@ -553,6 +554,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Decrease tempo"
           onPressIn={() => startHold(-1)}
           onPressOut={stopHold}
           activeOpacity={0.7}
@@ -575,6 +577,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
         </View>
 
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Increase tempo"
           onPressIn={() => startHold(1)}
           onPressOut={stopHold}
           activeOpacity={0.7}

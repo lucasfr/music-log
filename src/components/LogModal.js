@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Alert,
   KeyboardAvoidingView, Platform, Modal,
@@ -10,8 +10,10 @@ import { GlassCard, SectionTitle, Btn, Label } from '../components/UI';
 import { Field, TextF, NumberF, DatePickerF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
 import { ReorderList, SwipeRow, DragHandle } from '../components/Gestures';
+import { useUndoToast } from './Undo';
+import { useDirtyGuard } from '../utils/useDirtyGuard';
 import { reorder } from '../utils/reorder';
-import { uid, confirmDelete } from '../utils';
+import { uid, confirmDelete, confirmDiscard } from '../utils';
 
 function ZeldaBar({ label, emoji, value, onChange }) {
   return (
@@ -21,7 +23,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
       </Text>
       <View style={{ flexDirection: 'row', gap: 2 }}>
         {[1, 2, 3, 4, 5].map(n => (
-          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
+          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={`${n} of 5`} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
             <Text style={{ fontSize: 26, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
               {emoji}
             </Text>
@@ -35,7 +37,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
 function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
 export function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
-export function LogModal({ visible, onClose, onSave, compositions, initialDate, initialSession, inline }) {
+export function LogModal({ visible, onClose, onSave, compositions, initialDate, initialSession, previousSession, inline }) {
   const [date, setDate]           = useState(initialDate || '');
   const [energyBar, setEnergyBar] = useState(0);
   const [enjoyment, setEnjoyment] = useState(0);
@@ -44,6 +46,10 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   const [dragging, setDragging]   = useState(false);
   const [wins, setWins]           = useState('');
   const [focus, setFocus]         = useState('');
+  const undo = useUndoToast();
+  const scrollRef = useRef(null);
+  const scrollY = useRef(0);
+  const guard = useDirtyGuard(JSON.stringify({ date, energyBar, enjoyment, duration, segments, wins, focus }));
 
   useEffect(() => {
     if (visible || inline) {
@@ -60,6 +66,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
         setEnergyBar(0); setEnjoyment(0); setDuration('');
         setSegments([]); setWins(''); setFocus('');
       }
+      guard.markReset();
     }
   }, [visible, inline, initialDate, initialSession]);
 
@@ -67,7 +74,30 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
     setSegments(s => [...s, { id: uid(), type, title: '', notes: '', challenges: [], progress: [] }]);
   }
   function updateSegment(id, val) { setSegments(s => s.map(seg => seg.id === id ? val : seg)); }
-  function removeSegment(id)      { setSegments(s => s.filter(seg => seg.id !== id)); }
+  function removeSegment(id) {
+    const idx = segments.findIndex(seg => seg.id === id);
+    if (idx < 0) return;
+    const item = segments[idx];
+    setSegments(s => s.filter(seg => seg.id !== id));
+    undo.show('Segment removed', () => setSegments(s => {
+      const a = s.slice();
+      a.splice(Math.min(idx, a.length), 0, item);
+      return a;
+    }));
+  }
+  function requestClose() {
+    if (guard.isDirty()) confirmDiscard(onClose); else onClose();
+  }
+  // Pre-fill from the previous session's plan; the reflective fields start fresh.
+  function repeatLast() {
+    const prev = previousSession;
+    if (!prev) return;
+    setSegments((prev.segments || []).map(s => ({
+      ...s, id: uid(), notes: '', feedback: '', assignment: '',
+      challenges: [], progress: [], feltDifficulty: 0, liking: 0,
+    })));
+    if (prev.duration) setDuration(String(prev.duration));
+  }
   function reorderSegments(from, to) { setSegments(s => reorder(s, from, to)); }
 
   function handleSave() {
@@ -90,7 +120,8 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   const totalMin = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
 
   const formBody = (
-    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
+    <View style={{ flex: 1 }}>
+    <ScrollView ref={scrollRef} onScroll={e => { scrollY.current = e.nativeEvent.contentOffset.y; }} scrollEventThrottle={16} contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
       <GlassCard>
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
           <View style={{ flex: 1 }}>
@@ -129,6 +160,12 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
       {segments.length === 0 && (
         <View style={{ borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.35)', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 1 }}>
           <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments above</Text>
+          {previousSession && !initialSession ? (
+            <TouchableOpacity onPress={repeatLast} activeOpacity={0.75} hitSlop={HIT_PILL}
+              style={{ ...TOUCH_PILL, marginTop: 14, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>↻ Repeat last session</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       )}
 
@@ -137,6 +174,8 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
         keyExtractor={seg => seg.id}
         onReorder={reorderSegments}
         onDragChange={setDragging}
+        scrollRef={scrollRef}
+        scrollOffset={scrollY}
         renderItem={({ item: seg, handleProps, isActive }) => (
           <SwipeRow onDelete={() => removeSegment(seg.id)} bottomInset={10}>
             <SegmentEditor segment={seg} compositions={compositions}
@@ -158,6 +197,8 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
 
       <Btn label="Save session" variant="primary" onPress={handleSave} style={{ marginTop: 4 }} />
     </ScrollView>
+    {undo.toast}
+    </View>
   );
 
   // ── Inline mode (desktop right panel) ────────────────────────────────────
@@ -166,7 +207,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 28, paddingTop: 24, paddingBottom: 8 }}>
           <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text }}>Log session</Text>
-          <TouchableOpacity onPress={onClose} activeOpacity={0.75}
+          <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
             <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
           </TouchableOpacity>
@@ -178,13 +219,13 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
 
   // ── Full-screen modal (mobile) ────────────────────────────────────────────
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={requestClose}>
       <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint="light" style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Log session</Text>
-              <TouchableOpacity onPress={onClose} activeOpacity={0.75}
+              <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
               </TouchableOpacity>

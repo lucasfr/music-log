@@ -21,7 +21,7 @@ export const COLOURS = {
   // Text
   text:      '#09637E',
   textMuted: '#088395',
-  textDim:   '#7AB2B2',
+  textDim:   '#3A767C',   // was #7AB2B2 (2.1:1) — now 4.6:1 on the page bg, 5.2:1 on white
 
   // Glass
   glass:        'rgba(255,255,255,0.55)',

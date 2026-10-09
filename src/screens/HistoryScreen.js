@@ -1,11 +1,13 @@
-import React, { useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, EmptyState } from '../components/UI';
 import { SwipeRow } from '../components/Gestures';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
+import { TextF } from '../components/Form';
+import { useUndoableDelete } from '../components/Undo';
+import { fmtDate, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
@@ -101,7 +103,7 @@ function PracticeEntry({ session, compositions, onDelete }) {
         {repSegs.length > 0 ? <View style={{ marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>{'📜 Repertoire'}</Text>{repSegs.map(seg => <SegDetail key={seg.id} seg={seg} compName={compName} accentColor={COLOURS.navy} />)}</View> : null}
         {session.wins ? <View style={{ marginBottom: 8, padding: 12, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'✨ Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.wins}</Text></View> : null}
         {session.tomorrowFocus ? <View style={{ marginBottom: 8, padding: 12, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🎯 Next focus'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text></View> : null}
-        <DeleteBtn onPress={() => confirmDelete('Delete session?', fmtDate(session.date), () => onDelete(session.id))} />
+        <DeleteBtn onPress={() => onDelete(session.id)} />
       </View>
     </BlurView>
   );
@@ -134,13 +136,18 @@ function LessonEntry({ lesson, compositions, onDeleteLesson }) {
         {lesson.overallNotes ? <View style={{ marginBottom: 8, padding: 12, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text></View> : null}
         {lesson.wins ? <View style={{ marginBottom: 8, padding: 12, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.wins}</Text></View> : null}
         {lesson.nextFocus ? <View style={{ marginBottom: 8, padding: 12, backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text></View> : null}
-        <DeleteBtn onPress={() => confirmDelete('Delete lesson?', fmtDate(lesson.date), () => onDeleteLesson(lesson.id))} />
+        <DeleteBtn onPress={() => onDeleteLesson(lesson.id)} />
       </View>
     </BlurView>
   );
 }
 
 export default function HistoryScreen({ sessions, lessons, compositions, onDelete, onDeleteLesson, isDesktop }) {
+  const [query, setQuery] = useState('');
+  const [kind, setKind] = useState('all');   // all | practice | lesson
+  // Deletes are hidden at once but only committed after the undo window closes.
+  const undo = useUndoableDelete({ bottom: isDesktop ? 24 : 100 });
+
   const feedItems = useMemo(() => {
     const s = (sessions  || []).map(s => ({ ...s, _type: 'practice' }));
     const l = (lessons   || []).map(l => ({ ...l, _type: 'lesson'   }));
@@ -148,6 +155,33 @@ export default function HistoryScreen({ sessions, lessons, compositions, onDelet
       b.date.localeCompare(a.date) || (b.createdAt || '').localeCompare(a.createdAt || '')
     );
   }, [sessions, lessons]);
+
+  // Search across everything someone might remember an entry by.
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const names = new Map((compositions || []).map(c => [c.id, c.title]));
+    return feedItems.filter(item => {
+      if (kind !== 'all' && item._type !== kind) return false;
+      if (!q) return true;
+      const text = [item.date, fmtDate(item.date), item.wins, item.tomorrowFocus, item.overallNotes, item.nextFocus, item.teacher]
+        .concat((item.segments || []).flatMap(s => [s.title, s.group, s.section, s.notes, s.feedback, s.assignment, names.get(s.compositionId)]))
+        .filter(Boolean).join(' ').toLowerCase();
+      return text.includes(q);
+    });
+  }, [feedItems, query, kind, compositions]);
+
+  // Flatten into month headers + entries so the list can be virtualised.
+  const rows = [];
+  let lastLabel = null;
+  filtered.forEach(item => {
+    if (undo.isPending(item.id)) return;
+    const [y, m] = item.date.split('-');
+    const label = new Date(Number(y), Number(m) - 1, 1)
+      .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    if (label !== lastLabel) { rows.push({ type: 'header', key: 'h-' + label, label }); lastLabel = label; }
+    rows.push({ type: 'entry', key: item.id, item });
+  });
+  const firstEntryKey = (rows.find(r => r.type === 'entry') || {}).key;
 
   if (feedItems.length === 0) {
     return (
@@ -157,50 +191,62 @@ export default function HistoryScreen({ sessions, lessons, compositions, onDelet
     );
   }
 
-  // Group by month label
-  const grouped = useMemo(() => {
-    const groups = [];
-    let current = null;
-    feedItems.forEach(item => {
-      const [y, m] = item.date.split('-');
-      const label = new Date(Number(y), Number(m) - 1, 1)
-        .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-      if (!current || current.label !== label) {
-        current = { label, items: [] };
-        groups.push(current);
-      }
-      current.items.push(item);
-    });
-    return groups;
-  }, [feedItems]);
+  const renderRow = ({ item: row }) => {
+    if (row.type === 'header') {
+      return (
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textMuted, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10, marginTop: 12 }}>
+          {row.label}
+        </Text>
+      );
+    }
+    const item = row.item;
+    const isLesson = item._type === 'lesson';
+    const remove = isLesson
+      ? () => undo.schedule(item.id, 'Lesson', () => onDeleteLesson(item.id))
+      : () => undo.schedule(item.id, 'Session', () => onDelete(item.id));
+    return (
+      <SwipeRow bottomInset={12} hint={row.key === firstEntryKey} onDelete={remove}>
+        {isLesson
+          ? <LessonEntry lesson={item} compositions={compositions} onDeleteLesson={remove} />
+          : <PracticeEntry session={item} compositions={compositions} onDelete={remove} />}
+      </SwipeRow>
+    );
+  };
+
+  const header = (
+    <View>
+      <SectionTitle style={{ marginTop: 4 }}>History</SectionTitle>
+      <TextF value={query} onChange={setQuery} placeholder="Search pieces, notes, dates…" />
+      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, marginBottom: 4 }}>
+        {[['all', 'All'], ['practice', 'Practice'], ['lesson', 'Lessons']].map(([k, label]) => {
+          const active = kind === k;
+          return (
+            <TouchableOpacity key={k} onPress={() => setKind(k)} activeOpacity={0.75}
+              hitSlop={HIT_PILL}
+              style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: active ? COLOURS.navy : 'rgba(255,255,255,0.55)' }}>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 120 }}>
-        <SectionTitle style={{ marginTop: 4 }}>History</SectionTitle>
-        {grouped.map(group => (
-          <View key={group.label} style={{ marginBottom: 8 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textMuted, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10, marginTop: 4 }}>
-              {group.label}
-            </Text>
-            {group.items.map(item =>
-              item._type === 'lesson' ? (
-                <SwipeRow key={item.id} bottomInset={12} fullSwipe={false}
-                  onDelete={() => confirmDelete('Delete lesson?', fmtDate(item.date), () => onDeleteLesson(item.id))}>
-                  <LessonEntry lesson={item} compositions={compositions}
-                    onDeleteLesson={onDeleteLesson} />
-                </SwipeRow>
-              ) : (
-                <SwipeRow key={item.id} bottomInset={12} fullSwipe={false}
-                  onDelete={() => confirmDelete('Delete session?', fmtDate(item.date), () => onDelete(item.id))}>
-                  <PracticeEntry session={item} compositions={compositions}
-                    onDelete={onDelete} />
-                </SwipeRow>
-              )
-            )}
-          </View>
-        ))}
-      </ScrollView>
+      <FlatList
+        data={rows}
+        keyExtractor={r => r.key}
+        renderItem={renderRow}
+        ListHeaderComponent={header}
+        ListEmptyComponent={<EmptyState icon="🔎" text="Nothing matches that search." />}
+        keyboardShouldPersistTaps="handled"
+        initialNumToRender={10}
+        maxToRenderPerBatch={8}
+        windowSize={7}
+        contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 120 }}
+      />
+      {undo.toast}
     </SafeAreaView>
   );
 }

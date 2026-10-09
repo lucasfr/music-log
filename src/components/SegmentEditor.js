@@ -21,6 +21,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
             key={n}
             onPress={() => onChange(n === value ? 0 : n)}
             activeOpacity={0.7}
+            accessibilityRole="button" accessibilityLabel={`${n} of 5`}
             hitSlop={{ top: 8, bottom: 8, left: 0, right: 0 }}
             style={{ paddingHorizontal: 8 }}
           >

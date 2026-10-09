@@ -15,11 +15,12 @@
 // scrolling is untouched.
 
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
-import { View, Text, Animated, PanResponder, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, Animated, PanResponder, TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLOURS, RADIUS, TOUCH } from '../theme';
 import { overIndex, shiftFor, snapOffset, clampDy } from '../utils/reorder';
+import { getLocalPref, setLocalPref } from '../utils';
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -40,6 +41,10 @@ const NO_TOUCH = IS_WEB ? { touchAction: 'none', userSelect: 'none', cursor: 'gr
 
 export const SWIPE_ACTION_W = 88;
 
+// The first swipeable row on screen nudges itself open and shut once, ever, so
+// people discover the gesture. Remembered across launches.
+let hintShownThisSession = false;
+
 export function SwipeRow({
   children,
   onDelete,
@@ -48,6 +53,7 @@ export function SwipeRow({
   radius = RADIUS.md,
   fullSwipe = true,       // swipe most of the way across to delete without tapping the button
   disabled = false,
+  hint = false,           // peek the action once, on first ever use, to teach the gesture
 }) {
   const x       = useRef(new Animated.Value(0)).current;
   const cur     = useRef(0);
@@ -61,6 +67,21 @@ export function SwipeRow({
     const id = x.addListener(({ value }) => { cur.current = value; });
     return () => x.removeListener(id);
   }, [x]);
+
+  useEffect(() => {
+    if (!hint || hintShownThisSession) return undefined;
+    hintShownThisSession = true;
+    if (getLocalPref('swipeHintSeen') === '1') return undefined;
+    const t = setTimeout(() => {
+      setLocalPref('swipeHintSeen', '1');
+      Animated.sequence([
+        Animated.timing(x, { toValue: -44, duration: 320, useNativeDriver: false }),
+        Animated.delay(450),
+        Animated.timing(x, { toValue: 0, duration: 260, useNativeDriver: false }),
+      ]).start();
+    }, 900);
+    return () => clearTimeout(t);
+  }, [hint, x]);
 
   const animateTo = (to, done) =>
     Animated.timing(x, { toValue: to, duration: 170, useNativeDriver: false }).start(done);
@@ -157,13 +178,13 @@ export function DragHandle({ handleProps, active = false }) {
   );
 }
 
-export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragChange, itemGap = 10 }) {
+export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragChange, itemGap = 10, scrollRef, scrollOffset }) {
   const layouts    = useRef({});   // key -> { y, h } (original, un-shifted)
   const shifts     = useRef({});   // key -> Animated.Value (translateY)
   const responders = useRef({});   // key -> PanResponder
   const drag       = useRef(null); // { key, index, keys, h, startY, over }
   const latest     = useRef({});
-  latest.current = { data, keyExtractor, onReorder, onDragChange, itemGap };
+  latest.current = { data, keyExtractor, onReorder, onDragChange, itemGap, scrollRef, scrollOffset };
   const [activeKey, setActiveKey] = useState(null);
   // The dashed "drop here" placeholder that glides to wherever the card will land.
   const [slotH, setSlotH] = useState(0);
@@ -180,7 +201,13 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
     const index = keys.indexOf(key);
     const L = layouts.current[key];
     if (index < 0 || !L) return;
-    drag.current = { key, index, keys, h: L.h, startY: L.y, over: index };
+    const so = latest.current.scrollOffset;
+    drag.current = {
+      key, index, keys, h: L.h, startY: L.y, over: index,
+      startScroll: so ? so.current : 0, rawDy: 0, moveY: 0, timer: null,
+    };
+    // While a card is held near the top or bottom of the screen, keep scrolling.
+    if (latest.current.scrollRef) drag.current.timer = setInterval(autoScroll, 16);
     slotTop.setValue(L.y);
     setSlotH(Math.max(0, L.h - latest.current.itemGap));
     setActiveKey(key);
@@ -213,9 +240,38 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
     }
   };
 
+  // Finger position -> list position, allowing for how far the list has scrolled
+  // since the drag began.
+  const moveRaw = (g) => {
+    const s = drag.current;
+    if (!s) return;
+    s.rawDy = g.dy;
+    s.moveY = g.moveY;
+    const so = latest.current.scrollOffset;
+    move(g.dy + (so ? so.current - s.startScroll : 0));
+  };
+
+  const autoScroll = () => {
+    const s = drag.current;
+    const { scrollRef: ref, scrollOffset: so } = latest.current;
+    if (!s || !ref || !ref.current || !so || !s.moveY) return;
+    const H = Dimensions.get('window').height;
+    const TOP = 150;      // below the modal header
+    const ZONE = 90;      // how close to the edge before scrolling starts
+    const BOTTOM = H - 40;
+    let v = 0;
+    if (s.moveY < TOP + ZONE) v = -Math.min(16, (TOP + ZONE - s.moveY) / 5);
+    else if (s.moveY > BOTTOM - ZONE) v = Math.min(16, (s.moveY - (BOTTOM - ZONE)) / 4);
+    if (v === 0) return;
+    const next = Math.max(0, so.current + v);
+    ref.current.scrollTo({ y: next, animated: false });
+    move(s.rawDy + (next - s.startScroll));
+  };
+
   const end = () => {
     const s = drag.current;
     if (!s) return;
+    if (s.timer) clearInterval(s.timer);
     drag.current = null;
     const target = snapOffset(s.keys, layouts.current, s.index, s.over);
     Animated.timing(getShift(s.key), { toValue: target, duration: 120, useNativeDriver: false }).start(() => {
@@ -240,7 +296,7 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
         onPanResponderTerminationRequest: () => false,
         onShouldBlockNativeResponder: () => true,
         onPanResponderGrant: () => begin(key),
-        onPanResponderMove: (_, g) => move(g.dy),
+        onPanResponderMove: (_, g) => moveRaw(g),
         onPanResponderRelease: () => end(),
         onPanResponderTerminate: () => end(),
       });

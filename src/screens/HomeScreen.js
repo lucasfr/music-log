@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
@@ -630,6 +630,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             visible={!!logModalDate || !!logModalSession}
             initialDate={logModalSession?.date || logModalDate || ''}
             initialSession={logModalSession}
+            previousSession={latestSession(sessions)}
             compositions={compositions}
             onSave={s => { onSave(s); setLogModalDate(null); setLogModalSession(null); }}
             onClose={() => { setLogModalDate(null); setLogModalSession(null); }}
@@ -780,6 +781,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               inline
               initialDate={logModalDate || today}
               initialSession={logModalSession}
+              previousSession={latestSession(sessions)}
               compositions={compositions}
               onSave={s => { onSave(s); closeRight(); }}
               onClose={closeRight}
@@ -872,6 +874,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         <View style={{ flex: 1, backgroundColor: COLOURS.bg }}>
           <TouchableOpacity
             onPress={() => setShowAbout(false)}
+            accessibilityRole="button" accessibilityLabel="Close"
             hitSlop={{ top: 2, bottom: 2, left: 2, right: 2 }}
             style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(9,99,126,0.12)', alignItems: 'center', justifyContent: 'center' }}
           >

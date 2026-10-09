@@ -213,13 +213,13 @@ export function DatePickerF({ label, value, onChange, icon }) {
       <View style={{ backgroundColor: 'rgba(255,255,255,0.65)', padding: 16 }}>
         {/* Month nav */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <TouchableOpacity onPress={prevMonth} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
+          <TouchableOpacity onPress={prevMonth} accessibilityRole="button" accessibilityLabel="Previous month" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
             <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>‹</Text>
           </TouchableOpacity>
           <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>
             {MONTHS_LONG[viewMonth]} {viewYear}
           </Text>
-          <TouchableOpacity onPress={nextMonth} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
+          <TouchableOpacity onPress={nextMonth} accessibilityRole="button" accessibilityLabel="Next month" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
             <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>›</Text>
           </TouchableOpacity>
         </View>

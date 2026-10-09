@@ -61,10 +61,11 @@ function buildYear(year, dateMap) {
   return months;
 }
 
-function ActivityGrid({ sessions, lessons }) {
+function ActivityGrid({ sessions, lessons, compositions }) {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const [width, setWidth] = useState(0);
+  const [selectedDay, setSelectedDay] = useState(null);
   const [mode, setModeState] = useState(() => getLocalPref('activityGridMode', 'both')); // 'both' | 'practice' | 'lessons'
   function setMode(m) {
     setModeState(m);
@@ -131,8 +132,8 @@ function ActivityGrid({ sessions, lessons }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>{year}</Text>
         <View style={{ flexDirection: 'row', gap: 6 }}>
-          <TouchableYear onPress={() => setYear(y => y - 1)} icon="chevron-back" />
-          <TouchableYear onPress={() => setYear(y => y + 1)} icon="chevron-forward" disabled={year >= currentYear} />
+          <TouchableYear onPress={() => { setYear(y => y - 1); setSelectedDay(null); }} icon="chevron-back" />
+          <TouchableYear onPress={() => { setYear(y => y + 1); setSelectedDay(null); }} icon="chevron-forward" disabled={year >= currentYear} />
         </View>
       </View>
 
@@ -164,14 +165,19 @@ function ActivityGrid({ sessions, lessons }) {
                               ? `rgba(247,127,0,${0.45 + Math.min(0.55, day.duration / 120)})`
                               : 'rgba(247,127,0,0.45)'
                             : cellColor(day.duration) || 'rgba(140,32,69,0.07)';
+                        const isSel = selectedDay === day.iso;
                         return (
-                          <View key={di} style={{
-                            width: cell, height: cell,
-                            borderRadius: Math.max(1, cell * 0.2),
-                            backgroundColor: color,
-                            borderWidth: isToday ? 1 : 0,
-                            borderColor: COLOURS.navy,
-                          }} />
+                          <TouchableOpacity key={di} disabled={day.isFuture} activeOpacity={0.6}
+                            onPress={() => setSelectedDay(isSel ? null : day.iso)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`${day.iso}${day.duration > 0 ? `, ${day.duration} minutes` : ''}`}
+                            style={{
+                              width: cell, height: cell,
+                              borderRadius: Math.max(1, cell * 0.2),
+                              backgroundColor: color,
+                              borderWidth: isSel ? 2 : isToday ? 1 : 0,
+                              borderColor: COLOURS.navy,
+                            }} />
                         );
                       })}
                     </View>
@@ -182,6 +188,32 @@ function ActivityGrid({ sessions, lessons }) {
           })}
         </View>
       )}
+
+      {/* Selected day */}
+      {selectedDay ? (() => {
+        const daySessions = (sessions || []).filter(s => s.date === selectedDay);
+        const dayLessons  = (lessons  || []).filter(l => l.date === selectedDay);
+        const mins = daySessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
+        const names = new Map((compositions || []).map(c => [c.id, c.title]));
+        const pieces = [...new Set([...daySessions, ...dayLessons].flatMap(x =>
+          (x.segments || []).map(seg => names.get(seg.compositionId) || seg.title || seg.group).filter(Boolean)))];
+        const when = new Date(selectedDay + 'T12:00:00')
+          .toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+        const parts = [];
+        if (daySessions.length) parts.push(`${daySessions.length} session${daySessions.length !== 1 ? 's' : ''} · ${mins} min`);
+        if (dayLessons.length)  parts.push(`${dayLessons.length} lesson${dayLessons.length !== 1 ? 's' : ''}`);
+        return (
+          <View style={{ marginTop: 12, padding: 12, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.55)' }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{when}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2 }}>
+              {parts.length ? parts.join('   ') : 'Nothing logged'}
+            </Text>
+            {pieces.length ? (
+              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 4 }}>{pieces.join(' · ')}</Text>
+            ) : null}
+          </View>
+        );
+      })() : null}
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12, justifyContent: 'flex-end' }}>
@@ -1472,6 +1504,7 @@ function DayOfWeekChart({ sessions }) {
 function TouchableYear({ onPress, icon, disabled = false }) {
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }} activeOpacity={0.7}
+      accessibilityRole="button" accessibilityLabel={icon === 'chevron-back' ? 'Previous year' : 'Next year'}
       style={{ ...TOUCH_PILL, width: 48, alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: 'rgba(255,255,255,0.55)', opacity: disabled ? 0.3 : 1 }}>
       <Ionicons name={icon} size={24} color={COLOURS.navy} />
     </TouchableOpacity>
@@ -1682,7 +1715,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         <SectionTitle>Activity</SectionTitle>
         <GlassCard>
-          <ActivityGrid sessions={sessions} lessons={lessons} />
+          <ActivityGrid sessions={sessions} lessons={lessons} compositions={compositions} />
         </GlassCard>
 
         <SectionTitle style={{ marginTop: 16 }}>{period === '7d' ? 'Daily' : 'Weekly'} trends & session quality ({periodLabel})</SectionTitle>

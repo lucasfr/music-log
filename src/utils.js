@@ -117,6 +117,29 @@ export function setLocalPref(key, value) {
   localStorage.setItem(PREF_PREFIX + key, value);
 }
 
+// The most recent session that actually has segments, to offer "repeat last session".
+export function latestSession(sessions) {
+  let best = null;
+  (sessions || []).forEach(s => {
+    if (!(s.segments || []).length) return;
+    const d = s.date || '';
+    if (!best || d > best.date || (d === best.date && (s.createdAt || '') > (best.createdAt || ''))) best = { ...s, date: d };
+  });
+  return best;
+}
+
+// Same idea as confirmDelete, for leaving a form with unsaved changes.
+export function confirmDiscard(onDiscard) {
+  if (Platform.OS === 'web') {
+    if (window.confirm('Discard changes?\nYou have unsaved changes that will be lost.')) onDiscard();
+  } else {
+    Alert.alert('Discard changes?', 'You have unsaved changes that will be lost.', [
+      { text: 'Keep editing', style: 'cancel' },
+      { text: 'Discard', style: 'destructive', onPress: onDiscard },
+    ]);
+  }
+}
+
 // Alert.alert is a no-op on web — use window.confirm there instead
 export function confirmDelete(title, message, onConfirm) {
   if (Platform.OS === 'web') {
