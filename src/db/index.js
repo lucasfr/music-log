@@ -103,6 +103,8 @@ async function getDB() {
     'ALTER TABLE compositions ADD COLUMN resource_recordings TEXT',
     'ALTER TABLE compositions ADD COLUMN resource_tutorials TEXT',
     'ALTER TABLE compositions ADD COLUMN teacher_feedback TEXT',
+    'ALTER TABLE compositions ADD COLUMN tempo INTEGER',
+    'ALTER TABLE compositions ADD COLUMN time_sigs TEXT',
   ];
 
   for (const sql of newCols) {
@@ -201,6 +203,13 @@ function rowToComp(r) {
     resourceRecordings: r.resource_recordings || '',
     resourceTutorials: r.resource_tutorials || '',
     teacherFeedback: r.teacher_feedback || '',
+    tempo: r.tempo || null,
+    // time_sigs is the modern plural field (the form and the metronome's
+    // "use piece tempo" both read timeSigs, not timeSig) — for rows saved
+    // before it existed, fall back to wrapping the legacy singular time_sig
+    // so older compositions still produce a sensible array instead of
+    // losing their time signature entirely.
+    timeSigs: r.time_sigs ? JSON.parse(r.time_sigs) : (r.time_sig ? [r.time_sig] : []),
     createdAt: r.created_at,
   };
 }
@@ -226,11 +235,14 @@ export async function saveComposition(comp) {
         info, kerrin_notes, my_notes, difficulty, liking, arrangement, collection,
         year, tags, date_started, date_completed, technical_challenges,
         musical_focus, practice_notes, resource_sheet, resource_recordings,
-        resource_tutorials, teacher_feedback, created_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        resource_tutorials, teacher_feedback, tempo, time_sigs, created_at)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       comp.id, comp.title, comp.composer || null, comp.status || 'learning',
-      comp.grade || null, comp.keyRoot || null, comp.keyMode || null, comp.timeSig || null,
+      comp.grade || null, comp.keyRoot || null, comp.keyMode || null,
+      // time_sig (singular) kept in sync from timeSigs[0] for any code still
+      // reading the legacy field — time_sigs (plural) is the source of truth.
+      (comp.timeSigs && comp.timeSigs[0]) || comp.timeSig || null,
       comp.info || null, comp.kerrinNotes || null, comp.myNotes || null,
       comp.difficulty || 0,
       comp.liking || 0,
@@ -241,6 +253,8 @@ export async function saveComposition(comp) {
       comp.practiceNotes || null, comp.resourceSheet || null,
       comp.resourceRecordings || null, comp.resourceTutorials || null,
       comp.teacherFeedback || null,
+      comp.tempo ? Number(comp.tempo) : null,
+      comp.timeSigs?.length ? JSON.stringify(comp.timeSigs) : null,
       comp.createdAt || new Date().toISOString(),
     ]
   );

@@ -29,7 +29,7 @@ function toRow(table, record, uid) {
   const KNOWN = {
     sessions:     ['id','user_id','date','duration','energy','enjoyment','wins','segments','created_at','updated_at'],
     lessons:      ['id','user_id','date','duration','teacher','wins','segments','created_at','updated_at'],
-    compositions: ['id','user_id','title','composer','status','keys','time_sigs','notes','created_at','updated_at'],
+    compositions: ['id','user_id','title','composer','status','keys','time_sigs','tempo','notes','created_at','updated_at'],
   };
   const allowed = KNOWN[table];
   if (allowed) {
