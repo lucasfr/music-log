@@ -9,6 +9,8 @@ import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Btn } from '../components/UI';
 import { Field, TextF, NumberF, DatePickerF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
+import { ReorderList, SwipeRow, DragHandle } from '../components/Gestures';
+import { reorder } from '../utils/reorder';
 import { uid } from '../utils';
 
 function ZeldaBar({ label, emoji, value, onChange }) {
@@ -19,7 +21,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
       </Text>
       <View style={{ flexDirection: 'row', gap: 2 }}>
         {[1, 2, 3, 4, 5].map(n => (
-          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} hitSlop={{ top: 9, bottom: 9, left: 2, right: 2 }}>
+          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
             <Text style={{ fontSize: 26, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>{emoji}</Text>
           </TouchableOpacity>
         ))}
@@ -39,6 +41,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
   const [energyBar, setEnergyBar]   = useState(0);
   const [enjoyment, setEnjoyment]   = useState(0);
   const [pieces, setPieces]         = useState([]);
+  const [dragging, setDragging]     = useState(false);
   const [overallNotes, setOverallNotes] = useState('');
   const [wins, setWins]             = useState('');
   const [nextFocus, setNextFocus]   = useState('');
@@ -70,17 +73,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
   }
   function updatePiece(id, val) { setPieces(p => p.map(x => x.id === id ? val : x)); }
   function removePiece(id)      { setPieces(p => p.filter(x => x.id !== id)); }
-  function movePiece(id, dir) {
-    setPieces(p => {
-      const idx = p.findIndex(x => x.id === id);
-      if (idx < 0) return p;
-      const next = idx + dir;
-      if (next < 0 || next >= p.length) return p;
-      const arr = [...p];
-      [arr[idx], arr[next]] = [arr[next], arr[idx]];
-      return arr;
-    });
-  }
+  function reorderPieces(from, to) { setPieces(p => reorder(p, from, to)); }
 
   function handleSave() {
     if (!date) { Alert.alert('Date required'); return; }
@@ -144,14 +137,21 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
         </View>
       )}
 
-      {pieces.map((item, idx) => (
-        <SegmentEditor key={item.id} segment={item} compositions={compositions}
-          onChange={val => updatePiece(item.id, val)}
-          onRemove={() => removePiece(item.id)}
-          onMoveUp={idx > 0 ? () => movePiece(item.id, -1) : null}
-          onMoveDown={idx < pieces.length - 1 ? () => movePiece(item.id, 1) : null}
-          lessonMode />
-      ))}
+      <ReorderList
+        data={pieces}
+        keyExtractor={item => item.id}
+        onReorder={reorderPieces}
+        onDragChange={setDragging}
+        renderItem={({ item, handleProps, isActive }) => (
+          <SwipeRow onDelete={() => removePiece(item.id)} bottomInset={10}>
+            <SegmentEditor segment={item} compositions={compositions}
+              onChange={val => updatePiece(item.id, val)}
+              onRemove={() => removePiece(item.id)}
+              dragHandle={<DragHandle handleProps={handleProps} active={isActive} />}
+              lessonMode />
+          </SwipeRow>
+        )}
+      />
 
       <GlassCard>
         <Field label="Lesson notes" icon="create-outline">
@@ -180,7 +180,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
             <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
           </TouchableOpacity>
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
           {formContent}
         </ScrollView>
       </View>
@@ -203,7 +203,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
           </BlurView>
         </SafeAreaView>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
             {formContent}
           </ScrollView>
         </KeyboardAvoidingView>

@@ -97,7 +97,7 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View style={{ paddingVertical: 3 }}>
+      <View style={{ paddingVertical: 11 }}>
         {/* Track */}
         <View style={{
           height: 22,

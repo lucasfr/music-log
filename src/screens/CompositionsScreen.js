@@ -8,6 +8,7 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
+import { SwipeRow } from '../components/Gestures';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate, todayISO } from '../utils';
@@ -354,7 +355,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <View style={{ flexDirection: 'row', gap: 2 }}>
                     {[1,2,3,4,5].map(n => (
-                      <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75} hitSlop={{ top: 9, bottom: 9, left: 2, right: 2 }}>
+                      <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
                         <Text style={{ fontSize: 26, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
                       </TouchableOpacity>
                     ))}
@@ -738,6 +739,18 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
+// Shared by the Remove button in an open card and by swipe-left on the card.
+function confirmRemovePiece(comp, onDelete) {
+  if (Platform.OS === 'web') {
+    if (window.confirm(`Remove "${comp.title}" from your library?`)) onDelete(comp.id);
+  } else {
+    Alert.alert('Remove piece?', comp.title, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => onDelete(comp.id) },
+    ]);
+  }
+}
+
 export default function CompositionsScreen({ compositions, sessions, onSave, onDelete, isDesktop }) {
   const [modal, setModal] = useState(null);
   const [search, setSearch] = useState('');
@@ -807,7 +820,10 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
         {filtered.length === 0 && <EmptyState icon="♩" text="No pieces yet. Add your current repertoire." />}
 
         {filtered.map(comp => (
-          <CompCard key={comp.id} comp={comp} sessions={sessions} onEdit={c => setModal({ ...c })} onDelete={onDelete} />
+          <SwipeRow key={comp.id} bottomInset={12} fullSwipe={false} label="Remove"
+            onDelete={() => confirmRemovePiece(comp, onDelete)}>
+            <CompCard comp={comp} sessions={sessions} onEdit={c => setModal({ ...c })} onDelete={onDelete} />
+          </SwipeRow>
         ))}
       </ScrollView>
 

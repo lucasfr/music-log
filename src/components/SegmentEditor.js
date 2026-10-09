@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL, HIT_TEXT, TOUCH_ICON, HIT_ICON } from '../theme';
+import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { TagCloud, Label } from './UI';
 import { Field, TextF, NumberF, SelectF } from './Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
@@ -21,7 +21,8 @@ function ZeldaBar({ label, emoji, value, onChange }) {
             key={n}
             onPress={() => onChange(n === value ? 0 : n)}
             activeOpacity={0.7}
-            hitSlop={{ top: 9, bottom: 9, left: 2, right: 2 }}
+            hitSlop={{ top: 8, bottom: 8, left: 0, right: 0 }}
+            style={{ paddingHorizontal: 8 }}
           >
             <Text style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
               {emoji}
@@ -255,7 +256,7 @@ export function ArticulationPicker({ value, onChange }) {
   );
 }
 
-export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDown, compositions, lessonMode = false }) {
+export function SegmentEditor({ segment, onChange, onRemove, dragHandle, compositions, lessonMode = false }) {
   const [open, setOpen] = useState(true);
   const isTech = segment.type === 'technique';
   const field = (k, v) => onChange({ ...segment, [k]: v });
@@ -315,25 +316,9 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
             <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2 }}>{segment.duration} min</Text>
           ) : null}
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          {onMoveUp ? (
-            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveUp(); }} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={{ width: 36 }} />
-          )}
-          {onMoveDown ? (
-            <TouchableOpacity onPress={e => { e.stopPropagation(); onMoveDown(); }} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={{ width: 36 }} />
-          )}
-          <TouchableOpacity onPress={e => { e.stopPropagation(); onRemove(); }} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-            <Text style={{ fontSize: 16, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
-          </TouchableOpacity>
-          <Text style={{ fontSize: 11, color: COLOURS.textDim }}>{open ? '▲' : '▼'}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{ fontSize: 11, color: COLOURS.textDim, marginRight: 2 }}>{open ? '▲' : '▼'}</Text>
+          {dragHandle}
         </View>
       </TouchableOpacity>
 
@@ -492,6 +477,17 @@ export function SegmentEditor({ segment, onChange, onRemove, onMoveUp, onMoveDow
           <Field label="Progress" icon="checkmark-circle-outline" style={{ marginBottom: 0 }}>
             <TagCloud tags={PROGRESS_TAGS} selected={segment.progress || []} onToggle={t => toggleTag('progress', t)} />
           </Field>
+
+          {onRemove && (
+            <TouchableOpacity
+              onPress={onRemove}
+              activeOpacity={0.75}
+              hitSlop={HIT_PILL}
+              style={{ ...TOUCH_PILL, alignSelf: 'flex-end', marginTop: 16, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.dangerLight }}
+            >
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.danger }}>Remove segment</Text>
+            </TouchableOpacity>
+          )}
         </TouchableOpacity>
       )}
     </BlurView>

@@ -4,15 +4,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, TOUCH_ICON, HIT_ICON } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Btn } from './UI';
 import { Field, TextF, SelectF } from './Form';
 import { ArticulationPicker } from './SegmentEditor';
 import { MinutesDial } from './MinutesDial';
+import { ReorderList, SwipeRow, DragHandle } from './Gestures';
+import { reorder } from '../utils/reorder';
 import { TECH_GROUPS } from '../constants';
 import { uid, formatArticulation } from '../utils';
 
-function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, onMoveDown }) {
+function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle }) {
   const isTech = segment.type === 'technique';
   const field = (k, v) => onChange({ ...segment, [k]: v });
   const isValid = Number(segment.plannedMinutes) > 0 && (isTech ? !!segment.title : !!segment.compositionId);
@@ -25,7 +27,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
   // keeps only what still needs attention expanded.
   if (segment.confirmed) {
     return (
-      <View style={{
+      <TouchableOpacity activeOpacity={0.85} onPress={() => field('confirmed', false)} style={{
         flexDirection: 'row', alignItems: 'center',
         borderRadius: RADIUS.md,
         backgroundColor: 'rgba(255,255,255,0.55)',
@@ -56,25 +58,9 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 12 }}>
           {segment.plannedMinutes} min
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 0 }}>
-          {onMoveUp ? (
-            <TouchableOpacity onPress={onMoveUp} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
-            </TouchableOpacity>
-          ) : <View style={{ width: 36 }} />}
-          {onMoveDown ? (
-            <TouchableOpacity onPress={onMoveDown} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
-            </TouchableOpacity>
-          ) : <View style={{ width: 36 }} />}
-          <TouchableOpacity onPress={() => field('confirmed', false)} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-            <Text style={{ fontSize: 13, color: COLOURS.steel }}>✎</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onRemove} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-            <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        <Text style={{ fontSize: 13, color: COLOURS.steel, marginRight: 2 }}>✎</Text>
+        {dragHandle}
+      </TouchableOpacity>
     );
   }
 
@@ -96,21 +82,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
             {isTech ? 'technique' : 'repertoire'}
           </Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 0 }}>
-          {onMoveUp ? (
-            <TouchableOpacity onPress={onMoveUp} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↑</Text>
-            </TouchableOpacity>
-          ) : <View style={{ width: 36 }} />}
-          {onMoveDown ? (
-            <TouchableOpacity onPress={onMoveDown} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-              <Text style={{ fontSize: 15, color: COLOURS.textMuted, lineHeight: 18 }}>↓</Text>
-            </TouchableOpacity>
-          ) : <View style={{ width: 36 }} />}
-          <TouchableOpacity onPress={onRemove} hitSlop={HIT_ICON} style={TOUCH_ICON}>
-            <Text style={{ fontSize: 15, color: COLOURS.danger }}>✕</Text>
-          </TouchableOpacity>
-        </View>
+        {dragHandle}
       </View>
 
       {isTech ? (
@@ -185,27 +157,29 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, onMoveUp, 
           Confirm
         </Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={onRemove}
+        activeOpacity={0.75}
+        hitSlop={HIT_PILL}
+        style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 10, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.dangerLight }}
+      >
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.danger }}>Remove segment</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
   const [draftSegments, setDraftSegments] = useState([]);
+  const [dragging, setDragging] = useState(false);
 
   function addSegment(type) {
     setDraftSegments(s => [...s, { id: uid(), type, title: '', compositionId: '', plannedMinutes: 10 }]);
   }
   function updateSegment(id, val) { setDraftSegments(s => s.map(seg => (seg.id === id ? val : seg))); }
   function removeSegment(id) { setDraftSegments(s => s.filter(seg => seg.id !== id)); }
-  function moveSegment(index, dir) {
-    setDraftSegments(s => {
-      const next = [...s];
-      const j = index + dir;
-      if (j < 0 || j >= next.length) return s;
-      [next[index], next[j]] = [next[j], next[index]];
-      return next;
-    });
-  }
+  function reorderSegments(from, to) { setDraftSegments(s => reorder(s, from, to)); }
 
   const totalMin = draftSegments.reduce((sum, s) => sum + (Number(s.plannedMinutes) || 0), 0);
   const canStart = draftSegments.length > 0 && draftSegments.every(s => Number(s.plannedMinutes) > 0 && (s.type === 'technique' ? s.title : s.compositionId));
@@ -236,7 +210,7 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
         </SafeAreaView>
 
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <SectionTitle style={{ marginBottom: 0 }}>Segments{totalMin ? ` · ${totalMin} min total` : ''}</SectionTitle>
@@ -260,17 +234,23 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
               </View>
             )}
 
-            {draftSegments.map((seg, i) => (
-              <DraftSegmentRow
-                key={seg.id}
-                segment={seg}
-                compositions={compositions}
-                onChange={val => updateSegment(seg.id, val)}
-                onRemove={() => removeSegment(seg.id)}
-                onMoveUp={i > 0 ? () => moveSegment(i, -1) : null}
-                onMoveDown={i < draftSegments.length - 1 ? () => moveSegment(i, 1) : null}
-              />
-            ))}
+            <ReorderList
+              data={draftSegments}
+              keyExtractor={seg => seg.id}
+              onReorder={reorderSegments}
+              onDragChange={setDragging}
+              renderItem={({ item: seg, handleProps, isActive }) => (
+                <SwipeRow onDelete={() => removeSegment(seg.id)} bottomInset={10} disabled={!seg.confirmed}>
+                  <DraftSegmentRow
+                    segment={seg}
+                    compositions={compositions}
+                    onChange={val => updateSegment(seg.id, val)}
+                    onRemove={() => removeSegment(seg.id)}
+                    dragHandle={<DragHandle handleProps={handleProps} active={isActive} />}
+                  />
+                </SwipeRow>
+              )}
+            />
 
             <Btn label="Start timer" variant="primary" onPress={handleStart} disabled={!canStart} style={{ marginTop: 8 }} />
           </ScrollView>

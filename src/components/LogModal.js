@@ -9,6 +9,8 @@ import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Btn, Label } from '../components/UI';
 import { Field, TextF, NumberF, DatePickerF } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
+import { ReorderList, SwipeRow, DragHandle } from '../components/Gestures';
+import { reorder } from '../utils/reorder';
 import { uid, confirmDelete } from '../utils';
 
 function ZeldaBar({ label, emoji, value, onChange }) {
@@ -19,7 +21,7 @@ function ZeldaBar({ label, emoji, value, onChange }) {
       </Text>
       <View style={{ flexDirection: 'row', gap: 2 }}>
         {[1, 2, 3, 4, 5].map(n => (
-          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} hitSlop={{ top: 9, bottom: 9, left: 2, right: 2 }}>
+          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
             <Text style={{ fontSize: 26, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
               {emoji}
             </Text>
@@ -39,6 +41,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   const [enjoyment, setEnjoyment] = useState(0);
   const [duration, setDuration]   = useState('');
   const [segments, setSegments]   = useState([]);
+  const [dragging, setDragging]   = useState(false);
   const [wins, setWins]           = useState('');
   const [focus, setFocus]         = useState('');
 
@@ -65,17 +68,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   }
   function updateSegment(id, val) { setSegments(s => s.map(seg => seg.id === id ? val : seg)); }
   function removeSegment(id)      { setSegments(s => s.filter(seg => seg.id !== id)); }
-  function moveSegment(id, dir) {
-    setSegments(s => {
-      const idx = s.findIndex(seg => seg.id === id);
-      if (idx < 0) return s;
-      const next = idx + dir;
-      if (next < 0 || next >= s.length) return s;
-      const arr = [...s];
-      [arr[idx], arr[next]] = [arr[next], arr[idx]];
-      return arr;
-    });
-  }
+  function reorderSegments(from, to) { setSegments(s => reorder(s, from, to)); }
 
   function handleSave() {
     if (energyBar === 0) {
@@ -97,7 +90,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   const totalMin = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
 
   const formBody = (
-    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled" scrollEnabled={!dragging}>
       <GlassCard>
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
           <View style={{ flex: 1 }}>
@@ -139,13 +132,20 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
         </View>
       )}
 
-      {segments.map((seg, idx) => (
-        <SegmentEditor key={seg.id} segment={seg} compositions={compositions}
-          onChange={val => updateSegment(seg.id, val)}
-          onRemove={() => removeSegment(seg.id)}
-          onMoveUp={idx > 0 ? () => moveSegment(seg.id, -1) : null}
-          onMoveDown={idx < segments.length - 1 ? () => moveSegment(seg.id, 1) : null} />
-      ))}
+      <ReorderList
+        data={segments}
+        keyExtractor={seg => seg.id}
+        onReorder={reorderSegments}
+        onDragChange={setDragging}
+        renderItem={({ item: seg, handleProps, isActive }) => (
+          <SwipeRow onDelete={() => removeSegment(seg.id)} bottomInset={10}>
+            <SegmentEditor segment={seg} compositions={compositions}
+              onChange={val => updateSegment(seg.id, val)}
+              onRemove={() => removeSegment(seg.id)}
+              dragHandle={<DragHandle handleProps={handleProps} active={isActive} />} />
+          </SwipeRow>
+        )}
+      />
 
       <GlassCard>
         <Field label="Wins today" icon="sparkles-outline">

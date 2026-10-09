@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, EmptyState } from '../components/UI';
+import { SwipeRow } from '../components/Gestures';
 import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
@@ -184,11 +185,17 @@ export default function HistoryScreen({ sessions, lessons, compositions, onDelet
             </Text>
             {group.items.map(item =>
               item._type === 'lesson' ? (
-                <LessonEntry key={item.id} lesson={item} compositions={compositions}
-                  onDeleteLesson={onDeleteLesson} />
+                <SwipeRow key={item.id} bottomInset={12} fullSwipe={false}
+                  onDelete={() => confirmDelete('Delete lesson?', fmtDate(item.date), () => onDeleteLesson(item.id))}>
+                  <LessonEntry lesson={item} compositions={compositions}
+                    onDeleteLesson={onDeleteLesson} />
+                </SwipeRow>
               ) : (
-                <PracticeEntry key={item.id} session={item} compositions={compositions}
-                  onDelete={onDelete} />
+                <SwipeRow key={item.id} bottomInset={12} fullSwipe={false}
+                  onDelete={() => confirmDelete('Delete session?', fmtDate(item.date), () => onDelete(item.id))}>
+                  <PracticeEntry session={item} compositions={compositions}
+                    onDelete={onDelete} />
+                </SwipeRow>
               )
             )}
           </View>
