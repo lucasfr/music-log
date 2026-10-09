@@ -89,7 +89,7 @@ const LIGHT = { ...COLOURS };
 
 const DARK = {
   ...LIGHT,
-  navy: '#2B94AE', steel: '#3BB3C6', tealLight: '#5E9AA3',
+  navy: '#2A8CA5', steel: '#3BB3C6', tealLight: '#5E9AA3',
   ink: '#1E3A44', red: '#E0668F', amber: '#FF9A33', gold: '#FCBF49',
   bg: '#0A1418', bg2: '#13242A',
   text: '#E4F3F6', textMuted: '#9BD0DA', textDim: '#8FB6BE',
