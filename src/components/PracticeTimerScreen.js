@@ -115,6 +115,13 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
   useKeepAwake(visible && timer.isRunning);
   const [showMetronome, setShowMetronome] = useState(false);
   const toggleMetronome = useCallback(() => setShowMetronome(s => !s), []);
+  // True right after a segment transition that landed paused (timeout or
+  // skip, both now autoStart:false) — shows an interstitial with its own
+  // Start button instead of rolling straight into the next segment, which
+  // was the actual 'overwhelming, it just goes on' complaint. Deliberately
+  // not shown for the very first segment, since opening the timer screen
+  // at all is already a deliberate 'start' action.
+  const [awaitingStart, setAwaitingStart] = useState(false);
 
   // Bumped on every play/pause/skip/+minutes so the notification effect
   // below knows to reschedule against the new deadline — deliberately not
@@ -132,6 +139,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
     if (timer.currentIndex !== prevIndex.current) {
       playChime();
       prevIndex.current = timer.currentIndex;
+      if (!timer.isRunning) setAwaitingStart(true);
     }
   }, [timer.currentIndex]);
 
@@ -176,6 +184,12 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
     if (scheduledIdRef.current) cancelScheduledNotification(scheduledIdRef.current);
   }, []);
 
+  function handleStartNext() {
+    timer.start();
+    setAwaitingStart(false);
+    setNotifyGen(g => g + 1);
+  }
+
   if (!visible || !timer.currentSegment) return null;
 
   const linkedComposition = (compositions || []).find(c => c.id === timer.currentSegment.compositionId) || null;
@@ -204,6 +218,28 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
             <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.textDim, fontSize: 13 }}>Finish</Text>
           </TouchableOpacity>
 
+          {awaitingStart ? (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 6 }}>
+                segment {timer.currentIndex + 1} of {timer.segments.length}
+              </Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 28, color: COLOURS.text, marginBottom: 6, textAlign: 'center' }}>
+                {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
+                {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
+              </Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textDim, marginBottom: 32 }}>
+                {timer.currentSegment.plannedMinutes} min
+              </Text>
+              <TouchableOpacity
+                onPress={handleStartNext}
+                activeOpacity={0.85}
+                style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: COLOURS.navy, alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Text style={{ fontSize: 26, color: '#fff' }}>▶</Text>
+              </TouchableOpacity>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 14 }}>tap to start</Text>
+            </View>
+          ) : (
           <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 10 }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 2 }}>
               segment {timer.currentIndex + 1} of {timer.segments.length}
@@ -265,6 +301,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
               segmentKey={timer.currentIndex}
             />
           </ScrollView>
+          )}
         </SafeAreaView>
       </View>
     </Modal>

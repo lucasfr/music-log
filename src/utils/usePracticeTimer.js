@@ -80,7 +80,7 @@ export function usePracticeTimer(initialSegments = []) {
     setIsRunning(false);
   }, [freezeCurrent]);
 
-  const goTo = useCallback((idx) => {
+  const goTo = useCallback((idx, { autoStart = true } = {}) => {
     freezeCurrent();
     if (idx >= segments.length) {
       setIsFinished(true);
@@ -89,11 +89,20 @@ export function usePracticeTimer(initialSegments = []) {
     }
     if (idx < 0) return;
     setCurrentIndex(idx);
-    runStartRef.current = Date.now();
-    setIsRunning(true);
+    if (autoStart) {
+      runStartRef.current = Date.now();
+      setIsRunning(true);
+    } else {
+      // Lands on the new segment paused rather than counting down
+      // immediately — the caller (PracticeTimerScreen) shows an
+      // interstitial with its own Start button instead of rolling
+      // straight into the next segment with no breathing room.
+      runStartRef.current = null;
+      setIsRunning(false);
+    }
   }, [freezeCurrent, segments.length]);
 
-  const skip = useCallback(() => goTo(currentIndex + 1), [goTo, currentIndex]);
+  const skip = useCallback(() => goTo(currentIndex + 1, { autoStart: false }), [goTo, currentIndex]);
 
   // Ends the session right now, wherever it is — freezes whatever time has
   // accumulated on the current segment and marks the session finished, same
@@ -135,7 +144,7 @@ export function usePracticeTimer(initialSegments = []) {
     const id = setInterval(() => {
       listenersRef.current.forEach(cb => cb());
       const { isRunning: stillRunning, currentIndex: idx, currentRemainingMs: getRemaining, goTo: go } = latestRef.current;
-      if (stillRunning && getRemaining() <= 0) go(idx + 1);
+      if (stillRunning && getRemaining() <= 0) go(idx + 1, { autoStart: false });
     }, TICK_MS);
     return () => clearInterval(id);
   }, [isRunning]);
