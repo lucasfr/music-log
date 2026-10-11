@@ -353,19 +353,19 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
                   />
                 </Field>
               )}
-              <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
                 <View style={{ flex: 1 }}>
-                  <Field label="Label (optional)" icon="pricetag-outline">
+                  <Field label="Label" icon="pricetag-outline">
                     <TextF value={segment.title || ''} onChange={v => field('title', v)} placeholder="e.g. Hanon No. 1" />
                   </Field>
                 </View>
                 <View style={{ width: 90 }}>
-                  <Field label="⏱ Min">
+                  <Field label="Min" icon="time-outline">
                     <NumberF value={segment.duration || ''} onChange={v => field('duration', v)} />
                   </Field>
                 </View>
                 <View style={{ width: 90 }}>
-                  <Field label="BPM">
+                  <Field label="BPM" icon="pulse-outline">
                     <NumberF value={segment.tempo || ''} onChange={v => field('tempo', v)} />
                   </Field>
                 </View>
