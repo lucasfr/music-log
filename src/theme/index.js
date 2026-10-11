@@ -83,6 +83,11 @@ export const COLOURS = {
   emptyCell:  'rgba(140,32,69,0.07)',
   futureCell: 'rgba(0,0,0,0.05)',
   shadow:     a => `rgba(9,99,126,${a})`,
+  // Soft coloured glows (entry cards, FAB) and the surface wash behind entry cards.
+  glowPractice: 'rgba(140,32,69,0.28)',
+  glowLesson:   'rgba(247,127,0,0.28)',
+  glowTeal:     'rgba(8,131,149,0.30)',
+  entryWash:    'rgba(255,255,255,0)',
   isDark:    false,
   __theme:   'light',
 };
@@ -126,6 +131,12 @@ const DARK = {
   emptyCell:  'rgba(255,255,255,0.07)',
   futureCell: 'rgba(255,255,255,0.025)',
   shadow:     a => `rgba(0,0,0,${+Math.min(0.8, a * 2.5).toFixed(3)})`,
+  // Coloured glows read as haloes on a dark page, so they go neutral; entry cards (a bare
+  // dark blur) get a faint white wash so they sit above the page instead of below it.
+  glowPractice: 'rgba(0,0,0,0.6)',
+  glowLesson:   'rgba(0,0,0,0.6)',
+  glowTeal:     'rgba(0,0,0,0.6)',
+  entryWash:    'rgba(255,255,255,0.08)',
 };
 
 export const THEMES = {

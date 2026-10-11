@@ -15,23 +15,23 @@ export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
         <>
           {onTimer && (
             <TouchableOpacity onPress={() => { setExpanded(false); onTimer(); }} activeOpacity={0.85}
-              style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.tealBorder, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
+              style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>{'⏱ Start timer'}</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
-            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.accent2Mid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
+            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.glowLesson, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => { setExpanded(false); onPractice(); }} activeOpacity={0.85}
-            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
+            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
           </TouchableOpacity>
         </>
       )}
       <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.85}
         accessibilityRole="button" accessibilityLabel={expanded ? 'Close menu' : 'Add session, lesson or timer'}
-        style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.55, shadowRadius: 16, elevation: 8 }}>
+        style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.55, shadowRadius: 16, elevation: 8 }}>
         <Text style={{ fontSize: expanded ? 22 : 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>
           {expanded ? '✕' : '+'}
         </Text>

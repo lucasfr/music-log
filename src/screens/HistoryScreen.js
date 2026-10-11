@@ -80,7 +80,7 @@ function PracticeEntry({ session, compositions, onDelete }) {
   const repSegs  = (session.segments || []).filter(s => s.type === 'repertoire');
 
   return (
-    <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.7, shadowRadius: 16, elevation: 6 }}>
+    <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, backgroundColor: COLOURS.entryWash, shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.7, shadowRadius: 16, elevation: 6 }}>
       <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
         <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
         <View style={{ flex: 1 }}>
@@ -115,7 +115,7 @@ function LessonEntry({ lesson, compositions, onDeleteLesson }) {
   const repSegs  = allSegs.filter(s => s.type === 'repertoire' || !s.type);
 
   return (
-    <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, shadowColor: COLOURS.accent2Mid, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.7, shadowRadius: 16, elevation: 6 }}>
+    <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, backgroundColor: COLOURS.entryWash, shadowColor: COLOURS.glowLesson, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.7, shadowRadius: 16, elevation: 6 }}>
       <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
         <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
         <View style={{ flex: 1 }}>

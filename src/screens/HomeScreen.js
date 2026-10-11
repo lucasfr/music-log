@@ -48,8 +48,8 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
       <BlurView intensity={isSelected ? 50 : 36} tint={COLOURS.blurTint} style={{
-        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
-        shadowColor: isSelected ? COLOURS.accentMid : COLOURS.accentMid,
+        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, backgroundColor: COLOURS.entryWash,
+        shadowColor: isSelected ? COLOURS.accentMid : COLOURS.glowPractice,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: isSelected ? 0.7 : 0.45,
         shadowRadius: isSelected ? 20 : 14,
@@ -113,8 +113,8 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
       <BlurView intensity={isSelected ? 50 : 36} tint={COLOURS.blurTint} style={{
-        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10,
-        shadowColor: isSelected ? COLOURS.accent2Mid : COLOURS.accent2Mid,
+        borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, backgroundColor: COLOURS.entryWash,
+        shadowColor: isSelected ? COLOURS.accent2Mid : COLOURS.glowLesson,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: isSelected ? 0.7 : 0.45,
         shadowRadius: isSelected ? 20 : 14,

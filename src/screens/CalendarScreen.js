@@ -349,7 +349,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                 const techSegs = allSegs.filter(s => s.type === 'technique');
                 const repSegs  = allSegs.filter(s => s.type === 'repertoire' || !s.type);
                 return (
-                  <BlurView key={l.id} intensity={40} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
+                  <BlurView key={l.id} intensity={40} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, backgroundColor: COLOURS.entryWash, shadowColor: COLOURS.glowLesson, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
                     <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
                       <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
                       <View style={{ flex: 1 }}>
@@ -412,7 +412,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                 const techSegs = (s.segments || []).filter(sg => sg.type === 'technique');
                 const repSegs  = (s.segments || []).filter(sg => sg.type === 'repertoire');
                 return (
-                  <BlurView key={s.id} intensity={40} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
+                  <BlurView key={s.id} intensity={40} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, backgroundColor: COLOURS.entryWash, shadowColor: COLOURS.glowPractice, shadowOffset:{width:0,height:0}, shadowOpacity:0.7, shadowRadius:16, elevation:6 }}>
                     <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
                       <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
                       <View style={{ flex: 1 }}>
