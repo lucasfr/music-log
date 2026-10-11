@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
 import { SwipeRow } from '../components/Gestures';
+import { notify } from '../utils/notify';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate, todayISO } from '../utils';
@@ -271,7 +272,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
   const f = (k, v) => setData(d => ({ ...d, [k]: v }));
 
   function handleSave() {
-    if (!data.title) { Alert.alert('Title required'); return; }
+    if (!data.title) { notify('Title required'); return; }
     onSave(data);
   }
 

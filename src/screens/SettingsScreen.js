@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOURS, RADIUS, HIT_TEXT, TOUCH_PILL, HIT_PILL } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
+import { notify } from '../utils/notify';
 import {
   getSupabaseCredentials,
   saveSupabaseCredentials,
@@ -369,7 +370,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           </View>
           {savedBanner && (
             <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: 'rgba(0,180,120,0.08)' }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: '#00825A' }}>✓ Credentials saved</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.success }}>✓ Credentials saved</Text>
             </View>
           )}
         </GlassCard>
@@ -440,7 +441,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
               <Row icon="copy-outline" label="Copy all as JSON"
                 onPress={() =>
                   copyAllJSON(sessions, lessons, compositions)
-                    .then(() => Alert.alert('Copied', 'All data copied to clipboard.'))
+                    .then(() => notify('Copied', 'All data copied to clipboard.'))
                     .catch(() => {})
                 }
               />

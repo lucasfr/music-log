@@ -545,7 +545,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
       </View>
 
       {audioError ? (
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: '#B3261E', marginBottom: 8, textAlign: 'center' }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.danger, marginBottom: 8, textAlign: 'center' }}>
           Audio engine failed to start: {audioError}
         </Text>
       ) : null}
@@ -661,11 +661,11 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 3 }}>target bpm</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <TouchableOpacity onPress={() => setRampTarget(t => Math.max(bpm, t - 5))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                <TouchableOpacity onPress={() => setRampTarget(t => Math.max(bpm, t - 5))} accessibilityRole="button" accessibilityLabel="Lower ramp target tempo" hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>
                 </TouchableOpacity>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, minWidth: 28, textAlign: 'center' }}>{rampTarget}</Text>
-                <TouchableOpacity onPress={() => setRampTarget(t => Math.min(240, t + 5))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                <TouchableOpacity onPress={() => setRampTarget(t => Math.min(240, t + 5))} accessibilityRole="button" accessibilityLabel="Raise ramp target tempo" hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -673,11 +673,11 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 3 }}>every N bars</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.max(1, n - 1))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.max(1, n - 1))} accessibilityRole="button" accessibilityLabel="Fewer bars between tempo steps" hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>−</Text>
                 </TouchableOpacity>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, minWidth: 16, textAlign: 'center' }}>{rampEveryBars}</Text>
-                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.min(32, n + 1))} hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                <TouchableOpacity onPress={() => setRampEveryBars(n => Math.min(32, n + 1))} accessibilityRole="button" accessibilityLabel="More bars between tempo steps" hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: 14, color: COLOURS.navy }}>+</Text>
                 </TouchableOpacity>
               </View>

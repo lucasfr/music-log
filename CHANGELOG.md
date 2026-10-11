@@ -36,6 +36,10 @@ All notable changes to music.log are documented here.
 ### Fixed
 - The activity heatmap showed each day's activity one day early between March and October (British Summer Time): dates were built at local midnight and then converted with `toISOString()`, which is UTC. Added `localISO()` to `utils.js`; `todayISO()` now uses it.
 - `HistoryScreen` called a hook after an early return, which breaks as soon as the log goes from empty to having an entry.
+- **Feedback messages did nothing on the web version.** `Alert.alert` is a silent no-op in a browser, so saving a piece with no title or a lesson with no date, "Copied to clipboard", and export errors gave no feedback at all. They now go through `notify()`: the same alert dialog on native, and a toast on web that sits above open modals.
+- **Onboarding replayed on every native launch**, and remembered choices (the heatmap's Both/Practice/Lessons toggle, the swipe hint) reset each time, because preferences only persisted on web. `getLocalPref` / `setLocalPref` now work on native too: a copy is held in memory, loaded from AsyncStorage at startup (`initPrefs()`) and written back in the background. Existing web users aren't shown onboarding again.
+- A handful of hardcoded dark text colours (the timer's "+5 min", the "new" badge, the new-piece chip on Home, the calendar's joy number, the metronome error, "Credentials saved") now use theme colours so they stay readable in dark mode.
+- The metronome's tempo-ramp +/− steppers have accessibility labels (a screen reader previously just said "plus" or "minus").
 - JSON import no longer drops or mislabels segment data. Segment durations (`duration_minutes`) were ignored entirely; felt difficulty was stored as `difficulty` rather than `feltDifficulty`, and progress tags as `progressTags` rather than `progress`, so none of them showed up in the editor, Stats, or composition-status derivation. Files imported before this fix keep the old keys.
 - Lesson teacher feedback was always exported as `null` because export read `teacherFeedback` while the editor writes `feedback`. It now exports (and re-imports) correctly.
 

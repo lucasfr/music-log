@@ -109,9 +109,9 @@ music-log/
     │   ├── TimelineScreen.js       # Gantt-style composition timeline with status history
     │   ├── SettingsScreen.js       # App settings + Supabase sync setup/sign-in
     │   ├── AboutScreen.js          # About screen
-    │   ├── OnboardingScreen.js     # First-run onboarding
-    │   └── LogScreen.js            # Standalone log screen (mobile)
+    │   └── OnboardingScreen.js     # First-run onboarding
     └── utils/
+        ├── notify.js                # notify(title, message): an alert on native, a toast on web (Alert.alert is a no-op in browsers)
         ├── reorder.js               # Pure drag-to-reorder maths (which slot, how far others shift, toSlot layout conversion) — unit-tested in plain Node (`npm test`)
         ├── useDirtyGuard.js         # Tracks unsaved changes in a form against the values it loaded with
         ├── export.js                # JSON export: Blob (web) / share sheet (native)

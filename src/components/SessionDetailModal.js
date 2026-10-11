@@ -8,6 +8,7 @@ import { COLOURS, RADIUS, SIZES, HIT_TEXT } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
 import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 import { exportSessionJSON, copySessionJSON } from '../utils/export';
+import { notify } from '../utils/notify';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
 
@@ -228,12 +229,12 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
               { onDelete(session.id); onClose(); }
             } />
             <Btn label="Export JSON" onPress={() =>
-              exportSessionJSON(session, compositions).catch(e => Alert.alert('Export failed', e.message))
+              exportSessionJSON(session, compositions).catch(e => notify('Export failed', e.message))
             } />
             <Btn label="Copy JSON" onPress={() =>
               copySessionJSON(session, compositions)
-                .then(() => Alert.alert('Copied', 'JSON copied to clipboard.'))
-                .catch(e => Alert.alert('Copy failed', e.message))
+                .then(() => notify('Copied', 'JSON copied to clipboard.'))
+                .catch(e => notify('Copy failed', e.message))
             } />
           </BtnRow>
         </ScrollView>

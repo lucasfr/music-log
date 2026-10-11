@@ -73,7 +73,7 @@ function DayIndicators({ sessions }) {
       {avgJoy > 0 && (
         <>
           <Text style={[ind.emoji, { opacity: 0.25 + (avgJoy / 5) * 0.75, marginLeft: 3 }]}>❤️</Text>
-          <Text style={[ind.val, { color: '#8A2A50', opacity: 0.25 + (avgJoy / 5) * 0.75 }]}>{Math.round(avgJoy)}</Text>
+          <Text style={[ind.val, { color: COLOURS.accent, opacity: 0.25 + (avgJoy / 5) * 0.75 }]}>{Math.round(avgJoy)}</Text>
         </>
       )}
     </View>

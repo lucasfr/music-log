@@ -6,6 +6,7 @@ import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
 import { BtnRow, Btn } from '../components/UI';
 import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 import { exportSessionJSON } from '../utils/export';
+import { notify } from '../utils/notify';
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
 function energyToBar(v) { return (v ?? 0) + 3; }
@@ -178,7 +179,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
                       {seg.isNew && (
                         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}>
-                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#5C2D6E' }}>new</Text>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.lessonText }}>new</Text>
                         </View>
                       )}
                       {seg.duration ? (
@@ -264,7 +265,7 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
               { onDelete(lesson.id); onClose(); }
             } />
             <Btn label="Export JSON" onPress={() =>
-              exportSessionJSON(lesson, compositions).catch(e => Alert.alert('Export failed', e.message))
+              exportSessionJSON(lesson, compositions).catch(e => notify('Export failed', e.message))
             } />
           </BtnRow>
         </ScrollView>

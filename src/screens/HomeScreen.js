@@ -151,7 +151,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
                   const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
                   return name ? (
                     <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: '#5A3A00' }}>✦ {name}</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.lessonText }}>✦ {name}</Text>
                     </View>
                   ) : null;
                 })}
@@ -460,7 +460,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                   <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.amber, marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
-                      {seg.isNew && <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#5C2D6E' }}>new</Text></View>}
+                      {seg.isNew && <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.lessonText }}>new</Text></View>}
                       {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                     </View>
                     {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}

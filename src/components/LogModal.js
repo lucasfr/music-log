@@ -13,6 +13,7 @@ import { ReorderList, SwipeRow, DragHandle } from '../components/Gestures';
 import { useUndoToast } from './Undo';
 import { useDirtyGuard } from '../utils/useDirtyGuard';
 import { reorder } from '../utils/reorder';
+import { notify } from '../utils/notify';
 import { uid, confirmDelete, confirmDiscard } from '../utils';
 
 function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
@@ -83,8 +84,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
 
   function handleSave() {
     if (energyBar === 0) {
-      if (Platform.OS === 'web') { window.alert('Please set an energy level before saving.'); }
-      else { Alert.alert('Energy required', 'Please set an energy level before saving.'); }
+      notify('Energy required', 'Please set an energy level before saving.');
       return;
     }
     const totalFromSegs = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);

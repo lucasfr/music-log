@@ -19,7 +19,7 @@ import {
 
 import { useSessions, useCompositions, useLessons } from './src/db/hooks';
 import { backfillTechniqueGroups } from './src/db/migrations';
-import { deriveCompositionStatus } from './src/utils';
+import { deriveCompositionStatus, initPrefs, getLocalPref, setLocalPref } from './src/utils';
 import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
@@ -56,18 +56,24 @@ function AppInner({ fontsLoaded }) {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (fontsLoaded) {
-      const done = Platform.OS === 'web'
-        ? localStorage.getItem('onboarding_done')
-        : null; // native: always show for now, can add AsyncStorage later
-      if (!done) setShowOnboarding(true);
-      const t = setTimeout(() => setReady(true), 200);
-      return () => clearTimeout(t);
-    }
+    if (!fontsLoaded) return undefined;
+    let alive = true;
+    let t;
+    // Preferences load first (native has no synchronous storage), so onboarding and every
+    // remembered choice are known before the first screen renders.
+    initPrefs().then(() => {
+      if (!alive) return;
+      // Web used to store this under a bare 'onboarding_done' key; honour it so existing
+      // users aren't shown onboarding again.
+      const legacyWeb = typeof localStorage !== 'undefined' && localStorage.getItem('onboarding_done');
+      if (!legacyWeb && getLocalPref('onboarding_done') !== '1') setShowOnboarding(true);
+      t = setTimeout(() => setReady(true), 200);
+    });
+    return () => { alive = false; clearTimeout(t); };
   }, [fontsLoaded]);
 
   function completeOnboarding() {
-    if (Platform.OS === 'web') localStorage.setItem('onboarding_done', '1');
+    setLocalPref('onboarding_done', '1');
     setShowOnboarding(false);
   }
 

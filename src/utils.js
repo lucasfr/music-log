@@ -1,4 +1,5 @@
 import { Alert, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PROGRESS_TAG_TO_STATUS, STATUS_RANK, RANK_TO_STATUS, SHELVED_AFTER_DAYS, ARTICULATION_LABELS } from './constants';
 
 export function uid() {
@@ -100,21 +101,39 @@ export function formatArticulation(seg) {
 }
 
 // ─── Local UI preferences ──────────────────────────────────────────
-// Persists small UI choices (e.g. which toggle was last selected) across
-// launches. Web-only for now (uses localStorage, same pattern as the
-// Supabase credentials in lib/supabase.js) — on native this silently
-// no-ops, so the preference just resets each launch instead of crashing.
+// Small choices that should survive a relaunch: the last-selected toggle, "swipe hint
+// seen", "onboarding done". They're read synchronously so any screen can use one in a
+// useState initialiser:
+//   web    — straight from localStorage.
+//   native — there is no localStorage and AsyncStorage is async, so a copy lives in
+//            memory. initPrefs() fills it once at startup (App.js waits for it before
+//            showing anything); writes update the copy at once and persist in the
+//            background.
 const PREF_PREFIX = 'musiclog_pref_';
+const nativePrefs = {};
+const hasLocalStorage = () => typeof localStorage !== 'undefined';
+
+export async function initPrefs() {
+  if (hasLocalStorage()) return;
+  try {
+    const keys = (await AsyncStorage.getAllKeys()).filter(k => k.startsWith(PREF_PREFIX));
+    if (keys.length) (await AsyncStorage.multiGet(keys)).forEach(([k, v]) => { nativePrefs[k] = v; });
+  } catch {
+    // prefs simply fall back to their defaults
+  }
+}
 
 export function getLocalPref(key, fallback = null) {
-  if (typeof localStorage === 'undefined') return fallback;
-  const raw = localStorage.getItem(PREF_PREFIX + key);
-  return raw === null ? fallback : raw;
+  const k = PREF_PREFIX + key;
+  const raw = hasLocalStorage() ? localStorage.getItem(k) : (k in nativePrefs ? nativePrefs[k] : null);
+  return raw === null || raw === undefined ? fallback : raw;
 }
 
 export function setLocalPref(key, value) {
-  if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(PREF_PREFIX + key, value);
+  const k = PREF_PREFIX + key;
+  if (hasLocalStorage()) { localStorage.setItem(k, value); return; }
+  nativePrefs[k] = String(value);
+  AsyncStorage.setItem(k, String(value)).catch(() => {});
 }
 
 // The most recent session that actually has segments, to offer "repeat last session".

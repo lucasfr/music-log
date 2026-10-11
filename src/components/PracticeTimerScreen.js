@@ -235,7 +235,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
           activeOpacity={0.85}
           style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(247,127,0,0.14)', alignItems: 'center', justifyContent: 'center' }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#7A3A00' }}>+5 min</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>+5 min</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSkip}

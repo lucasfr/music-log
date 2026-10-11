@@ -13,6 +13,7 @@ import { ReorderList, SwipeRow, DragHandle } from '../components/Gestures';
 import { useUndoToast } from './Undo';
 import { useDirtyGuard } from '../utils/useDirtyGuard';
 import { reorder } from '../utils/reorder';
+import { notify } from '../utils/notify';
 import { uid, confirmDiscard } from '../utils';
 
 function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
@@ -78,7 +79,7 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
   function reorderPieces(from, to) { setPieces(p => reorder(p, from, to)); }
 
   function handleSave() {
-    if (!date) { Alert.alert('Date required'); return; }
+    if (!date) { notify('Date required'); return; }
     onSave({
       id: initialLesson?.id || uid(),
       type: 'lesson', date, teacher,
