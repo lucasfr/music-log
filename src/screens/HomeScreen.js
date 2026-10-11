@@ -827,6 +827,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           onClose={() => setTimerSetupVisible(false)}
           onStart={handleTimerStart}
           compositions={compositions}
+          previousSession={latestSession(sessions)}
         />
         {timerSegments && (
           <PracticeTimerScreen
@@ -888,6 +889,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         onClose={() => setTimerSetupVisible(false)}
         onStart={handleTimerStart}
         compositions={compositions}
+        previousSession={latestSession(sessions)}
       />
       {timerSegments && (
         <PracticeTimerScreen

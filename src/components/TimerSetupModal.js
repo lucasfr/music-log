@@ -13,7 +13,7 @@ import { ReorderList, SwipeRow, DragHandle } from './Gestures';
 import { useUndoToast } from './Undo';
 import { reorder } from '../utils/reorder';
 import { TECH_GROUPS } from '../constants';
-import { uid, formatArticulation, confirmDiscard } from '../utils';
+import { uid, fmtDate, formatArticulation, confirmDiscard, sessionToTimerPlan } from '../utils';
 
 function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle }) {
   const isTech = segment.type === 'technique';
@@ -171,7 +171,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
   );
 }
 
-export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
+export function TimerSetupModal({ visible, onClose, onStart, compositions, previousSession }) {
   const [draftSegments, setDraftSegments] = useState([]);
   const [dragging, setDragging] = useState(false);
   const undo = useUndoToast();
@@ -194,6 +194,19 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
     }));
   }
   function reorderSegments(from, to) { setDraftSegments(s => reorder(s, from, to)); }
+
+  // Start from the most recent logged session's plan (see sessionToTimerPlan).
+  function repeatLast() {
+    if (!previousSession) return;
+    setDraftSegments(sessionToTimerPlan(previousSession, compositions));
+  }
+
+  const previousSummary = (() => {
+    const segs = (previousSession && previousSession.segments) || [];
+    if (!segs.length) return '';
+    const mins = segs.reduce((sum, s) => sum + Math.min(60, Number(s.duration) || 10), 0);
+    return `${fmtDate(previousSession.date)} · ${segs.length} segment${segs.length === 1 ? '' : 's'} · ${mins} min`;
+  })();
 
   const totalMin = draftSegments.reduce((sum, s) => sum + (Number(s.plannedMinutes) || 0), 0);
   const canStart = draftSegments.length > 0 && draftSegments.every(s => Number(s.plannedMinutes) > 0 && (s.type === 'technique' ? s.title : s.compositionId));
@@ -250,6 +263,16 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions }) {
                 <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14, textAlign: 'center' }}>
                   Add the segments you plan to work through, and how many minutes each gets.
                 </Text>
+                {previousSession ? (
+                  <>
+                    <TouchableOpacity onPress={repeatLast} activeOpacity={0.75} hitSlop={HIT_PILL}
+                      accessibilityRole="button" accessibilityLabel={`Repeat last session: ${previousSummary}`}
+                      style={{ ...TOUCH_PILL, marginTop: 14, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>↻ Repeat last session</Text>
+                    </TouchableOpacity>
+                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6, textAlign: 'center' }}>{previousSummary}</Text>
+                  </>
+                ) : null}
               </View>
             )}
 
