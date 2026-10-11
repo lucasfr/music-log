@@ -278,11 +278,11 @@ export function deriveStatusHistory(compositionId, sessions, lessons, manualShel
 
   if (logs.length === 0) return [];
 
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = localISO(new Date());
   const addDays = (iso, n) => {
     const d = new Date(iso + 'T12:00:00');
     d.setDate(d.getDate() + n);
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
   };
   const daysBetween = (a, b) => Math.floor((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000);
 

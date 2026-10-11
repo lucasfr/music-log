@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, GlassCard } from '../components/UI';
 import { STATUS_OPTIONS } from '../constants';
-import { deriveStatusTimeline, deriveStatusHistory } from '../utils';
+import { deriveStatusTimeline, deriveStatusHistory, localISO } from '../utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -196,7 +196,7 @@ function DetailPanel({ comp, sessions, lessons }) {
     () => deriveStatusHistory(comp.id, sessions, lessons, comp.shelvedAt),
     [comp.id, sessions, lessons, comp.shelvedAt]
   );
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = localISO(new Date());
   const histStart = history.length ? parseDate(history[0].start) : null;
   const histEnd    = history.length ? parseDate(history[history.length - 1].end) : null;
   const histTotalMs = histStart && histEnd ? Math.max(1, histEnd - histStart) : 0;

@@ -27,10 +27,10 @@ const GAP = 2;
 
 function cellColor(duration) {
   if (!duration)      return null; // empty — handled by caller
-  if (duration < 20)  return 'rgba(140,32,69,0.25)';
-  if (duration < 40)  return 'rgba(140,32,69,0.50)';
-  if (duration < 60)  return 'rgba(140,32,69,0.75)';
-  return '#8C2045';
+  if (duration < 20)  return COLOURS.heat(0.25);
+  if (duration < 40)  return COLOURS.heat(0.50);
+  if (duration < 60)  return COLOURS.heat(0.75);
+  return COLOURS.heatTop;
 }
 
 function buildYear(year, dateMap) {
@@ -172,12 +172,12 @@ function ActivityGrid({ sessions, lessons, compositions }) {
                         const isLesson = lessonDates.has(day.iso);
                         const isToday = day.iso === todayStr;
                         const color = day.isFuture
-                          ? 'rgba(0,0,0,0.05)'
+                          ? COLOURS.futureCell
                           : isLesson
                             ? day.duration > 0
-                              ? `rgba(247,127,0,${0.45 + Math.min(0.55, day.duration / 120)})`
-                              : 'rgba(247,127,0,0.45)'
-                            : cellColor(day.duration) || 'rgba(140,32,69,0.07)';
+                              ? COLOURS.heatLesson(0.45 + Math.min(0.55, day.duration / 120))
+                              : COLOURS.heatLesson(0.45)
+                            : cellColor(day.duration) || COLOURS.emptyCell;
                         const isSel = selectedDay === day.iso;
                         return (
                           <TouchableOpacity key={di} disabled={day.isFuture} activeOpacity={0.6}
@@ -243,7 +243,7 @@ function ActivityGrid({ sessions, lessons, compositions }) {
               <View key={d} style={{
                 width: cell, height: cell,
                 borderRadius: Math.max(1, cell * 0.2),
-                backgroundColor: d === 0 ? 'rgba(140,32,69,0.07)' : cellColor(d),
+                backgroundColor: d === 0 ? COLOURS.emptyCell : cellColor(d),
               }} />
             ))}
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginLeft: 2, marginRight: mode !== 'practice' ? 8 : 0 }}>More</Text>
@@ -251,7 +251,7 @@ function ActivityGrid({ sessions, lessons, compositions }) {
         )}
         {mode !== 'practice' && (
           <>
-            <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: 'rgba(247,127,0,0.55)' }} />
+            <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: COLOURS.heatLesson(0.55) }} />
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Lesson</Text>
           </>
         )}
@@ -327,7 +327,7 @@ function PracticeVolumeChart({ sessions, period }) {
     if (period === 'all') return null;
     const d = new Date();
     d.setDate(d.getDate() - (isDaily ? 7 : 30));
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
   })();
 
   const buckets = {};
@@ -335,7 +335,7 @@ function PracticeVolumeChart({ sessions, period }) {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      buckets[d.toISOString().slice(0, 10)] = 0;
+      buckets[localISO(d)] = 0;
     }
   }
   sessions.forEach(s => {
@@ -362,7 +362,7 @@ function PracticeVolumeChart({ sessions, period }) {
   const H = 160;
   const padT = 16, padB = 20;
   const barGap = 2;
-  const barW = width > 0 ? Math.max(4, Math.floor((width - (visible.length - 1) * barGap) / visible.length)) : 0;
+  const barW = width > 0 ? Math.min(36, Math.max(4, Math.floor((width - (visible.length - 1) * barGap) / visible.length))) : 0;
   const maxBarH = H - padT - padB;
   const avgY = padT + (1 - avgMin / maxMin) * maxBarH;
 
@@ -423,7 +423,7 @@ function WeeklyTrendChart({ sessions, period }) {
     if (period === 'all') return null;
     const d = new Date();
     d.setDate(d.getDate() - (isDaily ? 7 : 30));
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
   })();
 
   // Build buckets — daily ISO string for 7d, ISO week key for 30d/all
@@ -434,7 +434,7 @@ function WeeklyTrendChart({ sessions, period }) {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      buckets[d.toISOString().slice(0, 10)] = { energy: [], liking: [] };
+      buckets[localISO(d)] = { energy: [], liking: [] };
     }
   }
 
@@ -468,6 +468,11 @@ function WeeklyTrendChart({ sessions, period }) {
 
   const H = 160;
   const padL = 28, padR = 28, padT = 10, padB = 24;
+  // x for point i. With a single point there is no (n - 1) to divide by, which used to
+  // give NaN and draw the dot and its label clipped at the left edge; centre it instead.
+  const xAt = i => (visible.length < 2
+    ? padL + (width - padL - padR) / 2
+    : padL + (i / (visible.length - 1)) * (width - padL - padR));
 
   // Each series normalised independently to the same pixel range
   function toYEnergy(val) {
@@ -483,7 +488,7 @@ function WeeklyTrendChart({ sessions, period }) {
     const validPts = pts.map((v, i) => ({ v, i })).filter(p => p.v !== null);
     if (validPts.length < 2) return '';
     return validPts.map(({ v, i }, idx) => {
-      const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+      const x = xAt(i);
       const y = toY(v);
       return `${idx === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
     }).join(' ');
@@ -530,19 +535,19 @@ function WeeklyTrendChart({ sessions, period }) {
           {energyPath ? <Path d={energyPath} fill="none" stroke={COLOURS.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
           {energyPts.map((v, i) => {
             if (v === null) return null;
-            const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+            const x = xAt(i);
             return <Circle key={`e${i}`} cx={x} cy={toYEnergy(v)} r={3} fill={COLOURS.amber} />;
           })}
           {likingPath ? <Path d={likingPath} fill="none" stroke="#E87EA1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
           {likingPts.map((v, i) => {
             if (v === null) return null;
-            const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+            const x = xAt(i);
             return <Circle key={`l${i}`} cx={x} cy={toYLiking(v)} r={3} fill="#E87EA1" />;
           })}
           {visible.map((key, i) => {
             const label = xLabel(key, i);
             if (!label) return null;
-            const x = padL + (i / (visible.length - 1)) * (width - padL - padR);
+            const x = xAt(i);
             return (
               <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
             );
@@ -714,7 +719,7 @@ function WinsTimeline({ sessions, period }) {
     if (period === 'all') return null;
     const d = new Date();
     d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
   })();
 
   const wins = sessions
@@ -807,7 +812,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
     if (period === 'all') return null;
     const d = new Date();
     d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
   })();
 
   const periodLessons = lessons.filter(l => !cutoff || l.date >= cutoff);
@@ -1574,7 +1579,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     const end = new Date();
     let best = 0, current = 0, d = new Date(start);
     while (d <= end) {
-      const iso = d.toISOString().slice(0, 10);
+      const iso = localISO(d);
       if (dateSet.has(iso)) { current++; best = Math.max(best, current); }
       else { current = 0; }
       d.setDate(d.getDate() + 1);
@@ -1659,7 +1664,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const daysSinceSession = (() => {
     if (sessions.length === 0) return null;

@@ -176,7 +176,7 @@ const glass = live(() => ({
     borderRadius: RADIUS.md,
     overflow: 'hidden',
     marginBottom: 12,
-    shadowColor: COLOURS.navyA(0.08),
+    shadowColor: COLOURS.shadow(0.08),
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 10,
@@ -230,7 +230,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 practice</Text>
           </View>
           {session.duration ? (
-            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.navyA(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.shadow(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {session.duration} min</Text>
             </View>
           ) : null}
@@ -394,7 +394,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 lesson</Text>
           </View>
           {lesson.duration ? (
-            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.navyA(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
+            <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.shadow(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {lesson.duration} min</Text>
             </View>
           ) : null}
@@ -752,7 +752,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           backgroundColor: COLOURS.w(0.28),
           borderWidth: 1,
           borderColor: COLOURS.w(0.55),
-          shadowColor: COLOURS.navyA(0.12),
+          shadowColor: COLOURS.shadow(0.12),
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 24,

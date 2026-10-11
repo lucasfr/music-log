@@ -76,6 +76,13 @@ export const COLOURS = {
   statusBar: 'dark',    // expo-status-bar style (dark icons on a light background)
   float:     'rgba(255,255,255,0.92)',   // floating chrome (FAB, tab bar): stays near-opaque in every theme
   sheet:     'rgba(235,244,246,0.97)',   // bottom sheets / pickers
+  // Activity heatmap, and shadows (a dark theme wants black shadows, not tinted glows).
+  heat:       a => `rgba(140,32,69,${a})`,
+  heatLesson: a => `rgba(247,127,0,${a})`,
+  heatTop:    '#8C2045',
+  emptyCell:  'rgba(140,32,69,0.07)',
+  futureCell: 'rgba(0,0,0,0.05)',
+  shadow:     a => `rgba(9,99,126,${a})`,
   isDark:    false,
   __theme:   'light',
 };
@@ -107,12 +114,18 @@ const DARK = {
   danger: '#FF7A6B', dangerLight: 'rgba(255,122,107,0.16)',
   success: '#4CC3A0', successLight: 'rgba(76,195,160,0.16)',
   // On a dark page, "white glass" is a faint white wash rather than a bright card.
-  w:      a => `rgba(255,255,255,${+Math.min(1, a * 0.13).toFixed(3)})`,
+  w:      a => `rgba(255,255,255,${+Math.min(1, a * 0.17).toFixed(3)})`,
   navyA:  a => `rgba(78,178,204,${+Math.min(1, a * 1.3).toFixed(3)})`,
   steelA: a => `rgba(70,190,208,${+Math.min(1, a * 1.3).toFixed(3)})`,
   blurTint: 'dark', statusBar: 'light', isDark: true, __theme: 'dark',
   float: '#1C323A',
   sheet: 'rgba(16,32,38,0.98)',
+  heat:       a => `rgba(224,102,143,${+Math.min(1, a * 1.15 + 0.08).toFixed(3)})`,
+  heatLesson: a => `rgba(255,154,51,${a})`,
+  heatTop:    '#E0668F',
+  emptyCell:  'rgba(255,255,255,0.07)',
+  futureCell: 'rgba(255,255,255,0.025)',
+  shadow:     a => `rgba(0,0,0,${+Math.min(0.8, a * 2.5).toFixed(3)})`,
 };
 
 export const THEMES = {

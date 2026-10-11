@@ -109,7 +109,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           paddingVertical: 16,
           paddingHorizontal: 20,
           alignItems: 'center',
-          shadowColor: COLOURS.navyA(0.35),
+          shadowColor: COLOURS.shadow(0.35),
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 1,
           shadowRadius: 16,
