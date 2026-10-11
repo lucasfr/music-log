@@ -61,6 +61,38 @@ const inputStyle = live(() => ({
   elevation: 2,
 }));
 
+// Five tappable emoji that share the row's width equally, so the bar always fits its
+// container (full width, or one of two side by side). Each cell is at least 44pt tall.
+// Tapping the current value clears it.
+export function RatingBar({ label, emoji, value, onChange, size = 26 }) {
+  return (
+    <View>
+      {label ? (
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+          {label}
+        </Text>
+      ) : null}
+      <View style={{ flexDirection: 'row' }}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <TouchableOpacity
+            key={n}
+            onPress={() => onChange(n === value ? 0 : n)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={`${label ? label + ' ' : ''}${n} of 5`}
+            accessibilityState={{ selected: n === value }}
+            style={{ flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text style={{ fontSize: size, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
+              {emoji}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export function TextF({ value, onChange, placeholder, multiline, style }) {
   return (
     <TextInput

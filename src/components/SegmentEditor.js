@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { TagCloud, Label } from './UI';
-import { Field, TextF, NumberF, SelectF } from './Form';
+import { Field, TextF, NumberF, SelectF, RatingBar } from './Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf } from '../utils';
 
@@ -12,27 +12,9 @@ import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf } f
 const CELL_W = 36;
 const CELLS  = 5;
 
-function ZeldaBar({ label, emoji, value, onChange }) {
-  return (
-    <View>
-      <View style={{ flexDirection: 'row', gap: 2 }}>
-        {[1, 2, 3, 4, 5].map(n => (
-          <TouchableOpacity
-            key={n}
-            onPress={() => onChange(n === value ? 0 : n)}
-            activeOpacity={0.7}
-            accessibilityRole="button" accessibilityLabel={`${n} of 5`}
-            hitSlop={{ top: 8, bottom: 8, left: 0, right: 0 }}
-            style={{ paddingHorizontal: 8 }}
-          >
-            <Text style={{ fontSize: 22, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
-              {emoji}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
+// Felt difficulty / liking: the shared rating bar, with slightly smaller emoji.
+function ZeldaBar(props) {
+  return <RatingBar size={22} {...props} />;
 }
 
 // ─── Scales / arpeggios picker ─────────────────────────────────────────────

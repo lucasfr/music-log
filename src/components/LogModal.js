@@ -7,32 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Btn, Label } from '../components/UI';
-import { Field, TextF, NumberF, DatePickerF } from '../components/Form';
+import { Field, TextF, NumberF, DatePickerF, RatingBar } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
 import { ReorderList, SwipeRow, DragHandle } from '../components/Gestures';
 import { useUndoToast } from './Undo';
 import { useDirtyGuard } from '../utils/useDirtyGuard';
 import { reorder } from '../utils/reorder';
 import { uid, confirmDelete, confirmDiscard } from '../utils';
-
-function ZeldaBar({ label, emoji, value, onChange }) {
-  return (
-    <View style={{ marginBottom: 0 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
-        {label}
-      </Text>
-      <View style={{ flexDirection: 'row', gap: 2 }}>
-        {[1, 2, 3, 4, 5].map(n => (
-          <TouchableOpacity key={n} onPress={() => onChange(n === value ? 0 : n)} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={`${n} of 5`} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
-            <Text style={{ fontSize: 26, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
-              {emoji}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
-}
 
 function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
 export function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
@@ -133,12 +114,12 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
             </Field>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', gap: 20 }}>
-          <View style={{ flex: 1 }}>
-            <ZeldaBar label="Energy" emoji="⚡" value={energyBar} onChange={setEnergyBar} />
+        <View style={{ gap: 12 }}>
+          <View>
+            <RatingBar label="Energy" emoji="⚡" value={energyBar} onChange={setEnergyBar} />
           </View>
-          <View style={{ flex: 1 }}>
-            <ZeldaBar label="Enjoyment" emoji="❤️" value={enjoyment} onChange={setEnjoyment} />
+          <View>
+            <RatingBar label="Enjoyment" emoji="❤️" value={enjoyment} onChange={setEnjoyment} />
           </View>
         </View>
       </GlassCard>
