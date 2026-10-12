@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../components/Icon';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
@@ -143,7 +143,7 @@ function ActivityGrid({ sessions, lessons, compositions }) {
 
       {/* Year picker */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>{year}</Text>
+        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text, fontVariant: ['lining-nums'] }}>{year}</Text>
         <View style={{ flexDirection: 'row', gap: 6 }}>
           <TouchableYear onPress={() => { setYear(y => y - 1); setSelectedDay(null); }} icon="chevron-back" />
           <TouchableYear onPress={() => { setYear(y => y + 1); setSelectedDay(null); }} icon="chevron-forward" disabled={year >= currentYear} />
@@ -411,6 +411,11 @@ function PracticeVolumeChart({ sessions, period }) {
           })}
         </Svg>
       )}
+      {!isDaily && visible.length < 2 && (
+        <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim, marginTop: 6 }}>
+          Bars build up week by week; trends appear once there's a second week of data.
+        </Text>
+      )}
     </View>
   );
 }
@@ -553,6 +558,11 @@ function WeeklyTrendChart({ sessions, period }) {
             );
           })}
         </Svg>
+      )}
+      {!isDaily && visible.length < 2 && (
+        <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim, marginTop: 6 }}>
+          A trend line appears once you have a second week of data.
+        </Text>
       )}
     </View>
   );
@@ -878,7 +888,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
         )}
         <View style={{ gap: 4 }}>
           <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Lessons</Text>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy }}>{periodLessons.length}</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy, fontVariant: ['lining-nums'] }}>{periodLessons.length}</Text>
         </View>
       </View>
 
@@ -1736,7 +1746,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                       ? <ZeldaBarFractional emoji={item.emoji} fill={item.fill} size={16} />
                       : <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 24, color: COLOURS.navy, lineHeight: 28 }}>—</Text>
                   ) : (
-                    <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, color: item.urgent ? COLOURS.red : COLOURS.navy, lineHeight: 32 }}>{item.value}</Text>
+                    <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, color: item.urgent ? COLOURS.red : COLOURS.navy, lineHeight: 32, fontVariant: ['lining-nums'] }}>{item.value}</Text>
                   )}
                   <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 4, textAlign: 'center', letterSpacing: 0.2 }}>{item.label}</Text>
                   {item.allTime ? <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginTop: 2, textAlign: 'center', opacity: 0.7 }}>{item.allTime}</Text> : null}

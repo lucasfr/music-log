@@ -14,7 +14,7 @@
 // text characters, not emoji, and render consistently.
 
 export const EMOJI_ICONS = {
-  '⚡': { name: 'lightning-bolt', tint: 'amber' },
+  '⚡': { name: 'lightning-bolt', tint: 'yellow' },
   '❤': { name: 'heart', tint: 'heart' },
   '⭐': { name: 'star', tint: 'gold' },
   '🌟': { name: 'star-four-points', tint: 'gold' },

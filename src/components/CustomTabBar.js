@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, TouchableOpacity, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './Icon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLOURS, RADIUS } from '../theme';
 import { useNavScrollContext } from '../context/NavScrollContext';
@@ -8,7 +8,7 @@ import { useNavScrollContext } from '../context/NavScrollContext';
 const TAB_ICONS = {
   Home:     { active: 'home',          inactive: 'home-outline' },
   Calendar: { active: 'calendar',      inactive: 'calendar-outline' },
-  History:  { active: 'time',          inactive: 'time-outline' },
+  History:  { active: 'history',       inactive: 'history' },
   Pieces:   { active: 'musical-notes', inactive: 'musical-notes-outline' },
   Stats:    { active: 'bar-chart',     inactive: 'bar-chart-outline' },
   Timeline: { active: 'git-branch',    inactive: 'git-branch-outline' },

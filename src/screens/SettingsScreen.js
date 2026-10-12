@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../components/Icon';
 import { COLOURS, RADIUS, HIT_TEXT, TOUCH_PILL, HIT_PILL } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import { notify } from '../utils/notify';

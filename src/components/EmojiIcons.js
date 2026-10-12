@@ -19,6 +19,8 @@ import { hasEmoji, splitEmoji } from '../utils/emojiIcons';
 // Semantic tints, resolved when drawn so they follow the active theme.
 const tintFor = tint => ({
   amber: COLOURS.amber,
+  // Energy's bolt is yellow rather than amber: amber is the lesson colour throughout the app.
+  yellow: '#F2C94C',
   gold: COLOURS.gold,
   success: COLOURS.success,
   heart: '#E5566D',

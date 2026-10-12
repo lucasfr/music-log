@@ -128,7 +128,7 @@ const DARK = {
   heat:       a => `rgba(224,102,143,${+Math.min(1, a * 1.15 + 0.08).toFixed(3)})`,
   heatLesson: a => `rgba(255,154,51,${a})`,
   heatTop:    '#E0668F',
-  emptyCell:  'rgba(255,255,255,0.07)',
+  emptyCell:  'rgba(255,255,255,0.045)',
   futureCell: 'rgba(255,255,255,0.025)',
   shadow:     a => `rgba(0,0,0,${+Math.min(0.8, a * 2.5).toFixed(3)})`,
   // Coloured glows read as haloes on a dark page, so they go neutral; entry cards (a bare

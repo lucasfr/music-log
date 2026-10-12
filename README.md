@@ -40,6 +40,8 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - ↩️ **Undo instead of "are you sure?"** — deleting a session, lesson or piece hides it immediately and shows an Undo toast for 5 seconds before it's really deleted (it is committed if you close the tab or background the app first); removing a segment from a form can be undone and restores it in the same position
 - 🛡️ **Unsaved-changes guard** — cancelling the session log, lesson log or timer setup asks before throwing away what you've entered, but only when there's something to lose
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
+- 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
+- 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
 - ♿ **Built for thumbs and screen readers** — 44pt minimum touch targets, higher-contrast secondary text, no text below 11px (chart labels included), and accessibility labels on icon-only controls
 - 📤 **JSON export** — share any session as structured JSON via native share sheet or browser download, including each segment's articulation and tempo
 - 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; works fully without an account or network, with sync as an opt-in extra
@@ -57,7 +59,9 @@ music-log/
 ├── patch-dist.js                   # Post-build patch for PWA routing
 ├── tests/
 │   ├── reorder.test.mjs            # Unit tests for the drag-to-reorder maths (node:test, no extra deps)
-│   └── emojiIcons.test.mjs         # Unit tests for the emoji → icon mapping, plus a scan that fails on any unmapped emoji
+│   ├── emojiIcons.test.mjs         # Unit tests for the emoji → icon mapping, plus a scan that fails on any unmapped emoji
+│   ├── iconMap.test.mjs            # Checks the Ionicons → MDI table, and that every icon name used in the app is mapped
+│   └── progress.test.mjs           # Streaks, the weekly summary, "next up" and milestone detection (incl. clock-change and timezone edge cases)
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
 │   └── service-worker.js           # Cache-first service worker
@@ -88,6 +92,7 @@ music-log/
     │   ├── UI.js                   # GlassCard, Btn, SectionTitle, StatusPill, etc.
     │   ├── Form.js                 # TextF, NumberF, SelectF, DatePickerF, RatingBar
     │   ├── EmojiIcons.js           # Importing it makes <Text> draw known emoji as Material Design Icons (see Design Conventions)
+    │   ├── Icon.js                 # Ionicons-compatible <Ionicons /> that draws Material Design Icons, so the whole UI shares one icon family
     │   ├── Gestures.js             # SwipeRow (swipe-left delete), ReorderList + DragHandle (drag to reorder, auto-scroll) — plain PanResponder/Animated, no extra deps
     │   ├── Undo.js                 # UndoToast, useUndoToast (undo a local change), useUndoableDelete (deferred real deletes)
     │   ├── FAB.js                  # Shared floating action button (practice + lesson + timer)
@@ -113,6 +118,8 @@ music-log/
     │   ├── AboutScreen.js          # About screen
     │   └── OnboardingScreen.js     # First-run onboarding
     └── utils/
+        ├── iconMap.js               # Ionicons → MDI name table used by components/Icon.js; pure, unit-tested
+        ├── progress.js              # currentStreak, weekSummary, latestFocus, detectMilestones; pure, unit-tested
         ├── emojiIcons.js            # The emoji → icon registry (EMOJI_ICONS) and splitEmoji(); pure, unit-tested
         ├── notify.js                # notify(title, message): an alert on native, a toast on web (Alert.alert is a no-op in browsers)
         ├── reorder.js               # Pure drag-to-reorder maths (which slot, how far others shift, toSlot layout conversion) — unit-tested in plain Node (`npm test`)
@@ -161,7 +168,8 @@ It then appears in **Settings → Appearance** automatically. A palette also sup
 - **Deleting:** call the `onDelete`/`onDeleteLesson` props and don't add a confirm dialog — `App.js` makes every delete undoable (hide now, delete after the undo window). For removing something from an in-progress form, use `useUndoToast` and restore it on Undo.
 - **Lists you can edit:** `ReorderList` + `SwipeRow` + `DragHandle` from `components/Gestures.js`. Disable the parent `ScrollView` while dragging (`onDragChange`) and pass `scrollRef`/`scrollOffset` so it can auto-scroll.
 - **Unsaved changes:** forms use `useDirtyGuard` and `confirmDiscard`, calling `guard.markReset()` at the end of the effect that loads their initial values.
-- **Emoji:** write emoji in `<Text>` as normal — `components/EmojiIcons.js` draws the ones listed in `utils/emojiIcons.js` as Material Design Icons (sized to the text, themed, and tinted where it helps: amber ⚡, rose ❤️, gold ⭐), because emoji look different on every platform and can't follow the theme. To use a new emoji, add a line to `EMOJI_ICONS`; `npm test` fails if one is used without a mapping. Emoji in places that aren't `<Text>` (SVG text, placeholders, native alerts) aren't converted, so leave them out there. The ♪ ♩ ❙ ✕ ✓ style symbols are ordinary text characters and stay as they are.
+- **Icons:** import `Ionicons` from `components/Icon` (not from `@expo/vector-icons`). It takes the same props but draws Material Design Icons, so everything shares one family, and it falls back to real Ionicons for any name missing from `utils/iconMap.js`, so nothing renders blank. An MDI name (e.g. `history`) can be passed directly. Use lining numerals (`fontVariant: ['lining-nums']`) on big Cormorant numbers: its default old-style figures make "1" look like "I" and "0" like "o". The energy bolt is yellow, not amber, because amber means lesson throughout the app.
+- **Emoji:** write emoji in `<Text>` as normal — `components/EmojiIcons.js` draws the ones listed in `utils/emojiIcons.js` as Material Design Icons (sized to the text, themed, and tinted where it helps: yellow ⚡, rose ❤️, gold ⭐), because emoji look different on every platform and can't follow the theme. To use a new emoji, add a line to `EMOJI_ICONS`; `npm test` fails if one is used without a mapping. Emoji in places that aren't `<Text>` (SVG text, placeholders, native alerts) aren't converted, so leave them out there. The ♪ ♩ ❙ ✕ ✓ style symbols are ordinary text characters and stay as they are.
 - **Dates:** use `localISO()`/`todayISO()` from `utils.js`. `toISOString()` converts to UTC, which shifts a local-midnight date back a day in summer time.
 
 ---
@@ -209,7 +217,7 @@ Connect the repo to Netlify — it will pick up `netlify.toml` automatically and
 npm test
 ```
 
-Runs the unit tests (the drag-to-reorder maths and the emoji-to-icon mapping) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
+Runs the unit tests (the drag-to-reorder maths, the emoji and icon mappings, and the progress helpers) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
 
 ### Optional: cloud sync
 

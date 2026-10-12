@@ -14,6 +14,7 @@ import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/expo
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
 import { TimerSetupModal } from '../components/TimerSetupModal';
+import { weekSummary, latestFocus } from '../utils/progress';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 
@@ -205,6 +206,48 @@ function GlassBtn({ label, onPress, color, danger, small }) {
 }
 
 // ─── Desktop detail panel ─────────────────────────────────────────────────────
+
+// The "tomorrow's focus" you wrote in your last session, surfaced where you'll see it.
+function NextUpCard({ focus, date }) {
+  return (
+    <BlurView intensity={36} tint={COLOURS.blurTint} style={{
+      borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, backgroundColor: COLOURS.entryWash,
+      shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 14, elevation: 5,
+    }}>
+      <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+        <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.steel, alignSelf: 'stretch' }} />
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🎯 Next up'}</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.text, lineHeight: 24 }}>{focus}</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6 }}>from {fmtDate(date)}</Text>
+        </View>
+      </View>
+    </BlurView>
+  );
+}
+
+// Sessions, minutes and streak for the current Monday–Sunday week.
+function WeekStrip({ week, streak }) {
+  const mins = week.minutes >= 60 ? `${Math.floor(week.minutes / 60)}h ${week.minutes % 60}m` : `${week.minutes}m`;
+  const stat = (value, label) => (
+    <View style={{ flex: 1, alignItems: 'center' }}>
+      <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 24, color: COLOURS.navy, lineHeight: 28, fontVariant: ['lining-nums'] }}>{value}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{label}</Text>
+    </View>
+  );
+  return (
+    <View style={{ marginBottom: 16 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>This week</Text>
+      <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', backgroundColor: COLOURS.entryWash }}>
+        <View style={{ flexDirection: 'row', paddingVertical: 12, paddingHorizontal: 6 }}>
+          {stat(week.sessions, week.sessions === 1 ? 'session' : 'sessions')}
+          {stat(mins, 'practised')}
+          {stat(streak, 'day streak')}
+        </View>
+      </BlurView>
+    </View>
+  );
+}
 
 function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onCloseLesson, onDeleteSession, onDeleteLesson, onEditSession, onEditLesson }) {
   const compName = id => (compositions.find(c => c.id === id) || {}).title || null;
@@ -614,6 +657,9 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     return count;
   }, [sessions]);
 
+  const week   = useMemo(() => weekSummary(sessions, lessons, today), [sessions, lessons, today]);
+  const nextUp = useMemo(() => latestFocus(sessions), [sessions]);
+
   const feedItems = useMemo(() => {
     const s = sessions.filter(s => s.date !== today).map(s => ({ ...s, _type: 'practice' }));
     const l = (lessons || []).filter(l => l.date !== today).map(l => ({ ...l, _type: 'lesson' }));
@@ -695,7 +741,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           </View>
         ) : (
           <View>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No session logged yet.</Text>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>Nothing logged today yet. Even ten minutes counts.</Text>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity onPress={() => openLogSession(today)} activeOpacity={0.8}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:0}, shadowOpacity:0.45, shadowRadius:12, elevation:3 }}>
@@ -709,6 +755,10 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           </View>
         )}
       </View>
+
+      {/* Next up (last session's focus) and this week's numbers */}
+      {nextUp ? <NextUpCard focus={nextUp.focus} date={nextUp.date} /> : null}
+      {sessions.length > 0 ? <WeekStrip week={week} streak={currentStreak} /> : null}
 
       {/* Feed */}
       {feedItems.length > 0 && (

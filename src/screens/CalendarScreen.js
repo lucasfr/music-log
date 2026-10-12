@@ -147,7 +147,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
             ].map((stat, i) => (
               <View key={i} style={{ flex: 1, alignItems: 'center', borderRightWidth: i < 3 ? 1 : 0, borderRightColor: COLOURS.glassBorderSubtle, paddingVertical: 4 }}>
                 <Text style={{ fontSize: 24, lineHeight: 28, marginBottom: 4 }}>{stat.emoji}</Text>
-                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28 }}>{stat.value}</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28, fontVariant: ['lining-nums'] }}>{stat.value}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 3, letterSpacing: 0.2 }}>{stat.label}</Text>
               </View>
             ))}

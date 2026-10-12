@@ -15,7 +15,7 @@ const { EMOJI_ICONS, hasEmoji, splitEmoji } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const VS16 = '\uFE0F';
-const TINTS = new Set(['amber', 'gold', 'success', 'heart']);
+const TINTS = new Set(['amber', 'yellow', 'gold', 'success', 'heart']);
 
 // ── splitEmoji ───────────────────────────────────────────────────────────────────────
 

@@ -20,7 +20,10 @@ import {
 import './src/components/EmojiIcons'; // draws emoji as icons inside <Text> (must load before any screen renders)
 import { useSessions, useCompositions, useLessons } from './src/db/hooks';
 import { backfillTechniqueGroups } from './src/db/migrations';
-import { deriveCompositionStatus, initPrefs, getLocalPref, setLocalPref } from './src/utils';
+import { deriveCompositionStatus, initPrefs, getLocalPref, setLocalPref, todayISO } from './src/utils';
+import * as Haptics from 'expo-haptics';
+import { notify } from './src/utils/notify';
+import { detectMilestones } from './src/utils/progress';
 import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
@@ -105,6 +108,41 @@ function AppInner({ fontsLoaded }) {
   const deleteLesson  = id => undo.schedule(id, 'Lesson',  () => removeLesson(id));
   const deleteComp    = id => undo.schedule(id, 'Piece',   () => removeComp(id));
 
+  // Saves made through the UI give feedback: a light success haptic on native, and a short
+  // message when the save newly reaches a milestone (first session, a 7-day streak, 10 hours…).
+  // Bulk paths (import / sync in Settings) keep the raw savers below, so restoring a backup
+  // doesn't fire a stack of celebrations.
+  const pulse = () => {
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+  };
+  const announce = found => { if (found[0]) notify(found[0].title, found[0].message); };
+  const saveSessionUI = async s => {
+    const isNew = !allSessions.some(x => x.id === s.id);
+    const result = await saveSession(s);
+    pulse();
+    if (isNew) {
+      announce(detectMilestones(
+        { sessions: allSessions, lessons: allLessons },
+        { sessions: [...allSessions, s], lessons: allLessons },
+        todayISO(),
+      ));
+    }
+    return result;
+  };
+  const saveLessonUI = async l => {
+    const isNew = !allLessons.some(x => x.id === l.id);
+    const result = await saveLesson(l);
+    pulse();
+    if (isNew) {
+      announce(detectMilestones(
+        { sessions: allSessions, lessons: allLessons },
+        { sessions: allSessions, lessons: [...allLessons, l] },
+        todayISO(),
+      ));
+    }
+    return result;
+  };
+
   // One-time data fix, see migrations.js for why. Runs once this session is
   // ready to render and refreshes the sessions list if it touched anything,
   // so the fix is visible immediately rather than needing a relaunch.
@@ -149,7 +187,7 @@ function AppInner({ fontsLoaded }) {
 
   const screenProps = {
     sessions, lessons, compositions: compositionsWithStatus,
-    onSave: saveSession, onSaveLesson: saveLesson,
+    onSave: saveSessionUI, onSaveLesson: saveLessonUI,
     onDelete: deleteSession, onDeleteLesson: deleteLesson,
     isDesktop,
   };

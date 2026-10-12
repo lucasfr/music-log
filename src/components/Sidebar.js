@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './Icon';
 import { COLOURS, RADIUS, live } from '../theme';
 
 const SIDEBAR_W = 200;
@@ -9,7 +9,7 @@ const SIDEBAR_W = 200;
 const NAV_ITEMS = [
   { name: 'Home',     icon: 'home',          iconOut: 'home-outline' },
   { name: 'Calendar', icon: 'calendar',      iconOut: 'calendar-outline' },
-  { name: 'History',  icon: 'time',          iconOut: 'time-outline' },
+  { name: 'History',  icon: 'history',       iconOut: 'history' },
   { name: 'Pieces',   icon: 'musical-notes', iconOut: 'musical-notes-outline' },
   { name: 'Stats',    icon: 'bar-chart',     iconOut: 'bar-chart-outline' },
   { name: 'Timeline', icon: 'git-branch',    iconOut: 'git-branch-outline' },
