@@ -24,6 +24,7 @@ import { deriveCompositionStatus, initPrefs, getLocalPref, setLocalPref, todayIS
 import * as Haptics from 'expo-haptics';
 import { notify } from './src/utils/notify';
 import { detectMilestones } from './src/utils/progress';
+import { setupUpdatePrompt } from './src/utils/updatePrompt';
 import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
 import CompositionsScreen from './src/screens/CompositionsScreen';
@@ -83,9 +84,12 @@ function AppInner({ fontsLoaded }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-      });
+      // This effect runs after React mounts, which can be after the window's `load` event has
+      // already fired; waiting for `load` alone would then never register the worker at all.
+      const register = () => navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+      if (document.readyState === 'complete') register();
+      else window.addEventListener('load', register);
+      setupUpdatePrompt(); // offers a Reload when a new version has been deployed
     }
   }, []);
 
