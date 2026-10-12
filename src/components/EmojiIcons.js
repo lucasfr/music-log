@@ -24,7 +24,7 @@ const tintFor = tint => ({
   heart: '#E5566D',
 })[tint];
 
-function iconNodes(str, size) {
+function iconNodes(str, size, fallbackColour) {
   return splitEmoji(str).map((part, i) => (
     typeof part === 'string'
       ? part
@@ -33,7 +33,10 @@ function iconNodes(str, size) {
           key={i}
           name={part.name}
           size={size}
-          color={part.tint ? tintFor(part.tint) : undefined}
+          // A semantic tint if the icon has one, otherwise the text's own colour. If the text
+          // sets none, use the theme's text colour: left alone, an icon takes React Native's
+          // default black, which disappears on a dark theme.
+          color={part.tint ? tintFor(part.tint) : fallbackColour}
           accessible={false}
           importantForAccessibility="no"
           accessibilityElementsHidden
@@ -48,9 +51,9 @@ function needsConversion(children) {
   return false;
 }
 
-function convert(children, size) {
-  if (typeof children === 'string') return iconNodes(children, size);
-  return children.map(c => (typeof c === 'string' && hasEmoji(c) ? iconNodes(c, size) : c));
+function convert(children, size, colour) {
+  if (typeof children === 'string') return iconNodes(children, size, colour);
+  return children.map(c => (typeof c === 'string' && hasEmoji(c) ? iconNodes(c, size, colour) : c));
 }
 
 let installed = false;
@@ -63,8 +66,9 @@ export function installEmojiIcons() {
 
   Text.render = function renderWithEmojiIcons(props, ref) {
     if (!needsConversion(props.children)) return original.call(this, props, ref);
-    const fontSize = (StyleSheet.flatten(props.style) || {}).fontSize || 14;
-    return original.call(this, { ...props, children: convert(props.children, Math.round(fontSize * 1.1)) }, ref);
+    const flat = StyleSheet.flatten(props.style) || {};
+    const size = Math.round((flat.fontSize || 14) * 1.1);
+    return original.call(this, { ...props, children: convert(props.children, size, flat.color || COLOURS.text) }, ref);
   };
 }
 

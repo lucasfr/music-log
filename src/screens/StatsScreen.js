@@ -1729,7 +1729,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                       <Ionicons name={item.icon} size={28} color={COLOURS.steel} />
                     </View>
                   ) : (
-                    <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8 }}>{item.emoji}</Text>
+                    <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8, color: COLOURS.steel }}>{item.emoji}</Text>
                   )}
                   {(item.type === 'energy' || item.type === 'enjoyment') ? (
                     item.fill !== null
