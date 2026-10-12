@@ -107,7 +107,7 @@ const DARK = {
   text: '#E4F3F6', textMuted: '#9BD0DA', textDim: '#8FB6BE',
   glass: 'rgba(255,255,255,0.07)', glassHover: 'rgba(255,255,255,0.12)',
   glassBorder: 'rgba(255,255,255,0)', glassBorderSubtle: 'rgba(255,255,255,0.10)',
-  glassShadow: 'rgba(0,0,0,0.35)', glassShadowMd: 'rgba(0,0,0,0.5)',
+  glassShadow: 'rgba(59,179,198,0.16)', glassShadowMd: 'rgba(59,179,198,0.24)',
   entryBg: 'rgba(255,255,255,0.09)', modalBg: 'rgba(20,38,44,0.94)', backdropColor: 'rgba(0,0,0,0.6)',
   accent: '#E0668F', accentLight: 'rgba(224,102,143,0.16)', accentMid: 'rgba(224,102,143,0.40)',
   practiceText: '#F4A9C3', practiceBg: 'rgba(224,102,143,0.16)', practiceBorder: 'rgba(224,102,143,0.40)',
@@ -130,12 +130,13 @@ const DARK = {
   heatTop:    '#E0668F',
   emptyCell:  'rgba(255,255,255,0.045)',
   futureCell: 'rgba(255,255,255,0.025)',
-  shadow:     a => `rgba(0,0,0,${+Math.min(0.8, a * 2.5).toFixed(3)})`,
-  // Coloured glows read as haloes on a dark page, so they go neutral; entry cards (a bare
-  // dark blur) get a faint white wash so they sit above the page instead of below it.
-  glowPractice: 'rgba(0,0,0,0.6)',
-  glowLesson:   'rgba(0,0,0,0.6)',
-  glowTeal:     'rgba(0,0,0,0.6)',
+  shadow:     a => `rgba(70,190,208,${+Math.min(0.5, a * 2.2).toFixed(3)})`,
+  // On a dark page a black shadow is invisible, so depth has to come from a soft light glow:
+  // rose for practice, amber for lessons, teal for everything else. Entry cards (a bare dark
+  // blur) also get a faint white wash so they sit above the page instead of below it.
+  glowPractice: 'rgba(224,102,143,0.55)',
+  glowLesson:   'rgba(255,154,51,0.50)',
+  glowTeal:     'rgba(59,179,198,0.55)',
   entryWash:    'rgba(255,255,255,0.10)',
 };
 
