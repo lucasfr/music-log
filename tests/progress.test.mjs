@@ -70,6 +70,18 @@ test('on a Sunday the week still starts the previous Monday', () => {
   assert.equal(w.sessions, 2);
 });
 
+test('the previous week is found by stepping back seven days, and excludes this week', () => {
+  // today = Monday 12 Oct; last week = Mon 5 – Sun 11 Oct. Your reported case: one 5-minute session on Fri 9 Oct.
+  const sessions = [s('2026-10-09', { duration: 5 }), s('2026-10-12', { duration: 30 })];
+  const lastWeek = weekSummary(sessions, [], '2026-10-05');       // any date inside last week
+  assert.equal(lastWeek.start, '2026-10-05');
+  assert.equal(lastWeek.end, '2026-10-11');
+  assert.equal(lastWeek.sessions, 1);
+  assert.equal(lastWeek.minutes, 5, 'the Monday session belongs to the new week');
+  const thisWeek = weekSummary([sessions[0]], [], '2026-10-12');
+  assert.equal(thisWeek.sessions, 0, 'so on that Monday this week is empty (and the strip shows last week)');
+});
+
 test('weekSummary is safe on empty input and counts a day once however many sessions it has', () => {
   assert.deepEqual({ ...weekSummary([], undefined, '2026-10-14') }.sessions, 0);
   const w = weekSummary([s('2026-10-14'), s('2026-10-14', { id: 'x' })], [], '2026-10-14');

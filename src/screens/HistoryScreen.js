@@ -81,7 +81,7 @@ function PracticeEntry({ session, compositions, onDelete }) {
 
   return (
     <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, backgroundColor: COLOURS.entryWash, shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.7, shadowRadius: 16, elevation: 6 }}>
-      <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+      <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12, backgroundColor: COLOURS.entryWash }}>
         <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>{fmtDate(session.date)}</Text>
@@ -116,7 +116,7 @@ function LessonEntry({ lesson, compositions, onDeleteLesson }) {
 
   return (
     <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 10, backgroundColor: COLOURS.entryWash, shadowColor: COLOURS.glowLesson, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.7, shadowRadius: 16, elevation: 6 }}>
-      <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+      <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12, backgroundColor: COLOURS.entryWash }}>
         <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>{fmtDate(lesson.date)}</Text>

@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
@@ -56,7 +56,7 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
         shadowRadius: isSelected ? 20 : 14,
         elevation: isSelected ? 8 : 5,
       }}>
-        <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+        <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12, backgroundColor: COLOURS.entryWash }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
           <View style={{ flex: 1 }}>
             {showDate && (
@@ -121,7 +121,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
         shadowRadius: isSelected ? 20 : 14,
         elevation: isSelected ? 8 : 5,
       }}>
-        <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+        <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12, backgroundColor: COLOURS.entryWash }}>
           <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
           <View style={{ flex: 1 }}>
             {showDate && (
@@ -214,7 +214,7 @@ function NextUpCard({ focus, date }) {
       borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12, backgroundColor: COLOURS.entryWash,
       shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 14, elevation: 5,
     }}>
-      <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12 }}>
+      <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12, backgroundColor: COLOURS.entryWash }}>
         <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.steel, alignSelf: 'stretch' }} />
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🎯 Next up'}</Text>
@@ -227,7 +227,7 @@ function NextUpCard({ focus, date }) {
 }
 
 // Sessions, minutes and streak for the current Monday–Sunday week.
-function WeekStrip({ week, streak }) {
+function WeekStrip({ week, lastWeek, streak }) {
   const mins = week.minutes >= 60 ? `${Math.floor(week.minutes / 60)}h ${week.minutes % 60}m` : `${week.minutes}m`;
   const stat = (value, label) => (
     <View style={{ flex: 1, alignItems: 'center' }}>
@@ -238,13 +238,28 @@ function WeekStrip({ week, streak }) {
   return (
     <View style={{ marginBottom: 16 }}>
       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>This week</Text>
-      <BlurView intensity={36} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', backgroundColor: COLOURS.entryWash }}>
-        <View style={{ flexDirection: 'row', paddingVertical: 12, paddingHorizontal: 6 }}>
-          {stat(week.sessions, week.sessions === 1 ? 'session' : 'sessions')}
-          {stat(mins, 'practised')}
-          {stat(streak, 'day streak')}
-        </View>
-      </BlurView>
+      {/* A plain card (not a blur): on web the blur sets its own background, which hid this in light mode. */}
+      <View style={{
+        borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5),
+        shadowColor: COLOURS.shadow(0.08), shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 2,
+      }}>
+        {week.sessions === 0 ? (
+          // An empty week is just a new one (it's Monday, or you've had a rest), so say that and show last week.
+          <View style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textMuted, lineHeight: 22 }}>
+              {lastWeek && lastWeek.sessions > 0
+                ? `A fresh week. Last week: ${lastWeek.sessions} session${lastWeek.sessions === 1 ? '' : 's'}, ${lastWeek.minutes >= 60 ? `${Math.floor(lastWeek.minutes / 60)}h ${lastWeek.minutes % 60}m` : `${lastWeek.minutes}m`}.`
+                : 'Your week starts here.'}
+            </Text>
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', paddingVertical: 12, paddingHorizontal: 6 }}>
+            {stat(week.sessions, week.sessions === 1 ? 'session' : 'sessions')}
+            {stat(mins, 'practised')}
+            {stat(streak, 'day streak')}
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -659,6 +674,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
 
   const week   = useMemo(() => weekSummary(sessions, lessons, today), [sessions, lessons, today]);
   const nextUp = useMemo(() => latestFocus(sessions), [sessions]);
+  // The previous Monday–Sunday week, shown on an empty week instead of three zeros.
+  const lastWeek = useMemo(() => {
+    const d = new Date(`${today}T12:00:00`);
+    d.setDate(d.getDate() - 7);
+    return weekSummary(sessions, lessons, localISO(d));
+  }, [sessions, lessons, today]);
 
   const feedItems = useMemo(() => {
     const s = sessions.filter(s => s.date !== today).map(s => ({ ...s, _type: 'practice' }));
@@ -758,7 +779,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
 
       {/* Next up (last session's focus) and this week's numbers */}
       {nextUp ? <NextUpCard focus={nextUp.focus} date={nextUp.date} /> : null}
-      {sessions.length > 0 ? <WeekStrip week={week} streak={currentStreak} /> : null}
+      {sessions.length > 0 ? <WeekStrip week={week} lastWeek={lastWeek} streak={currentStreak} /> : null}
 
       {/* Feed */}
       {feedItems.length > 0 && (

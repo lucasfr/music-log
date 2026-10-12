@@ -136,7 +136,7 @@ const DARK = {
   glowPractice: 'rgba(0,0,0,0.6)',
   glowLesson:   'rgba(0,0,0,0.6)',
   glowTeal:     'rgba(0,0,0,0.6)',
-  entryWash:    'rgba(255,255,255,0.08)',
+  entryWash:    'rgba(255,255,255,0.10)',
 };
 
 export const THEMES = {
