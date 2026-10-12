@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from './Icon';
+import { Pop } from './Motion';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLOURS, RADIUS } from '../theme';
 import { useNavScrollContext } from '../context/NavScrollContext';
@@ -97,11 +98,14 @@ export function CustomTabBar({ state, navigation }) {
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <Ionicons
-                name={focused ? icons.active : icons.inactive}
-                size={20}
-                color={focused ? '#ffffff' : COLOURS.textDim}
-              />
+              {/* The icon springs up when its tab becomes the active one. */}
+              <Pop trigger={focused} playOnMount>
+                <Ionicons
+                  name={focused ? icons.active : icons.inactive}
+                  size={20}
+                  color={focused ? '#ffffff' : COLOURS.textDim}
+                />
+              </Pop>
               {focused ? (
                 <Text numberOfLines={1} maxFontSizeMultiplier={1.1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', marginTop: 1 }}>
                   {TAB_LABELS[route.name] || route.name}

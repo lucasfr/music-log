@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from './Icon';
+import { PressScale } from './Motion';
 import { COLOURS, RADIUS, SIZES, STATUS_COLOURS, TOUCH, HIT_PILL } from '../theme';
 
 // ─── Glass card ───────────────────────────────────────────────────────────────
@@ -114,7 +115,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
 
   if (isPrimary) {
     return (
-      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.85}
+      <PressScale onPress={onPress} disabled={disabled} activeOpacity={0.85}
         style={[{
           backgroundColor: COLOURS.navy,
           borderRadius: RADIUS.pill,
@@ -129,13 +130,13 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           opacity: disabled ? 0.4 : 1,
         }, style]}>
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: '#fff', letterSpacing: 0.3 }}>{label}</Text>
-      </TouchableOpacity>
+      </PressScale>
     );
   }
 
   if (isDanger) {
     return (
-      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75} hitSlop={HIT_PILL}
+      <PressScale onPress={onPress} disabled={disabled} activeOpacity={0.75} hitSlop={HIT_PILL}
         style={[{
           backgroundColor: COLOURS.dangerLight,
           minHeight: TOUCH.pill,
@@ -152,12 +153,12 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           opacity: disabled ? 0.4 : 1,
         }, style]}>
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.danger }}>{label}</Text>
-      </TouchableOpacity>
+      </PressScale>
     );
   }
 
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.75} hitSlop={HIT_PILL}
+    <PressScale onPress={onPress} disabled={disabled} activeOpacity={0.75} hitSlop={HIT_PILL}
       style={[{
         backgroundColor: COLOURS.w(0.50),
         minHeight: TOUCH.pill,
@@ -174,7 +175,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
         opacity: disabled ? 0.4 : 1,
       }, style]}>
       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>{label}</Text>
-    </TouchableOpacity>
+    </PressScale>
   );
 }
 

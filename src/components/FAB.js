@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { COLOURS, RADIUS } from '../theme';
+import { Rotate, FadeInUp, PressScale } from './Motion';
+
+// Shared look of the three option pills; only the glow colour differs.
+const optionStyle = glow => ({
+  minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10,
+  paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill,
+  backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9),
+  shadowColor: glow, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4,
+});
 
 export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
   const [expanded, setExpanded] = useState(false);
@@ -13,29 +22,41 @@ export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
     <View style={{ position: 'absolute', bottom, right: 20, alignItems: 'flex-end', gap: 10 }}>
       {expanded && (
         <>
+          {/* The options fade up one after another, nearest the button first. */}
           {onTimer && (
-            <TouchableOpacity onPress={() => { setExpanded(false); onTimer(); }} activeOpacity={0.85}
-              style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>{'⏱ Start timer'}</Text>
-            </TouchableOpacity>
+            <FadeInUp delay={100}>
+              <TouchableOpacity onPress={() => { setExpanded(false); onTimer(); }} activeOpacity={0.85}
+                style={optionStyle(COLOURS.glowTeal)}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>{'⏱ Start timer'}</Text>
+              </TouchableOpacity>
+            </FadeInUp>
           )}
-          <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
-            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.glowLesson, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => { setExpanded(false); onPractice(); }} activeOpacity={0.85}
-            style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 4 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
-          </TouchableOpacity>
+          <FadeInUp delay={50}>
+            <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
+              style={optionStyle(COLOURS.glowLesson)}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
+            </TouchableOpacity>
+          </FadeInUp>
+          <FadeInUp>
+            <TouchableOpacity onPress={() => { setExpanded(false); onPractice(); }} activeOpacity={0.85}
+              style={optionStyle(COLOURS.glowPractice)}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
+            </TouchableOpacity>
+          </FadeInUp>
         </>
       )}
-      <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.85}
+      <PressScale onPress={() => setExpanded(e => !e)} activeOpacity={0.85} scaleTo={0.92}
         accessibilityRole="button" accessibilityLabel={expanded ? 'Close menu' : 'Add session, lesson or timer'}
-        style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), alignItems: 'center', justifyContent: 'center', shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.55, shadowRadius: 16, elevation: 8 }}>
-        <Text style={{ fontSize: expanded ? 22 : 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>
-          {expanded ? '✕' : '+'}
-        </Text>
-      </TouchableOpacity>
+        style={{
+          width: 58, height: 58, borderRadius: 29, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9),
+          alignItems: 'center', justifyContent: 'center',
+          shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.55, shadowRadius: 16, elevation: 8,
+        }}>
+        {/* A "+" that turns 45° into a "×" when the menu opens. */}
+        <Rotate active={expanded}>
+          <Text style={{ fontSize: 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
+        </Rotate>
+      </PressScale>
     </View>
   );
 }

@@ -42,6 +42,7 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
+- ✨ **Motion** — tab icons spring up when selected, the "+" turns into a "×" with its options fading up in order, rating icons pop in sequence as you tap them, buttons press down slightly, Home's cards fade up one after another, and progress bars fill smoothly. Every animation is skipped when the system's reduce-motion setting is on
 - 📈 **Weekly goal** — pick a target in Settings → Practice (1–5 hours) and Home shows a progress bar through your Monday–Sunday week
 - 💾 **Backup, always available** — Settings → Backup exports, copies or imports everything as JSON with no account needed, and remembers when you last did; Home gently reminds you after two weeks (or two weeks of use with no backup), with a Later button that snoozes it for a week
 - 🔔 **Daily reminder** — in the app, Settings → Practice can schedule a daily "time to practise" notification at 08:00, 12:00, 18:00 or 20:00
@@ -69,7 +70,8 @@ music-log/
 │   ├── iconMap.test.mjs            # Checks the Ionicons → MDI table, and that every icon name used in the app is mapped
 │   ├── progress.test.mjs           # Streaks, the weekly summary, "next up", milestones, timer plans and "repeat last session" (incl. clock-change and timezone edge cases)
 │   ├── planning.test.mjs           # Weekly goal, backup nudge, saved routines, grade pathway, reminder times
-│   └── serviceWorker.test.mjs      # Runs the real service worker in a sandbox: update detection, offline, no false alarms
+│   ├── serviceWorker.test.mjs      # Runs the real service worker in a sandbox: update detection, offline, no false alarms
+│   └── motion.test.mjs             # Stagger delays and bar clamping for the animation helpers
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
 │   └── service-worker.js           # Cache-first service worker; tells the page when a new version has been deployed
@@ -101,6 +103,7 @@ music-log/
     │   ├── Form.js                 # TextF, NumberF, SelectF, DatePickerF, RatingBar
     │   ├── EmojiIcons.js           # Importing it makes <Text> draw known emoji as Material Design Icons (see Design Conventions)
     │   ├── Icon.js                 # Ionicons-compatible <Ionicons /> that draws Material Design Icons, so the whole UI shares one icon family
+    │   ├── Motion.js               # Pop, FadeInUp, AnimatedFill, Rotate, PressScale: small animations on React Native's own Animated, all honouring reduce-motion
     │   ├── Gestures.js             # SwipeRow (swipe-left delete), ReorderList + DragHandle (drag to reorder, auto-scroll) — plain PanResponder/Animated, no extra deps
     │   ├── Undo.js                 # UndoToast, useUndoToast (undo a local change), useUndoableDelete (deferred real deletes)
     │   ├── FAB.js                  # Shared floating action button (practice + lesson + timer)
@@ -126,6 +129,7 @@ music-log/
     │   ├── AboutScreen.js          # About screen
     │   └── OnboardingScreen.js     # First-run onboarding
     └── utils/
+        ├── motion.js                # Animation timings, delayFor() stagger and clampFraction(); pure, unit-tested
         ├── planning.js              # Weekly goal, backup nudge, saved routines, gradePathway, reminder times; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)
@@ -180,6 +184,7 @@ It then appears in **Settings → Appearance** automatically. A palette also sup
 - **Deleting:** call the `onDelete`/`onDeleteLesson` props and don't add a confirm dialog — `App.js` makes every delete undoable (hide now, delete after the undo window). For removing something from an in-progress form, use `useUndoToast` and restore it on Undo.
 - **Lists you can edit:** `ReorderList` + `SwipeRow` + `DragHandle` from `components/Gestures.js`. Disable the parent `ScrollView` while dragging (`onDragChange`) and pass `scrollRef`/`scrollOffset` so it can auto-scroll.
 - **Unsaved changes:** forms use `useDirtyGuard` and `confirmDiscard`, calling `guard.markReset()` at the end of the effect that loads their initial values.
+- **Motion:** use the helpers in `components/Motion.js` rather than ad-hoc `Animated` code: `Pop` (spring up when a flag turns on), `FadeInUp` (entrance, with `delay` and `skip`), `AnimatedFill` (a bar easing to a fraction), `Rotate`, and `PressScale` (a `TouchableOpacity` that presses down). Stagger a group with `delayFor(index)` from `utils/motion.js` (it's capped, so long lists don't crawl). Animate `transform` and `opacity` where you can: they use the native driver, width can't. Don't loop animations or animate long lists; everything must honour reduce-motion, which these components already do.
 - **Icons:** import `Ionicons` from `components/Icon` (not from `@expo/vector-icons`). It takes the same props but draws Material Design Icons, so everything shares one family, and it falls back to real Ionicons for any name missing from `utils/iconMap.js`, so nothing renders blank. An MDI name (e.g. `history`) can be passed directly. Use lining numerals (`fontVariant: ['lining-nums']`) on big Cormorant numbers: its default old-style figures make "1" look like "I" and "0" like "o". The energy bolt is yellow, not amber, because amber means lesson throughout the app.
 - **Emoji:** write emoji in `<Text>` as normal — `components/EmojiIcons.js` draws the ones listed in `utils/emojiIcons.js` as Material Design Icons (sized to the text, themed, and tinted where it helps: yellow ⚡, rose ❤️, gold ⭐), because emoji look different on every platform and can't follow the theme. To use a new emoji, add a line to `EMOJI_ICONS`; `npm test` fails if one is used without a mapping. Emoji in places that aren't `<Text>` (SVG text, placeholders, native alerts) aren't converted, so leave them out there. The ♪ ♩ ❙ ✕ ✓ style symbols are ordinary text characters and stay as they are.
 - **Dates:** use `localISO()`/`todayISO()` from `utils.js`. `toISOString()` converts to UTC, which shifts a local-midnight date back a day in summer time.
@@ -229,7 +234,7 @@ Connect the repo to Netlify — it will pick up `netlify.toml` automatically and
 npm test
 ```
 
-Runs the unit tests (the drag-to-reorder maths, the emoji and icon mappings, the progress and planning helpers, and the service worker's update detection) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
+Runs the unit tests (the drag-to-reorder maths, the emoji and icon mappings, the progress and planning helpers, the motion timings, and the service worker's update detection) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
 
 ### Optional: cloud sync
 

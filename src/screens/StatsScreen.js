@@ -7,6 +7,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '..
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
+import { AnimatedFill } from '../components/Motion';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
@@ -1576,8 +1577,8 @@ function GradePathway({ compositions, sessions }) {
                 </Text>
               </View>
               <View style={{ height: 6, borderRadius: 3, backgroundColor: COLOURS.navyA(0.10), overflow: 'hidden', marginTop: 8 }}>
-                <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.round((started / g.total) * 100)}%`, backgroundColor: COLOURS.steelA(0.45) }} />
-                <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.round((g.ready / g.total) * 100)}%`, backgroundColor: COLOURS.success }} />
+                <AnimatedFill fraction={started / g.total} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: COLOURS.steelA(0.45) }} />
+                <AnimatedFill fraction={g.ready / g.total} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: COLOURS.success }} />
               </View>
             </TouchableOpacity>
             {isOpen && g.pieces.map(p => {

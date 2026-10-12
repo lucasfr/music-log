@@ -18,6 +18,8 @@ import { weekSummary, latestFocus } from '../utils/progress';
 import { RatingMini } from '../components/UI';
 import { usePref } from '../utils/usePref';
 import { goalProgress, backupNudge, snoozeUntil } from '../utils/planning';
+import { FadeInUp, AnimatedFill } from '../components/Motion';
+import { delayFor } from '../utils/motion';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 
@@ -259,7 +261,7 @@ function WeekStrip({ week, lastWeek, goal, streak }) {
         {goal ? (
           <View style={{ paddingHorizontal: 16, paddingBottom: 14 }}>
             <View style={{ height: 6, borderRadius: 3, backgroundColor: COLOURS.navyA(0.12), overflow: 'hidden' }}>
-              <View style={{ width: `${Math.round(goal.fraction * 100)}%`, height: '100%', borderRadius: 3, backgroundColor: goal.reached ? COLOURS.success : COLOURS.steel }} />
+              <AnimatedFill fraction={goal.fraction} style={{ height: '100%', borderRadius: 3, backgroundColor: goal.reached ? COLOURS.success : COLOURS.steel }} />
             </View>
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6 }}>
               {goal.reached
@@ -783,6 +785,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const feedContent = (
     <>
       {/* Today */}
+      <FadeInUp>
       <View style={{ marginBottom: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Today</Text>
@@ -824,16 +827,19 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           </View>
         )}
       </View>
+      </FadeInUp>
 
       {/* Next up (last session's focus) and this week's numbers */}
-      {nextUp ? <NextUpCard focus={nextUp.focus} date={nextUp.date} /> : null}
-      {sessions.length > 0 ? <WeekStrip week={week} lastWeek={lastWeek} goal={goal} streak={currentStreak} /> : null}
+      {nextUp ? <FadeInUp delay={delayFor(1)}><NextUpCard focus={nextUp.focus} date={nextUp.date} /></FadeInUp> : null}
+      {sessions.length > 0 ? <FadeInUp delay={delayFor(2)}><WeekStrip week={week} lastWeek={lastWeek} goal={goal} streak={currentStreak} /></FadeInUp> : null}
       {backupDue ? (
+        <FadeInUp delay={delayFor(3)}>
         <BackupNudge
           due={backupDue}
           onBackup={() => exportAllJSON(sessions, lessons, compositions).then(() => setLocalPref('lastBackup', today)).catch(() => {})}
           onLater={() => setLocalPref('backupSnoozedUntil', snoozeUntil(today))}
         />
+        </FadeInUp>
       ) : null}
 
       {/* Feed */}
@@ -842,17 +848,20 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
             Previous sessions
           </Text>
-          {feedItems.map(item =>
-            item._type === 'lesson' ? (
-              <LessonEntry key={item.id} lesson={item} compositions={compositions}
-                isSelected={isDesktop && rightPanel === 'detail-lesson' && detailLesson?.id === item.id}
-                onPress={() => openLesson(item)} />
-            ) : (
-              <PracticeEntry key={item.id} session={item} compositions={compositions}
-                isSelected={isDesktop && rightPanel === 'detail-session' && detailSession?.id === item.id}
-                onPress={() => openSession(item)} />
-            )
-          )}
+          {/* The first few cards fade up one after another; later ones just appear. */}
+          {feedItems.map((item, i) => (
+            <FadeInUp key={item.id} delay={delayFor(i, 200)} skip={i > 7}>
+              {item._type === 'lesson' ? (
+                <LessonEntry lesson={item} compositions={compositions}
+                  isSelected={isDesktop && rightPanel === 'detail-lesson' && detailLesson?.id === item.id}
+                  onPress={() => openLesson(item)} />
+              ) : (
+                <PracticeEntry session={item} compositions={compositions}
+                  isSelected={isDesktop && rightPanel === 'detail-session' && detailSession?.id === item.id}
+                  onPress={() => openSession(item)} />
+              )}
+            </FadeInUp>
+          ))}
         </>
       )}
 
