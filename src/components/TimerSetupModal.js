@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
@@ -14,6 +14,9 @@ import { useUndoToast } from './Undo';
 import { reorder } from '../utils/reorder';
 import { TECH_GROUPS } from '../constants';
 import { uid, fmtDate, formatArticulation, confirmDiscard, sessionToTimerPlan } from '../utils';
+import { usePref } from '../utils/usePref';
+import { parseRoutines, serializeRoutines, addRoutine, removeRoutine, routineToPlan } from '../utils/planning';
+import { notify } from '../utils/notify';
 
 function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle }) {
   const isTech = segment.type === 'technique';
@@ -178,6 +181,12 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
   const scrollRef = useRef(null);
   const scrollY = useRef(0);
 
+  // Saved routines: a named plan you can load in one tap (kept in preferences as JSON).
+  const [routinesRaw, setRoutinesRaw] = usePref('timerRoutines', '[]');
+  const routines = useMemo(() => parseRoutines(routinesRaw), [routinesRaw]);
+  const [naming, setNaming] = useState(false);
+  const [routineName, setRoutineName] = useState('');
+
   function addSegment(type) {
     setDraftSegments(s => [...s, { id: uid(), type, title: '', compositionId: '', plannedMinutes: 10 }]);
   }
@@ -201,6 +210,21 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
     setDraftSegments(sessionToTimerPlan(previousSession, compositions));
   }
 
+  function loadRoutine(r) { setDraftSegments(routineToPlan(r, compositions)); }
+  function saveRoutine() {
+    const next = addRoutine(routines, routineName, draftSegments);
+    if (next === routines) return;                       // no name, or nothing to save
+    setRoutinesRaw(serializeRoutines(next));
+    notify('Routine saved', routineName.trim());
+    setNaming(false);
+    setRoutineName('');
+  }
+  function deleteRoutine(r) {
+    const before = routines;
+    setRoutinesRaw(serializeRoutines(removeRoutine(routines, r.id)));
+    undo.show(`Routine "${r.name}" removed`, () => setRoutinesRaw(serializeRoutines(before)));
+  }
+
   const previousSummary = (() => {
     const segs = (previousSession && previousSession.segments) || [];
     if (!segs.length) return '';
@@ -217,6 +241,8 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
   }
 
   function handleClose() {
+    setNaming(false);
+    setRoutineName('');
     setDraftSegments([]);
     onClose();
   }
@@ -273,6 +299,27 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
                     <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6, textAlign: 'center' }}>{previousSummary}</Text>
                   </>
                 ) : null}
+                {routines.length > 0 ? (
+                  <View style={{ marginTop: 18, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Your routines</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+                      {routines.map(r => (
+                        <View key={r.id} style={{ flexDirection: 'row', alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
+                          <TouchableOpacity onPress={() => loadRoutine(r)} activeOpacity={0.75} hitSlop={HIT_PILL}
+                            accessibilityRole="button" accessibilityLabel={`Load routine ${r.name}, ${r.segments.length} segments`}
+                            style={{ ...TOUCH_PILL, paddingLeft: 14, paddingRight: 6 }}>
+                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{r.name}</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => deleteRoutine(r)} activeOpacity={0.75} hitSlop={{ top: 4, bottom: 4, left: 0, right: 6 }}
+                            accessibilityRole="button" accessibilityLabel={`Remove routine ${r.name}`}
+                            style={{ minWidth: 36, minHeight: 36, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 13, color: COLOURS.textDim }}>✕</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                ) : null}
               </View>
             )}
 
@@ -295,6 +342,28 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
                 </SwipeRow>
               )}
             />
+
+            {draftSegments.length > 0 && (naming ? (
+              <View style={{ marginTop: 4, marginBottom: 12 }}>
+                <TextF value={routineName} onChange={setRoutineName} placeholder="Name this routine, e.g. Warm-up" />
+                <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                  <TouchableOpacity onPress={saveRoutine} disabled={!routineName.trim()} activeOpacity={0.8} hitSlop={HIT_PILL}
+                    style={{ ...TOUCH_PILL, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: routineName.trim() ? COLOURS.navy : COLOURS.navyA(0.15) }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: routineName.trim() ? '#fff' : COLOURS.textDim }}>Save routine</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { setNaming(false); setRoutineName(''); }} activeOpacity={0.8} hitSlop={HIT_PILL}
+                    style={{ ...TOUCH_PILL, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10) }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textMuted }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity onPress={() => setNaming(true)} activeOpacity={0.75} hitSlop={HIT_PILL}
+                accessibilityRole="button" accessibilityLabel="Save this plan as a routine"
+                style={{ ...TOUCH_PILL, alignSelf: 'flex-start', paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, marginTop: 4, marginBottom: 8 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Save as routine</Text>
+              </TouchableOpacity>
+            ))}
 
             <Btn label="Start timer" variant="primary" onPress={handleStart} disabled={!canStart} style={{ marginTop: 8 }} />
           </ScrollView>

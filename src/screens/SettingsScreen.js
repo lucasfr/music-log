@@ -6,6 +6,10 @@ import { Ionicons } from '../components/Icon';
 import { COLOURS, RADIUS, HIT_TEXT, TOUCH_PILL, HIT_PILL } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import { notify } from '../utils/notify';
+import { usePref } from '../utils/usePref';
+import { setLocalPref, todayISO, fmtDate } from '../utils';
+import { GOAL_OPTIONS, REMINDER_TIMES } from '../utils/planning';
+import { setDailyReminder } from '../utils/reminders';
 import {
   getSupabaseCredentials,
   saveSupabaseCredentials,
@@ -287,6 +291,24 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
 
   const { pref: themePref, setTheme, options: themeOptions } = useTheme();
   const THEME_ICONS = { system: 'phone-portrait-outline', light: 'sunny-outline', dark: 'moon-outline' };
+  const [goalRaw, setGoalRaw] = usePref('weeklyGoalMin', '0');
+  const [reminderTime, setReminderTime] = usePref('reminderTime', '');
+  const [lastBackup] = usePref('lastBackup', '');
+  const markBackedUp = () => setLocalPref('lastBackup', todayISO());
+  const chooseReminder = async t => {
+    const r = await setDailyReminder(t);
+    if (r.ok) setReminderTime(t);
+    else notify('Reminder not set', r.reason);
+  };
+  const chip = (key, label, active, onPress, a11y) => (
+    <TouchableOpacity
+      key={key} onPress={onPress} activeOpacity={0.75} hitSlop={HIT_PILL}
+      accessibilityRole="radio" accessibilityLabel={a11y} accessibilityState={{ selected: active }}
+      style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.10) }}
+    >
+      <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 14, color: active ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
@@ -329,6 +351,58 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
               System follows your device's light or dark setting.
             </Text>
           </View>
+        </GlassCard>
+
+        {/* Practice: weekly goal (shown on Home) and, in the app, a daily reminder */}
+        <SectionHeader>Practice</SectionHeader>
+        <GlassCard>
+          <View style={{ padding: 14 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, marginBottom: 8 }}>Weekly goal</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {GOAL_OPTIONS.map(g => chip(
+                `g${g}`, g ? `${g / 60}h` : 'Off', Number(goalRaw) === g,
+                () => setGoalRaw(String(g)),
+                g ? `${g / 60} hours a week` : 'No weekly goal',
+              ))}
+            </View>
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 10 }}>
+              Shown on Home as progress through your week.
+            </Text>
+            {Platform.OS !== 'web' && (
+              <>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Daily reminder</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {['', ...REMINDER_TIMES].map(t => chip(
+                    `r${t}`, t || 'Off', reminderTime === t,
+                    () => chooseReminder(t),
+                    t ? `Remind me at ${t}` : 'No daily reminder',
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
+        </GlassCard>
+
+        {/* Backup: always available (it used to appear only when signed in to sync) */}
+        <SectionHeader>Backup</SectionHeader>
+        <GlassCard>
+          <Row icon="arrow-down-outline" label="Export all as JSON"
+            sublabel={lastBackup ? `Last backup ${fmtDate(lastBackup)}` : 'Not backed up yet'}
+            onPress={() => exportAllJSON(sessions, lessons, compositions).then(markBackedUp).catch(() => {})}
+            first
+          />
+          <Row icon="copy-outline" label="Copy all as JSON"
+            onPress={() =>
+              copyAllJSON(sessions, lessons, compositions)
+                .then(() => { markBackedUp(); notify('Copied', 'All data copied to clipboard.'); })
+                .catch(() => {})
+            }
+          />
+          <Row icon="arrow-up-outline" label="Import from JSON"
+            onPress={handleImport}
+            last
+          />
+          <ResultBanner result={importResult} />
         </GlassCard>
 
         {/* ── Sync section ─────────────────────────────────────────── */}
@@ -434,23 +508,9 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                 onPress={phase === 'syncing' ? null : handleSyncAll}
                 right={phase === 'syncing' ? <ActivityIndicator color={COLOURS.navy} size="small" /> : undefined}
                 first
-              />
-              <Row icon="arrow-down-outline" label="Export all as JSON"
-                onPress={() => exportAllJSON(sessions, lessons, compositions).catch(() => {})}
-              />
-              <Row icon="copy-outline" label="Copy all as JSON"
-                onPress={() =>
-                  copyAllJSON(sessions, lessons, compositions)
-                    .then(() => notify('Copied', 'All data copied to clipboard.'))
-                    .catch(() => {})
-                }
-              />
-              <Row icon="arrow-up-outline" label="Import from JSON"
-                onPress={handleImport}
                 last
               />
               <ResultBanner result={syncResult} />
-              <ResultBanner result={importResult} />
             </GlassCard>
 
             <SectionHeader>Account</SectionHeader>

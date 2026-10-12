@@ -6,6 +6,7 @@ import { Ionicons } from '../components/Icon';
 import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
+import { gradePathway } from '../utils/planning';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
@@ -1545,6 +1546,62 @@ function TouchableYear({ onPress, icon, label, disabled = false }) {
   );
 }
 
+// The library by grade, easiest first: how many pieces are performance-ready and how much
+// practice each has had. Tap a grade to see its pieces, furthest along first.
+function GradePathway({ compositions, sessions }) {
+  const path = useMemo(() => gradePathway(compositions, sessions), [compositions, sessions]);
+  const [open, setOpen] = useState(() => {
+    const next = path.find(g => g.pieces.some(p => p.status !== 'performance-ready' && p.status !== 'ambition' && p.status !== 'shelved'));
+    return next ? next.grade : null;
+  });
+  const fmtMin = m => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`);
+  if (path.length === 0) {
+    return <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Give your pieces a grade in the library and they'll appear here.</Text>;
+  }
+  return (
+    <View style={{ gap: 6 }}>
+      {path.map(g => {
+        const isOpen = open === g.grade;
+        const started = g.pieces.filter(p => p.status !== 'new' && p.status !== 'ambition' && p.status !== 'shelved').length;
+        return (
+          <View key={g.grade}>
+            <TouchableOpacity onPress={() => setOpen(isOpen ? null : g.grade)} activeOpacity={0.8}
+              accessibilityRole="button" accessibilityState={{ expanded: isOpen }}
+              accessibilityLabel={`${g.grade}: ${g.ready} of ${g.total} performance-ready`}
+              style={{ minHeight: 48, justifyContent: 'center', paddingVertical: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.text }}>{g.grade}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>
+                  {g.ready}/{g.total} ready{g.minutes ? ` \u00b7 ${fmtMin(g.minutes)}` : ''}
+                </Text>
+              </View>
+              <View style={{ height: 6, borderRadius: 3, backgroundColor: COLOURS.navyA(0.10), overflow: 'hidden', marginTop: 8 }}>
+                <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.round((started / g.total) * 100)}%`, backgroundColor: COLOURS.steelA(0.45) }} />
+                <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.round((g.ready / g.total) * 100)}%`, backgroundColor: COLOURS.success }} />
+              </View>
+            </TouchableOpacity>
+            {isOpen && g.pieces.map(p => {
+              const sc = STATUS_COLOURS[p.status] || {};
+              return (
+                <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingLeft: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{p.title}</Text>
+                    {p.composer ? <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{p.composer}</Text> : null}
+                  </View>
+                  <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: sc.bg || COLOURS.glass }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: sc.text || COLOURS.textDim }}>{p.status}</Text>
+                  </View>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, minWidth: 44, textAlign: 'right' }}>{p.minutes ? fmtMin(p.minutes) : '\u2014'}</Text>
+                </View>
+              );
+            })}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 export default function StatsScreen({ sessions, compositions, lessons, isDesktop }) {
   const onNavScroll = useNavScrollHandler(); // collapses the floating tab pill on scroll, like Home
   const [period, setPeriod] = useState('30d');
@@ -1832,6 +1889,11 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             );
           })}
         </View>
+
+        <SectionTitle style={{ marginTop: 16 }}>Grade pathway</SectionTitle>
+        <GlassCard>
+          <GradePathway compositions={compositions} sessions={sessions} />
+        </GlassCard>
 
         <SectionTitle style={{ marginTop: 16 }}>Lesson insights ({periodLabel})</SectionTitle>
         <GlassCard>

@@ -9,12 +9,15 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, setLocalPref } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
 import { TimerSetupModal } from '../components/TimerSetupModal';
 import { weekSummary, latestFocus } from '../utils/progress';
+import { RatingMini } from '../components/UI';
+import { usePref } from '../utils/usePref';
+import { goalProgress, backupNudge, snoozeUntil } from '../utils/planning';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 
@@ -22,15 +25,8 @@ function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
 const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Good', '2': 'High' };
 
-function ZeldaMini({ emoji, value, total = 5, size = 16 }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
-      {Array.from({ length: total }, (_, i) => (
-        <Text key={i} style={{ fontSize: size, opacity: i < value ? 1 : 0.18, transform: [{ scale: i < value ? 1 : 0.88 }] }}>{emoji}</Text>
-      ))}
-    </View>
-  );
-}
+// Read-only rating row (energy, enjoyment): the shared RatingMini at this screen's default size.
+const ZeldaMini = RatingMini;
 
 function todayISO() {
   const d = new Date();
@@ -227,7 +223,8 @@ function NextUpCard({ focus, date }) {
 }
 
 // Sessions, minutes and streak for the current Monday–Sunday week.
-function WeekStrip({ week, lastWeek, streak }) {
+function WeekStrip({ week, lastWeek, goal, streak }) {
+  const fmtMin = m => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}` : `${m}m`);
   const mins = week.minutes >= 60 ? `${Math.floor(week.minutes / 60)}h ${week.minutes % 60}m` : `${week.minutes}m`;
   const stat = (value, label) => (
     <View style={{ flex: 1, alignItems: 'center' }}>
@@ -259,6 +256,45 @@ function WeekStrip({ week, lastWeek, streak }) {
             {stat(streak, 'day streak')}
           </View>
         )}
+        {goal ? (
+          <View style={{ paddingHorizontal: 16, paddingBottom: 14 }}>
+            <View style={{ height: 6, borderRadius: 3, backgroundColor: COLOURS.navyA(0.12), overflow: 'hidden' }}>
+              <View style={{ width: `${Math.round(goal.fraction * 100)}%`, height: '100%', borderRadius: 3, backgroundColor: goal.reached ? COLOURS.success : COLOURS.steel }} />
+            </View>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6 }}>
+              {goal.reached
+                ? `Weekly goal reached: ${fmtMin(goal.minutes)} of ${fmtMin(goal.goal)}`
+                : `${fmtMin(goal.minutes)} of ${fmtMin(goal.goal)} · ${fmtMin(goal.remaining)} to go`}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+// A gentle reminder to export a copy, shown when it's been a while (or never).
+function BackupNudge({ due, onBackup, onLater }) {
+  const pill = (label, onPress, primary) => (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} hitSlop={HIT_PILL}
+      style={{ ...TOUCH_PILL, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: primary ? COLOURS.navy : COLOURS.navyA(0.10) }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: primary ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+    </TouchableOpacity>
+  );
+  return (
+    <View style={{
+      marginBottom: 16, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 14,
+      shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 14, elevation: 4,
+    }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{due.never ? 'Back up your journal' : 'Time for a backup'}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2, lineHeight: 19 }}>
+        {due.never
+          ? `You've been logging for ${due.days} days and haven't exported a copy yet.`
+          : `Your last backup was ${due.days} days ago.`}
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+        {pill('Back up now', onBackup, true)}
+        {pill('Later', onLater, false)}
       </View>
     </View>
   );
@@ -681,6 +717,18 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     return weekSummary(sessions, lessons, localISO(d));
   }, [sessions, lessons, today]);
 
+  const [goalRaw] = usePref('weeklyGoalMin', '0');
+  const goal = useMemo(() => goalProgress(week.minutes, goalRaw), [week.minutes, goalRaw]);
+  const [lastBackup] = usePref('lastBackup', '');
+  const [snoozedUntil] = usePref('backupSnoozedUntil', '');
+  const backupDue = useMemo(() => backupNudge({
+    lastBackup: lastBackup || null,
+    snoozedUntil: snoozedUntil || null,
+    today,
+    sessionCount: sessions.length,
+    firstSessionDate: sessions.reduce((min, s) => (!min || s.date < min ? s.date : min), null),
+  }), [lastBackup, snoozedUntil, today, sessions]);
+
   const feedItems = useMemo(() => {
     const s = sessions.filter(s => s.date !== today).map(s => ({ ...s, _type: 'practice' }));
     const l = (lessons || []).filter(l => l.date !== today).map(l => ({ ...l, _type: 'lesson' }));
@@ -779,7 +827,14 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
 
       {/* Next up (last session's focus) and this week's numbers */}
       {nextUp ? <NextUpCard focus={nextUp.focus} date={nextUp.date} /> : null}
-      {sessions.length > 0 ? <WeekStrip week={week} lastWeek={lastWeek} streak={currentStreak} /> : null}
+      {sessions.length > 0 ? <WeekStrip week={week} lastWeek={lastWeek} goal={goal} streak={currentStreak} /> : null}
+      {backupDue ? (
+        <BackupNudge
+          due={backupDue}
+          onBackup={() => exportAllJSON(sessions, lessons, compositions).then(() => setLocalPref('lastBackup', today)).catch(() => {})}
+          onLater={() => setLocalPref('backupSnoozedUntil', snoozeUntil(today))}
+        />
+      ) : null}
 
       {/* Feed */}
       {feedItems.length > 0 && (
