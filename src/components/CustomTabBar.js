@@ -28,6 +28,10 @@ const TAB_LABELS = {
   Stats: 'Stats', Timeline: 'Timeline', Settings: 'Settings',
 };
 
+// Collapsed, the pill hugs the active tab with just a thin rim (it used to keep the full
+// 12px of padding either side, which read as a heavy dark capsule on top of the content).
+const COMPACT_RIM = 4;
+
 export function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
   const { compact } = useNavScrollContext();
@@ -38,7 +42,7 @@ export function CustomTabBar({ state, navigation }) {
 
   useEffect(() => {
     Animated.timing(widthAnim, {
-      toValue: compact ? LABEL_W + 24 : expandedWidth,
+      toValue: compact ? LABEL_W + COMPACT_RIM * 2 : expandedWidth,
       duration: 280,
       useNativeDriver: false,
     }).start();
@@ -61,7 +65,7 @@ export function CustomTabBar({ state, navigation }) {
           justifyContent: 'center',
           alignItems: 'center',
           gap: ICON_GAP,
-          paddingHorizontal: 12,
+          paddingHorizontal: compact ? COMPACT_RIM : 12,
           backgroundColor: COLOURS.float,
           borderRadius: RADIUS.pill,
           shadowColor: COLOURS.glassShadowMd,

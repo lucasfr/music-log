@@ -1686,9 +1686,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { value: streak,         label: `best streak (${periodLabel})`,   emoji: '🔥' },
     { value: null, fill: energyFill,    label: `avg energy (${periodLabel})`,    emoji: '⚡', type: 'energy' },
     { value: null, fill: avgEnjoymentFill, label: `avg enjoyment (${periodLabel})`, emoji: '❤️', type: 'enjoyment' },
-    { value: daysSinceSession === null ? '—' : daysSinceSession === 0 ? 'today' : `${daysSinceSession}d`, label: 'since practice', emoji: '📅',
+    { value: daysSinceSession === null ? '—' : daysSinceSession === 0 ? 'today' : `${daysSinceSession}d`, label: 'since practice', icon: 'calendar-outline',
       urgent: daysSinceSession !== null && daysSinceSession >= 3 },
-    { value: daysSinceLesson === null ? '—' : daysSinceLesson === 0 ? 'today' : `${daysSinceLesson}d`, label: 'since lesson', emoji: '🎼',
+    { value: daysSinceLesson === null ? '—' : daysSinceLesson === 0 ? 'today' : `${daysSinceLesson}d`, label: 'since lesson', icon: 'school-outline',
       urgent: daysSinceLesson !== null && daysSinceLesson >= 16 },
   ];
 
@@ -1722,7 +1722,15 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             <View key={i} style={{ flexBasis: '11%', flexGrow: 1, minWidth: isDesktop ? 0 : '30%' }}>
               <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadowMd, shadowOffset:{width:0,height:4}, shadowOpacity:1, shadowRadius:16, elevation:4, flex: 1 }}>
                 <View style={{ backgroundColor: COLOURS.glass, paddingVertical: 16, paddingHorizontal: 10, alignItems: 'center', flex: 1, justifyContent: 'center', borderWidth: 1, borderColor: COLOURS.w(0.6) }}>
-                  <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8 }}>{item.emoji}</Text>
+                  {item.icon ? (
+                    // A themed line icon rather than an emoji: the 🎼 was a black glyph that vanished on a dark card,
+                    // and the pair of "since" tiles should match.
+                    <View style={{ height: 34, justifyContent: 'center', marginBottom: 8 }}>
+                      <Ionicons name={item.icon} size={28} color={COLOURS.steel} />
+                    </View>
+                  ) : (
+                    <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8 }}>{item.emoji}</Text>
+                  )}
                   {(item.type === 'energy' || item.type === 'enjoyment') ? (
                     item.fill !== null
                       ? <ZeldaBarFractional emoji={item.emoji} fill={item.fill} size={16} />
