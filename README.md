@@ -56,7 +56,8 @@ music-log/
 ├── netlify.toml                    # Netlify build config
 ├── patch-dist.js                   # Post-build patch for PWA routing
 ├── tests/
-│   └── reorder.test.mjs            # Unit tests for the drag-to-reorder maths (node:test, no extra deps)
+│   ├── reorder.test.mjs            # Unit tests for the drag-to-reorder maths (node:test, no extra deps)
+│   └── emojiIcons.test.mjs         # Unit tests for the emoji → icon mapping, plus a scan that fails on any unmapped emoji
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
 │   └── service-worker.js           # Cache-first service worker
@@ -85,7 +86,8 @@ music-log/
     ├── components/
     │   ├── Background.js           # Dot-grid SVG background
     │   ├── UI.js                   # GlassCard, Btn, SectionTitle, StatusPill, etc.
-    │   ├── Form.js                 # TextF, NumberF, SelectF, DatePickerF, ZeldaBar
+    │   ├── Form.js                 # TextF, NumberF, SelectF, DatePickerF, RatingBar
+    │   ├── EmojiIcons.js           # Importing it makes <Text> draw known emoji as Material Design Icons (see Design Conventions)
     │   ├── Gestures.js             # SwipeRow (swipe-left delete), ReorderList + DragHandle (drag to reorder, auto-scroll) — plain PanResponder/Animated, no extra deps
     │   ├── Undo.js                 # UndoToast, useUndoToast (undo a local change), useUndoableDelete (deferred real deletes)
     │   ├── FAB.js                  # Shared floating action button (practice + lesson + timer)
@@ -111,6 +113,7 @@ music-log/
     │   ├── AboutScreen.js          # About screen
     │   └── OnboardingScreen.js     # First-run onboarding
     └── utils/
+        ├── emojiIcons.js            # The emoji → icon registry (EMOJI_ICONS) and splitEmoji(); pure, unit-tested
         ├── notify.js                # notify(title, message): an alert on native, a toast on web (Alert.alert is a no-op in browsers)
         ├── reorder.js               # Pure drag-to-reorder maths (which slot, how far others shift, toSlot layout conversion) — unit-tested in plain Node (`npm test`)
         ├── useDirtyGuard.js         # Tracks unsaved changes in a form against the values it loaded with
@@ -158,6 +161,7 @@ It then appears in **Settings → Appearance** automatically. A palette also sup
 - **Deleting:** call the `onDelete`/`onDeleteLesson` props and don't add a confirm dialog — `App.js` makes every delete undoable (hide now, delete after the undo window). For removing something from an in-progress form, use `useUndoToast` and restore it on Undo.
 - **Lists you can edit:** `ReorderList` + `SwipeRow` + `DragHandle` from `components/Gestures.js`. Disable the parent `ScrollView` while dragging (`onDragChange`) and pass `scrollRef`/`scrollOffset` so it can auto-scroll.
 - **Unsaved changes:** forms use `useDirtyGuard` and `confirmDiscard`, calling `guard.markReset()` at the end of the effect that loads their initial values.
+- **Emoji:** write emoji in `<Text>` as normal — `components/EmojiIcons.js` draws the ones listed in `utils/emojiIcons.js` as Material Design Icons (sized to the text, themed, and tinted where it helps: amber ⚡, rose ❤️, gold ⭐), because emoji look different on every platform and can't follow the theme. To use a new emoji, add a line to `EMOJI_ICONS`; `npm test` fails if one is used without a mapping. Emoji in places that aren't `<Text>` (SVG text, placeholders, native alerts) aren't converted, so leave them out there. The ♪ ♩ ❙ ✕ ✓ style symbols are ordinary text characters and stay as they are.
 - **Dates:** use `localISO()`/`todayISO()` from `utils.js`. `toISOString()` converts to UTC, which shifts a local-midnight date back a day in summer time.
 
 ---
@@ -205,7 +209,7 @@ Connect the repo to Netlify — it will pick up `netlify.toml` automatically and
 npm test
 ```
 
-Runs the drag-to-reorder maths tests with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
+Runs the unit tests (the drag-to-reorder maths and the emoji-to-icon mapping) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
 
 ### Optional: cloud sync
 

@@ -1375,11 +1375,11 @@ function ScaleCoverage({ sessions }) {
           {!sel ? (
             <G>
               <SvgText x={cx} y={cy - size*0.074} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.040} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⏱ {timeStr(totalScaleMins)}</SvgText>
+                fontSize={size*0.040} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{timeStr(totalScaleMins)}</SvgText>
               <SvgText x={cx} y={cy - size*0.028} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.036} fill={COLOURS.textDim} fontFamily="Lato">total scale time</SvgText>
               <SvgText x={cx} y={cy + size*0.022} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {totalScaleSess} sessions</SvgText>
+                fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{totalScaleSess} sessions</SvgText>
               <SvgText x={cx} y={cy + size*0.072} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{keysVisited}/24 keys</SvgText>
 
@@ -1391,9 +1391,9 @@ function ScaleCoverage({ sessions }) {
               <SvgText x={cx} y={cy - size*0.040} textAnchor="middle" dominantBaseline="central"
                 fontSize={size*0.038} fill={COLOURS.textDim} fontFamily="Lato">{sel.ring === 'major' ? 'major' : 'minor'}</SvgText>
               <SvgText x={cx} y={cy + size*0.012} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">⚡ {selData?.sessions || 0} sessions</SvgText>
+                fontSize={size*0.036} fontWeight="500" fill={COLOURS.text} fontFamily="Lato">{selData?.sessions || 0} sessions</SvgText>
               <SvgText x={cx} y={cy + size*0.058} textAnchor="middle" dominantBaseline="central"
-                fontSize={size*0.038} fill={COLOURS.textDim} fontFamily="Lato">⏱ {timeStr(selData?.minutes || 0)}</SvgText>
+                fontSize={size*0.038} fill={COLOURS.textDim} fontFamily="Lato">{timeStr(selData?.minutes || 0)}</SvgText>
 
             </G>
           )}

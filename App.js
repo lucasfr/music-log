@@ -17,6 +17,7 @@ import {
   Lato_700Bold,
 } from '@expo-google-fonts/lato';
 
+import './src/components/EmojiIcons'; // draws emoji as icons inside <Text> (must load before any screen renders)
 import { useSessions, useCompositions, useLessons } from './src/db/hooks';
 import { backfillTechniqueGroups } from './src/db/migrations';
 import { deriveCompositionStatus, initPrefs, getLocalPref, setLocalPref } from './src/utils';
