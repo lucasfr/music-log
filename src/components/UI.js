@@ -63,6 +63,18 @@ export function SectionTitle({ children, style }) {
   );
 }
 
+// A read-only row of rating icons (energy, enjoyment, …): filled up to `value`, the rest dimmed.
+// `emoji` is drawn as an icon by components/EmojiIcons.js.
+export function RatingMini({ emoji, value, total = 5, size = 16, gap = 1, shrink = true }) {
+  return (
+    <View style={{ flexDirection: 'row', gap, alignItems: 'center' }}>
+      {Array.from({ length: total }, (_, i) => (
+        <Text key={i} style={{ fontSize: size, opacity: i < value ? 1 : 0.18, ...(shrink ? { transform: [{ scale: i < value ? 1 : 0.88 }] } : null) }}>{emoji}</Text>
+      ))}
+    </View>
+  );
+}
+
 export function Label({ children, style, icon }) {
   if (icon) {
     return (

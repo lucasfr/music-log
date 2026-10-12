@@ -129,46 +129,28 @@ export function getLocalPref(key, fallback = null) {
   return raw === null || raw === undefined ? fallback : raw;
 }
 
+const prefListeners = new Set();
+// Lets a screen react when a preference changes elsewhere (e.g. Settings changes the weekly goal
+// that Home is showing). See utils/usePref.js.
+export function subscribePrefs(fn) {
+  prefListeners.add(fn);
+  return () => { prefListeners.delete(fn); };
+}
+
 export function setLocalPref(key, value) {
   const k = PREF_PREFIX + key;
-  if (hasLocalStorage()) { localStorage.setItem(k, value); return; }
-  nativePrefs[k] = String(value);
-  AsyncStorage.setItem(k, String(value)).catch(() => {});
+  if (hasLocalStorage()) {
+    localStorage.setItem(k, value);
+  } else {
+    nativePrefs[k] = String(value);
+    AsyncStorage.setItem(k, String(value)).catch(() => {});
+  }
+  prefListeners.forEach(fn => fn(key));
 }
 
-// Turn a logged session into a timer plan: the reverse of HomeScreen.handleTimerFinish.
-// The same technique / piece segments and minutes (capped at the minutes dial's 60). Only
-// what the timer uses is carried over — notes, tempo, scales and ratings aren't part of a
-// plan. A segment that's ready to run comes back `confirmed` (collapsed); one that still
-// needs a piece (say it has since been removed from the library) stays open.
-export function sessionToTimerPlan(session, compositions) {
-  return ((session && session.segments) || []).map(seg => {
-    const isTech = seg.type === 'technique';
-    const comp = (compositions || []).find(c => c.id === seg.compositionId);
-    const draft = {
-      id: uid(),
-      type: seg.type,
-      // The timer keeps a technique's group in `title`; a repertoire segment's title is its piece.
-      title: isTech ? (seg.group || '') : (comp ? comp.title : (seg.title || '')),
-      compositionId: comp ? comp.id : '',
-      plannedMinutes: Math.min(60, Math.max(1, Math.round(Number(seg.duration) || 10))),
-    };
-    if (isTech && seg.articulation) draft.articulation = seg.articulation;
-    draft.confirmed = isTech ? !!draft.title : !!draft.compositionId;
-    return draft;
-  });
-}
-
-// The most recent session that actually has segments, to offer "repeat last session".
-export function latestSession(sessions) {
-  let best = null;
-  (sessions || []).forEach(s => {
-    if (!(s.segments || []).length) return;
-    const d = s.date || '';
-    if (!best || d > best.date || (d === best.date && (s.createdAt || '') > (best.createdAt || ''))) best = { ...s, date: d };
-  });
-  return best;
-}
+// sessionToTimerPlan and latestSession live in utils/progress.js (pure, so the repo's tests
+// cover them); re-exported here so existing imports keep working.
+export { sessionToTimerPlan, latestSession } from './utils/progress';
 
 // Same idea as confirmDelete, for leaving a form with unsaved changes.
 export function confirmDiscard(onDiscard) {

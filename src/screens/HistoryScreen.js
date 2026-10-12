@@ -6,19 +6,13 @@ import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, EmptyState } from '../components/UI';
 import { SwipeRow } from '../components/Gestures';
 import { TextF } from '../components/Form';
+import { RatingMini } from '../components/UI';
 import { fmtDate, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
-function ZeldaMini({ emoji, value, total = 5 }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
-      {Array.from({ length: total }, (_, i) => (
-        <Text key={i} style={{ fontSize: 14, opacity: i < value ? 1 : 0.18 }}>{emoji}</Text>
-      ))}
-    </View>
-  );
-}
+// This screen's rating rows are a little smaller and don't shrink unfilled icons.
+const ZeldaMini = props => <RatingMini size={14} shrink={false} {...props} />;
 
 function StarRow({ value, total = 5, emoji = '🎵' }) {
   if (!value) return null;

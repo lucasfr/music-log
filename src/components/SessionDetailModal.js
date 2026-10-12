@@ -5,7 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES, HIT_TEXT } from '../theme';
-import { BtnRow, Btn } from '../components/UI';
+import { BtnRow, Btn, RatingMini } from '../components/UI';
 import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 import { exportSessionJSON, copySessionJSON } from '../utils/export';
 import { notify } from '../utils/notify';
@@ -15,17 +15,8 @@ const ENERGY_LABELS = { '-2': 'Very low', '-1': 'Low', '0': 'Neutral', '1': 'Goo
 // energy DB value -2..+2 → bar 1..5
 function energyToBar(v) { return (v ?? 0) + 3; }
 
-function ZeldaMini({ emoji, value, total = 5 }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 2, alignItems: 'center' }}>
-      {Array.from({ length: total }, (_, i) => (
-        <Text key={i} style={{ fontSize: 20, opacity: i < value ? 1 : 0.18, transform: [{ scale: i < value ? 1 : 0.88 }] }}>
-          {emoji}
-        </Text>
-      ))}
-    </View>
-  );
-}
+// Detail views show the rating rows larger than the feed does.
+const ZeldaMini = props => <RatingMini size={20} gap={2} {...props} />;
 
 function StarRow({ value, total = 5, emoji = '🎵' }) {
   if (!value) return null;

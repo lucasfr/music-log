@@ -89,3 +89,41 @@ export function detectMilestones(prev, next, todayStr) {
   if (count) out.push({ id: `sessions-${count}`, title: `${count} sessions`, message: `${count} practice sessions logged.` });
   return out;
 }
+
+// ── Timer plans and "repeat last session" ────────────────────────────────────────────
+
+const makeId = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+// Turn a logged session into a timer plan: the reverse of HomeScreen.handleTimerFinish.
+// The same technique / piece segments and minutes (capped at the minutes dial's 60). Only
+// what the timer uses is carried over — notes, tempo, scales and ratings aren't part of a
+// plan. A segment that's ready to run comes back `confirmed` (collapsed); one that still
+// needs a piece (say it has since been removed from the library) stays open.
+export function sessionToTimerPlan(session, compositions) {
+  return ((session && session.segments) || []).map(seg => {
+    const isTech = seg.type === 'technique';
+    const comp = (compositions || []).find(c => c.id === seg.compositionId);
+    const draft = {
+      id: makeId(),
+      type: seg.type,
+      // The timer keeps a technique's group in `title`; a repertoire segment's title is its piece.
+      title: isTech ? (seg.group || '') : (comp ? comp.title : (seg.title || '')),
+      compositionId: comp ? comp.id : '',
+      plannedMinutes: Math.min(60, Math.max(1, Math.round(Number(seg.duration) || 10))),
+    };
+    if (isTech && seg.articulation) draft.articulation = seg.articulation;
+    draft.confirmed = isTech ? !!draft.title : !!draft.compositionId;
+    return draft;
+  });
+}
+
+// The most recent session that actually has segments, to offer "repeat last session".
+export function latestSession(sessions) {
+  let best = null;
+  (sessions || []).forEach(s => {
+    if (!(s.segments || []).length) return;
+    const d = s.date || '';
+    if (!best || d > best.date || (d === best.date && (s.createdAt || '') > (best.createdAt || ''))) best = { ...s, date: d };
+  });
+  return best;
+}

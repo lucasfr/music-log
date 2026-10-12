@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(join(here, '../src/utils/progress.js'), 'utf8');
-const { currentStreak, weekSummary, latestFocus, detectMilestones } =
+const { currentStreak, weekSummary, latestFocus, detectMilestones, sessionToTimerPlan, latestSession } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const s = (date, extra = {}) => ({ id: date + (extra.id || ''), date, duration: 10, ...extra });
@@ -158,4 +158,84 @@ test('only the highest threshold is reported for one save, and the first-ever se
   const got = detectMilestones({ sessions: [], lessons: [] }, { sessions: [s('2026-10-12', { duration: 700 })], lessons: [] }, '2026-10-12');
   assert.equal(got[0].id, 'first-session');
   assert.ok(got.every(m => m.title && m.message), 'every milestone has a title and a message');
+});
+
+// ── sessionToTimerPlan ("repeat last session" in the timer setup) ─────────────────────────
+
+const comps = [{ id: 'c1', title: 'Gymnopédie No. 1' }, { id: 'c2', title: 'Minuet in F' }];
+
+test('a timer plan survives being logged and then repeated (the round trip HomeScreen does)', () => {
+  const timerPlan = [
+    { id: 't1', type: 'technique', title: 'Hanon', compositionId: '', plannedMinutes: 15, articulation: { rh: 'legato', lh: 'staccato' } },
+    { id: 't2', type: 'repertoire', title: 'Gymnopédie No. 1', compositionId: 'c1', plannedMinutes: 20 },
+    { id: 't3', type: 'technique', title: 'Scales', compositionId: '', plannedMinutes: 10 },
+  ];
+  const actual = [15, 20, 10];
+  // what HomeScreen.handleTimerFinish turns a finished timer into
+  const logged = timerPlan.map((p, i) => {
+    const isTech = p.type === 'technique';
+    return { id: p.id, type: p.type, group: isTech ? p.title : undefined, title: isTech ? '' : p.title,
+      compositionId: p.compositionId || '', duration: actual[i], articulation: isTech ? (p.articulation || null) : undefined,
+      notes: 'went well', challenges: ['tempo'], progress: ['clean'], tempo: 96, scales: ['C major'] };
+  });
+  const back = sessionToTimerPlan({ date: '2026-10-12', segments: logged }, comps);
+  assert.equal(back.length, 3);
+  back.forEach((b, i) => {
+    assert.equal(b.type, timerPlan[i].type);
+    assert.equal(b.title, timerPlan[i].title, `segment ${i}: title`);
+    assert.equal(b.compositionId, timerPlan[i].compositionId, `segment ${i}: piece`);
+    assert.equal(b.plannedMinutes, timerPlan[i].plannedMinutes, `segment ${i}: minutes`);
+    assert.equal(b.confirmed, true);
+    assert.notEqual(b.id, timerPlan[i].id, 'ids are fresh');
+    for (const k of ['notes', 'challenges', 'progress', 'tempo', 'scales', 'duration', 'group']) assert.equal(k in b, false, `${k} must not leak into a timer plan`);
+  });
+  assert.deepEqual(back[0].articulation, { rh: 'legato', lh: 'staccato' });
+  assert.equal(new Set(back.map(b => b.id)).size, 3);
+});
+
+test('timer-plan minutes are capped at the dial\'s 60, default to 10, and are never below 1', () => {
+  const mins = sessionToTimerPlan({ segments: [95, 0, undefined, 7.6, 0.2].map(d => ({ type: 'technique', group: 'Hanon', duration: d })) }, comps).map(x => x.plannedMinutes);
+  assert.deepEqual(mins, [60, 10, 10, 8, 1]);
+});
+
+test('a segment that cannot run yet stays open so the user can finish it', () => {
+  const open = sessionToTimerPlan({ segments: [
+    { type: 'repertoire', compositionId: 'gone', title: 'Old piece', duration: 10 },   // piece deleted from the library
+    { type: 'repertoire', title: 'Free-text piece', duration: 10 },                    // never linked
+    { type: 'technique', title: 'free label', duration: 10 },                          // no technique group
+  ] }, comps);
+  assert.deepEqual(open.map(x => x.confirmed), [false, false, false]);
+  assert.equal(open[0].compositionId, '', 'a deleted piece is not carried as a dangling id');
+  assert.equal(open[0].title, 'Old piece');
+  assert.equal(open[2].title, '', 'a free-text label is not mistaken for a technique group');
+});
+
+test('sessionToTimerPlan is safe on empty or missing input', () => {
+  assert.deepEqual(sessionToTimerPlan(null, comps), []);
+  assert.deepEqual(sessionToTimerPlan({}, comps), []);
+  assert.deepEqual(sessionToTimerPlan({ segments: [] }, undefined), []);
+});
+
+// ── latestSession ──────────────────────────────────────────────────────────────────────────
+
+test('latestSession is the most recent session that has segments', () => {
+  const seg = [{ type: 'technique', group: 'Hanon', duration: 10 }];
+  const picked = latestSession([
+    { id: 'a', date: '2026-10-10', segments: seg },
+    { id: 'b', date: '2026-10-12', segments: [] },        // newer but nothing to repeat
+    { id: 'c', date: '2026-10-11', segments: seg },
+  ]);
+  assert.equal(picked.id, 'c');
+  assert.equal(latestSession([]), null);
+  assert.equal(latestSession(undefined), null);
+  assert.equal(latestSession([{ id: 'x', date: '2026-10-01' }]), null);
+});
+
+test('two sessions on the same day: the later-created one wins', () => {
+  const seg = [{ type: 'technique', group: 'Hanon', duration: 10 }];
+  const picked = latestSession([
+    { id: 'am', date: '2026-10-11', createdAt: '2026-10-11T08:00', segments: seg },
+    { id: 'pm', date: '2026-10-11', createdAt: '2026-10-11T20:00', segments: seg },
+  ]);
+  assert.equal(picked.id, 'pm');
 });
