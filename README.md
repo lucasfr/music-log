@@ -42,6 +42,12 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
+- 📈 **Weekly goal** — pick a target in Settings → Practice (1–5 hours) and Home shows a progress bar through your Monday–Sunday week
+- 💾 **Backup, always available** — Settings → Backup exports, copies or imports everything as JSON with no account needed, and remembers when you last did; Home gently reminds you after two weeks (or two weeks of use with no backup), with a Later button that snoozes it for a week
+- 🔔 **Daily reminder** — in the app, Settings → Practice can schedule a daily "time to practise" notification at 08:00, 12:00, 18:00 or 20:00
+- 📚 **Saved routines** — in the timer setup, save a plan as a named routine ("Warm-up", "Hanon + scales") and load it in one tap; routines are kept on the device
+- 🎓 **Grade pathway** — Stats groups your library by grade, easiest first, with how many pieces are performance-ready and how much practice each has had
+- 🔄 **Update prompt (web)** — the app is served instantly from its cache, so after a deploy it now tells you "A new version is available" and offers a Reload, instead of leaving you on the old version until the next visit
 - ♿ **Built for thumbs and screen readers** — 44pt minimum touch targets, higher-contrast secondary text, no text below 11px (chart labels included), and accessibility labels on icon-only controls
 - 📤 **JSON export** — share any session as structured JSON via native share sheet or browser download, including each segment's articulation and tempo
 - 💾 **Offline-first** — IndexedDB on web, expo-sqlite on native; works fully without an account or network, with sync as an opt-in extra
@@ -61,10 +67,12 @@ music-log/
 │   ├── reorder.test.mjs            # Unit tests for the drag-to-reorder maths (node:test, no extra deps)
 │   ├── emojiIcons.test.mjs         # Unit tests for the emoji → icon mapping, plus a scan that fails on any unmapped emoji
 │   ├── iconMap.test.mjs            # Checks the Ionicons → MDI table, and that every icon name used in the app is mapped
-│   └── progress.test.mjs           # Streaks, the weekly summary, "next up" and milestone detection (incl. clock-change and timezone edge cases)
+│   ├── progress.test.mjs           # Streaks, the weekly summary, "next up", milestones, timer plans and "repeat last session" (incl. clock-change and timezone edge cases)
+│   ├── planning.test.mjs           # Weekly goal, backup nudge, saved routines, grade pathway, reminder times
+│   └── serviceWorker.test.mjs      # Runs the real service worker in a sandbox: update detection, offline, no false alarms
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
-│   └── service-worker.js           # Cache-first service worker
+│   └── service-worker.js           # Cache-first service worker; tells the page when a new version has been deployed
 ├── assets/
 │   ├── icon.png                    # App icon (1024×1024)
 │   ├── adaptive-icon.png           # Android adaptive icon
@@ -118,6 +126,10 @@ music-log/
     │   ├── AboutScreen.js          # About screen
     │   └── OnboardingScreen.js     # First-run onboarding
     └── utils/
+        ├── planning.js              # Weekly goal, backup nudge, saved routines, gradePathway, reminder times; pure, unit-tested
+        ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
+        ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)
+        ├── updatePrompt.js         # The "new version available — Reload" banner shown when the service worker reports a deploy
         ├── iconMap.js               # Ionicons → MDI name table used by components/Icon.js; pure, unit-tested
         ├── progress.js              # currentStreak, weekSummary, latestFocus, detectMilestones; pure, unit-tested
         ├── emojiIcons.js            # The emoji → icon registry (EMOJI_ICONS) and splitEmoji(); pure, unit-tested
@@ -217,7 +229,7 @@ Connect the repo to Netlify — it will pick up `netlify.toml` automatically and
 npm test
 ```
 
-Runs the unit tests (the drag-to-reorder maths, the emoji and icon mappings, and the progress helpers) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
+Runs the unit tests (the drag-to-reorder maths, the emoji and icon mappings, the progress and planning helpers, and the service worker's update detection) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
 
 ### Optional: cloud sync
 
