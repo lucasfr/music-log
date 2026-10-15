@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, setLocalPref } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, setLocalPref, sessionToTimerPlan } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
@@ -17,7 +17,8 @@ import { TimerSetupModal } from '../components/TimerSetupModal';
 import { weekSummary, latestFocus } from '../utils/progress';
 import { RatingMini } from '../components/UI';
 import { usePref } from '../utils/usePref';
-import { goalProgress, backupNudge, snoozeUntil } from '../utils/planning';
+import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan } from '../utils/planning';
+import { Ionicons } from '../components/Icon';
 import { FadeInUp, AnimatedFill } from '../components/Motion';
 import { delayFor } from '../utils/motion';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
@@ -271,6 +272,48 @@ function WeekStrip({ week, lastWeek, goal, streak }) {
           </View>
         ) : null}
       </View>
+    </View>
+  );
+}
+
+const minutesOf = plan => plan.reduce((total, s) => total + (Number(s.plannedMinutes) || 0), 0);
+
+// The way in to practising: the timer is how you practise, but it used to live inside the + menu.
+// "Set up" opens the timer setup; the chips start a plan straight away (the last session's, or one
+// of your saved routines).
+function StartPracticeCard({ repeatPlan, routines, compositions, onSetup, onStartPlan }) {
+  const chip = (key, label, plan, a11y) => (
+    <TouchableOpacity key={key} onPress={() => onStartPlan(plan)} activeOpacity={0.8} hitSlop={HIT_PILL}
+      accessibilityRole="button" accessibilityLabel={a11y}
+      style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{minutesOf(plan)} min</Text>
+    </TouchableOpacity>
+  );
+  const shortcuts = [
+    ...(repeatPlan.length > 0 ? [chip('repeat', '↻ Repeat last session', repeatPlan, `Start the timer with your last session, ${minutesOf(repeatPlan)} minutes`)] : []),
+    ...routines.map(r => chip(r.id, r.name, routineToPlan(r, compositions), `Start the routine ${r.name}`)),
+  ];
+  return (
+    <View style={{
+      marginBottom: 16, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 14,
+      shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 14, elevation: 4,
+    }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text }}>Start practice</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>Timed segments, with a metronome.</Text>
+        </View>
+        <TouchableOpacity onPress={onSetup} activeOpacity={0.85} hitSlop={HIT_PILL}
+          accessibilityRole="button" accessibilityLabel="Set up a practice timer"
+          style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
+          <Ionicons name="play" size={18} color="#fff" />
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Set up</Text>
+        </TouchableOpacity>
+      </View>
+      {shortcuts.length > 0 ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>{shortcuts}</View>
+      ) : null}
     </View>
   );
 }
@@ -723,6 +766,21 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const goal = useMemo(() => goalProgress(week.minutes, goalRaw), [week.minutes, goalRaw]);
   const [lastBackup] = usePref('lastBackup', '');
   const [snoozedUntil] = usePref('backupSnoozedUntil', '');
+  const [routinesRaw] = usePref('timerRoutines', '[]');
+  const routines = useMemo(() => parseRoutines(routinesRaw), [routinesRaw]);
+  const repeatPlan = useMemo(() => {
+    const previous = latestSession(sessions);
+    return previous ? sessionToTimerPlan(previous, compositions) : [];
+  }, [sessions, compositions]);
+  // A plan starts straight away only when every segment is ready to run; one that still needs
+  // something chosen (say a piece that has since been deleted) opens the setup instead.
+  function startPlan(plan) {
+    if (plan.length > 0 && plan.every(s => s.confirmed)) {
+      handleTimerStart(plan.map(({ confirmed, ...s }) => ({ ...s, plannedMinutes: Number(s.plannedMinutes) })));
+    } else {
+      setTimerSetupVisible(true);
+    }
+  }
   const backupDue = useMemo(() => backupNudge({
     lastBackup: lastBackup || null,
     snoozedUntil: snoozedUntil || null,
@@ -784,6 +842,17 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   // Feed column (shared between desktop and mobile)
   const feedContent = (
     <>
+      {/* Start practice */}
+      <FadeInUp>
+        <StartPracticeCard
+          repeatPlan={repeatPlan}
+          routines={routines}
+          compositions={compositions}
+          onSetup={() => setTimerSetupVisible(true)}
+          onStartPlan={startPlan}
+        />
+      </FadeInUp>
+
       {/* Today */}
       <FadeInUp>
       <View style={{ marginBottom: 16 }}>
