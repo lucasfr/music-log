@@ -49,13 +49,16 @@ function energyOpacity(energy) {
 }
 
 // A calendar cell is only ~47pt wide on a phone, and an icon plus a value for both energy and
-// enjoyment is wider than that, so the two readouts stack (energy over enjoyment). Both rows are
-// the same fixed width, with the value in a fixed slot, so the icons and numbers line up.
+// enjoyment is wider than that, so the two readouts stack (energy over enjoyment). Energy has a
+// +/- sign and enjoyment doesn't, so the sign gets a slot of its own (empty for enjoyment): both
+// rows are then the same width and the icons and digits line up.
 const ind = StyleSheet.create({
   wrap:   { alignItems: 'center', marginTop: 1 },
-  line:   { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 2, height: 14, width: 40 },
+  line:   { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 1, height: 14, width: 40 },
   emoji:  { fontSize: 11, lineHeight: 14 },
-  val:    { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14, minWidth: 26 },
+  sign:   { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14, width: 7, textAlign: 'right' },
+  signSlot: { width: 7 },
+  val:    { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14, minWidth: 17 },
   dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 2, alignSelf: 'center' },
   dot:    { width: 5, height: 5, borderRadius: 3 },
 });
@@ -70,15 +73,19 @@ function DayIndicators({ sessions }) {
   const energyLabel = Number.isInteger(avgEnergy)
     ? (avgEnergy > 0 ? `+${avgEnergy}` : `${avgEnergy}`)
     : (avgEnergy > 0 ? `+${avgEnergy.toFixed(1)}` : avgEnergy.toFixed(1));
+  const energySign = avgEnergy > 0 ? '+' : avgEnergy < 0 ? '-' : '';
+  const energyMagnitude = Number.isInteger(avgEnergy) ? String(Math.abs(avgEnergy)) : Math.abs(avgEnergy).toFixed(1);
   return (
     <View style={ind.wrap} accessible accessibilityLabel={`Energy ${energyLabel}${avgJoy > 0 ? `, enjoyment ${Math.round(avgJoy)} of 5` : ''}`}>
       <View style={ind.line}>
         <Text style={[ind.emoji, { opacity: energyOpacity(avgEnergy) }]}>⚡</Text>
-        <Text style={[ind.val, { color: COLOURS.red, opacity: energyOpacity(avgEnergy) }]}>{energyLabel}</Text>
+        <Text style={[ind.sign, { color: COLOURS.red, opacity: energyOpacity(avgEnergy) }]}>{energySign}</Text>
+        <Text style={[ind.val, { color: COLOURS.red, opacity: energyOpacity(avgEnergy) }]}>{energyMagnitude}</Text>
       </View>
       {avgJoy > 0 && (
         <View style={ind.line}>
           <Text style={[ind.emoji, { opacity: 0.25 + (avgJoy / 5) * 0.75 }]}>❤️</Text>
+          <View style={ind.signSlot} />
           <Text style={[ind.val, { color: COLOURS.accent, opacity: 0.25 + (avgJoy / 5) * 0.75 }]}>{Math.round(avgJoy)}</Text>
         </View>
       )}
