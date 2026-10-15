@@ -16,8 +16,9 @@ const TAB_ICONS = {
   Settings: { active: 'settings',      inactive: 'settings-outline' },
 };
 
-// Reachable via navigation.navigate elsewhere if needed, but doesn't get
-// a permanent slot in the floating pill — keeps the bar from feeling crowded.
+// Has no permanent slot in the floating pill, which keeps the bar from feeling crowded. It's
+// reached from the Pieces screen, and shows in the pill while you're on it so you can see where
+// you are (and tap Pieces to go back).
 const HIDDEN_ROUTES = ['Timeline'];
 
 const ICON_SIZE = 44;
@@ -37,7 +38,7 @@ export function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
   const { compact } = useNavScrollContext();
 
-  const visibleRoutes = state.routes.filter(r => !HIDDEN_ROUTES.includes(r.name));
+  const visibleRoutes = state.routes.filter((r, i) => !HIDDEN_ROUTES.includes(r.name) || state.index === i);
   const expandedWidth = visibleRoutes.length * ICON_SIZE + (visibleRoutes.length - 1) * ICON_GAP + 24 + (LABEL_W - ICON_SIZE);
   const widthAnim = useRef(new Animated.Value(expandedWidth)).current;
 

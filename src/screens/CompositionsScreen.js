@@ -13,6 +13,7 @@ import { notify } from '../utils/notify';
 import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate, todayISO } from '../utils';
+import { PIECE_SORTS, sortPieces } from '../utils/planning';
 
 // ─── Zelda-style 🎹 difficulty ───────────────────────────────────────────────
 
@@ -495,6 +496,38 @@ function NoteSection({ label, value }) {
   );
 }
 
+// The short summary under a piece's title: grade, keys, time signatures and tempo on one quiet
+// line, then the two ratings. Collection, tags and dates live in the expanded Details tab, so a
+// card in the list stays easy to scan.
+function CardSummary({ comp }) {
+  const keyLabels = (comp.keys && comp.keys.length > 0
+    ? comp.keys
+    : comp.keyRoot ? [{ root: comp.keyRoot, mode: comp.keyMode }] : []
+  ).filter(k => k.root).map(k => `${k.root} ${k.mode || ''}`.trim());
+  const sigs = comp.timeSigs && comp.timeSigs.length > 0 ? comp.timeSigs : comp.timeSig ? [comp.timeSig] : [];
+  const line = [comp.grade, keyLabels.join(', '), sigs.join(', '), comp.tempo ? `♪ ${comp.tempo} bpm` : '']
+    .filter(Boolean).join('  ·  ');
+  const rated = comp.difficulty > 0 || comp.liking > 0;
+  if (!line && !rated) return null;
+  return (
+    <View style={{ marginTop: 8 }}>
+      {line ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 19 }}>{line}</Text> : null}
+      {rated ? (
+        <View style={{ flexDirection: 'row', gap: 14, marginTop: line ? 6 : 0, alignItems: 'center' }}>
+          {comp.difficulty > 0 && <DifficultyDisplay value={comp.difficulty} />}
+          {comp.liking > 0 && (
+            <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
+              {[1,2,3,4,5].map(n => (
+                <Text key={n} style={{ fontSize: 14, opacity: n <= comp.liking ? 1 : 0.18 }}>⭐</Text>
+              ))}
+            </View>
+          )}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 function CompCard({ comp, sessions, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [tab, setTab] = useState('details');
@@ -524,35 +557,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, alignItems: 'center' }}>
-          {comp.difficulty > 0 && <DifficultyDisplay value={comp.difficulty} />}
-          {comp.liking > 0 && (
-            <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
-              {[1,2,3,4,5].map(n => (
-                <Text key={n} style={{ fontSize: 14, opacity: n <= comp.liking ? 1 : 0.18 }}>⭐</Text>
-              ))}
-            </View>
-          )}
-          {comp.grade   ? <MetaChip label={comp.grade} /> : null}
-          {(comp.keys && comp.keys.length > 0
-            ? comp.keys
-            : comp.keyRoot ? [{ root: comp.keyRoot, mode: comp.keyMode }] : []
-          ).map((k, i) => k.root ? <MetaChip key={i} label={`${k.root} ${k.mode || ''}`.trim()} /> : null)}
-          {(comp.timeSigs && comp.timeSigs.length > 0
-            ? comp.timeSigs
-            : comp.timeSig ? [comp.timeSig] : []
-          ).map((s, i) => <MetaChip key={i} label={s} />)}
-          {comp.tempo ? <MetaChip label={`♪ ${comp.tempo} bpm`} /> : null}
-          {comp.collection ? <MetaChip label={comp.collection} /> : null}
-          {(comp.tags || []).map(t => <MetaChip key={t} label={t} />)}
-        </View>
-
-        {(comp.dateStarted || comp.dateCompleted) && (
-          <View style={{ flexDirection: 'row', gap: 16, marginTop: 8 }}>
-            {comp.dateStarted ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Started {comp.dateStarted}</Text> : null}
-            {comp.dateCompleted ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Completed {comp.dateCompleted}</Text> : null}
-          </View>
-        )}
+        <CardSummary comp={comp} />
       </TouchableOpacity>
 
       {expanded && (
@@ -578,6 +583,17 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
           <View style={{ padding: 14 }}>
             {tab === 'details' && (
               <>
+                {(comp.collection || (comp.tags || []).length > 0) ? (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                    {comp.collection ? <MetaChip label={comp.collection} /> : null}
+                    {(comp.tags || []).map(t => <MetaChip key={t} label={t} />)}
+                  </View>
+                ) : null}
+                {(comp.dateStarted || comp.dateCompleted) ? (
+                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 12 }}>
+                    {[comp.dateStarted ? `Started ${comp.dateStarted}` : '', comp.dateCompleted ? `Completed ${comp.dateCompleted}` : ''].filter(Boolean).join('  ·  ')}
+                  </Text>
+                ) : null}
                 {comp.info ? <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22, marginBottom: 14 }}>{comp.info}</Text> : null}
                 <BtnRow>
                   <Btn label="Remove" variant="danger" onPress={() => onDelete(comp.id)} />
@@ -732,10 +748,11 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function CompositionsScreen({ compositions, sessions, onSave, onDelete, isDesktop }) {
+export default function CompositionsScreen({ compositions, sessions, onSave, onDelete, isDesktop, onOpenTimeline }) {
   const [modal, setModal] = useState(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [sortBy, setSortBy] = useState('title');
   const [selectedComp, setSelectedComp] = useState(null);
 
   const composerSuggestions = [...new Set(
@@ -760,7 +777,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
     createdAt: new Date().toISOString(),
   });
 
-  const filtered = compositions.filter(c => {
+  const filtered = sortPieces(compositions, sessions, sortBy).filter(c => {
     const ms = c.title.toLowerCase().includes(search.toLowerCase())
       || (c.composer || '').toLowerCase().includes(search.toLowerCase())
       || (c.tags || []).some(t => t.includes(search.toLowerCase()));
@@ -770,8 +787,17 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingLeft: isDesktop ? 226 : 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-        <View style={{ marginBottom: 14, marginTop: 4 }}>
+        <View style={{ marginBottom: 14, marginTop: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <SectionTitle style={{ marginBottom: 0 }}>Compositions</SectionTitle>
+          {/* The Timeline isn't in the tab bar, so this is how you reach it on a phone. */}
+          {onOpenTimeline ? (
+            <TouchableOpacity onPress={onOpenTimeline} activeOpacity={0.75} hitSlop={HIT_PILL}
+              accessibilityRole="button" accessibilityLabel="Open the timeline of your library"
+              style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
+              <Ionicons name="git-branch" size={16} color={COLOURS.navy} />
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Timeline</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         <Field label="">
@@ -793,6 +819,20 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
                   elevation: active ? 4 : 1,
                 }}>
                 <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginBottom: 16 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginRight: 2 }}>Sort</Text>
+          {PIECE_SORTS.map(o => {
+            const active = sortBy === o.key;
+            return (
+              <TouchableOpacity key={o.key} onPress={() => setSortBy(o.key)} activeOpacity={0.75} hitSlop={HIT_PILL}
+                accessibilityRole="radio" accessibilityLabel={`Sort by ${o.label}`} accessibilityState={{ selected: active }}
+                style={{ ...TOUCH_PILL, paddingHorizontal: 12, borderRadius: RADIUS.pill, backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55) }}>
+                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
               </TouchableOpacity>
             );
           })}

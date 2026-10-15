@@ -266,7 +266,7 @@ function AppInner({ fontsLoaded }) {
             {() => <HistoryScreen sessions={sessions} lessons={lessons} compositions={compositionsWithStatus} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Pieces">
-            {() => <CompositionsScreen compositions={compositionsWithStatus} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={false} />}
+            {({ navigation }) => <CompositionsScreen compositions={compositionsWithStatus} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={false} onOpenTimeline={() => navigation.navigate('Timeline')} />}
           </Tab.Screen>
           <Tab.Screen name="Stats">
             {() => <StatsScreen sessions={sessions} compositions={compositionsWithStatus} lessons={lessons} isDesktop={false} />}

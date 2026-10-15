@@ -174,3 +174,49 @@ export function parseReminderTime(t) {
   const minute = Number(m[2]);
   return hour < 24 && minute < 60 ? { hour, minute } : null;
 }
+
+// ── Sorting the library ────────────────────────────────────────────────────────────────────────────────
+
+export const PIECE_SORTS = [
+  { key: 'title', label: 'A–Z' },
+  { key: 'recent', label: 'Recent' },
+  { key: 'grade', label: 'Grade' },
+];
+
+// The date each piece was last practised, from the session segments linked to it.
+function lastPlayedByPiece(sessions) {
+  const last = {};
+  (sessions || []).forEach(s => (s.segments || []).forEach(seg => {
+    if (seg.compositionId && s.date && (!last[seg.compositionId] || s.date > last[seg.compositionId])) last[seg.compositionId] = s.date;
+  }));
+  return last;
+}
+
+// A sorted copy of the library. 'title' is A–Z; 'recent' puts the most recently practised first
+// and never-practised pieces last; 'grade' goes easiest first with ungraded pieces last. Ties
+// always fall back to the title, so the order is stable.
+export function sortPieces(compositions, sessions, mode = 'title') {
+  const byTitle = (a, b) => (a.title || '').localeCompare(b.title || '');
+  const list = [...(compositions || [])];
+  if (mode === 'recent') {
+    const last = lastPlayedByPiece(sessions);
+    return list.sort((a, b) => {
+      const la = last[a.id] || '';
+      const lb = last[b.id] || '';
+      if (la === lb) return byTitle(a, b);
+      if (!la) return 1;
+      if (!lb) return -1;
+      return lb.localeCompare(la);
+    });
+  }
+  if (mode === 'grade') {
+    const rank = g => { const i = GRADE_ORDER.indexOf(g); return i < 0 ? Infinity : i; };
+    return list.sort((a, b) => {
+      const ra = rank(a.grade);
+      const rb = rank(b.grade);
+      if (ra === rb) return byTitle(a, b);
+      return ra < rb ? -1 : 1;
+    });
+  }
+  return list.sort(byTitle);
+}
