@@ -10,6 +10,7 @@ import { usePracticeTimer } from '../utils/usePracticeTimer';
 import { scheduleSegmentEndNotification, cancelScheduledNotification } from '../utils/segmentNotifications';
 import { MetronomeControl } from './MetronomeControl';
 import { Ionicons } from './Icon';
+import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { formatArticulation } from '../utils';
 
 // Isolated from PracticeTimerScreen for the same reason MetronomeControl is
@@ -24,30 +25,13 @@ import { formatArticulation } from '../utils';
 // through creating this section's elements — still costs real JS-thread
 // time every 250ms unless this section is memoized too, with props that
 // stay referentially stable across pure countdown ticks.
-const MetronomeSection = React.memo(function MetronomeSection({ showMetronome, onToggle, composition, segmentKey }) {
+const MetronomeSection = React.memo(function MetronomeSection({ composition, segmentKey, compact }) {
+  // Always on screen. On a phone it starts as a compact bar (tempo and play) with the time
+  // signature, subdivision and ramp folded away; it used to sit behind a toggle you had to find.
   return (
-    <>
-      <TouchableOpacity
-        onPress={onToggle}
-        activeOpacity={0.75}
-        hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
-          paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.pill,
-          backgroundColor: showMetronome ? COLOURS.navy : 'transparent',
-          borderWidth: showMetronome ? 0 : 1, borderColor: COLOURS.navyA(0.35),
-          marginBottom: showMetronome ? 14 : 0,
-        }}
-      >
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: showMetronome ? '#fff' : COLOURS.steel }}>
-          Metronome
-        </Text>
-      </TouchableOpacity>
-
-      {showMetronome && (
-        <View style={{ width: '100%', maxWidth: 320 }}>
-          <MetronomeControl key={segmentKey} composition={composition} />
-        </View>
-      )}
-    </>
+    <View style={{ width: '100%', maxWidth: 320, marginTop: compact ? 4 : 0 }}>
+      <MetronomeControl key={segmentKey} composition={composition} compact={compact} />
+    </View>
   );
 });
 
@@ -115,8 +99,6 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
 export function PracticeTimerScreen({ visible, initialSegments, compositions, onFinish, isDesktop }) {
   const timer = usePracticeTimer(initialSegments);
   useKeepAwake(visible && timer.isRunning);
-  const [showMetronome, setShowMetronome] = useState(false);
-  const toggleMetronome = useCallback(() => setShowMetronome(s => !s), []);
   // True right after a segment transition that landed paused (timeout or
   // skip, both now autoStart:false) — shows an interstitial with its own
   // Start button instead of rolling straight into the next segment, which
@@ -195,9 +177,23 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
   if (!visible || !timer.currentSegment) return null;
 
   const linkedComposition = (compositions || []).find(c => c.id === timer.currentSegment.compositionId) || null;
+  // The piece's tempo and time signature, shown under the title so you know what you're aiming at.
+  const pieceDefaults = pieceMetronomeDefaults(linkedComposition);
+  const pieceInfo = [pieceDefaults.hasTempo ? `\u266a ${pieceDefaults.bpm} bpm` : '', pieceDefaults.hasSig ? pieceDefaults.sig : '']
+    .filter(Boolean).join('  \u00b7  ');
 
   const timerColumn = (
     <>
+      {/* The whole plan at a glance: one bar per segment, as wide as its planned minutes. */}
+      <View accessible accessibilityLabel={`Segment ${timer.currentIndex + 1} of ${timer.segments.length}`}
+        style={{ flexDirection: 'row', gap: 4, width: '100%', maxWidth: 320, marginBottom: 12 }}>
+        {timer.segments.map((s, i) => (
+          <View key={s.id || i} style={{
+            flex: Math.max(1, Number(s.plannedMinutes) || 1), height: 5, borderRadius: 3,
+            backgroundColor: i < timer.currentIndex ? COLOURS.steel : i === timer.currentIndex ? COLOURS.amber : COLOURS.navyA(0.14),
+          }} />
+        ))}
+      </View>
       <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 2 }}>
         segment {timer.currentIndex + 1} of {timer.segments.length}
       </Text>
@@ -205,6 +201,10 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
         {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
         {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
       </Text>
+
+      {pieceInfo ? (
+        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: -4, marginBottom: 8 }}>{pieceInfo}</Text>
+      ) : null}
 
       {timer.currentSegment.type === 'technique' && formatArticulation(timer.currentSegment) ? (
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.steel, marginTop: -2, marginBottom: 10 }}>
@@ -261,10 +261,9 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
 
   const metronomeColumn = (
     <MetronomeSection
-      showMetronome={showMetronome}
-      onToggle={toggleMetronome}
       composition={linkedComposition}
       segmentKey={timer.currentIndex}
+      compact={!isDesktop}
     />
   );
 

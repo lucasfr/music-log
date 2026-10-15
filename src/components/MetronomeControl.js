@@ -182,7 +182,7 @@ function SigChip({ sig, active, onPress }) {
 // own tick/animation state and knocking the visuals out of sync with the
 // audio, which kept ticking fine underneath since its scheduler lives in a
 // ref-held closure unaffected by re-renders.
-export const MetronomeControl = React.memo(function MetronomeControl({ composition }) {
+export const MetronomeControl = React.memo(function MetronomeControl({ composition, compact = false }) {
   // Tempo and time signature of the linked piece (90 bpm and 4/4 when it has none).
   const piece = pieceMetronomeDefaults(composition);
   const defaultBpm = piece.bpm;
@@ -194,6 +194,9 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const [playing, setPlaying] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  // `compact` (the phone's timer screen) starts with only tempo and play showing; everything
+  // else (presets, time signature, subdivision, ramp) opens with one tap.
+  const [expanded, setExpanded] = useState(!compact);
   const [audioError, setAudioError] = useState(null);
   const [rampEnabled, setRampEnabled] = useState(false);
   const [rampTarget, setRampTarget] = useState(() => Math.min(240, defaultBpm + 40));
@@ -594,7 +597,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 26, color: COLOURS.text }}>{bpm}</Text>
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>bpm</Text>
           </View>
-          <TouchableOpacity onPress={() => setPresetsOpen(o => !o)} activeOpacity={0.7}
+          <TouchableOpacity onPress={() => { if (!expanded) { setExpanded(true); setPresetsOpen(true); } else setPresetsOpen(o => !o); }} activeOpacity={0.7}
             hitSlop={{ top: 10, bottom: 10, left: 12, right: 12 }}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 6 }}>
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{currentTempoName}</Text>
@@ -616,6 +619,20 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
         tap ±5 · hold for ±1
       </Text>
 
+      {compact ? (
+        <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.75}
+          hitSlop={{ top: 6, bottom: 6, left: 20, right: 20 }}
+          accessibilityRole="button"
+          accessibilityLabel={expanded ? 'Hide time signature, subdivision and ramp' : 'Show time signature, subdivision and ramp'}
+          accessibilityState={{ expanded }}
+          style={{ minHeight: 36, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 6 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{expanded ? 'Fewer options' : `${sig} \u00b7 more options`}</Text>
+          <Text style={{ fontSize: 11, color: COLOURS.steel }}>{expanded ? '\u25b2' : '\u25bc'}</Text>
+        </TouchableOpacity>
+      ) : null}
+
+      {expanded && (
+      <>
       {presetsOpen && (
         <View style={{ borderTopWidth: 0.5, borderTopColor: COLOURS.navyA(0.12), paddingTop: 8, marginBottom: 8 }}>
           {TEMPO_PRESETS.map(p => {
@@ -711,6 +728,8 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           </View>
         )}
       </View>
+      </>
+      )}
     </View>
     </BlurView>
   );
