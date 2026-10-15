@@ -1878,7 +1878,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                 }}
               >
                 <View style={{ backgroundColor: sc.bg || COLOURS.glass, padding: 16, borderWidth: 1, borderColor: COLOURS.w(0.5) }}>
-                  <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8 }}>
+                  <Text style={{ fontSize: 28, lineHeight: 34, marginBottom: 8, color: sc.text || COLOURS.navy }}>
                     {STATUS_EMOJI[s] || '🎵'}
                   </Text>
                   <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 30, color: sc.text || COLOURS.navy, lineHeight: 32 }}>

@@ -172,7 +172,7 @@ export function live(factory) {
   });
 }
 
-export const STATUS_COLOURS = {
+const STATUS_LIGHT = {
   // Lifecycle arc — hues from palette 4 (crimson → navy), lightened for light bg
   new:                 { bg: '#FDE8D8', text: '#7A3500', border: 'rgba(247,127,0,0.43)'   },  // amber
   learning:            { bg: '#FAD9CC', text: '#6B1A05', border: 'rgba(213,62,15,0.43)'   },  // rust
@@ -182,6 +182,21 @@ export const STATUS_COLOURS = {
   shelved:             { bg: '#E4EAF0', text: '#3E5A6D', border: 'rgba(94,138,158,0.45)'   },  // soft slate blue
   ambition:            { bg: '#EEEDFE', text: '#26215C', border: 'rgba(127,119,221,0.43)'  },  // purple — aspirational
 };
+
+// The same arc for the dark theme. The light pastels above are meant for a pale page: on a dark one
+// they were glaring tiles whose pale icons and text had nothing to contrast with. Here each status
+// is a faint tint of its hue over the page, with a light version of the hue for text and icons.
+const STATUS_DARK = {
+  new:                 { bg: 'rgba(255,154,51,0.16)',  text: '#FFC48A', border: 'rgba(255,154,51,0.40)'  },  // amber
+  learning:            { bg: 'rgba(240,120,80,0.18)',  text: '#FFB199', border: 'rgba(240,120,80,0.42)'  },  // rust
+  consolidating:       { bg: 'rgba(252,191,73,0.16)',  text: '#FCD98A', border: 'rgba(252,191,73,0.40)'  },  // gold
+  'performance-ready': { bg: 'rgba(76,195,160,0.16)',  text: '#8FE0C4', border: 'rgba(76,195,160,0.40)'  },  // sage green
+  shelved:             { bg: 'rgba(143,182,190,0.16)', text: '#B7CDD4', border: 'rgba(143,182,190,0.38)' },  // slate
+  ambition:            { bg: 'rgba(150,140,240,0.18)', text: '#C9C3FF', border: 'rgba(150,140,240,0.42)' },  // purple
+};
+
+// Follows the theme (read it where it's used, not into a module-level constant).
+export const STATUS_COLOURS = live(() => (COLOURS.isDark ? STATUS_DARK : STATUS_LIGHT));
 
 export const RADIUS = {
   sm:   10,
