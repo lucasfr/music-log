@@ -7,6 +7,7 @@ import { AudioContext } from 'react-native-audio-api';
 import { COLOURS, RADIUS, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
+import { Ionicons } from './Icon';
 
 // Compound meters are conventionally felt in fewer main pulses than their
 // numerator — 6/8 as 2 (each a dotted quarter), 12/8 as 4 — rather than
@@ -553,7 +554,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           <TouchableOpacity onPress={togglePlay} activeOpacity={0.85}
             accessibilityRole="button" accessibilityLabel={playing ? 'Pause metronome' : 'Start metronome'}
             style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: COLOURS.amber, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontSize: 13, color: '#fff' }}>{playing ? '❙❙' : '▶'}</Text>
+            <Ionicons name={playing ? 'pause' : 'play'} size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>

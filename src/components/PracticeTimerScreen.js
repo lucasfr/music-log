@@ -9,6 +9,7 @@ import { useKeepAwake } from '../utils/useKeepAwake';
 import { usePracticeTimer } from '../utils/usePracticeTimer';
 import { scheduleSegmentEndNotification, cancelScheduledNotification } from '../utils/segmentNotifications';
 import { MetronomeControl } from './MetronomeControl';
+import { Ionicons } from './Icon';
 import { formatArticulation } from '../utils';
 
 // Isolated from PracticeTimerScreen for the same reason MetronomeControl is
@@ -228,7 +229,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
             alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <Text style={{ fontSize: 18, color: '#fff' }}>{timer.isRunning ? '⏸' : '▶'}</Text>
+          <Ionicons name={timer.isRunning ? 'pause' : 'play'} size={28} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleAddMinutes(5)}
@@ -308,7 +309,7 @@ export function PracticeTimerScreen({ visible, initialSegments, compositions, on
                 activeOpacity={0.85}
                 style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: COLOURS.navy, alignItems: 'center', justifyContent: 'center' }}
               >
-                <Text style={{ fontSize: 26, color: '#fff' }}>▶</Text>
+                <Ionicons name="play" size={44} color="#fff" />
               </TouchableOpacity>
               <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14 }}>tap to start</Text>
             </View>
