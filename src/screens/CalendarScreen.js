@@ -49,12 +49,13 @@ function energyOpacity(energy) {
 }
 
 // A calendar cell is only ~47pt wide on a phone, and an icon plus a value for both energy and
-// enjoyment is wider than that, so the two readouts stack (energy over enjoyment).
+// enjoyment is wider than that, so the two readouts stack (energy over enjoyment). Both rows are
+// the same fixed width, with the value in a fixed slot, so the icons and numbers line up.
 const ind = StyleSheet.create({
   wrap:   { alignItems: 'center', marginTop: 1 },
-  line:   { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 2, height: 14 },
+  line:   { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 2, height: 14, width: 40 },
   emoji:  { fontSize: 11, lineHeight: 14 },
-  val:    { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14 },
+  val:    { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14, minWidth: 26 },
   dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 2, alignSelf: 'center' },
   dot:    { width: 5, height: 5, borderRadius: 3 },
 });
