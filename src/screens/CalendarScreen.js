@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Platform, StyleSheet,
+  View, Text, ScrollView, TouchableOpacity, Platform, StyleSheet, PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -11,6 +11,7 @@ import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate, formatArticulation, formatTempo, latestSession } from '../utils';
 import { FAB } from '../components/FAB';
+import { DaySheet } from '../components/DaySheet';
 
 const DAYS   = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -105,7 +106,7 @@ function DayDots({ hasPractice, hasLesson }) {
 
 // ─── Calendar grid ────────────────────────────────────────────────────────────
 
-function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, cellH, onDayPress, selectedDate, onPrevMonth, onNextMonth }) {
+function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, cellH, onDayPress, selectedDate, onPrevMonth, onNextMonth, onToday }) {
   const sessionsByDate = useMemo(() => {
     const m = {};
     sessions.forEach(s => { if (!m[s.date]) m[s.date] = []; m[s.date].push(s); });
@@ -123,21 +124,20 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
   const monthLessons  = (lessons || []).filter(l => l.date.startsWith(monthPrefix));
   const streak        = currentStreak(sessions);
 
+  // Swipe the grid sideways to change month (left for next, right for previous). It only takes
+  // over a clearly horizontal drag, so scrolling the page and tapping a day still work.
+  const monthHandlers = useRef({});
+  monthHandlers.current = { prev: onPrevMonth, next: onNextMonth };
+  const swipe = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 18 && Math.abs(g.dx) > Math.abs(g.dy) * 1.8,
+    onPanResponderRelease: (_, g) => {
+      if (g.dx < -50) monthHandlers.current.next();
+      else if (g.dx > 50) monthHandlers.current.prev();
+    },
+  })).current;
+
   return (
     <View>
-      {/* Month nav */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>
-        <TouchableOpacity onPress={onPrevMonth} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
-          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
-        </TouchableOpacity>
-        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>
-          {MONTHS[viewMonth]} {viewYear}
-        </Text>
-        <TouchableOpacity onPress={onNextMonth} accessibilityRole="button" accessibilityLabel="Next month" hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
-          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Header */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16, marginTop: 4 }}>
         <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>Calendar</Text>
@@ -146,6 +146,28 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{streak} day streak 🔥</Text>
           </View>
         )}
+      </View>
+
+      {/* Month nav: the screen title comes first, then the month. Swiping the grid does the same. */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, paddingHorizontal: 4 }}>
+        <TouchableOpacity onPress={onPrevMonth} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
+          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
+        </TouchableOpacity>
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>
+            {MONTHS[viewMonth]} {viewYear}
+          </Text>
+          {onToday && !today.startsWith(monthPrefix) ? (
+            <TouchableOpacity onPress={onToday} activeOpacity={0.75} hitSlop={HIT_PILL}
+              accessibilityRole="button" accessibilityLabel="Go to the current month"
+              style={{ marginTop: 4, paddingHorizontal: 12, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>Today</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        <TouchableOpacity onPress={onNextMonth} accessibilityRole="button" accessibilityLabel="Next month" hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
+          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Month stats */}
@@ -169,6 +191,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       )}
 
       {/* Calendar grid */}
+      <View {...swipe.panHandlers}>
       <BlurView intensity={32} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 6 }}>
         <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
           <View style={{ flexDirection: 'row', marginBottom: 6 }}>
@@ -208,6 +231,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
           ))}
         </View>
       </BlurView>
+      </View>
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
@@ -243,6 +267,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
   const [detailLesson,    setDetailLesson]    = useState(null);
   const [selectedDate,    setSelectedDate]    = useState(null);
   const [gridWidth, setGridWidth] = useState(0);
+  const [sheetDate, setSheetDate] = useState(null); // the day whose sheet is open (phone only)
 
   const sessionsByDate = useMemo(() => {
     const m = {};
@@ -264,15 +289,16 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
     else setViewMonth(m => m + 1);
   }
 
+  // On a phone every day opens its sheet, so a day with several entries shows them all and an
+  // empty day offers Log practice / Log lesson instead of jumping straight into a form.
   function handleDayPress(day, iso) {
-    const dayLessons  = lessonsByDate[iso]  || [];
-    const daySessions = sessionsByDate[iso] || [];
     if (isDesktop) { setSelectedDate(iso); return; }
-    if (dayLessons.length === 1 && daySessions.length === 0)      setDetailLesson(dayLessons[0]);
-    else if (daySessions.length === 1 && dayLessons.length === 0) setDetailSession(daySessions[0]);
-    else if (dayLessons.length === 0 && daySessions.length === 0) setLogModalDate(iso);
-    else if (dayLessons.length > 0)                               setDetailLesson(dayLessons[0]);
-    else                                                          setDetailSession(daySessions[0]);
+    setSheetDate(iso);
+  }
+  function goToday() {
+    const n = new Date();
+    setViewYear(n.getFullYear());
+    setViewMonth(n.getMonth());
   }
 
   // cellW derived from measured content width (set via onLayout on inner view)
@@ -287,6 +313,17 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
         onSave={l => { onSaveLesson(l); setLessonModalDate(null); }} onClose={() => setLessonModalDate(null)} />
       {!isDesktop && (
         <>
+          <DaySheet
+            date={sheetDate}
+            sessions={sheetDate ? (sessionsByDate[sheetDate] || []) : []}
+            lessons={sheetDate ? (lessonsByDate[sheetDate] || []) : []}
+            compositions={compositions}
+            onClose={() => setSheetDate(null)}
+            onOpenSession={s => { setSheetDate(null); setDetailSession(s); }}
+            onOpenLesson={l => { setSheetDate(null); setDetailLesson(l); }}
+            onLogPractice={() => { const d = sheetDate; setSheetDate(null); setLogModalDate(d); }}
+            onLogLesson={() => { const d = sheetDate; setSheetDate(null); setLessonModalDate(d); }}
+          />
           <SessionDetailModal visible={!!detailSession} session={detailSession} compositions={compositions}
             onClose={() => setDetailSession(null)} onDelete={id => { onDelete(id); setDetailSession(null); }} />
           <LessonDetailModal visible={!!detailLesson} lesson={detailLesson} compositions={compositions}
@@ -329,7 +366,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
               today={today} cellW={cellW} cellH={cellH}
               onDayPress={handleDayPress}
               selectedDate={selectedDate}
-              onPrevMonth={prevMonth} onNextMonth={nextMonth}
+              onPrevMonth={prevMonth} onNextMonth={nextMonth} onToday={goToday}
             />
           </ScrollView>
           <FAB onPractice={() => setLogModalDate(selectedDate || today)} onLesson={() => setLessonModalDate(selectedDate || today)} />
@@ -493,8 +530,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           viewYear={viewYear} viewMonth={viewMonth}
           today={today} cellW={cellW} cellH={cellH}
           onDayPress={handleDayPress}
-          selectedDate={null}
-          onPrevMonth={prevMonth} onNextMonth={nextMonth}
+          selectedDate={sheetDate}
+          onPrevMonth={prevMonth} onNextMonth={nextMonth} onToday={goToday}
         />
       </ScrollView>
       <FAB onPractice={() => setLogModalDate(today)} onLesson={() => setLessonModalDate(today)} />
