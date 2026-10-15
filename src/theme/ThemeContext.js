@@ -11,7 +11,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { THEMES, applyTheme } from './index';
+import { THEMES, COLOURS, applyTheme } from './index';
+import { applyPageChrome } from '../utils/pageChrome';
 
 const STORAGE_KEY = 'musiclog.theme';
 
@@ -50,6 +51,9 @@ export function ThemeProvider({ children }) {
 
   // Applied during render so children see the right colours on their very first paint.
   applyTheme(resolved);
+
+  // The page behind the app, and so the notch on an iPhone, follows the theme too.
+  useEffect(() => { applyPageChrome(COLOURS); }, [resolved]);
 
   const setTheme = useCallback((next, { resume } = {}) => {
     resumeRoute = resume || null;

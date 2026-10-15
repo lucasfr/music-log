@@ -183,7 +183,10 @@ function AppInner({ fontsLoaded }) {
         <StatusBar style={COLOURS.statusBar} backgroundColor={COLOURS.bg} translucent={false} />
         <View style={{ flex: 1 }}>
           <AppBackground />
-          <OnboardingScreen onComplete={completeOnboarding} />
+          {/* A translucent status bar draws the page behind the notch, so keep the content clear of it. */}
+          <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+            <OnboardingScreen onComplete={completeOnboarding} />
+          </SafeAreaView>
         </View>
       </>
     );
