@@ -40,6 +40,9 @@ function toRow(table, record, uid) {
   // Map camelCase local fields to snake_case Supabase columns
   if (table === 'compositions') {
     if (record.timeSigs !== undefined) row.time_sigs = record.timeSigs;
+    // The form keeps tempo as text, so a cleared field is ''. Postgres rejects '' for an
+    // integer column, which would fail the push for the whole piece, not just the tempo.
+    if ('tempo' in row) row.tempo = Number(row.tempo) > 0 ? Math.round(Number(row.tempo)) : null;
   }
   return row;
 }

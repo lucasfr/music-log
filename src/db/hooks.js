@@ -5,6 +5,7 @@ import {
   getAllLessons, saveLesson, deleteLesson,
 } from '../db';
 import { pushRecord, deleteRecord, pullTable, mergeRows } from './sync';
+import { fromRemoteComposition } from './records';
 
 // ─── Local intent guards ───────────────────────────────────────────────────────
 // These sets/maps prevent remote stale data from overwriting local edits or
@@ -98,7 +99,10 @@ export function useCompositions() {
     setCompositions(local.filter(r => !pendingDeletes.compositions.has(r.id)));
     setLoading(false);
 
-    const remote = await pullTable('compositions');
+    // Supabase rows are snake_case (time_sigs); reshape them like local ones so the metronome
+    // can read a piece's tempo and time signature on a device that only has it from sync.
+    const pulled = await pullTable('compositions');
+    const remote = pulled ? pulled.map(fromRemoteComposition) : null;
     if (remote) {
       const safeRemote = remote
         .filter(r => !pendingDeletes.compositions.has(r.id))

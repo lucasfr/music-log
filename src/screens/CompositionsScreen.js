@@ -542,6 +542,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
             ? comp.timeSigs
             : comp.timeSig ? [comp.timeSig] : []
           ).map((s, i) => <MetaChip key={i} label={s} />)}
+          {comp.tempo ? <MetaChip label={`♪ ${comp.tempo} bpm`} /> : null}
           {comp.collection ? <MetaChip label={comp.collection} /> : null}
           {(comp.tags || []).map(t => <MetaChip key={t} label={t} />)}
         </View>

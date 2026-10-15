@@ -71,6 +71,7 @@ music-log/
 │   ├── progress.test.mjs           # Streaks, the weekly summary, "next up", milestones, timer plans and "repeat last session" (incl. clock-change and timezone edge cases)
 │   ├── planning.test.mjs           # Weekly goal, backup nudge, saved routines, grade pathway, reminder times
 │   ├── serviceWorker.test.mjs      # Runs the real service worker in a sandbox: update detection, offline, no false alarms
+│   ├── records.test.mjs            # Reshaping a Supabase piece into the local form (time_sigs → timeSigs, tempo), so the metronome reads it on any device
 │   └── motion.test.mjs             # Stagger delays and bar clamping for the animation helpers
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
@@ -96,6 +97,7 @@ music-log/
     │   ├── hooks.js                # useSessions, useCompositions, useLessons — local save/load + auto push/pull sync
     │   ├── sync.js                 # Supabase push/pull/merge — safe no-ops when not signed in
     │   ├── syncStatus.js           # Pub-sub for push/pull outcomes, feeds the Settings sync indicator
+    │   ├── records.js              # Reshapes a pulled Supabase piece into the local form (time_sigs → timeSigs, tempo); pure, unit-tested
     │   └── migrations.js           # One-time, flag-guarded data fixes (e.g. technique-group backfill)
     ├── components/
     │   ├── Background.js           # Dot-grid SVG background
