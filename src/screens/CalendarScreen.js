@@ -48,9 +48,12 @@ function energyOpacity(energy) {
   return 0.20 + (bar / 5) * 0.80;
 }
 
+// A calendar cell is only ~47pt wide on a phone, and an icon plus a value for both energy and
+// enjoyment is wider than that, so the two readouts stack (energy over enjoyment).
 const ind = StyleSheet.create({
-  wrap:   { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 2, marginTop: 2 },
-  emoji:  { fontSize: 12, lineHeight: 15 },
+  wrap:   { alignItems: 'center', marginTop: 1 },
+  line:   { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 2, height: 14 },
+  emoji:  { fontSize: 11, lineHeight: 14 },
   val:    { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14 },
   dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 2, alignSelf: 'center' },
   dot:    { width: 5, height: 5, borderRadius: 3 },
@@ -67,14 +70,16 @@ function DayIndicators({ sessions }) {
     ? (avgEnergy > 0 ? `+${avgEnergy}` : `${avgEnergy}`)
     : (avgEnergy > 0 ? `+${avgEnergy.toFixed(1)}` : avgEnergy.toFixed(1));
   return (
-    <View style={ind.wrap}>
-      <Text style={[ind.emoji, { opacity: energyOpacity(avgEnergy) }]}>⚡</Text>
-      <Text style={[ind.val, { color: COLOURS.red, opacity: energyOpacity(avgEnergy) }]}>{energyLabel}</Text>
+    <View style={ind.wrap} accessible accessibilityLabel={`Energy ${energyLabel}${avgJoy > 0 ? `, enjoyment ${Math.round(avgJoy)} of 5` : ''}`}>
+      <View style={ind.line}>
+        <Text style={[ind.emoji, { opacity: energyOpacity(avgEnergy) }]}>⚡</Text>
+        <Text style={[ind.val, { color: COLOURS.red, opacity: energyOpacity(avgEnergy) }]}>{energyLabel}</Text>
+      </View>
       {avgJoy > 0 && (
-        <>
-          <Text style={[ind.emoji, { opacity: 0.25 + (avgJoy / 5) * 0.75, marginLeft: 3 }]}>❤️</Text>
+        <View style={ind.line}>
+          <Text style={[ind.emoji, { opacity: 0.25 + (avgJoy / 5) * 0.75 }]}>❤️</Text>
           <Text style={[ind.val, { color: COLOURS.accent, opacity: 0.25 + (avgJoy / 5) * 0.75 }]}>{Math.round(avgJoy)}</Text>
-        </>
+        </View>
       )}
     </View>
   );
@@ -264,7 +269,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
 
   // cellW derived from measured content width (set via onLayout on inner view)
   const cellW = gridWidth > 0 ? Math.floor(Math.min(gridWidth, 700) / 7) : 44;
-  const cellH = Math.max(58, Math.round(cellW * 0.85));
+  const cellH = Math.max(66, Math.round(cellW * 0.85));
 
   const modals = (
     <>
