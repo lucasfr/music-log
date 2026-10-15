@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { AudioContext } from 'react-native-audio-api';
 import { COLOURS, RADIUS, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
+import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 
 // Compound meters are conventionally felt in fewer main pulses than their
 // numerator — 6/8 as 2 (each a dotted quarter), 12/8 as 4 — rather than
@@ -181,8 +182,10 @@ function SigChip({ sig, active, onPress }) {
 // audio, which kept ticking fine underneath since its scheduler lives in a
 // ref-held closure unaffected by re-renders.
 export const MetronomeControl = React.memo(function MetronomeControl({ composition }) {
-  const defaultBpm = Number(composition?.tempo) || 90;
-  const defaultSig = (composition?.timeSigs && composition.timeSigs[0]) || '4/4';
+  // Tempo and time signature of the linked piece (90 bpm and 4/4 when it has none).
+  const piece = pieceMetronomeDefaults(composition);
+  const defaultBpm = piece.bpm;
+  const defaultSig = piece.sig;
 
   const [bpm, setBpm] = useState(defaultBpm);
   const [sig, setSig] = useState(defaultSig);
@@ -194,6 +197,17 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const [rampEnabled, setRampEnabled] = useState(false);
   const [rampTarget, setRampTarget] = useState(() => Math.min(240, defaultBpm + 40));
   const [rampEveryBars, setRampEveryBars] = useState(4);
+
+  // The piece's values can arrive after this card opens (a sync landing mid-session). Follow
+  // them, but only for a control that still shows the previous default, so something you've
+  // changed by hand is never overwritten.
+  const appliedRef = useRef({ bpm: defaultBpm, sig: defaultSig });
+  useEffect(() => {
+    const prev = appliedRef.current;
+    if (prev.bpm !== defaultBpm) setBpm(b => (b === prev.bpm ? defaultBpm : b));
+    if (prev.sig !== defaultSig) setSig(s => (s === prev.sig ? defaultSig : s));
+    appliedRef.current = { bpm: defaultBpm, sig: defaultSig };
+  }, [defaultBpm, defaultSig]);
 
   const mainBeats = mainBeatsFor(sig);
   const dotsRef = useRef(null);
@@ -525,7 +539,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>metronome</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {composition ? (
+          {piece.hasTempo || piece.hasSig ? (
             <TouchableOpacity onPress={usePieceTempo} activeOpacity={0.75}
               hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
               style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: COLOURS.steelA(0.10) }}>
@@ -549,6 +563,17 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           Audio engine failed to start: {audioError}
         </Text>
       ) : null}
+
+      {/* What the piece gave the metronome, so a piece that arrives without a tempo or time
+          signature (or a segment with no piece) is visible as that rather than as a silent
+          90 bpm and 4/4. */}
+      <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, textAlign: 'center', marginBottom: 8 }}>
+        {!composition
+          ? 'No piece is linked to this segment.'
+          : piece.hasTempo || piece.hasSig
+            ? `${composition.title}: ${piece.hasTempo ? `${piece.bpm} bpm` : 'no tempo saved'} · ${piece.hasSig ? piece.sig : 'no time signature saved'}`
+            : `${composition.title} has no tempo or time signature saved on this device.`}
+      </Text>
 
       <BeatDotsRow ref={dotsRef} mainBeats={mainBeats} />
 
