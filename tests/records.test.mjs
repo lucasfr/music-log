@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(join(here, '../src/db/records.js'), 'utf8');
-const { fromRemoteComposition } =
+const { fromRemoteComposition, missingColumn, missingColumnHint } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 // What the sync merge does when the remote row wins (see mergeRows in src/db/sync.js).
@@ -73,4 +73,27 @@ test('other fields are left alone, the input is not mutated, and bad input is re
   assert.equal(out.updated_at, 'u');
   assert.equal(fromRemoteComposition(null), null);
   assert.equal(fromRemoteComposition(undefined), undefined);
+});
+
+// ── missing-column errors from Supabase ────────────────────────────────────────────────
+
+test('missingColumn reads the column name out of a PostgREST or Postgres error', () => {
+  assert.equal(missingColumn("Could not find the 'tempo' column of 'compositions' in the schema cache"), 'tempo');
+  assert.equal(missingColumn('column "tempo" of relation "compositions" does not exist'), 'tempo');
+  assert.equal(missingColumn("Could not find the 'time_sigs' column of 'compositions' in the schema cache"), 'time_sigs');
+});
+
+test('missingColumn ignores every other kind of error', () => {
+  for (const m of ['JWT expired', 'new row violates row-level security policy', 'invalid input syntax for type integer: ""', '', null, undefined]) {
+    assert.equal(missingColumn(m), null, String(m));
+  }
+});
+
+test('the hint names the fix, as SQL when the column type is known', () => {
+  const h = missingColumnHint('compositions', ['tempo']);
+  assert.match(h, /"tempo"/);
+  assert.match(h, /alter table compositions add column if not exists tempo integer;/);
+  const other = missingColumnHint('compositions', ['mystery']);
+  assert.doesNotMatch(other, /alter table/);
+  assert.match(other, /dashboard/);
 });

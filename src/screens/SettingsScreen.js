@@ -252,8 +252,14 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
       ...lessons.map(r      => ({ table: 'lessons',      record: r })),
       ...compositions.map(r => ({ table: 'compositions', record: r })),
     ];
+    // Pieces are stamped as just edited, so another device takes this copy even when its own
+    // has the same timestamp (it had the piece before the tempo could be synced).
+    const stamp = new Date().toISOString();
     for (const { table, record } of all) {
-      try { await pushRecord(table, record); pushed++; } catch { errors++; }
+      try {
+        const ok = await pushRecord(table, table === 'compositions' ? { ...record, updated_at: stamp } : record);
+        if (ok) pushed++; else errors++;
+      } catch { errors++; }
     }
     setSyncResult({ pushed, errors, message: errors > 0 ? `${pushed} pushed · ${errors} failed` : `${pushed} records synced` });
     setPhase('idle');

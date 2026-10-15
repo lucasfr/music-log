@@ -3,6 +3,7 @@
 
 import { getClient, getSession } from '../lib/supabase';
 import { reportSyncStart, reportSyncSuccess, reportSyncError } from './syncStatus';
+import { missingColumn, missingColumnHint } from './records';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,23 +50,45 @@ function toRow(table, record, uid) {
 
 // ─── Push (save) ──────────────────────────────────────────────────────────────
 
+// Resolves true when the record reached Supabase (possibly without a column the table lacks,
+// see below) and false when it didn't, so callers like "Push all" can count real failures.
 export async function pushRecord(table, record) {
+  const scope = `push:${table}`;
   try {
     const session = await getSession();
-    if (!session) return;
+    if (!session) return false;
     reportSyncStart();
     const client = await getClient();
-    const row = toRow(table, record, userId(session));
-    const { error } = await client.from(table).upsert(row, { onConflict: 'id' });
+    let row = toRow(table, record, userId(session));
+    // A column the Supabase table doesn't have makes it reject the whole row, not just that
+    // field, so a piece with a tempo set never synced at all. Drop the column and try again so
+    // the rest of the record gets through, and keep reporting the gap until the column exists.
+    const skipped = [];
+    let error = null;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      ({ error } = await client.from(table).upsert(row, { onConflict: 'id' }));
+      const column = error ? missingColumn(error.message) : null;
+      if (!column || !(column in row)) break;
+      skipped.push(column);
+      const { [column]: _left, ...rest } = row;
+      row = rest;
+    }
     if (error) {
       console.warn(`[sync] push ${table} failed:`, error.message, error.details);
-      reportSyncError(error.message);
-    } else {
-      reportSyncSuccess();
+      reportSyncError(error.message, scope);
+      return false;
     }
+    if (skipped.length) {
+      console.warn(`[sync] push ${table} left out missing columns:`, skipped.join(', '));
+      reportSyncError(missingColumnHint(table, skipped), scope);
+      return true;
+    }
+    reportSyncSuccess(scope);
+    return true;
   } catch (e) {
     console.warn(`[sync] push ${table} exception:`, e.message);
-    reportSyncError(e.message);
+    reportSyncError(e.message, scope);
+    return false;
   }
 }
 
@@ -106,7 +129,7 @@ export async function pullTable(table) {
         .range(from, from + PAGE_SIZE - 1);
       if (error) {
         console.warn(`[sync] pull ${table} failed:`, error.message);
-        reportSyncError(error.message);
+        reportSyncError(error.message, `pull:${table}`);
         return null;
       }
       if (!data || data.length === 0) break;
@@ -114,11 +137,11 @@ export async function pullTable(table) {
       if (data.length < PAGE_SIZE) break; // last page
       from += PAGE_SIZE;
     }
-    reportSyncSuccess();
+    reportSyncSuccess(`pull:${table}`);
     return allData;
   } catch (e) {
     console.warn(`[sync] pull ${table} exception:`, e.message);
-    reportSyncError(e.message);
+    reportSyncError(e.message, `pull:${table}`);
     return null;
   }
 }
