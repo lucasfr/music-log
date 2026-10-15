@@ -8,6 +8,7 @@ import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
 import { AnimatedFill } from '../components/Motion';
+import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
@@ -307,17 +308,8 @@ function weekLabel(isoWeek) {
   return monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-// Dynamically thins x-axis date labels to whatever actually fits the
-// chart's rendered width, instead of a fixed "every 2nd/3rd" step
-// regardless of how many points there are. A fixed step works fine for
-// a dozen weeks but still crams and overlaps once a chart has 30+ points
-// (e.g. 'All time' trends) — the available width per label shrinks as
-// more points are added, but a fixed step never adapts to that.
-function labelStep(count, width, minLabelWidth = 34) {
-  if (width <= 0 || count <= 1) return 1;
-  const maxLabels = Math.max(1, Math.floor(width / minLabelWidth));
-  return Math.max(1, Math.ceil(count / maxLabels));
-}
+// Which x-axis date labels fit, and where they anchor, is in utils/chartLabels.js (labelIndices,
+// labelAnchor): the newest label is always shown and no two are closer than a label's width.
 
 // ─── Practice volume chart ───────────────────────────────────────────────────
 
@@ -368,11 +360,10 @@ function PracticeVolumeChart({ sessions, period }) {
   const maxBarH = H - padT - padB;
   const avgY = padT + (1 - avgMin / maxMin) * maxBarH;
 
+  const labelSet = isDaily ? null : labelIndices(visible.length, visible.length * (barW + barGap));
   function xLabel(key, i) {
     if (isDaily) return new Date(key + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short' });
-    const step = labelStep(visible.length, width);
-    if (i % step !== 0 && i !== visible.length - 1) return null;
-    return weekLabel(key);
+    return labelSet.has(i) ? weekLabel(key) : null;
   }
 
   return (
@@ -408,7 +399,7 @@ function PracticeVolumeChart({ sessions, period }) {
             if (!label) return null;
             const x = i * (barW + barGap) + barW / 2;
             return (
-              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
+              <SvgText key={key} x={x} y={H - 4} textAnchor={labelAnchor(x, width)} fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
             );
           })}
         </Svg>
@@ -504,13 +495,12 @@ function WeeklyTrendChart({ sessions, period }) {
   const energyPath = buildPath(energyPts, toYEnergy);
   const likingPath = buildPath(likingPts, toYLiking);
 
+  const labelSet = isDaily ? null : labelIndices(visible.length, width - padL - padR);
   function xLabel(key, i) {
     if (isDaily) {
       return new Date(key + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short' });
     }
-    const step = labelStep(visible.length, width);
-    if (i % step !== 0 && i !== visible.length - 1) return null;
-    return weekLabel(key);
+    return labelSet.has(i) ? weekLabel(key) : null;
   }
 
   return (
@@ -556,7 +546,7 @@ function WeeklyTrendChart({ sessions, period }) {
             if (!label) return null;
             const x = xAt(i);
             return (
-              <SvgText key={key} x={x} y={H - 4} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
+              <SvgText key={key} x={x} y={H - 4} textAnchor={labelAnchor(x, width)} fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">{label}</SvgText>
             );
           })}
         </Svg>
@@ -1023,10 +1013,9 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
           ))}
           {/* X-axis labels — density adapts to chart width, not a fixed step */}
           {pts.map((p, i) => {
-            const step = labelStep(pts.length, width);
-            if (i % step !== 0 && i !== pts.length - 1) return null;
+            if (!labelIndices(pts.length, width - padL - padR).has(i)) return null;
             return (
-              <SvgText key={p.m} x={toX(i)} y={H - 4} textAnchor="middle" fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">
+              <SvgText key={p.m} x={toX(i)} y={H - 4} textAnchor={labelAnchor(toX(i), width)} fontSize="11" fill={COLOURS.textDim} fontFamily="Lato">
                 {new Date(p.m + '-15').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })}
               </SvgText>
             );
