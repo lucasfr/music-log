@@ -203,7 +203,7 @@ function AppInner({ fontsLoaded }) {
   if (Platform.OS === 'web' && isDesktop) {
     const renderScreen = () => {
       switch (activeTab) {
-        case 'Home':     return <HomeScreen     key="home"     {...screenProps} />;
+        case 'Home':     return <HomeScreen     key="home"     {...screenProps} onOpenSettings={() => setActiveTab('Settings')} />;
         case 'Calendar': return <CalendarScreen key="calendar" {...screenProps} />;
         case 'Pieces':   return <CompositionsScreen key="pieces" compositions={compositionsWithStatus} sessions={sessions} onSave={saveComp} onDelete={deleteComp} isDesktop={isDesktop} />;
         case 'History':  return <HistoryScreen  key="history"  sessions={sessions} lessons={lessons} compositions={compositionsWithStatus} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={isDesktop} />;
@@ -211,7 +211,7 @@ function AppInner({ fontsLoaded }) {
         case 'Timeline': return <TimelineScreen key="timeline" compositions={compositionsWithStatus} sessions={sessions} lessons={lessons} isDesktop={isDesktop} />;
         case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />;
         case 'About':    return <AboutScreen    key="about"    isDesktop={isDesktop} />;
-        default:         return <HomeScreen     key="home"     {...screenProps} />;
+        default:         return <HomeScreen     key="home"     {...screenProps} onOpenSettings={() => setActiveTab('Settings')} />;
       }
     };
 
@@ -260,7 +260,7 @@ function AppInner({ fontsLoaded }) {
           }}
         >
           <Tab.Screen name="Home">
-            {() => <HomeScreen     {...screenProps} />}
+            {({ navigation }) => <HomeScreen     {...screenProps} onOpenSettings={() => navigation.navigate('Settings')} />}
           </Tab.Screen>
           <Tab.Screen name="Calendar">
             {() => <CalendarScreen {...screenProps} />}

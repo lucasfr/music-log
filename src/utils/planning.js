@@ -220,3 +220,37 @@ export function sortPieces(compositions, sessions, mode = 'title') {
   }
   return list.sort(byTitle);
 }
+
+// ── Dates and today at a glance ──
+
+// 'Today', 'Yesterday', '4 days ago', '2 weeks ago'. Null for a future date, or past eight weeks,
+// where the date itself is the better label.
+export function relativeDay(dateStr, today) {
+  if (!dateStr || !today) return null;
+  const d = daysBetween(dateStr, today);
+  if (d < 0) return null;
+  if (d === 0) return 'Today';
+  if (d === 1) return 'Yesterday';
+  if (d < 7) return `${d} days ago`;
+  const w = Math.floor(d / 7);
+  if (w < 8) return w === 1 ? '1 week ago' : `${w} weeks ago`;
+  return null;
+}
+
+const minutesText = m => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}` : `${m} min`);
+
+// One line for what has been logged today: 'Practised 25 min', '2 practices, 1h 10m', plus
+// '1 lesson'. Empty when nothing is logged.
+export function todaySummary(sessions, lessons) {
+  const parts = [];
+  const n = (sessions || []).length;
+  if (n) {
+    const total = sessions.reduce((t, s) => t + (Number(s.duration) || 0), 0);
+    parts.push(n === 1
+      ? `Practised${total ? ` ${minutesText(total)}` : ''}`
+      : `${n} practices${total ? `, ${minutesText(total)}` : ''}`);
+  }
+  const l = (lessons || []).length;
+  if (l) parts.push(l === 1 ? '1 lesson' : `${l} lessons`);
+  return parts.join('  ·  ');
+}

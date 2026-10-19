@@ -17,8 +17,9 @@ import { TimerSetupModal } from '../components/TimerSetupModal';
 import { weekSummary, latestFocus } from '../utils/progress';
 import { RatingMini } from '../components/UI';
 import { usePref } from '../utils/usePref';
-import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan } from '../utils/planning';
+import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, relativeDay, todaySummary } from '../utils/planning';
 import { Ionicons } from '../components/Icon';
+import { SyncIssueBanner } from '../components/SyncIssueBanner';
 import { FadeInUp, AnimatedFill } from '../components/Motion';
 import { delayFor } from '../utils/motion';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
@@ -60,7 +61,8 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
           <View style={{ flex: 1 }}>
             {showDate && (
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
-                {fmtDate(session.date)}
+                {relativeDay(session.date, todayISO()) || fmtDate(session.date)}
+                {relativeDay(session.date, todayISO()) ? <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim }}>{`  ·  ${fmtDate(session.date)}`}</Text> : null}
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -125,7 +127,8 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
           <View style={{ flex: 1 }}>
             {showDate && (
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 4 }}>
-                {fmtDate(lesson.date)}
+                {relativeDay(lesson.date, todayISO()) || fmtDate(lesson.date)}
+                {relativeDay(lesson.date, todayISO()) ? <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim }}>{`  ·  ${fmtDate(lesson.date)}`}</Text> : null}
               </Text>
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -675,7 +678,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function HomeScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onDelete, onDeleteLesson, isDesktop }) {
+export default function HomeScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onDelete, onDeleteLesson, isDesktop, onOpenSettings }) {
   const today = todayISO();
   const [logModalDate,    setLogModalDate]    = useState(null);
   const [logModalSession, setLogModalSession] = useState(null);
@@ -736,6 +739,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const todaySessions = useMemo(() => sessions.filter(s => s.date === today), [sessions, today]);
   const todayLessons  = useMemo(() => (lessons || []).filter(l => l.date === today), [lessons, today]);
   const hasToday = todaySessions.length > 0 || todayLessons.length > 0;
+  // Once something is logged, Today folds to one summary line (open by default on desktop).
+  const [todayOpen, setTodayOpen] = useState(!!isDesktop);
 
   const currentStreak = useMemo(() => {
     let count = 0;
@@ -842,6 +847,9 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   // Feed column (shared between desktop and mobile)
   const feedContent = (
     <>
+      {/* A sync problem that needs attention (never just being offline) */}
+      <SyncIssueBanner onPress={onOpenSettings} />
+
       {/* Start practice */}
       <FadeInUp>
         <StartPracticeCard
@@ -866,7 +874,16 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           )}
         </View>
         {hasToday ? (
-          <View style={{ gap: 10 }}>
+          <View>
+            <TouchableOpacity onPress={() => setTodayOpen(o => !o)} activeOpacity={0.8} hitSlop={HIT_PILL}
+              accessibilityRole="button" accessibilityState={{ expanded: todayOpen }}
+              accessibilityLabel={`${todaySummary(todaySessions, todayLessons)}. ${todayOpen ? 'Hide' : 'Show'} today's entries`}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44, paddingHorizontal: 14, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5) }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.text }}>{todaySummary(todaySessions, todayLessons)}</Text>
+              <Text style={{ fontSize: 13, color: COLOURS.textDim }}>{todayOpen ? '\u25b4' : '\u25be'}</Text>
+            </TouchableOpacity>
+            {todayOpen ? (
+          <View style={{ gap: 10, marginTop: 10 }}>
             {todayLessons.map(l => (
               <LessonEntry key={l.id} lesson={l} compositions={compositions}
                 isSelected={isDesktop && rightPanel === 'detail-lesson' && detailLesson?.id === l.id}
@@ -879,6 +896,20 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
                 onPress={() => openSession(s)}
                 showDate={false} />
             ))}
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity onPress={() => openLogSession(today)} activeOpacity={0.8} hitSlop={HIT_PILL}
+                accessibilityRole="button" accessibilityLabel="Log another practice today"
+                style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.5) }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>+ Log another practice</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => openLogLesson(today)} activeOpacity={0.8} hitSlop={HIT_PILL}
+                accessibilityRole="button" accessibilityLabel="Log a lesson today"
+                style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.5) }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>+ Log lesson</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+            ) : null}
           </View>
         ) : (
           <View>
