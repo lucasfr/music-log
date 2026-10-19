@@ -14,13 +14,13 @@ import { useUndoToast } from './Undo';
 import { useDirtyGuard } from '../utils/useDirtyGuard';
 import { reorder } from '../utils/reorder';
 import { notify } from '../utils/notify';
-import { uid, confirmDelete, confirmDiscard } from '../utils';
+import { uid, confirmDelete, confirmDiscard, todayISO } from '../utils';
 
 function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
 export function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
 export function LogModal({ visible, onClose, onSave, compositions, initialDate, initialSession, previousSession, inline }) {
-  const [date, setDate]           = useState(initialDate || '');
+  const [date, setDate]           = useState(initialDate || todayISO());
   const [energyBar, setEnergyBar] = useState(0);
   const [enjoyment, setEnjoyment] = useState(0);
   const [duration, setDuration]   = useState('');
@@ -44,7 +44,7 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
         setWins(initialSession.wins || '');
         setFocus(initialSession.tomorrowFocus || '');
       } else {
-        setDate(initialDate || '');
+        setDate(initialDate || todayISO());
         setEnergyBar(0); setEnjoyment(0); setDuration('');
         setSegments([]); setWins(''); setFocus('');
       }
@@ -85,11 +85,13 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
   function handleSave() {
     if (energyBar === 0) {
       notify('Energy required', 'Please set an energy level before saving.');
+      // Energy is at the top of the form and Save is at the bottom: show where it is.
+      scrollRef.current?.scrollTo?.({ y: 0, animated: true });
       return;
     }
     const totalFromSegs = segments.reduce((s, seg) => s + (Number(seg.duration) || 0), 0);
     onSave({
-      id: initialSession?.id || uid(), date, energy: energyBarToValue(energyBar),
+      id: initialSession?.id || uid(), date: date || todayISO(), energy: energyBarToValue(energyBar),
       enjoyment: enjoyment || null,
       duration: Number(duration) || totalFromSegs || null,
       segments, wins, tomorrowFocus: focus,

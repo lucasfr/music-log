@@ -1615,6 +1615,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     setCollapsed(next);
     setLocalPref('statsCollapsed', serializeCollapsed(next));
   }
+  // A brand-new install has nothing to chart: say so once, instead of eight sections that are each empty.
+  const noData = sessions.length === 0 && (lessons || []).length === 0 && compositions.length === 0;
 
   const PERIODS = [
     { key: '7d',  label: '7 days' },
@@ -1822,6 +1824,12 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           ))}
         </View>
 
+        {noData ? (
+          <GlassCard>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.text, marginBottom: 6 }}>Nothing to chart yet.</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textDim, lineHeight: 21 }}>Log a practice, a lesson or a piece and your stats will build up here: volume, energy and enjoyment, scales covered, and how your library is growing.</Text>
+          </GlassCard>
+        ) : (<>
         <StatsSection id="activity" title="Activity" first collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <ActivityGrid sessions={sessions} lessons={lessons} compositions={compositions} />
@@ -1871,6 +1879,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
         </StatsSection>
         <StatsSection id="library" title="Library" collapsed={collapsed} onToggle={toggleSection}>
+        {compositions.length === 0 ? (
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim, marginBottom: 12 }}>No pieces in the library yet.</Text>
+        ) : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
           {STATUS_OPTIONS.map(s => {
             const sc = STATUS_COLOURS[s] || {};
@@ -2009,6 +2020,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           </View>
         </GlassCard>
         </StatsSection>
+        </>)}
 
       </ScrollView>
     </SafeAreaView>
