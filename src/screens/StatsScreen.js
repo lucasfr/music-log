@@ -9,6 +9,10 @@ import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
 import { tempoProgress, describeTempo, staleScales, agoLabel } from '../utils/insights';
 import { GradeTargetCard } from '../components/GradeTargetCard';
+import {
+  inPeriod, periodCutoff, volumeBuckets, trendBuckets, dayOfWeekBuckets, streakRuns, topStreaks, longestStreak,
+  periodAverages, daysSinceLatest, neglectedPieces, pieceStats, lessonInsights,
+} from '../utils/statsCalc';
 import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { coverageColour, readableOn } from '../utils/chartColours';
@@ -295,15 +299,6 @@ function ZeldaBarFractional({ emoji, fill, total = 5, size = 22 }) {
 
 // ─── Trend chart (daily for 7d, weekly for 30d/all) ──────────────────────────
 
-function getISOWeek(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  const day = d.getDay() || 7;
-  d.setDate(d.getDate() + 4 - day);
-  const yearStart = new Date(d.getFullYear(), 0, 1);
-  const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-  return `${d.getFullYear()}-W${String(week).padStart(2, '0')}`;
-}
-
 function weekLabel(isoWeek) {
   const [year, w] = isoWeek.split('-W');
   const jan4 = new Date(Number(year), 0, 4);
@@ -326,31 +321,7 @@ function PracticeVolumeChart({ sessions, period }) {
   const [width, setWidth] = useState(0);
   const isDaily = period === '7d';
 
-  const cutoff = (() => {
-    if (period === 'all') return null;
-    const d = new Date();
-    d.setDate(d.getDate() - (isDaily ? 7 : 30));
-    return localISO(d);
-  })();
-
-  const buckets = {};
-  if (isDaily) {
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      buckets[localISO(d)] = 0;
-    }
-  }
-  sessions.forEach(s => {
-    if (cutoff && s.date < cutoff) return;
-    const key = isDaily ? s.date : getISOWeek(s.date);
-    buckets[key] = (buckets[key] || 0) + (Number(s.duration) || 0);
-  });
-
-  const keys = Object.keys(buckets).sort();
-  const MAX_WEEKS = period === 'all' ? keys.length : 12;
-  const visible = isDaily ? keys : keys.slice(-MAX_WEEKS);
-  const mins = visible.map(k => buckets[k] || 0);
+  const { visible, mins } = volumeBuckets(sessions, period, todayISO());
 
   if (mins.every(v => v === 0)) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
@@ -426,47 +397,7 @@ function WeeklyTrendChart({ sessions, period }) {
   const [width, setWidth] = useState(0);
   const isDaily = period === '7d';
 
-  const cutoff = (() => {
-    if (period === 'all') return null;
-    const d = new Date();
-    d.setDate(d.getDate() - (isDaily ? 7 : 30));
-    return localISO(d);
-  })();
-
-  // Build buckets — daily ISO string for 7d, ISO week key for 30d/all
-  const buckets = {};
-
-  if (isDaily) {
-    // Pre-fill all 7 days so gaps (no session) still appear as null points
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      buckets[localISO(d)] = { energy: [], liking: [] };
-    }
-  }
-
-  sessions.forEach(s => {
-    if (cutoff && s.date < cutoff) return;
-    const key = isDaily ? s.date : getISOWeek(s.date);
-    if (!buckets[key]) buckets[key] = { energy: [], liking: [] };
-    if (s.energy != null) buckets[key].energy.push(Number(s.energy));
-    (s.segments || []).forEach(seg => {
-      if (seg.type === 'repertoire' && seg.liking) buckets[key].liking.push(Number(seg.liking));
-    });
-  });
-
-  const keys = Object.keys(buckets).sort();
-  const MAX_WEEKS = period === 'all' ? keys.length : 12;
-  const visible = isDaily ? keys : keys.slice(-MAX_WEEKS);
-
-  const energyPts = visible.map(k => {
-    const arr = buckets[k]?.energy || [];
-    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
-  });
-  const likingPts = visible.map(k => {
-    const arr = buckets[k]?.liking || [];
-    return arr.length ? arr.reduce((a, v) => a + v, 0) / arr.length : null;
-  });
+  const { visible, energyPts, likingPts } = trendBuckets(sessions, period, todayISO());
 
   const hasData = energyPts.some(v => v !== null) || likingPts.some(v => v !== null);
   if (!hasData) return (
@@ -652,37 +583,7 @@ function ScatterPlot({ sessions }) {
 // ─── Neglected pieces ─────────────────────────────────────────────────────
 
 function NeglectedPieces({ sessions, compositions }) {
-  const today = new Date();
-
-  // Count any segment linked to a composition, whether logged as repertoire
-  // or as technique (e.g. Hanon linked as a library piece) — both count as
-  // "worked on it" for neglect purposes.
-  const lastSeen = {};
-  sessions.forEach(s => {
-    (s.segments || []).forEach(seg => {
-      if (!seg.compositionId) return;
-      if (!lastSeen[seg.compositionId] || s.date > lastSeen[seg.compositionId]) {
-        lastSeen[seg.compositionId] = s.date;
-      }
-    });
-  });
-
-  const ACTIVE = new Set(['learning', 'consolidating']);
-  const neglected = compositions
-    .filter(c => ACTIVE.has(c.status))
-    .map(c => {
-      const last = lastSeen[c.id] || null;
-      const daysSince = last
-        ? Math.floor((today - new Date(last + 'T12:00:00')) / 86400000)
-        : null;
-      return { id: c.id, title: c.title, status: c.status, daysSince };
-    })
-    .filter(p => p.daysSince === null || p.daysSince >= 7)
-    .sort((a, b) => {
-      if (a.daysSince === null) return -1;
-      if (b.daysSince === null) return 1;
-      return b.daysSince - a.daysSince;
-    });
+  const neglected = neglectedPieces(sessions, compositions, todayISO());
 
   if (neglected.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>
@@ -726,12 +627,7 @@ function NeglectedPieces({ sessions, compositions }) {
 }
 
 function WinsTimeline({ sessions, period }) {
-  const cutoff = (() => {
-    if (period === 'all') return null;
-    const d = new Date();
-    d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
-    return localISO(d);
-  })();
+  const cutoff = periodCutoff(period, todayISO());
 
   const wins = sessions
     .filter(s => s.wins && s.wins.trim() && (!cutoff || s.date >= cutoff))
@@ -765,30 +661,16 @@ function WinsTimeline({ sessions, period }) {
 // ─── Streak history ─────────────────────────────────────────────────────
 
 function StreakHistory({ sessions }) {
-  // Find all streaks (runs of consecutive practice days) across all time
-  const dates = [...new Set(sessions.map(s => s.date))].sort();
-  if (dates.length === 0) return (
+  if (sessions.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No sessions yet.</Text>
   );
 
-  const streaks = [];
-  let start = dates[0], prev = dates[0], len = 1;
-  for (let i = 1; i < dates.length; i++) {
-    const diff = (new Date(dates[i] + 'T12:00:00') - new Date(prev + 'T12:00:00')) / 86400000;
-    if (diff === 1) { len++; prev = dates[i]; }
-    else {
-      if (len > 1) streaks.push({ start, end: prev, len });
-      start = dates[i]; prev = dates[i]; len = 1;
-    }
-  }
-  if (len > 1) streaks.push({ start, end: prev, len });
-
+  const streaks = streakRuns(sessions);
   if (streaks.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No streaks of 2+ days yet.</Text>
   );
 
-  const maxLen = Math.max(...streaks.map(s => s.len));
-  const visible = streaks.sort((a, b) => b.len - a.len).slice(0, 6);
+  const { top: visible, maxLen } = topStreaks(streaks);
 
   return (
     <View>
@@ -819,57 +701,13 @@ function StreakHistory({ sessions }) {
 // ─── Lesson insights ────────────────────────────────────────────────────────
 
 function LessonInsights({ lessons, sessions, compositions, period }) {
-  const cutoff = (() => {
-    if (period === 'all') return null;
-    const d = new Date();
-    d.setDate(d.getDate() - (period === '7d' ? 7 : 30));
-    return localISO(d);
-  })();
+  const r = lessonInsights(lessons, sessions, compositions, period, todayISO());
 
-  const periodLessons = lessons.filter(l => !cutoff || l.date >= cutoff);
-
-  if (periodLessons.length === 0) return (
+  if (r.count === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No lessons logged in this period.</Text>
   );
 
-  // ── Avg energy & enjoyment ────────────────────────────────────────────────
-  const energyVals    = periodLessons.filter(l => l.energy != null).map(l => Number(l.energy));
-  const enjoymentVals = periodLessons.filter(l => l.enjoyment != null).map(l => Number(l.enjoyment));
-  const avgEnergy    = energyVals.length    ? energyVals.reduce((a, v) => a + v, 0) / energyVals.length       : null;
-  const avgEnjoyment = enjoymentVals.length ? enjoymentVals.reduce((a, v) => a + v, 0) / enjoymentVals.length : null;
-
-  // ── Pieces covered in lessons ─────────────────────────────────────────────
-  const lessonPieceCounts = {};
-  periodLessons.forEach(l => {
-    (l.segments || []).forEach(seg => {
-      if (seg.type !== 'repertoire' || !seg.compositionId) return;
-      lessonPieceCounts[seg.compositionId] = (lessonPieceCounts[seg.compositionId] || 0) + 1;
-    });
-  });
-
-  const topLessonPieces = Object.entries(lessonPieceCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([id, count]) => ({
-      id,
-      title: compositions.find(c => c.id === id)?.title || id,
-      count,
-    }));
-
-  // ── Lesson-only pieces (never appeared in a practice session) ─────────────
-  const sessionPieceIds = new Set(
-    sessions.flatMap(s =>
-      (s.segments || [])
-        .filter(seg => seg.type === 'repertoire' && seg.compositionId)
-        .map(seg => seg.compositionId)
-    )
-  );
-  const lessonOnlyIds = Object.keys(lessonPieceCounts).filter(id => !sessionPieceIds.has(id));
-  const lessonOnlyPieces = lessonOnlyIds
-    .map(id => ({ id, title: compositions.find(c => c.id === id)?.title || id }))
-    .sort((a, b) => a.title.localeCompare(b.title));
-
-  const maxCount = topLessonPieces[0]?.count || 1;
+  const { count: lessonCount, avgEnergy, avgEnjoyment, topPieces: topLessonPieces, lessonOnly: lessonOnlyPieces, maxCount } = r;
 
   return (
     <View>
@@ -889,7 +727,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
         )}
         <View style={{ gap: 4 }}>
           <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Lessons</Text>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy, fontVariant: ['lining-nums'] }}>{periodLessons.length}</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.navy, fontVariant: ['lining-nums'] }}>{lessonCount}</Text>
         </View>
       </View>
 
@@ -1441,17 +1279,8 @@ function DayOfWeekChart({ sessions }) {
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
   );
 
-  // Bucket all sessions by day of week (Mon=0 … Sun=6)
-  const byDay = Array.from({ length: 7 }, () => ({ count: 0, minutes: 0, energy: [] }));
-  sessions.forEach(s => {
-    const dow = (new Date(s.date + 'T12:00:00').getDay() + 6) % 7; // Mon=0
-    byDay[dow].count++;
-    byDay[dow].minutes += Number(s.duration) || 0;
-    if (s.energy != null) byDay[dow].energy.push(Number(s.energy));
-  });
-
-  const maxCount   = Math.max(...byDay.map(d => d.count), 1);
-  const bestDay    = byDay.indexOf(byDay.reduce((a, b) => b.count > a.count ? b : a));
+  // Sessions by day of week (Mon=0 … Sun=6)
+  const { byDay, maxCount, bestDay } = dayOfWeekBuckets(sessions);
 
   const H = 160;
   const padL = 0, padR = 0, padT = 16, padB = 36;
@@ -1730,115 +1559,18 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { key: 'all', label: 'All time' },
   ];
 
-  function filterByPeriod(items, days) {
-    if (period === 'all') return items;
-    const ago = new Date();
-    ago.setDate(ago.getDate() - days);
-    return items.filter(s => new Date(s.date + 'T12:00:00') >= ago);
-  }
+  const periodSessions = inPeriod(sessions, period, todayISO());
+  const periodLessons  = inPeriod(lessons || [], period, todayISO());
 
-  const days = period === '7d' ? 7 : 30;
-  const periodSessions = filterByPeriod(sessions, days);
-  const periodLessons  = filterByPeriod(lessons || [], days);
-
-  const totalMin    = periodSessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
+  const { totalMin, avgEnergy: avgEnergyNum, avgEnjoyment: avgEnjoymentFill } = periodAverages(periodSessions);
   const allTimeMin  = sessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
   // Energy: convert -2…+2 scale to 0…5 fill for the Zelda bar
-  const avgEnergyNum  = periodSessions.length
-    ? periodSessions.reduce((a, s) => a + Number(s.energy), 0) / periodSessions.length
-    : null;
   const energyFill    = avgEnergyNum !== null ? avgEnergyNum + 3 : null; // -2→1, 0→3, +2→5
-  const enjoymentSessions = periodSessions.filter(s => s.enjoyment != null);
-  const avgEnjoymentFill   = enjoymentSessions.length
-    ? enjoymentSessions.reduce((a, s) => a + Number(s.enjoyment), 0) / enjoymentSessions.length
-    : null;
 
-  const streak = (() => {
-    const dateSet = new Set(periodSessions.map(s => s.date));
-    if (dateSet.size === 0) return 0;
-    // Walk every day in the period, find the longest consecutive run
-    const start = period === 'all'
-      ? new Date(Math.min(...periodSessions.map(s => new Date(s.date + 'T12:00:00'))))
-      : (() => { const d = new Date(); d.setDate(d.getDate() - days); return d; })();
-    const end = new Date();
-    let best = 0, current = 0, d = new Date(start);
-    while (d <= end) {
-      const iso = localISO(d);
-      if (dateSet.has(iso)) { current++; best = Math.max(best, current); }
-      else { current = 0; }
-      d.setDate(d.getDate() + 1);
-    }
-    return best;
-  })();
+  const streak = longestStreak(periodSessions, period, todayISO());
 
 
-  const pieceFreq = {};
-  const pieceEnjoyment = {};
-  const pieceMinutes = {};
-  const pieceEnergy = {};
-  const pieceSessionEnjoyment = {};
-  const pieceDifficulty = {};
-  periodSessions.forEach(s => {
-    (s.segments || []).forEach(seg => {
-      if (seg.type !== 'repertoire') return;
-      const comp = compositions.find(c => c.id === seg.compositionId);
-      if (comp?.status === 'ambition') return;
-      const name = seg.compositionId
-        ? (comp || {}).title || seg.compositionId
-        : seg.title;
-      if (!name) return;
-      pieceFreq[name] = (pieceFreq[name] || 0) + 1;
-      pieceMinutes[name] = (pieceMinutes[name] || 0) + (Number(seg.duration) || 0);
-      if (seg.liking) {
-        if (!pieceEnjoyment[name]) pieceEnjoyment[name] = [];
-        pieceEnjoyment[name].push(seg.liking);
-      }
-      // energy + enjoyment from parent session
-      if (s.energy != null) {
-        if (!pieceEnergy[name]) pieceEnergy[name] = [];
-        pieceEnergy[name].push(Number(s.energy));
-      }
-      if (s.enjoyment != null) {
-        if (!pieceSessionEnjoyment[name]) pieceSessionEnjoyment[name] = [];
-        pieceSessionEnjoyment[name].push(Number(s.enjoyment));
-      }
-      if (seg.feltDifficulty) {
-        if (!pieceDifficulty[name]) pieceDifficulty[name] = [];
-        pieceDifficulty[name].push(Number(seg.feltDifficulty));
-      }
-    });
-  });
-  const topPieces = Object.entries(pieceFreq)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name, count]) => {
-      const joys  = pieceEnjoyment[name] || [];
-      const engs  = pieceEnergy[name] || [];
-      const sesEnj = pieceSessionEnjoyment[name] || [];
-      const diffs = pieceDifficulty[name] || [];
-      const avgLiking          = joys.length   ? joys.reduce((a, v) => a + v, 0)   / joys.length   : null;
-      const avgEnergy          = engs.length   ? engs.reduce((a, v) => a + v, 0)   / engs.length   : null;
-      const avgSessionEnjoyment = sesEnj.length ? sesEnj.reduce((a, v) => a + v, 0) / sesEnj.length : null;
-      const avgDifficulty      = diffs.length  ? diffs.reduce((a, v) => a + v, 0)  / diffs.length  : null;
-      const mins = pieceMinutes[name] || 0;
-      return { name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins };
-    });
-
-  const topPiecesByTime = Object.entries(pieceMinutes)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name, mins]) => {
-      const count = pieceFreq[name] || 0;
-      const joys  = pieceEnjoyment[name] || [];
-      const engs  = pieceEnergy[name] || [];
-      const sesEnj = pieceSessionEnjoyment[name] || [];
-      const diffs = pieceDifficulty[name] || [];
-      const avgLiking          = joys.length   ? joys.reduce((a, v) => a + v, 0)   / joys.length   : null;
-      const avgEnergy          = engs.length   ? engs.reduce((a, v) => a + v, 0)   / engs.length   : null;
-      const avgSessionEnjoyment = sesEnj.length ? sesEnj.reduce((a, v) => a + v, 0) / sesEnj.length : null;
-      const avgDifficulty      = diffs.length  ? diffs.reduce((a, v) => a + v, 0)  / diffs.length  : null;
-      return { name, count, avgLiking, avgEnergy, avgSessionEnjoyment, avgDifficulty, mins };
-    });
+  const { byCount: topPieces, byTime: topPiecesByTime } = pieceStats(periodSessions, compositions);
 
   const activePieces = pieceSort === 'time' ? topPiecesByTime : topPieces;
   const activePieceMax = pieceSort === 'time'
@@ -1850,18 +1582,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
   const today = todayISO();
 
-  const daysSinceSession = (() => {
-    if (sessions.length === 0) return null;
-    const last = sessions.map(s => s.date).sort().at(-1);
-    return Math.floor((new Date(today + 'T12:00:00') - new Date(last + 'T12:00:00')) / 86400000);
-  })();
+  const daysSinceSession = daysSinceLatest(sessions, today);
 
-  const daysSinceLesson = (() => {
-    const all = lessons || [];
-    if (all.length === 0) return null;
-    const last = all.map(l => l.date).sort().at(-1);
-    return Math.floor((new Date(today + 'T12:00:00') - new Date(last + 'T12:00:00')) / 86400000);
-  })();
+  const daysSinceLesson = daysSinceLatest(lessons || [], today);
 
   const statItems = [
     { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱', allTime: period !== 'all' ? (allTimeMin >= 60 ? `${Math.floor(allTimeMin / 60)}h ${allTimeMin % 60}m total` : `${Math.round(allTimeMin)}m total`) : null },
