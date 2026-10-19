@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
+import { setLocalPref } from '../utils';
+import { buildSnapshot, SNAPSHOT_KEY, SNAPSHOT_EVERY_MS } from './timerSnapshot';
 
 const TICK_MS = 1000;
 
@@ -35,12 +37,16 @@ const TICK_MS = 1000;
 // happens to be.
 //
 // segments: [{ id, title, type, compositionId, plannedMinutes }]
-export function usePracticeTimer(initialSegments = []) {
-  const [segments, setSegments] = useState(initialSegments);
-  const [currentIndex, setCurrentIndex] = useState(0);
+//
+// restore: a snapshot from timerSnapshot.js to carry on from (the app was closed mid-session). The
+// timer picks up on the segment it was on, with the time already used; the screen starts it when
+// it opens, which here is the user tapping Resume.
+export function usePracticeTimer(initialSegments = [], restore = null) {
+  const [segments, setSegments] = useState(restore ? restore.segments : initialSegments);
+  const [currentIndex, setCurrentIndex] = useState(restore ? restore.currentIndex : 0);
   // Accumulated elapsed ms per segment, only updated when a segment is
   // paused/left — while running, current elapsed is derived live instead.
-  const [elapsedMs, setElapsedMs] = useState(() => initialSegments.map(() => 0));
+  const [elapsedMs, setElapsedMs] = useState(() => (restore ? restore.elapsedMs : initialSegments.map(() => 0)));
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const runStartRef = useRef(null);
@@ -158,6 +164,20 @@ export function usePracticeTimer(initialSegments = []) {
     });
     return () => sub.remove();
   }, []);
+
+  // Keep a saved copy of the timer so a killed or reloaded app can offer it back (see
+  // timerSnapshot.js): written whenever something changes, and every few seconds while it runs so
+  // the live time isn't lost. Cleared once the session is finished.
+  useEffect(() => {
+    if (isFinished) { setLocalPref(SNAPSHOT_KEY, ''); return undefined; }
+    const save = () => setLocalPref(SNAPSHOT_KEY, JSON.stringify(buildSnapshot({
+      segments, currentIndex, elapsedMs, runStart: runStartRef.current, isRunning, now: Date.now(),
+    })));
+    save();
+    if (!isRunning) return undefined;
+    const id = setInterval(save, SNAPSHOT_EVERY_MS);
+    return () => clearInterval(id);
+  }, [segments, currentIndex, elapsedMs, isRunning, isFinished]);
 
   function actualMinutesFor(idx) {
     const ms = idx === currentIndex ? currentElapsedMs() : (elapsedMs[idx] || 0);

@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, setLocalPref, sessionToTimerPlan } from '../utils';
+import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, getLocalPref, setLocalPref, sessionToTimerPlan } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
@@ -19,6 +19,7 @@ import { RatingMini } from '../components/UI';
 import { usePref } from '../utils/usePref';
 import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, relativeDay, todaySummary } from '../utils/planning';
 import { Ionicons } from '../components/Icon';
+import { SNAPSHOT_KEY, parseSnapshot, snapshotSummary, worthResuming } from '../utils/timerSnapshot';
 import { SyncIssueBanner } from '../components/SyncIssueBanner';
 import { FadeInUp, AnimatedFill } from '../components/Motion';
 import { delayFor } from '../utils/motion';
@@ -274,6 +275,33 @@ function WeekStrip({ week, lastWeek, goal, streak }) {
             </Text>
           </View>
         ) : null}
+      </View>
+    </View>
+  );
+}
+
+// Shown when the app was closed (or reloaded) while a timer was running: offers it back from the
+// last saved snapshot, rather than quietly losing the session. Resume carries on from the time
+// that was saved (see utils/timerSnapshot.js).
+function ResumeTimerCard({ summary, onResume, onDiscard }) {
+  return (
+    <View style={{ marginBottom: 16, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 14, borderWidth: 1, borderColor: COLOURS.navyA(0.25) }}>
+      <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>Pick up where you left off?</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>
+        {`${summary.names}  ·  ${summary.used} of ${summary.planned} min  ·  ${summary.ago}`}
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+        <TouchableOpacity onPress={onResume} activeOpacity={0.85} hitSlop={HIT_PILL}
+          accessibilityRole="button" accessibilityLabel="Resume the timer"
+          style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
+          <Ionicons name="play" size={18} color="#fff" />
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Resume</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onDiscard} activeOpacity={0.8} hitSlop={HIT_PILL}
+          accessibilityRole="button" accessibilityLabel="Discard the saved timer"
+          style={{ ...TOUCH_PILL, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.5) }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.textMuted }}>Discard</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -690,6 +718,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const [showAbout,       setShowAbout]       = useState(false);
   const [timerSetupVisible, setTimerSetupVisible] = useState(false);
   const [timerSegments,     setTimerSegments]     = useState(null); // non-null while a timed session is running
+  // A timer that was running when the app was closed, offered back as a Resume card.
+  const [resumable,    setResumable]    = useState(() => {
+    const saved = parseSnapshot(getLocalPref(SNAPSHOT_KEY, ''), Date.now());
+    return saved && worthResuming(saved) ? saved : null;
+  });
+  const [timerRestore, setTimerRestore] = useState(null);
   const [sessionKey,        setSessionKey]        = useState(0);   // bumped per session so PracticeTimerScreen remounts cleanly
   const onNavScroll = useNavScrollHandler(); // must be called unconditionally, before the isDesktop early return below
 
@@ -706,9 +740,22 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   function closeRight() { setRightPanel(null); setDetailSession(null); setDetailLesson(null); setLogModalDate(null); setLogModalSession(null); setLessonModalDate(null); setLessonModalLesson(null); }
 
   function handleTimerStart(segments) {
+    setTimerRestore(null);
+    setResumable(null);
     setTimerSegments(segments);
     setSessionKey(k => k + 1);
     setTimerSetupVisible(false);
+  }
+
+  function resumeTimer() {
+    setTimerRestore(resumable);
+    setTimerSegments(resumable.segments);
+    setSessionKey(k => k + 1);
+    setResumable(null);
+  }
+  function discardTimer() {
+    setLocalPref(SNAPSHOT_KEY, '');
+    setResumable(null);
   }
 
   function handleTimerFinish(timer) {
@@ -733,6 +780,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       };
     });
     setTimerSegments(null);
+    setTimerRestore(null);
+    setLocalPref(SNAPSHOT_KEY, '');
     openLogSession(today, { date: today, segments: prefilled });
   }
 
@@ -849,6 +898,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     <>
       {/* A sync problem that needs attention (never just being offline) */}
       <SyncIssueBanner onPress={onOpenSettings} />
+
+      {/* A timer that was running when the app closed */}
+      {resumable && !timerSegments ? (
+        <ResumeTimerCard summary={snapshotSummary(resumable, Date.now())} onResume={resumeTimer} onDiscard={discardTimer} />
+      ) : null}
 
       {/* Start practice */}
       <FadeInUp>
@@ -1069,6 +1123,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             key={sessionKey}
             visible={true}
             initialSegments={timerSegments}
+            restore={timerRestore}
             compositions={compositions}
             onFinish={handleTimerFinish}
             isDesktop
@@ -1131,6 +1186,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           key={sessionKey}
           visible={true}
           initialSegments={timerSegments}
+          restore={timerRestore}
           compositions={compositions}
           onFinish={handleTimerFinish}
         />

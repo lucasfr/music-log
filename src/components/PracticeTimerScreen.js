@@ -96,8 +96,8 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
   );
 }
 
-export function PracticeTimerScreen({ visible, initialSegments, compositions, onFinish, isDesktop }) {
-  const timer = usePracticeTimer(initialSegments);
+export function PracticeTimerScreen({ visible, initialSegments, restore, compositions, onFinish, isDesktop }) {
+  const timer = usePracticeTimer(initialSegments, restore);
   useKeepAwake(visible && timer.isRunning);
   // True right after a segment transition that landed paused (timeout or
   // skip, both now autoStart:false) — shows an interstitial with its own
