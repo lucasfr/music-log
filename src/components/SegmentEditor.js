@@ -423,9 +423,18 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
                   <TextF value={segment.title || ''} onChange={v => field('title', v)} placeholder="Title" />
                 </Field>
               )}
-              <Field label="Section practised" icon="git-branch-outline">
-                <TextF value={segment.section || ''} onChange={v => field('section', v)} placeholder="e.g. Bars 1–16, full piece…" />
-              </Field>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <Field label="Section practised" icon="git-branch-outline">
+                    <TextF value={segment.section || ''} onChange={v => field('section', v)} placeholder="e.g. Bars 1–16, full piece…" />
+                  </Field>
+                </View>
+                <View style={{ width: 90 }}>
+                  <Field label="BPM" icon="pulse-outline">
+                    <NumberF value={segment.tempo || ''} onChange={v => field('tempo', v)} />
+                  </Field>
+                </View>
+              </View>
             </>
           )}
 
