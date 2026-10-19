@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Modal, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { Tap as TouchableOpacity } from './Motion';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { RatingMini } from './UI';

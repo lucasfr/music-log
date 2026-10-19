@@ -21,6 +21,8 @@ export const IONICON_TO_MDI = {
   'checkmark-circle-outline': 'check-circle-outline',
   'chevron-back': 'chevron-left',
   'chevron-forward': 'chevron-right',
+  'chevron-up': 'chevron-up',
+  'chevron-down': 'chevron-down',
   'cloud-outline': 'cloud-outline',
   'cloud-upload-outline': 'cloud-upload-outline',
   'color-palette-outline': 'palette-outline',

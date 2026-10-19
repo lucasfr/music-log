@@ -628,7 +628,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
           accessibilityState={{ expanded }}
           style={{ minHeight: 36, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 6 }}>
           <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{expanded ? 'Fewer options' : `${sig} \u00b7 more options`}</Text>
-          <Text style={{ fontSize: 11, color: COLOURS.steel }}>{expanded ? '\u25b2' : '\u25bc'}</Text>
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={16} color={COLOURS.steel} />
         </TouchableOpacity>
       ) : null}
 

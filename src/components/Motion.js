@@ -122,3 +122,10 @@ export function PressScale({ scaleTo = 0.95, onPressIn, onPressOut, style, child
     </AnimatedTouchable>
   );
 }
+
+// The default for tappable things across the app: PressScale with a gentler 0.97, so a full-width
+// card or row doesn't visibly shrink while a small pill still gives clear feedback. Files use it
+// by importing `{ Tap as TouchableOpacity }`, so every tappable thing responds the same way.
+export function Tap(props) {
+  return <PressScale scaleTo={0.97} {...props} />;
+}

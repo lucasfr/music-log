@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
+import { Tap as TouchableOpacity } from './Motion';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { TagCloud, Label } from './UI';

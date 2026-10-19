@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, Animated,
+  View, Text, Animated,
   PanResponder, Platform,
 } from 'react-native';
+import { Tap as TouchableOpacity } from '../components/Motion';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS } from '../theme';
 

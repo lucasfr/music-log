@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
+import { Tap as TouchableOpacity } from './Motion';
 import { Ionicons } from './Icon';
 import { COLOURS, RADIUS } from '../theme';
 import { useSyncIssue } from '../db/useSyncIssue';

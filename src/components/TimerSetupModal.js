@@ -1,7 +1,8 @@
 import React, { useState, useRef, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Modal, KeyboardAvoidingView, Platform,
+  View, Text, ScrollView, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { Tap as TouchableOpacity } from './Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';

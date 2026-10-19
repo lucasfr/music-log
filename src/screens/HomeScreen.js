@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Image, Modal,
+  View, Text, ScrollView, Image, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -21,7 +21,7 @@ import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, r
 import { Ionicons } from '../components/Icon';
 import { SNAPSHOT_KEY, parseSnapshot, snapshotSummary, worthResuming } from '../utils/timerSnapshot';
 import { SyncIssueBanner } from '../components/SyncIssueBanner';
-import { FadeInUp, AnimatedFill } from '../components/Motion';
+import { FadeInUp, AnimatedFill, Tap as TouchableOpacity } from '../components/Motion';
 import { delayFor } from '../utils/motion';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
@@ -790,6 +790,10 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const hasToday = todaySessions.length > 0 || todayLessons.length > 0;
   // Once something is logged, Today folds to one summary line (open by default on desktop).
   const [todayOpen, setTodayOpen] = useState(!!isDesktop);
+  // Today's entries ease in when you open them, but not when the screen first appears.
+  const todayWasOpen = useRef(todayOpen);
+  const todayJustOpened = todayOpen && !todayWasOpen.current;
+  useEffect(() => { todayWasOpen.current = todayOpen; }, [todayOpen]);
 
   const currentStreak = useMemo(() => {
     let count = 0;
@@ -934,9 +938,10 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               accessibilityLabel={`${todaySummary(todaySessions, todayLessons)}. ${todayOpen ? 'Hide' : 'Show'} today's entries`}
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44, paddingHorizontal: 14, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5) }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.text }}>{todaySummary(todaySessions, todayLessons)}</Text>
-              <Text style={{ fontSize: 13, color: COLOURS.textDim }}>{todayOpen ? '\u25b4' : '\u25be'}</Text>
+              <Ionicons name={todayOpen ? 'chevron-up' : 'chevron-down'} size={18} color={COLOURS.textDim} />
             </TouchableOpacity>
             {todayOpen ? (
+          <FadeInUp skip={!todayJustOpened} distance={10}>
           <View style={{ gap: 10, marginTop: 10 }}>
             {todayLessons.map(l => (
               <LessonEntry key={l.id} lesson={l} compositions={compositions}
@@ -963,6 +968,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               </TouchableOpacity>
             </View>
           </View>
+          </FadeInUp>
             ) : null}
           </View>
         ) : (

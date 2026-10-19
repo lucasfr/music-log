@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '../components/Icon';
@@ -7,7 +7,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '..
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
-import { AnimatedFill } from '../components/Motion';
+import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { coverageColour, readableOn } from '../utils/chartColours';
 import { parseCollapsed, serializeCollapsed, toggleCollapsed } from '../utils/collapsed';
@@ -1591,6 +1591,10 @@ function GradePathway({ compositions, sessions }) {
 // long on a phone, so you can fold what you don't look at; the choice is remembered.
 function StatsSection({ id, title, first, collapsed, onToggle, children }) {
   const open = !collapsed.includes(id);
+  // The content eases in when a folded section is opened, but not when the screen first appears.
+  const wasOpen = useRef(open);
+  const justOpened = open && !wasOpen.current;
+  useEffect(() => { wasOpen.current = open; }, [open]);
   return (
     <View>
       <TouchableOpacity onPress={() => onToggle(id)} activeOpacity={0.8} hitSlop={HIT_PILL}
@@ -1598,9 +1602,13 @@ function StatsSection({ id, title, first, collapsed, onToggle, children }) {
         accessibilityLabel={`${title}, ${open ? 'expanded' : 'collapsed'}`}
         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, minHeight: 44, marginTop: first ? 0 : 8 }}>
         <SectionTitle style={{ marginTop: 0, marginBottom: 0, flex: 1 }}>{title}</SectionTitle>
-        <Text style={{ fontSize: 13, color: COLOURS.textDim }}>{open ? '\u25b4' : '\u25be'}</Text>
+        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={COLOURS.textDim} />
       </TouchableOpacity>
-      {open ? <View style={{ marginTop: 8 }}>{children}</View> : null}
+      {open ? (
+        <FadeInUp skip={!justOpened} distance={10}>
+          <View style={{ marginTop: 8 }}>{children}</View>
+        </FadeInUp>
+      ) : null}
     </View>
   );
 }

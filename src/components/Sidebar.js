@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, Platform } from 'react-native';
+import { Tap as TouchableOpacity } from './Motion';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from './Icon';
 import { COLOURS, RADIUS, live } from '../theme';

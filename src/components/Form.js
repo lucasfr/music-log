@@ -1,7 +1,8 @@
 import React from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, Modal, Platform,
+  View, Text, TextInput, Modal, Platform,
 } from 'react-native';
+import { Tap as TouchableOpacity } from './Motion';
 import { BlurView } from 'expo-blur';
 import { Picker } from '@react-native-picker/picker';
 import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, HIT_TEXT, live } from '../theme';

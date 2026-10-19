@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Platform, StyleSheet, PanResponder,
+  View, Text, ScrollView, Platform, StyleSheet, PanResponder,
 } from 'react-native';
+import { Tap as TouchableOpacity, FadeInUp } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
@@ -136,6 +137,10 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
     },
   })).current;
 
+  // The grid fades up when the month changes, but not the first time the screen appears.
+  const firstPaint = useRef(true);
+  useEffect(() => { firstPaint.current = false; }, []);
+
   return (
     <View>
       {/* Header */}
@@ -192,6 +197,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
 
       {/* Calendar grid */}
       <View {...swipe.panHandlers}>
+      <FadeInUp key={monthPrefix} skip={firstPaint.current} distance={8}>
       <BlurView intensity={32} tint={COLOURS.blurTint} style={{ borderRadius: RADIUS.md, overflow: 'hidden', shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 1, shadowRadius: 20, elevation: 6 }}>
         <View style={{ backgroundColor: COLOURS.glass, padding: 12 }}>
           <View style={{ flexDirection: 'row', marginBottom: 6 }}>
@@ -231,6 +237,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
           ))}
         </View>
       </BlurView>
+      </FadeInUp>
       </View>
 
       {/* Legend */}
