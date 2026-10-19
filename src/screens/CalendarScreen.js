@@ -13,6 +13,7 @@ import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate, formatArticulation, formatTempo, latestSession } from '../utils';
 import { FAB } from '../components/FAB';
 import { DaySheet } from '../components/DaySheet';
+import { currentStreak } from '../utils/progress';
 
 const DAYS   = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -33,17 +34,6 @@ function calendarDays(year, month) {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
   while (cells.length % 7 !== 0) cells.push(null);
   return cells;
-}
-function currentStreak(sessions) {
-  const dateSet = new Set(sessions.map(s => s.date));
-  let count = 0;
-  const d = new Date();
-  while (true) {
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    if (!dateSet.has(iso)) break;
-    count++; d.setDate(d.getDate() - 1);
-  }
-  return count;
 }
 function energyOpacity(energy) {
   const bar = (energy ?? 0) + 3;
@@ -123,7 +113,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
   const monthPrefix   = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
   const monthSessions = sessions.filter(s => s.date.startsWith(monthPrefix));
   const monthLessons  = (lessons || []).filter(l => l.date.startsWith(monthPrefix));
-  const streak        = currentStreak(sessions);
+  const streak        = currentStreak(sessions, today);
 
   // Swipe the grid sideways to change month (left for next, right for previous). It only takes
   // over a clearly horizontal drag, so scrolling the page and tapping a day still work.

@@ -1,6 +1,7 @@
 import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PROGRESS_TAG_TO_STATUS, STATUS_RANK, RANK_TO_STATUS, SHELVED_AFTER_DAYS, ARTICULATION_LABELS } from './constants';
+import { daysBetween } from './utils/statsCalc';
 
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -226,7 +227,7 @@ export function deriveCompositionStatus(compositionId, sessions, lessons, manual
   });
   if (rank === STATUS_RANK.new && logs.length > 1) rank = STATUS_RANK.learning;
 
-  const daysSince = Math.floor((new Date() - new Date(lastDate + 'T12:00:00')) / 86400000);
+  const daysSince = daysBetween(lastDate, todayISO());
   if (daysSince >= SHELVED_AFTER_DAYS) return 'shelved';
 
   return RANK_TO_STATUS[rank];
@@ -266,8 +267,6 @@ export function deriveStatusHistory(compositionId, sessions, lessons, manualShel
     d.setDate(d.getDate() + n);
     return localISO(d);
   };
-  const daysBetween = (a, b) => Math.floor((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000);
-
   const raw = [];
   let rank = STATUS_RANK.new;
 
