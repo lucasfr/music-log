@@ -1,88 +1,10 @@
 import { Platform } from 'react-native';
+import { buildSessionPayload, buildAllPayload, parseImportJSON, planImport, describeImport } from './backup';
 
-function uuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-  });
-}
-
-// ─── Payload builders ────────────────────────────────────────────────────────
-
-function buildSegment(seg, compName) {
-  return {
-    type:             seg.type,
-    group:            seg.group           || null,
-    piece:            seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName || null),
-    section:          seg.section         || null,
-    notes:            seg.notes           || null,
-    duration_minutes: seg.duration        ?? null,
-    difficulty:       seg.feltDifficulty  ?? null,
-    liking:           seg.liking          ?? null,
-    scales:           seg.scales          || null,
-    octaves:          seg.octaves         || null,
-    articulation:     seg.articulation    || null,
-    tempo_bpm:        seg.tempo           ? Number(seg.tempo) : null,
-    teacher_feedback: seg.feedback || seg.teacherFeedback || null,
-    assignment:       seg.assignment      || null,
-    challenge_tags:   seg.challenges      || [],
-    progress_tags:    seg.progress        || [],
-  };
-}
-
-function buildSessionPayload(session, compositions) {
-  const compName = id => (compositions.find(c => c.id === id) || {}).title || id;
-  return {
-    exported_at: new Date().toISOString(),
-    app: 'music.log',
-    session: {
-      date:             session.date,
-      duration_minutes: session.duration      ?? null,
-      energy:           session.energy        ?? null,
-      enjoyment:        session.enjoyment     ?? null,
-      wins:             session.wins          || null,
-      tomorrow_focus:   session.tomorrowFocus || null,
-      segments: (session.segments || []).map(seg => buildSegment(seg, compName)),
-    },
-  };
-}
-
-function buildAllPayload(sessions, lessons, compositions) {
-  const compName = id => (compositions.find(c => c.id === id) || {}).title || id;
-  return {
-    exported_at: new Date().toISOString(),
-    app: 'music.log',
-    sessions: [...sessions]
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .map(s => ({
-        date:             s.date,
-        duration_minutes: s.duration  ?? null,
-        energy:           s.energy    ?? null,
-        enjoyment:        s.enjoyment ?? null,
-        wins:             s.wins      || null,
-        segments:         (s.segments || []).map(seg => buildSegment(seg, compName)),
-      })),
-    lessons: [...lessons]
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .map(l => ({
-        date:             l.date,
-        duration_minutes: l.duration ?? null,
-        teacher:          l.teacher  || null,
-        wins:             l.wins     || null,
-        segments:         (l.segments || []).map(seg => buildSegment(seg, compName)),
-      })),
-    compositions: [...compositions]
-      .sort((a, b) => (a.title || '').localeCompare(b.title || ''))
-      .map(c => ({
-        title:     c.title,
-        composer:  c.composer || null,
-        status:    c.status   || null,
-        keys:      c.keys     || [],
-        time_sigs: c.timeSigs || [],
-        notes:     c.notes    || null,
-      })),
-  };
-}
+// The payloads and the import logic are in backup.js (pure, so tests/backup.test.mjs covers them).
+// This file is the part that touches the device: saving a file, sharing it, the clipboard and the
+// file picker. Re-exported so screens keep importing everything backup-related from here.
+export { parseImportJSON, planImport, describeImport };
 
 // ─── Download ─────────────────────────────────────────────────────────────────
 
@@ -144,80 +66,6 @@ async function copyToClipboard(payload) {
 }
 
 // ─── Import ───────────────────────────────────────────────────────────────────
-
-// Parses a music.log export JSON and returns { sessions, lessons, compositions }
-// ready to be saved via the existing hooks. Skips records that already exist
-// (matched by id). Generates fresh IDs for records that don't have one.
-export function parseImportJSON(json) {
-  let data;
-  try {
-    data = typeof json === 'string' ? JSON.parse(json) : json;
-  } catch {
-    throw new Error('Invalid JSON — could not parse file.');
-  }
-
-  if (!data || typeof data !== 'object') throw new Error('Unrecognised format.');
-
-  const now = new Date().toISOString();
-
-  const mapSegment = seg => ({
-    id:              seg.id              || uuid(),
-    type:            seg.type           || 'repertoire',
-    group:           seg.group          || null,
-    title:           seg.piece          || seg.title        || null,
-    compositionId:   seg.compositionId  || null,
-    section:         seg.section        || null,
-    notes:           seg.notes          || null,
-    duration:        seg.duration_minutes ?? seg.duration ?? null,
-    feltDifficulty:  seg.difficulty     ?? seg.feltDifficulty ?? null,
-    liking:          seg.liking         ?? null,
-    scales:          seg.scales         || null,
-    octaves:         seg.octaves        || null,
-    feedback:        seg.teacher_feedback || seg.teacherFeedback || seg.feedback || null,
-    articulation:    seg.articulation   || null,
-    tempo:           seg.tempo_bpm      ?? seg.tempo ?? null,
-    assignment:      seg.assignment     || null,
-    challenges:      seg.challenge_tags || seg.challenges    || [],
-    progress:        seg.progress_tags  || seg.progress || seg.progressTags || [],
-  });
-
-  const sessions = (data.sessions || []).map(s => ({
-    id:         s.id        || uuid(),
-    date:       s.date,
-    duration:   s.duration_minutes ?? s.duration ?? null,
-    energy:     s.energy    ?? null,
-    enjoyment:  s.enjoyment ?? null,
-    wins:       s.wins      || null,
-    segments:   (s.segments || []).map(mapSegment),
-    created_at: s.created_at || now,
-    updated_at: s.updated_at || now,
-  }));
-
-  const lessons = (data.lessons || []).map(l => ({
-    id:         l.id        || uuid(),
-    date:       l.date,
-    duration:   l.duration_minutes ?? l.duration ?? null,
-    teacher:    l.teacher   || null,
-    wins:       l.wins      || null,
-    segments:   (l.segments || []).map(mapSegment),
-    created_at: l.created_at || now,
-    updated_at: l.updated_at || now,
-  }));
-
-  const compositions = (data.compositions || []).map(c => ({
-    id:        c.id       || uuid(),
-    title:     c.title,
-    composer:  c.composer || null,
-    status:    c.status   || null,
-    keys:      c.keys     || [],
-    timeSigs:  c.time_sigs || c.timeSigs || [],
-    notes:     c.notes    || null,
-    created_at: c.created_at || now,
-    updated_at: c.updated_at || now,
-  }));
-
-  return { sessions, lessons, compositions };
-}
 
 // Picks a JSON file from disk (web only) and returns parsed content.
 export function pickJSONFile() {
