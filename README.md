@@ -113,7 +113,7 @@ music-log/
     │   ├── hooks.js                # useSessions, useCompositions, useLessons — local save/load + auto push/pull sync
     │   ├── sync.js                 # Supabase push/pull/merge — safe no-ops when not signed in
     │   ├── syncStatus.js           # Pub-sub for push/pull outcomes, feeds the Settings sync indicator
-    │   ├── records.js              # Native storage keeps the whole record (packRecord/unpackRecord); reshapes a pulled Supabase piece into the local form (time_sigs → timeSigs, tempo); pure, unit-tested
+    │   ├── records.js              # Native storage keeps the whole record (packRecord/unpackRecord); the Supabase `data` column for fields with no column of their own; the merge of pulled rows; reshapes a pulled Supabase piece into the local form (time_sigs → timeSigs, tempo); pure, unit-tested
     │   ├── syncIssue.js            # Which sync errors are worth showing (never being offline); pure, unit-tested
     │   ├── useSyncIssue.js         # Hook: the current sync problem, for the Settings dot and the Home banner
     │   └── migrations.js           # One-time, flag-guarded data fixes (e.g. technique-group backfill)
@@ -268,6 +268,31 @@ Runs the unit tests (the drag-to-reorder maths, the emoji and icon mappings, the
 ### Optional: cloud sync
 
 music.log works fully offline with no setup. To sync across devices, create a free [Supabase](https://supabase.com) project, then enter its Project URL and anon key in **Settings → Sync** and sign in (GitHub or email magic link). Nothing is sent anywhere until you do this.
+
+Sync needs three tables in the project (`sessions`, `lessons`, `compositions`). The `data` column carries the fields that have no column of their own (a piece's grade, ratings, tags, dates and notes; a lesson's ratings and notes; a session's tomorrow's-focus), so everything syncs. Turn on row-level security and add policies so each user can only read and write rows whose `user_id` is their own.
+
+```sql
+create table if not exists public.sessions (
+  id text primary key, user_id text not null, date text not null,
+  duration integer, energy integer, enjoyment integer, wins text,
+  segments jsonb default '[]'::jsonb, data jsonb,
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+create table if not exists public.lessons (
+  id text primary key, user_id text not null, date text not null,
+  duration integer, teacher text, wins text,
+  segments jsonb default '[]'::jsonb, data jsonb,
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+create table if not exists public.compositions (
+  id text primary key, user_id text not null, title text not null,
+  composer text, status text, keys jsonb default '[]'::jsonb, time_sigs jsonb default '[]'::jsonb,
+  notes text, tempo integer, data jsonb,
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+```
+
+Already have the tables from an earlier version? Add the column to each: `alter table public.sessions add column if not exists data jsonb;` (and the same for `lessons` and `compositions`), then use **Settings → Push all to Supabase** on the device with the full data. Until the column exists, pushes still work without it and Settings shows the exact statement to run.
 
 ---
 

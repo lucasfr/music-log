@@ -3,7 +3,7 @@
 
 import { getClient, getSession } from '../lib/supabase';
 import { reportSyncStart, reportSyncSuccess, reportSyncError } from './syncStatus';
-import { missingColumn, missingColumnHint } from './records';
+import { missingColumn, missingColumnHint, REMOTE_COLUMNS, extrasFor, unpackRemote, mergeRows } from './records';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -26,14 +26,11 @@ function toRow(table, record, uid) {
   if (row.createdAt)  { row.created_at  = row.createdAt;  delete row.createdAt; }
   if (row.updatedAt)  { row.updated_at  = row.updatedAt;  delete row.updatedAt; }
   if (!row.updated_at) row.updated_at = new Date().toISOString();
-  // Strip fields that don't exist in the Supabase schema
-  const KNOWN = {
-    sessions:     ['id','user_id','date','duration','energy','enjoyment','wins','segments','created_at','updated_at'],
-    lessons:      ['id','user_id','date','duration','teacher','wins','segments','created_at','updated_at'],
-    compositions: ['id','user_id','title','composer','status','keys','time_sigs','tempo','notes','created_at','updated_at'],
-  };
-  const allowed = KNOWN[table];
+  // Fields with no column of their own travel in `data` (see records.js); everything else is cut
+  // down to the columns the tables have.
+  const allowed = REMOTE_COLUMNS[table];
   if (allowed) {
+    row.data = extrasFor(table, record) || null;
     for (const key of Object.keys(row)) {
       if (!allowed.includes(key)) delete row[key];
     }
@@ -138,7 +135,7 @@ export async function pullTable(table) {
       from += PAGE_SIZE;
     }
     reportSyncSuccess(`pull:${table}`);
-    return allData;
+    return allData.map(unpackRemote);
   } catch (e) {
     console.warn(`[sync] pull ${table} exception:`, e.message);
     reportSyncError(e.message, `pull:${table}`);
@@ -148,26 +145,6 @@ export async function pullTable(table) {
 
 // ─── Merge ────────────────────────────────────────────────────────────────────
 
-// Merges remote rows into local rows. When remote is newer, it wins — but
-// local-only fields (not present on the remote row) are always preserved.
-// This prevents stripped Supabase columns from erasing local-only data.
-export function mergeRows(localRows, remoteRows, keyField = 'id') {
-  if (!remoteRows) return localRows;
-  const map = new Map();
-  for (const row of localRows)  map.set(row[keyField], row);
-  for (const row of remoteRows) {
-    const local = map.get(row[keyField]);
-    if (!local) {
-      map.set(row[keyField], row);
-    } else {
-      const localTs  = new Date(local.updated_at  || 0).getTime();
-      const remoteTs = new Date(row.updated_at || 0).getTime();
-      if (remoteTs > localTs) {
-        // Remote is newer: use remote as base but keep any local-only fields
-        // that the remote row doesn't carry (e.g. fields not in Supabase schema).
-        map.set(row[keyField], { ...local, ...row });
-      }
-    }
-  }
-  return Array.from(map.values());
-}
+// The merge itself lives in records.js (pure and unit-tested); it is re-exported here so the hooks
+// keep importing it from this file.
+export { mergeRows };

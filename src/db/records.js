@@ -48,7 +48,7 @@ export function missingColumn(message) {
 }
 
 // Column types we know, so the hint can be a statement that can be pasted as it is.
-const SQL_TYPES = { tempo: 'integer' };
+const SQL_TYPES = { tempo: 'integer', data: 'jsonb' };
 
 // The message shown when columns had to be left out of a push. It names the fix.
 export function missingColumnHint(table, columns) {
@@ -80,4 +80,86 @@ export function unpackRecord(fromColumns, dataText) {
   } catch {
     return fromColumns;
   }
+}
+
+// ── Fields with no column of their own (Supabase) ──
+//
+// The Supabase tables have a fixed set of columns, and anything else a record carried was stripped
+// before pushing, so it never left the device: a session's tomorrowFocus, a lesson's ratings and
+// notes, and nearly everything about a piece (grade, difficulty, liking, tags, dates, notes...).
+// A piece that reached a second device through sync arrived with only its title, keys, time
+// signatures and tempo. Each table now also has a `data jsonb` column carrying those extras.
+
+// The columns the app writes, per table. These must match the tables in Supabase;
+// tests/records.test.mjs holds the schema they were checked against.
+export const REMOTE_COLUMNS = {
+  sessions:     ['id', 'user_id', 'date', 'duration', 'energy', 'enjoyment', 'wins', 'segments', 'created_at', 'updated_at', 'data'],
+  lessons:      ['id', 'user_id', 'date', 'duration', 'teacher', 'wins', 'segments', 'created_at', 'updated_at', 'data'],
+  compositions: ['id', 'user_id', 'title', 'composer', 'status', 'keys', 'time_sigs', 'tempo', 'notes', 'created_at', 'updated_at', 'data'],
+};
+
+// Local fields that reach a column under another name, so they are not extras.
+const RENAMED = ['createdAt', 'updatedAt', 'timeSigs', 'userId'];
+
+// Everything a record carries that has no column of its own, for the `data` column; undefined when
+// there is nothing (or the table is not one we know).
+export function extrasFor(table, record) {
+  const columns = REMOTE_COLUMNS[table];
+  if (!columns || !record) return undefined;
+  const extras = {};
+  for (const [key, value] of Object.entries(record)) {
+    if (value === undefined || columns.includes(key) || RENAMED.includes(key)) continue;
+    extras[key] = value;
+  }
+  return Object.keys(extras).length ? extras : undefined;
+}
+
+// A pulled row with its `data` folded back into it. A column's value wins over `data` for any
+// field in both. An unreadable `data` is dropped rather than breaking the pull.
+export function unpackRemote(row) {
+  if (!row || typeof row !== 'object') return row;
+  const { data, ...columns } = row;
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return columns;
+  return { ...data, ...columns };
+}
+
+// ── Merging pulled rows with local ones ──
+
+// A value a record was never given. 0 counts, because a rating of 0 is "unset" in this app.
+const isBlank = v => v === undefined || v === null || v === '' || v === 0 || (Array.isArray(v) && v.length === 0);
+
+// `local` with every blank field filled from `remote`; the very same object when nothing was
+// filled, so callers can tell nothing changed.
+function fillGaps(local, remote) {
+  let filled = null;
+  for (const [key, value] of Object.entries(remote)) {
+    if (isBlank(value) || !isBlank(local[key])) continue;
+    if (!filled) filled = { ...local };
+    filled[key] = value;
+  }
+  return filled || local;
+}
+
+// Merges remote rows into local rows by id.
+//  - A remote row that is newer wins, but fields it doesn't carry are kept from the local row.
+//  - At the same timestamp (the same version of the record) only blank local fields are filled
+//    from the remote row, so fields that have only just started syncing arrive, and nothing is
+//    ever overwritten.
+//  - A local row that is newer is kept as it is: a field cleared on purpose stays cleared.
+// A row that needed no change is returned as the very same object, so a caller can tell which
+// rows changed (and need saving) by comparing references.
+export function mergeRows(localRows, remoteRows, keyField = 'id') {
+  if (!remoteRows) return localRows;
+  const map = new Map();
+  for (const row of localRows) map.set(row[keyField], row);
+  for (const row of remoteRows) {
+    const key = row[keyField];
+    const local = map.get(key);
+    if (!local) { map.set(key, row); continue; }
+    const localTs = new Date(local.updated_at || 0).getTime();
+    const remoteTs = new Date(row.updated_at || 0).getTime();
+    if (remoteTs > localTs) map.set(key, { ...local, ...row });
+    else if (remoteTs === localTs) map.set(key, fillGaps(local, row));
+  }
+  return Array.from(map.values());
 }

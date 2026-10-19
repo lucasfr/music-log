@@ -69,7 +69,7 @@ export function useSessions() {
         const localRow = local.find(l => l.id === row.id);
         const localTs  = new Date(localRow?.updated_at || 0).getTime();
         const remoteTs = new Date(row.updated_at || 0).getTime();
-        if (!localRow || remoteTs > localTs) await saveSession(row);
+        if (!localRow || row !== localRow) await saveSession(row);
       }
       setSessions(merged);
     }
@@ -129,7 +129,7 @@ export function useCompositions() {
         const localRow = local.find(l => l.id === row.id);
         const localTs  = new Date(localRow?.updated_at || 0).getTime();
         const remoteTs = new Date(row.updated_at || 0).getTime();
-        if (!localRow || remoteTs > localTs) await saveComposition(row);
+        if (!localRow || row !== localRow) await saveComposition(row);
       }
       setCompositions(merged);
     }
@@ -185,7 +185,7 @@ export function useLessons() {
         const localRow = local.find(l => l.id === row.id);
         const localTs  = new Date(localRow?.updated_at || 0).getTime();
         const remoteTs = new Date(row.updated_at || 0).getTime();
-        if (!localRow || remoteTs > localTs) await saveLesson(row);
+        if (!localRow || row !== localRow) await saveLesson(row);
       }
       setLessons(merged);
     }
