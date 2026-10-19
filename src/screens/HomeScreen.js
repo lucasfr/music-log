@@ -23,6 +23,7 @@ import { SNAPSHOT_KEY, parseSnapshot, snapshotSummary, worthResuming } from '../
 import { SyncIssueBanner } from '../components/SyncIssueBanner';
 import { FadeInUp, AnimatedFill, Tap as TouchableOpacity } from '../components/Motion';
 import { delayFor } from '../utils/motion';
+import { HomeInsightCards } from '../components/HomeInsightCards';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 
@@ -992,6 +993,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       {/* Next up (last session's focus) and this week's numbers */}
       {nextUp ? <FadeInUp delay={delayFor(1)}><NextUpCard focus={nextUp.focus} date={nextUp.date} /></FadeInUp> : null}
       {sessions.length > 0 ? <FadeInUp delay={delayFor(2)}><WeekStrip week={week} lastWeek={lastWeek} goal={goal} streak={currentStreak} /></FadeInUp> : null}
+      {sessions.length > 0 || (lessons || []).length > 0 ? (
+        <FadeInUp delay={delayFor(3)}>
+          <HomeInsightCards sessions={sessions} lessons={lessons || []} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
+        </FadeInUp>
+      ) : null}
       {backupDue ? (
         <FadeInUp delay={delayFor(3)}>
         <BackupNudge

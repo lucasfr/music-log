@@ -126,3 +126,334 @@ export function agoLabel(days) {
   if (days < 60) return `${Math.floor(days / 7)} weeks ago`;
   return `${Math.floor(days / 30)} months ago`;
 }
+
+// ── Lesson assignments ───────────────────────────────────────────────────────────────────────
+//
+// A lesson segment can carry an `assignment` ("what to practise before next lesson"). This turns
+// those into a checklist. An item is done when you tick it (`assignmentDone` on the lesson
+// segment, so it syncs and is backed up with the lesson), or covered automatically once a later
+// practice session has a segment for the same thing:
+//   - a piece: the same library piece (or, for an unlinked piece, the same title);
+//   - a technique segment that names scales or arpeggios: the same group with at least one of them;
+//   - any other technique segment: the same group.
+
+const norm = v => String(v ?? '').trim().toLowerCase();
+const scaleNames = list => (list || []).map(e => norm(typeof e === 'string' ? e : e && e.scale)).filter(Boolean);
+
+function coversAssignment(lessonSeg, seg) {
+  if (lessonSeg.type === 'repertoire') {
+    if (lessonSeg.compositionId) return seg.compositionId === lessonSeg.compositionId;
+    const t = norm(lessonSeg.title);
+    return !!t && seg.type === 'repertoire' && norm(seg.title) === t;
+  }
+  if (!lessonSeg.group || seg.group !== lessonSeg.group) return false;
+  const wanted = scaleNames(lessonSeg.scales);
+  if (!wanted.length) return true;
+  const done = new Set(scaleNames(seg.scales));
+  return wanted.some(n => done.has(n));
+}
+
+function assignmentLabel(seg, compositions) {
+  if (seg.type === 'repertoire') {
+    const c = (compositions || []).find(x => x.id === seg.compositionId);
+    return (c && c.title) || seg.title || 'Piece';
+  }
+  return seg.group || seg.title || 'Technique';
+}
+
+// -> { items, open, lessonDate }. Items are the assignments from your latest lesson that has any
+// (whatever their state, so you can see them ticked off), plus any still open from earlier lessons
+// within `windowDays`. Each item: { lessonId, segmentId, segmentIndex, lessonDate, text, label,
+// status: 'open' | 'covered' | 'done', doneOn, coveredOn, daysSince }.
+export function lessonAssignments(lessons, sessions, today, compositions = [], windowDays = 28) {
+  const all = [];
+  (lessons || []).forEach(l => (l.segments || []).forEach((seg, segmentIndex) => {
+    const text = String(seg.assignment || '').trim();
+    if (!text || !l.date || l.date > today) return;
+    let coveredOn = null;
+    (sessions || []).forEach(s => {
+      if (!(s.date > l.date && s.date <= today)) return;
+      if (!(s.segments || []).some(g => coversAssignment(seg, g))) return;
+      if (!coveredOn || s.date < coveredOn) coveredOn = s.date;
+    });
+    const doneOn = seg.assignmentDone ? (typeof seg.assignmentDone === 'string' ? seg.assignmentDone : l.date) : null;
+    all.push({
+      lessonId: l.id, segmentId: seg.id, segmentIndex, lessonDate: l.date, text,
+      label: assignmentLabel(seg, compositions),
+      status: doneOn ? 'done' : coveredOn ? 'covered' : 'open',
+      doneOn, coveredOn,
+      daysSince: daysBetween(l.date, today),
+    });
+  }));
+  if (!all.length) return { items: [], open: 0, lessonDate: null };
+  const lessonDate = all.reduce((d, x) => (x.lessonDate > d ? x.lessonDate : d), '');
+  const items = all
+    .filter(x => x.lessonDate === lessonDate || (x.status === 'open' && x.daysSince <= windowDays))
+    .sort((a, b) => b.lessonDate.localeCompare(a.lessonDate));
+  return { items, open: items.filter(x => x.status === 'open').length, lessonDate };
+}
+
+// The lesson with one assignment ticked (or un-ticked). The segment is found by id, or by its
+// position for any segment saved without one. A new object; the lesson passed in is untouched.
+export function setAssignmentDone(lesson, ref, done, today) {
+  const segments = (lesson.segments || []).map((seg, i) => {
+    const hit = ref.segmentId !== undefined && ref.segmentId !== null ? seg.id === ref.segmentId : i === ref.segmentIndex;
+    if (!hit) return seg;
+    if (done) return { ...seg, assignmentDone: today };
+    const { assignmentDone: _removed, ...rest } = seg; // eslint-disable-line no-unused-vars
+    return rest;
+  });
+  return { ...lesson, segments };
+}
+
+// ── Energy and what you usually do with it ───────────────────────────────────────────────────
+//
+// Energy (-2 to +2) is logged with each session. This describes what you have actually done at each
+// level: how long you play, how the time splits between technique and pieces, and how you rate the
+// session. It describes habit, not cause: a short session on a low-energy day may be what you
+// wanted, or just what fitted.
+
+const median = a => {
+  const s = [...a].sort((x, y) => x - y);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+const mean = a => a.reduce((t, v) => t + v, 0) / a.length;
+const usable = s => s.energy !== null && s.energy !== undefined && s.energy !== '' && Number.isFinite(Number(s.energy)) && num(s.duration) > 0;
+
+function shareOfTechnique(sessions) {
+  let tech = 0;
+  let total = 0;
+  sessions.forEach(s => (s.segments || []).forEach(seg => {
+    const d = num(seg.duration);
+    if (d <= 0 || (seg.type !== 'technique' && seg.type !== 'repertoire')) return;
+    total += d;
+    if (seg.type === 'technique') tech += d;
+  }));
+  return total > 0 ? tech / total : null;
+}
+
+// What your sessions at one energy level usually look like. With fewer than `min` sessions at
+// exactly that level it widens to the levels either side (`widened`); with still fewer, there is
+// not enough to say. -> { enough: false, n } or { enough: true, energy, n, widened, minutes,
+// techniqueShare, repertoireShare, avgEnjoyment }. `minutes` is the median, to the nearest 5.
+export function suggestScope(sessions, energy, min = 3) {
+  const all = (sessions || []).filter(usable);
+  let set = all.filter(s => Number(s.energy) === energy);
+  let widened = false;
+  if (set.length < min) {
+    set = all.filter(s => Math.abs(Number(s.energy) - energy) <= 1);
+    widened = true;
+  }
+  if (set.length < min) return { enough: false, n: set.length };
+  const enjoy = set.filter(s => num(s.enjoyment) > 0).map(s => num(s.enjoyment));
+  const tech = shareOfTechnique(set);
+  return {
+    enough: true, energy, n: set.length, widened,
+    minutes: Math.max(5, Math.round(median(set.map(s => num(s.duration))) / 5) * 5),
+    techniqueShare: tech,
+    repertoireShare: tech === null ? null : 1 - tech,
+    avgEnjoyment: enjoy.length ? Math.round(mean(enjoy) * 10) / 10 : null,
+  };
+}
+
+function pearson(xs, ys) {
+  const n = xs.length;
+  const mx = mean(xs);
+  const my = mean(ys);
+  let sxy = 0;
+  let sxx = 0;
+  let syy = 0;
+  for (let i = 0; i < n; i++) {
+    sxy += (xs[i] - mx) * (ys[i] - my);
+    sxx += (xs[i] - mx) ** 2;
+    syy += (ys[i] - my) ** 2;
+  }
+  return sxx === 0 || syy === 0 ? null : sxy / Math.sqrt(sxx * syy);
+}
+
+// How energy lines up with enjoyment and with session length across all sessions.
+// -> { n, enjoyment: r | null, minutes: r | null }; null until there are `min` sessions to go on.
+export function energyLinks(sessions, min = 10) {
+  const all = (sessions || []).filter(usable);
+  if (all.length < min) return { n: all.length, enjoyment: null, minutes: null };
+  const e = all.map(s => Number(s.energy));
+  const withEnjoy = all.filter(s => num(s.enjoyment) > 0);
+  return {
+    n: all.length,
+    enjoyment: withEnjoy.length >= min ? pearson(withEnjoy.map(s => Number(s.energy)), withEnjoy.map(s => num(s.enjoyment))) : null,
+    minutes: pearson(e, all.map(s => num(s.duration))),
+  };
+}
+
+// "no clear link", "a weak link (higher energy goes with higher enjoyment)". `what` is 'enjoyment'
+// or 'length' (of the session), so the sentence says what goes up or down with energy.
+const LINK_WORDS = { enjoyment: ['higher enjoyment', 'lower enjoyment'], length: ['longer sessions', 'shorter sessions'] };
+export function describeLink(r, what = 'enjoyment') {
+  if (r === null || r === undefined) return null;
+  const a = Math.abs(r);
+  if (a < 0.2) return 'no clear link';
+  const strength = a < 0.4 ? 'a weak' : a < 0.6 ? 'a moderate' : 'a strong';
+  const [up, down] = LINK_WORDS[what] || LINK_WORDS.enjoyment;
+  return `${strength} link (higher energy goes with ${r > 0 ? up : down})`;
+}
+
+// ── Grade target and readiness ───────────────────────────────────────────────────────────────
+//
+// A target you set yourself: a grade, a date, the scales and arpeggios it asks for, and how many
+// pieces. The requirement lists are entered by you (from the syllabus you are following) rather
+// than built into the app, so the app never ships anyone's copyrighted syllabus listing, and it
+// works for any exam board or for a teacher's own list. Entries use the same shape as the scale
+// picker in the log: { scale, motion, octaves, interval }.
+
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+function cleanEntry(e) {
+  const scale = typeof e === 'string' ? e : e && e.scale;
+  if (!scale || typeof scale !== 'string') return null;
+  if (typeof e === 'string') return { scale, motion: 'parallel', octaves: 1, interval: 'unison' };
+  return {
+    scale,
+    motion: e.motion === 'contrary' ? 'contrary' : 'parallel',
+    octaves: Math.min(4, Math.max(1, Math.round(num(e.octaves)) || 1)),
+    interval: ['unison', 'third', 'sixth', 'tenth'].includes(e.interval) ? e.interval : 'unison',
+  };
+}
+
+export function emptyTarget() {
+  return { name: '', grade: '', date: '', piecesNeeded: 3, scales: [], arpeggios: [] };
+}
+
+// Stored JSON to a clean target, or null when there is none (or it is unreadable).
+export function parseTarget(raw) {
+  try {
+    const t = JSON.parse(raw);
+    if (!t || typeof t !== 'object' || Array.isArray(t)) return null;
+    const list = v => (Array.isArray(v) ? v.map(cleanEntry).filter(Boolean) : []);
+    const pieces = Math.round(Number(t.piecesNeeded));
+    return {
+      name: String(t.name || '').trim().slice(0, 40),
+      grade: String(t.grade || ''),
+      date: ISO.test(String(t.date || '')) ? t.date : '',
+      piecesNeeded: Number.isFinite(pieces) ? Math.min(10, Math.max(0, pieces)) : 3,
+      scales: list(t.scales),
+      arpeggios: list(t.arpeggios),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export const serializeTarget = t => JSON.stringify(t);
+
+// The target editor has three lists (scales, contrary-motion scales, arpeggios) because the picker
+// holds one entry per name, and a syllabus often wants the same key in both motions. These split a
+// target into those lists and join them back; each list forces its own motion, so tapping a name in
+// the picker (which flips motion) cannot move an entry into the wrong list.
+export function splitScales(scales) {
+  return {
+    similar: (scales || []).filter(e => e.motion !== 'contrary'),
+    contrary: (scales || []).filter(e => e.motion === 'contrary'),
+  };
+}
+
+export function joinScales(similar, contrary) {
+  const name = e => (typeof e === 'string' ? e : e && e.scale);
+  const as = motion => e => ({ ...(typeof e === 'string' ? { scale: e, octaves: 1, interval: 'unison' } : e), motion });
+  return [
+    ...(similar || []).filter(name).map(as('parallel')),
+    ...(contrary || []).filter(name).map(as('contrary')),
+  ];
+}
+
+// A target is worth showing once it asks for something.
+export const targetHasContent = t => !!t && (t.scales.length + t.arpeggios.length > 0 || (t.piecesNeeded > 0 && !!t.grade));
+
+const INTERVAL_WORDS = { third: 'in 3rds', sixth: 'in 6ths', tenth: 'in 10ths' };
+
+// "Bb major, 2 oct", "C harmonic minor, 2 oct, contrary", "G major, 2 oct, in 3rds".
+export function describeRequirement(r) {
+  const bits = [`${r.octaves} oct`];
+  if (r.motion === 'contrary') bits.push('contrary');
+  if (INTERVAL_WORDS[r.interval]) bits.push(INTERVAL_WORDS[r.interval]);
+  return `${r.name}, ${bits.join(', ')}`;
+}
+
+function practisedEntries(sessions, group, today) {
+  const out = [];
+  (sessions || []).forEach(s => {
+    if (!s.date || s.date > today) return;
+    (s.segments || []).forEach(seg => {
+      if (seg.group !== group) return;
+      (seg.scales || []).forEach(e => {
+        const isStr = typeof e === 'string';
+        const name = isStr ? e : e && e.scale;
+        if (!name) return;
+        out.push({
+          name,
+          octaves: (isStr ? 0 : num(e.octaves)) || num(seg.octaves) || 1,
+          motion: !isStr && e.motion === 'contrary' ? 'contrary' : 'parallel',
+          interval: (!isStr && e.interval) || 'unison',
+          date: s.date,
+        });
+      });
+    });
+  });
+  return out;
+}
+
+// How far along you are against a target. A requirement is met by a logged scale (or arpeggio)
+// with the same name, motion and interval, played over at least the required octaves. `recent`
+// means within `recentDays`; `stale` means practised but longer ago; `never` is not yet.
+// -> { scales, arpeggios, counts, pieces, sightReading, daysLeft }
+export function readiness(target, sessions, compositions, today, recentDays = 21) {
+  const check = (reqs, group) => {
+    const seen = practisedEntries(sessions, group, today);
+    return reqs.map(r => {
+      const hits = seen.filter(e => e.name === r.scale && e.motion === r.motion && e.interval === r.interval && e.octaves >= r.octaves);
+      const lastDate = hits.reduce((d, h) => (h.date > d ? h.date : d), '') || null;
+      const daysSince = lastDate ? daysBetween(lastDate, today) : null;
+      return {
+        group, name: r.scale, octaves: r.octaves, motion: r.motion, interval: r.interval,
+        lastDate, daysSince, times: hits.length,
+        status: !lastDate ? 'never' : daysSince <= recentDays ? 'recent' : 'stale',
+      };
+    });
+  };
+  const scales = check(target.scales, 'Scales');
+  const arpeggios = check(target.arpeggios, 'Arpeggios');
+  const all = [...scales, ...arpeggios];
+  const count = status => all.filter(r => r.status === status).length;
+
+  const candidates = target.grade
+    ? (compositions || []).filter(c => c.grade === target.grade && c.status !== 'ambition')
+    : [];
+  const ready = candidates.filter(c => c.status === 'performance-ready').length;
+
+  const cutoff = (() => {
+    const d = new Date(`${today}T12:00:00`);
+    d.setDate(d.getDate() - 28);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+  let srSessions = 0;
+  let srMinutes = 0;
+  (sessions || []).forEach(s => {
+    if (!s.date || s.date < cutoff || s.date > today) return;
+    const segs = (s.segments || []).filter(g => g.group === 'Sight-reading');
+    if (!segs.length) return;
+    srSessions += 1;
+    srMinutes += segs.reduce((t, g) => t + num(g.duration), 0);
+  });
+
+  return {
+    scales, arpeggios,
+    counts: { total: all.length, recent: count('recent'), stale: count('stale'), never: count('never') },
+    pieces: {
+      needed: target.piecesNeeded, ready, candidates: candidates.length,
+      list: candidates.map(c => ({ id: c.id, title: c.title || 'Untitled', status: c.status || 'new' })),
+      short: Math.max(0, target.piecesNeeded - ready),
+    },
+    sightReading: { sessions: srSessions, minutes: srMinutes },
+    daysLeft: target.date ? daysBetween(today, target.date) : null,
+  };
+}

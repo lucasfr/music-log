@@ -8,6 +8,7 @@ import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
 import { tempoProgress, describeTempo, staleScales, agoLabel } from '../utils/insights';
+import { GradeTargetCard } from '../components/GradeTargetCard';
 import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { coverageColour, readableOn } from '../utils/chartColours';
@@ -2028,6 +2029,12 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <StatsSection id="gradepath" title="Grade pathway" collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <GradePathway compositions={compositions} sessions={sessions} />
+        </GlassCard>
+
+        </StatsSection>
+        <StatsSection id="gradetarget" title="Grade target" collapsed={collapsed} onToggle={toggleSection}>
+        <GlassCard>
+          <GradeTargetCard sessions={sessions} compositions={compositions} />
         </GlassCard>
 
         </StatsSection>

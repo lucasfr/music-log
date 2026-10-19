@@ -21,7 +21,7 @@ function ZeldaBar(props) {
 // ─── Scales / arpeggios picker ─────────────────────────────────────────────
 // Multi-select with search filter and + to add more
 
-function ScalesPicker({ selected = [], onChange }) {
+export function ScalesPicker({ selected = [], onChange }) {
   const [filter, setFilter] = useState('');
   const [showAll, setShowAll] = useState(false);
 
