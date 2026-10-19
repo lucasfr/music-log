@@ -198,6 +198,12 @@ const STATUS_DARK = {
 // Follows the theme (read it where it's used, not into a module-level constant).
 export const STATUS_COLOURS = live(() => (COLOURS.isDark ? STATUS_DARK : STATUS_LIGHT));
 
+// Text that sits on a faint amber or green tint (a selected filter pill, a "connected" label).
+// A fixed dark brown or dark green is fine on the light page and close to invisible on the dark one.
+export const TINT_TEXT = live(() => (COLOURS.isDark
+  ? { amber: '#FFC48A', success: '#4FD6A8' }
+  : { amber: '#7A3A00', success: '#00704D' }));
+
 export const RADIUS = {
   sm:   10,
   md:   16,

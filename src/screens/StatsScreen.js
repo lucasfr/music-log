@@ -9,6 +9,7 @@ import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
 import { AnimatedFill } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
+import { coverageColour, readableOn } from '../utils/chartColours';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
@@ -1158,24 +1159,10 @@ const SCALE_LABEL_TO_COF = {
   'Ab diminished 7th': 'Ab', 'Eb diminished 7th': 'Eb', 'Bb diminished 7th': 'Bb', 'F diminished 7th': 'F',
 };
 
-function amberForCount(n, max) {
-  if (!n) return 'rgba(180,178,170,0.22)';
-  const t = n / Math.max(max, 1);
-  if (t < 0.15) return '#FAEEDA';
-  if (t < 0.35) return '#FAC775';
-  if (t < 0.6)  return '#EF9F27';
-  if (t < 0.85) return '#BA7517';
-  return '#854F0B';
-}
-function tealForCount(n, max) {
-  if (!n) return 'rgba(180,178,170,0.15)';
-  const t = n / Math.max(max, 1);
-  if (t < 0.1)  return '#E1F5EE';
-  if (t < 0.3)  return '#9FE1CB';
-  if (t < 0.55) return '#5DCAA5';
-  if (t < 0.8)  return '#1D9E75';
-  return '#0F6E56';
-}
+// Segment colours follow the theme, and each key name takes whichever of near-black or white reads
+// on its segment (utils/chartColours.js).
+function amberForCount(n, max) { return coverageColour('amber', n, max, COLOURS.isDark); }
+function tealForCount(n, max) { return coverageColour('teal', n, max, COLOURS.isDark); }
 
 function cofArcPath(cx, cy, r1, r2, startDeg, endDeg) {
   const s = startDeg * Math.PI / 180;
@@ -1335,18 +1322,20 @@ function ScaleCoverage({ sessions }) {
             const midRad   = midDeg * Math.PI / 180;
             const majorSel = sel?.ring === 'major' && sel?.index === i;
             const minorSel = sel?.ring === 'minor' && sel?.index === i;
+            const majorFill = majorSel ? '#FCBF49' : amberForCount(majorCounts[i], maxCount);
+            const minorFill = minorSel ? '#1D9E75' : tealForCount(minorCounts[i], maxCount);
             return (
               <G key={key}>
                 <Path
                   d={cofArcPath(cx, cy, R1, R2, startDeg, endDeg)}
-                  fill={majorSel ? '#FCBF49' : amberForCount(majorCounts[i], maxCount)}
-                  stroke="#fff" strokeWidth={2}
+                  fill={majorFill}
+                  stroke={COLOURS.bg} strokeWidth={2}
                   onPress={() => setSelected(majorSel ? null : { ring: 'major', index: i })}
                 />
                 <Path
                   d={cofArcPath(cx, cy, R2, R3, startDeg, endDeg)}
-                  fill={minorSel ? '#1D9E75' : tealForCount(minorCounts[i], maxCount)}
-                  stroke="#fff" strokeWidth={1.5}
+                  fill={minorFill}
+                  stroke={COLOURS.bg} strokeWidth={1.5}
                   onPress={() => setSelected(minorSel ? null : { ring: 'minor', index: i })}
                 />
                 <SvgText
@@ -1354,14 +1343,14 @@ function ScaleCoverage({ sessions }) {
                   y={cy + (R1 + R2) / 2 * Math.sin(midRad)}
                   textAnchor="middle" dominantBaseline="central"
                   fontSize={size * 0.048} fontWeight="500"
-                  fill={COLOURS.text} fontFamily="Lato"
+                  fill={readableOn(majorFill, COLOURS.bg)} fontFamily="Lato"
                 >{key === 'F#' ? 'F#/Gb' : key}</SvgText>
                 <SvgText
                   x={cx + (R2 + R3) / 2 * Math.cos(midRad)}
                   y={cy + (R2 + R3) / 2 * Math.sin(midRad)}
                   textAnchor="middle" dominantBaseline="central"
                   fontSize={size * 0.038}
-                  fill={COLOURS.textDim} fontFamily="Lato"
+                  fill={readableOn(minorFill, COLOURS.bg)} fillOpacity={0.85} fontFamily="Lato"
                 >{COF_MINORS[i]}</SvgText>
               </G>
             );

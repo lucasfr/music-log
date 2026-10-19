@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from './Icon';
 import { PressScale } from './Motion';
-import { COLOURS, RADIUS, SIZES, STATUS_COLOURS, TOUCH, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, SIZES, STATUS_COLOURS, TINT_TEXT, TOUCH, HIT_PILL } from '../theme';
 
 // ─── Glass card ───────────────────────────────────────────────────────────────
 
@@ -257,7 +257,7 @@ export function TagCloud({ tags, selected, onToggle }) {
             <Text style={{
               fontFamily: active ? 'Lato-Bold' : 'Lato',
               fontSize: SIZES.label,
-              color: active ? '#7A3A00' : COLOURS.textMuted,
+              color: active ? TINT_TEXT.amber : COLOURS.textMuted,
             }}>
               {t}
             </Text>

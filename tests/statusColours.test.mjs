@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = p => readFileSync(join(here, '..', p), 'utf8');
-const { COLOURS, STATUS_COLOURS, applyTheme } =
+const { COLOURS, STATUS_COLOURS, TINT_TEXT, applyTheme } =
   await import('data:text/javascript;base64,' + Buffer.from(read('src/theme/index.js')).toString('base64'));
 
 // Every status the app can show, from constants.js
@@ -75,3 +75,16 @@ test('listing the statuses works (the objects behave like plain ones)', () => {
   assert.deepEqual(Object.keys(STATUS_COLOURS).sort(), [...STATUSES].sort());
   assert.equal(STATUS_COLOURS.nonsense, undefined);
 });
+
+// Text on a faint amber (selected filter pill) or green ("connected") tint, as the app draws them.
+const TINTS = { amber: 'rgba(247,127,0,0.14)', success: 'rgba(0,180,120,0.08)' };
+for (const theme of ['light', 'dark']) {
+  test(`${theme}: text on an amber or green tint is readable (at least 4.5:1)`, () => {
+    applyTheme(theme);
+    for (const kind of Object.keys(TINTS)) {
+      const { tile, text } = tileAndText({ bg: TINTS[kind], text: TINT_TEXT[kind] });
+      const ratio = contrast(text, tile);
+      assert.ok(ratio >= 4.5, `${theme} ${kind}: ${ratio.toFixed(2)}:1`);
+    }
+  });
+}

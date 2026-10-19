@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, Activity
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '../components/Icon';
-import { COLOURS, RADIUS, HIT_TEXT, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, HIT_TEXT, TOUCH_PILL, HIT_PILL, TINT_TEXT } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import { notify } from '../utils/notify';
 import { usePref } from '../utils/usePref';
@@ -149,7 +149,7 @@ function StatusDot({ connected }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: connected ? '#00B478' : COLOURS.textDim }} />
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: connected ? '#00825A' : COLOURS.textDim }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: connected ? TINT_TEXT.success : COLOURS.textDim }}>
         {connected ? 'Connected' : 'Not connected'}
       </Text>
     </View>
@@ -161,7 +161,7 @@ function ResultBanner({ result, errorKey = 'errors' }) {
   const hasErrors = result[errorKey] > 0;
   return (
     <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: hasErrors ? 'rgba(214,40,40,0.07)' : 'rgba(0,180,120,0.08)' }}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: hasErrors ? COLOURS.red : '#00825A' }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: hasErrors ? COLOURS.red : TINT_TEXT.success }}>
         {result.message}
       </Text>
     </View>
