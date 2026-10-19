@@ -6,6 +6,18 @@ import {
 } from '../db';
 import { pushRecord, deleteRecord, pullTable, mergeRows } from './sync';
 import { fromRemoteComposition } from './records';
+import { notify } from '../utils/notify';
+
+// A failed write to local storage used to vanish: the form has already closed by then, so the entry
+// was lost without a word. Say so (the caller still sees the error, as before).
+async function guardLocalWrite(write, what) {
+  try {
+    await write();
+  } catch (e) {
+    notify(`Couldn't save your ${what}`, 'It was not stored on this device. Please enter it again.');
+    throw e;
+  }
+}
 
 // ─── Local intent guards ───────────────────────────────────────────────────────
 // These sets/maps prevent remote stale data from overwriting local edits or
@@ -68,7 +80,7 @@ export function useSessions() {
   const save = useCallback(async (session) => {
     const record = { ...session, updated_at: new Date().toISOString() };
     pendingSaves.sessions.set(record.id, record);
-    await saveSession(record);
+    await guardLocalWrite(() => saveSession(record), 'practice session');
     pushRecord('sessions', record).finally(() => {
       setTimeout(() => pendingSaves.sessions.delete(record.id), SAVE_GUARD_MS);
     });
@@ -128,7 +140,7 @@ export function useCompositions() {
   const save = useCallback(async (comp) => {
     const record = { ...comp, updated_at: new Date().toISOString() };
     pendingSaves.compositions.set(record.id, record);
-    await saveComposition(record);
+    await guardLocalWrite(() => saveComposition(record), 'piece');
     pushRecord('compositions', record).finally(() => {
       setTimeout(() => pendingSaves.compositions.delete(record.id), SAVE_GUARD_MS);
     });
@@ -184,7 +196,7 @@ export function useLessons() {
   const save = useCallback(async (lesson) => {
     const record = { ...lesson, updated_at: new Date().toISOString() };
     pendingSaves.lessons.set(record.id, record);
-    await saveLesson(record);
+    await guardLocalWrite(() => saveLesson(record), 'lesson');
     pushRecord('lessons', record).finally(() => {
       setTimeout(() => pendingSaves.lessons.delete(record.id), SAVE_GUARD_MS);
     });

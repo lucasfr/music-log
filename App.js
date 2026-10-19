@@ -93,9 +93,9 @@ function AppInner({ fontsLoaded }) {
     }
   }, []);
 
-  const { sessions: allSessions, save: saveSession, remove: removeSession, reload: reloadSessions } = useSessions();
-  const { compositions: allCompositions, save: saveComp, remove: removeComp }   = useCompositions();
-  const { lessons: allLessons, save: saveLesson, remove: removeLesson }    = useLessons();
+  const { sessions: allSessions, save: saveSession, remove: removeSession, reload: reloadSessions, loading: sessionsLoading } = useSessions();
+  const { compositions: allCompositions, save: saveComp, remove: removeComp, loading: compsLoading }   = useCompositions();
+  const { lessons: allLessons, save: saveLesson, remove: removeLesson, loading: lessonsLoading }    = useLessons();
   const { width, onLayout, isDesktop }                         = useLayout();
 
   // Deletes are undoable app-wide: the item disappears at once but is only really
@@ -166,7 +166,17 @@ function AppInner({ fontsLoaded }) {
   // Desktop: manage active tab ourselves (no React Navigation tab bar)
   const [activeTab, setActiveTab] = useState('Home');
 
-  if (!fontsLoaded || !ready) {
+  // Keep the splash up until the local data has loaded. Without this Home drew with no sessions for a
+  // moment and flashed its "journal starts here" message before the real entries popped in. The wait
+  // is capped, so a storage problem can never leave you stuck on the splash.
+  const [dataWaited, setDataWaited] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setDataWaited(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+  const dataLoading = (sessionsLoading || compsLoading || lessonsLoading) && !dataWaited;
+
+  if (!fontsLoaded || !ready || dataLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ fontFamily: 'serif', fontSize: 28, color: COLOURS.navy, fontStyle: 'italic', letterSpacing: -0.5 }}>
