@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Animated, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, Animated, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import { Ionicons } from './Icon';
 import { Pop } from './Motion';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLOURS, RADIUS } from '../theme';
 import { useNavScrollContext } from '../context/NavScrollContext';
+import { useSyncIssue } from '../db/useSyncIssue';
+import { tabBarLayout } from '../utils/tabBarLayout';
 
 const TAB_ICONS = {
   Home:     { active: 'home',          inactive: 'home-outline' },
@@ -37,9 +39,14 @@ const COMPACT_RIM = 4;
 export function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
   const { compact } = useNavScrollContext();
+  const { width: screenWidth } = useWindowDimensions();
+  // A sync problem that needs attention puts a dot on the Settings tab (never for being offline).
+  const syncProblem = useSyncIssue();
 
   const visibleRoutes = state.routes.filter((r, i) => !HIDDEN_ROUTES.includes(r.name) || state.index === i);
-  const expandedWidth = visibleRoutes.length * ICON_SIZE + (visibleRoutes.length - 1) * ICON_GAP + 24 + (LABEL_W - ICON_SIZE);
+  // Seven tabs (Timeline showing) are wider than a small phone, so the gaps and end padding give way.
+  const layout = tabBarLayout(visibleRoutes.length, screenWidth, { icon: ICON_SIZE, label: LABEL_W, gap: ICON_GAP });
+  const expandedWidth = layout.width;
   const widthAnim = useRef(new Animated.Value(expandedWidth)).current;
 
   useEffect(() => {
@@ -66,8 +73,8 @@ export function CustomTabBar({ state, navigation }) {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: ICON_GAP,
-          paddingHorizontal: compact ? COMPACT_RIM : 12,
+          gap: compact ? ICON_GAP : layout.gap,
+          paddingHorizontal: compact ? COMPACT_RIM : layout.pad,
           backgroundColor: COLOURS.float,
           borderRadius: RADIUS.pill,
           shadowColor: COLOURS.glassShadowMd,
@@ -89,7 +96,7 @@ export function CustomTabBar({ state, navigation }) {
               onPress={() => navigation.navigate(route.name)}
               activeOpacity={0.75}
               accessibilityRole="tab"
-              accessibilityLabel={TAB_LABELS[route.name] || route.name}
+              accessibilityLabel={(TAB_LABELS[route.name] || route.name) + (route.name === 'Settings' && syncProblem ? ', sync problem' : '')}
               accessibilityState={{ selected: focused }}
               style={{
                 width: focused ? LABEL_W : ICON_SIZE,
@@ -107,6 +114,13 @@ export function CustomTabBar({ state, navigation }) {
                   color={focused ? '#ffffff' : COLOURS.textDim}
                 />
               </Pop>
+              {route.name === 'Settings' && syncProblem ? (
+                <View pointerEvents="none" style={{
+                  position: 'absolute', top: focused ? 7 : 6, right: focused ? 12 : 8,
+                  width: 10, height: 10, borderRadius: 5, backgroundColor: COLOURS.red,
+                  borderWidth: 2, borderColor: focused ? COLOURS.navy : COLOURS.float,
+                }} />
+              ) : null}
               {focused ? (
                 <Text numberOfLines={1} maxFontSizeMultiplier={1.1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', marginTop: 1 }}>
                   {TAB_LABELS[route.name] || route.name}
