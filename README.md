@@ -5,7 +5,7 @@
 [![Built with Expo](https://img.shields.io/badge/Expo-54-000020?logo=expo)](https://expo.dev)
 [![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react)](https://reactnative.dev)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://music-log.netlify.app)
-[![Version](https://img.shields.io/badge/version-1.1.0-088395)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-088395)](./CHANGELOG.md)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
 ---
@@ -39,6 +39,10 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 👆 **Touch-first editing** — segments reorder by dragging a grip handle (the page auto-scrolls near the screen edge, with a dashed landing slot and haptic ticks), and swipe left to delete segments, History entries and library pieces; the first swipeable row nudges itself open once to show the gesture
 - ↩️ **Undo instead of "are you sure?"** — deleting a session, lesson or piece hides it immediately and shows an Undo toast for 5 seconds before it's really deleted (it is committed if you close the tab or background the app first); removing a segment from a form can be undone and restores it in the same position
 - 🛡️ **Unsaved-changes guard** — cancelling the session log, lesson log or timer setup asks before throwing away what you've entered, but only when there's something to lose
+- 🚀 **Start practice** — a card at the top of Home opens the timer setup, or starts your last session or any saved routine in one tap
+- 📅 **Day sheet** — on a phone, tap any calendar day to see everything logged that day and to log a practice or lesson; swipe the grid to change month
+- ⚠️ **Sync alerts** — a dot on the Settings tab and a banner on Home when a sync problem needs attention (never just for being offline)
+- 🗂️ **Foldable Stats** — each Stats section folds away and stays that way
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
@@ -72,6 +76,16 @@ music-log/
 │   ├── planning.test.mjs           # Weekly goal, backup nudge, saved routines, grade pathway, reminder times
 │   ├── serviceWorker.test.mjs      # Runs the real service worker in a sandbox: update detection, offline, no false alarms
 │   ├── records.test.mjs            # Reshaping a Supabase piece into the local form (time_sigs → timeSigs, tempo), so the metronome reads it on any device
+│   ├── pieceTempo.test.mjs        # What the metronome takes from a piece (tempo, first time signature) in every stored shape
+│   ├── sortPieces.test.mjs        # Sorting the library: A–Z, most recently practised, grade
+│   ├── todayDates.test.mjs        # "4 days ago" labels and the one-line Today summary
+│   ├── pageChrome.test.mjs        # The page colour behind the iPhone notch follows the theme, and patch-dist.js matches the palette
+│   ├── statusColours.test.mjs     # Status colours on both themes: contrast, dark tiles stay dark, text on tints
+│   ├── chartLabels.test.mjs       # Which chart x-axis labels fit (none overlap, the newest is always shown)
+│   ├── chartColours.test.mjs      # Circle-of-fifths segment colours and readable label colours on both themes
+│   ├── syncIssue.test.mjs         # Which sync errors raise the Settings dot and the Home banner (never offline)
+│   ├── tabBarLayout.test.mjs      # Fitting seven tabs on a narrow phone
+│   ├── collapsed.test.mjs         # Remembering which Stats sections are folded
 │   └── motion.test.mjs             # Stagger delays and bar clamping for the animation helpers
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
@@ -97,7 +111,9 @@ music-log/
     │   ├── hooks.js                # useSessions, useCompositions, useLessons — local save/load + auto push/pull sync
     │   ├── sync.js                 # Supabase push/pull/merge — safe no-ops when not signed in
     │   ├── syncStatus.js           # Pub-sub for push/pull outcomes, feeds the Settings sync indicator
-    │   ├── records.js              # Reshapes a pulled Supabase piece into the local form (time_sigs → timeSigs, tempo); pure, unit-tested
+    │   ├── records.js              # Native storage keeps the whole record (packRecord/unpackRecord); reshapes a pulled Supabase piece into the local form (time_sigs → timeSigs, tempo); pure, unit-tested
+    │   ├── syncIssue.js            # Which sync errors are worth showing (never being offline); pure, unit-tested
+    │   ├── useSyncIssue.js         # Hook: the current sync problem, for the Settings dot and the Home banner
     │   └── migrations.js           # One-time, flag-guarded data fixes (e.g. technique-group backfill)
     ├── components/
     │   ├── Background.js           # Dot-grid SVG background
@@ -109,7 +125,9 @@ music-log/
     │   ├── Gestures.js             # SwipeRow (swipe-left delete), ReorderList + DragHandle (drag to reorder, auto-scroll) — plain PanResponder/Animated, no extra deps
     │   ├── Undo.js                 # UndoToast, useUndoToast (undo a local change), useUndoableDelete (deferred real deletes)
     │   ├── FAB.js                  # Shared floating action button (practice + lesson + timer)
-    │   ├── CustomTabBar.js         # Floating pill nav bar with scroll-aware collapse
+    │   ├── CustomTabBar.js         # Floating pill nav bar with scroll-aware collapse; fits narrow phones; sync dot on Settings
+    │   ├── DaySheet.js             # Calendar day bottom sheet (phone): every entry that day, plus Log practice / Log lesson
+    │   ├── SyncIssueBanner.js      # The banner on Home for a sync problem that needs attention
     │   ├── Sidebar.js              # Desktop sidebar navigation
     │   ├── SegmentEditor.js        # Technique / repertoire segment editor (incl. articulation picker and BPM field)
     │   ├── LogModal.js             # Session log form (pageSheet modal or inline)
@@ -117,15 +135,15 @@ music-log/
     │   ├── SessionDetailModal.js   # Session detail with export + delete (mobile)
     │   ├── LessonDetailModal.js    # Lesson detail with export + delete (mobile)
     │   ├── TimerSetupModal.js      # Build a practice-timer plan: add/confirm/collapse segments
-    │   ├── PracticeTimerScreen.js  # Countdown ring, pause/skip/+5min, metronome toggle
-    │   ├── MetronomeControl.js     # Tempo/time-sig/subdivision metronome, audio-engine-clock scheduling
+    │   ├── PracticeTimerScreen.js  # Countdown ring, plan progress strip, pause/skip/+5min, always-on metronome
+    │   ├── MetronomeControl.js     # Tempo/time-sig/subdivision metronome, audio-engine-clock scheduling; compact on a phone
     │   └── MinutesDial.js          # Drag-to-set minutes dial used in the timer setup segments
     ├── screens/
-    │   ├── HomeScreen.js           # Journal feed + today summary + FAB
-    │   ├── CalendarScreen.js       # Monthly calendar with day-detail panel
+    │   ├── HomeScreen.js           # Start practice card, journal feed, today summary, FAB
+    │   ├── CalendarScreen.js       # Monthly calendar: day sheet on a phone, detail panel on desktop, swipe to change month
     │   ├── HistoryScreen.js        # Full chronological session + lesson feed
-    │   ├── CompositionsScreen.js   # Composition library with full template
-    │   ├── StatsScreen.js          # Overview stats, charts, library breakdown
+    │   ├── CompositionsScreen.js   # Composition library: sort, quiet cards, expanded details
+    │   ├── StatsScreen.js          # Overview stats, charts, library breakdown; foldable sections
     │   ├── TimelineScreen.js       # Gantt-style composition timeline with status history
     │   ├── SettingsScreen.js       # App settings + Supabase sync setup/sign-in
     │   ├── AboutScreen.js          # About screen
@@ -133,6 +151,12 @@ music-log/
     └── utils/
         ├── motion.js                # Animation timings, delayFor() stagger and clampFraction(); pure, unit-tested
         ├── planning.js              # Weekly goal, backup nudge, saved routines, gradePathway, reminder times; pure, unit-tested
+        ├── pieceTempo.js            # What the metronome takes from a piece (tempo, first time signature); pure, unit-tested
+        ├── pageChrome.js            # Page/notch colours that follow the theme (iPhone PWA); pure where it can be, unit-tested
+        ├── chartLabels.js           # Which chart x-axis labels fit, and where they anchor; pure, unit-tested
+        ├── chartColours.js          # Circle-of-fifths segment ramps and readable label colours; pure, unit-tested
+        ├── collapsed.js             # Which Stats sections are folded, remembered between launches; pure, unit-tested
+        ├── tabBarLayout.js          # Fitting the tab bar to the screen width; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)
         ├── updatePrompt.js         # The "new version available — Reload" banner shown when the service worker reports a deploy
