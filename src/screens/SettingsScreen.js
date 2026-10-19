@@ -23,7 +23,9 @@ import {
 } from '../lib/supabase';
 import { pushRecord } from '../db/sync';
 import { getSyncStatus, subscribeSyncStatus } from '../db/syncStatus';
-import { exportAllJSON, copyAllJSON, parseImportJSON, pickJSONFile } from '../utils/export';
+import { exportAllJSON, copyAllJSON, parseImportJSON, planImport, describeImport, pickJSONFile } from '../utils/export';
+import { parseConflicts, parseOutbox, dirtyCount } from '../utils/syncQueue';
+import { outbox } from '../db/outbox';
 
 function timeAgo(iso) {
   if (!iso) return null;
@@ -270,12 +272,16 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     setError(null); setImportResult(null);
     try {
       const json = await pickJSONFile();
-      const parsed = parseImportJSON(json);
-      let s = 0, l = 0, c = 0, errors = 0;
-      for (const r of parsed.sessions)      { try { await onSaveSession(r);     s++; } catch { errors++; } }
-      for (const r of parsed.lessons)       { try { await onSaveLesson(r);      l++; } catch { errors++; } }
-      for (const r of parsed.compositions)  { try { await onSaveComposition(r); c++; } catch { errors++; } }
-      setImportResult({ errors, message: errors > 0 ? `${s}s / ${l}l / ${c}p imported · ${errors} failed` : `${s} sessions, ${l} lessons, ${c} pieces imported` });
+      // Only what isn't already on this device is saved: a record with an id that is here is
+      // skipped (unless the file's copy is newer), so importing a backup twice adds nothing.
+      const plan = planImport(parseImportJSON(json), { sessions, lessons, compositions });
+      let errors = 0;
+      // Pieces go first, so the segments that point at them are saved after them.
+      for (const r of plan.compositions) { try { await onSaveComposition(r); } catch { errors++; } }
+      for (const r of plan.sessions)     { try { await onSaveSession(r);     } catch { errors++; } }
+      for (const r of plan.lessons)      { try { await onSaveLesson(r);      } catch { errors++; } }
+      const summary = describeImport(plan.stats);
+      setImportResult({ errors, message: errors > 0 ? `${summary} · ${errors} failed to save` : summary });
     } catch (e) { setError(e.message || 'Import failed.'); }
   }
 
@@ -283,6 +289,24 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     await clearSupabaseCredentials();
     setUrl(''); setAnonKey(''); setCredsSaved(false); setSession(null);
   }
+
+  // Edits still waiting to reach Supabase, and versions that sync replaced because two devices
+  // edited the same entry (kept so they can be restored). Both live in preferences, so these
+  // update by themselves when the sync logic changes them.
+  const [outboxRaw] = usePref('syncOutbox', '');
+  const [conflictsRaw] = usePref('syncConflicts', '[]');
+  const waiting = dirtyCount(parseOutbox(outboxRaw));
+  const conflicts = parseConflicts(conflictsRaw);
+  const savers = { sessions: onSaveSession, lessons: onSaveLesson, compositions: onSaveComposition };
+  async function restoreConflict(c) {
+    try {
+      await savers[c.table](c.record);
+      outbox.resolveConflict(c.table, c.id, c.record.updated_at);
+    } catch {
+      notify("Couldn't restore", 'It could not be saved on this device. Try again.');
+    }
+  }
+  const dismissConflict = c => outbox.resolveConflict(c.table, c.id, c.record.updated_at);
 
   const isSignedIn = !!session;
   const totalRecords = sessions.length + lessons.length + compositions.length;
@@ -419,11 +443,51 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           <Row
             icon="cloud-outline"
             label="Supabase"
-            sublabel={syncSublabel}
+            sublabel={isSignedIn && waiting > 0 ? `${syncSublabel} · ${waiting} edit${waiting === 1 ? '' : 's'} waiting to sync` : syncSublabel}
             right={<StatusDot connected={isSignedIn} />}
             first last noBorder
           />
         </GlassCard>
+
+        {conflicts.length > 0 && (
+          <>
+            <SectionHeader>Edits replaced by sync</SectionHeader>
+            <GlassCard>
+              <View style={{ padding: 16 }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, lineHeight: 19 }}>
+                  Two devices changed the same entry. The newer version was kept, and the other one is saved here so nothing is lost.
+                </Text>
+              </View>
+              {conflicts.map(c => (
+                <View
+                  key={`${c.table}:${c.id}:${c.record.updated_at}`}
+                  style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: COLOURS.navyA(0.07) }}
+                >
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{c.label}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>
+                    {c.side === 'this device' ? 'Your edit on this device' : 'The edit from your other device'} · replaced {timeAgo(c.at)}
+                  </Text>
+                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+                    <TouchableOpacity
+                      onPress={() => restoreConflict(c)} activeOpacity={0.75} hitSlop={HIT_PILL}
+                      accessibilityRole="button" accessibilityLabel={`Restore this version of ${c.label}`}
+                      style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
+                    >
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Restore this version</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => dismissConflict(c)} activeOpacity={0.75} hitSlop={HIT_PILL}
+                      accessibilityRole="button" accessibilityLabel={`Dismiss ${c.label}`}
+                      style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10) }}
+                    >
+                      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted }}>Dismiss</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </GlassCard>
+          </>
+        )}
 
         {/* Credentials */}
         <GlassCard>

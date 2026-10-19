@@ -48,12 +48,13 @@ function toRow(table, record, uid) {
 // ─── Push (save) ──────────────────────────────────────────────────────────────
 
 // Resolves true when the record reached Supabase (possibly without a column the table lacks,
-// see below) and false when it didn't, so callers like "Push all" can count real failures.
+// see below), false when it didn't, so callers like "Push all" can count real failures, and null
+// when nothing was attempted because nobody is signed in (falsy too, so `if (ok)` still works).
 export async function pushRecord(table, record) {
   const scope = `push:${table}`;
   try {
     const session = await getSession();
-    if (!session) return false;
+    if (!session) return null;
     reportSyncStart();
     const client = await getClient();
     let row = toRow(table, record, userId(session));

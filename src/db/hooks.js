@@ -4,8 +4,9 @@ import {
   getAllCompositions, saveComposition, deleteComposition,
   getAllLessons, saveLesson, deleteLesson,
 } from '../db';
-import { pushRecord, deleteRecord, pullTable, mergeRows } from './sync';
+import { deleteRecord, pullTable, mergeRows } from './sync';
 import { fromRemoteComposition } from './records';
+import { outbox } from './outbox';
 import { notify } from '../utils/notify';
 
 // A failed write to local storage used to vanish: the form has already closed by then, so the entry
@@ -54,6 +55,9 @@ export function useSessions() {
     // Then pull remote and merge
     const remote = await pullTable('sessions');
     if (remote) {
+      // Retry edits that never reached the server, and keep a copy of whichever side loses when
+      // two devices edited the same record (see utils/syncQueue.js).
+      outbox.processPull('sessions', local, remote);
       // Filter out anything we've locally deleted or recently saved
       const safeRemote = remote
         .filter(r => !pendingDeletes.sessions.has(r.id))
@@ -81,7 +85,8 @@ export function useSessions() {
     const record = { ...session, updated_at: new Date().toISOString() };
     pendingSaves.sessions.set(record.id, record);
     await guardLocalWrite(() => saveSession(record), 'practice session');
-    pushRecord('sessions', record).finally(() => {
+    outbox.trackEdit('sessions', record, session.updated_at); // the version this edit started from
+    outbox.pushTracked('sessions', record).finally(() => {
       setTimeout(() => pendingSaves.sessions.delete(record.id), SAVE_GUARD_MS);
     });
     await reload();
@@ -116,6 +121,7 @@ export function useCompositions() {
     const pulled = await pullTable('compositions');
     const remote = pulled ? pulled.map(fromRemoteComposition) : null;
     if (remote) {
+      outbox.processPull('compositions', local, remote);
       const safeRemote = remote
         .filter(r => !pendingDeletes.compositions.has(r.id))
         .map(r => {
@@ -141,7 +147,8 @@ export function useCompositions() {
     const record = { ...comp, updated_at: new Date().toISOString() };
     pendingSaves.compositions.set(record.id, record);
     await guardLocalWrite(() => saveComposition(record), 'piece');
-    pushRecord('compositions', record).finally(() => {
+    outbox.trackEdit('compositions', record, comp.updated_at);
+    outbox.pushTracked('compositions', record).finally(() => {
       setTimeout(() => pendingSaves.compositions.delete(record.id), SAVE_GUARD_MS);
     });
     await reload();
@@ -172,6 +179,7 @@ export function useLessons() {
 
     const remote = await pullTable('lessons');
     if (remote) {
+      outbox.processPull('lessons', local, remote);
       const safeRemote = remote
         .filter(r => !pendingDeletes.lessons.has(r.id))
         .map(r => {
@@ -197,7 +205,8 @@ export function useLessons() {
     const record = { ...lesson, updated_at: new Date().toISOString() };
     pendingSaves.lessons.set(record.id, record);
     await guardLocalWrite(() => saveLesson(record), 'lesson');
-    pushRecord('lessons', record).finally(() => {
+    outbox.trackEdit('lessons', record, lesson.updated_at);
+    outbox.pushTracked('lessons', record).finally(() => {
       setTimeout(() => pendingSaves.lessons.delete(record.id), SAVE_GUARD_MS);
     });
     await reload();
