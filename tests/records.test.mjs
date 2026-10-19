@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(join(here, '../src/db/records.js'), 'utf8');
-const { fromRemoteComposition, missingColumn, missingColumnHint } =
+const { fromRemoteComposition, missingColumn, missingColumnHint, packRecord, unpackRecord } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 // What the sync merge does when the remote row wins (see mergeRows in src/db/sync.js).
@@ -96,4 +96,31 @@ test('the hint names the fix, as SQL when the column type is known', () => {
   const other = missingColumnHint('compositions', ['mystery']);
   assert.doesNotMatch(other, /alter table/);
   assert.match(other, /dashboard/);
+});
+
+// ── native storage keeps the whole record ──
+
+test('a packed record comes back whole, including fields the native tables have no column for', () => {
+  const piece = { id: 'c1', title: 'Minuet', keys: [{ root: 'F', mode: 'major' }], shelvedAt: '2026-09-01', updated_at: '2026-10-14T10:00:00Z' };
+  assert.deepEqual(unpackRecord({}, packRecord(piece)), piece);
+});
+
+test('the full copy wins over what the columns say, and the columns fill in the rest', () => {
+  const fromColumns = { id: 'c1', title: 'Old title', tempo: 80, timeSigs: [] };
+  const merged = unpackRecord(fromColumns, packRecord({ id: 'c1', title: 'New title', keys: [1] }));
+  assert.equal(merged.title, 'New title');
+  assert.deepEqual(merged.keys, [1]);
+  assert.equal(merged.tempo, 80, 'a field only the columns have is kept');
+});
+
+test('a row saved before the data column existed reads as it always did', () => {
+  const fromColumns = { id: 'c1', title: 'Old piece' };
+  for (const none of [null, undefined, '']) assert.equal(unpackRecord(fromColumns, none), fromColumns);
+});
+
+test('damaged or unexpected data never breaks a read', () => {
+  const fromColumns = { id: 'c1', title: 'Piece' };
+  for (const bad of ['{not json', '[1,2,3]', '42', 'null', '"text"']) {
+    assert.deepEqual(unpackRecord(fromColumns, bad), fromColumns, bad);
+  }
 });

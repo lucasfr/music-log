@@ -57,3 +57,27 @@ export function missingColumnHint(table, columns) {
   return `Supabase "${table}" has no ${list} column, so ${columns.length === 1 ? 'it' : 'they'} won't sync.`
     + (sql ? ` Run in the SQL editor: ${sql}` : ' Add it in the Supabase dashboard.');
 }
+
+// ── Native (SQLite) storage ──
+//
+// The native tables have a fixed set of columns, so anything else a record carries (a piece's keys
+// and shelvedAt, a practice segment's articulation, tempo_bpm and scales, a lesson's extras, and
+// the updated_at that sync compares) used to be dropped on save and only came back because sync
+// restored it. Each row now also keeps the whole record as JSON in a `data` column. Web storage
+// (IndexedDB) keeps whole objects already, so it never had the problem.
+
+// The whole record, as text for the `data` column.
+export const packRecord = record => JSON.stringify(record);
+
+// A record as read from the columns, overlaid with the full copy from `data` when there is one.
+// Rows saved before the column existed have no `data`, so they read as they always did. A damaged
+// or unexpected `data` is ignored rather than breaking the read.
+export function unpackRecord(fromColumns, dataText) {
+  if (!dataText) return fromColumns;
+  try {
+    const full = JSON.parse(dataText);
+    return full && typeof full === 'object' && !Array.isArray(full) ? { ...fromColumns, ...full } : fromColumns;
+  } catch {
+    return fromColumns;
+  }
+}

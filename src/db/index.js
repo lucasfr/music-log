@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { packRecord, unpackRecord } from './records';
 
 // ─── Web: IndexedDB ──────────────────────────────────────────────────────────
 
@@ -86,6 +87,10 @@ async function getDB() {
   try { await _db.execAsync('ALTER TABLE segments ADD COLUMN felt_difficulty INTEGER'); } catch (_) {}
   try { await _db.execAsync('ALTER TABLE lessons ADD COLUMN energy INTEGER'); } catch (_) {}
   try { await _db.execAsync('ALTER TABLE lessons ADD COLUMN enjoyment INTEGER'); } catch (_) {}
+  // The whole record as JSON (see records.js), so fields without a column of their own survive.
+  for (const table of ['sessions', 'lessons', 'compositions']) {
+    try { await _db.execAsync(`ALTER TABLE ${table} ADD COLUMN data TEXT`); } catch (_) {}
+  }
 
   const newCols = [
     'ALTER TABLE compositions ADD COLUMN difficulty INTEGER DEFAULT 0',
@@ -126,9 +131,10 @@ export async function getAllSessions() {
   const sessions = await db.getAllAsync('SELECT * FROM sessions ORDER BY date DESC, created_at DESC');
   const result = [];
   for (const s of sessions) {
+    const { data, ...cols } = s;
     const segments = await db.getAllAsync('SELECT * FROM segments WHERE session_id = ?', [s.id]);
-    result.push({
-      ...s,
+    result.push(unpackRecord({
+      ...cols,
       tomorrowFocus: s.tomorrow_focus,
       enjoyment: s.enjoyment ?? null,
       createdAt: s.created_at,
@@ -140,7 +146,7 @@ export async function getAllSessions() {
         feltDifficulty: seg.felt_difficulty ?? null,
         progress: seg.progress ? JSON.parse(seg.progress) : [],
       })),
-    });
+    }, data));
   }
   return result;
 }
@@ -153,12 +159,13 @@ export async function saveSession(session) {
 
   const db = await getDB();
   await db.runAsync(
-    `INSERT OR REPLACE INTO sessions (id, date, energy, duration, wins, tomorrow_focus, enjoyment, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO sessions (id, date, energy, duration, wins, tomorrow_focus, enjoyment, created_at, data)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [session.id, session.date, session.energy, session.duration || null,
      session.wins || null, session.tomorrowFocus || null,
      session.enjoyment || null,
-     session.createdAt || new Date().toISOString()]
+     session.createdAt || new Date().toISOString(),
+     packRecord(session)]
   );
   await db.runAsync('DELETE FROM segments WHERE session_id = ?', [session.id]);
   for (const seg of session.segments || []) {
@@ -184,7 +191,7 @@ export async function deleteSession(id) {
 // ─── COMPOSITIONS ────────────────────────────────────────────────────────────
 
 function rowToComp(r) {
-  return {
+  return unpackRecord({
     id: r.id, title: r.title, composer: r.composer, status: r.status,
     grade: r.grade, keyRoot: r.key_root, keyMode: r.key_mode, timeSig: r.time_sig,
     info: r.info, kerrinNotes: r.kerrin_notes, myNotes: r.my_notes,
@@ -211,7 +218,7 @@ function rowToComp(r) {
     // losing their time signature entirely.
     timeSigs: r.time_sigs ? JSON.parse(r.time_sigs) : (r.time_sig ? [r.time_sig] : []),
     createdAt: r.created_at,
-  };
+  }, r.data);
 }
 
 export async function getAllCompositions() {
@@ -235,8 +242,8 @@ export async function saveComposition(comp) {
         info, kerrin_notes, my_notes, difficulty, liking, arrangement, collection,
         year, tags, date_started, date_completed, technical_challenges,
         musical_focus, practice_notes, resource_sheet, resource_recordings,
-        resource_tutorials, teacher_feedback, tempo, time_sigs, created_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        resource_tutorials, teacher_feedback, tempo, time_sigs, created_at, data)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       comp.id, comp.title, comp.composer || null, comp.status || 'learning',
       comp.grade || null, comp.keyRoot || null, comp.keyMode || null,
@@ -256,6 +263,7 @@ export async function saveComposition(comp) {
       comp.tempo ? Number(comp.tempo) : null,
       comp.timeSigs?.length ? JSON.stringify(comp.timeSigs) : null,
       comp.createdAt || new Date().toISOString(),
+      packRecord(comp),
     ]
   );
 }
@@ -276,7 +284,7 @@ export async function getAllLessons() {
 
   const db = await getDB();
   const rows = await db.getAllAsync('SELECT * FROM lessons ORDER BY date DESC, created_at DESC');
-  return rows.map(r => ({
+  return rows.map(({ data, ...r }) => unpackRecord({
     ...r,
     type: 'lesson',
     pieces: r.pieces ? JSON.parse(r.pieces) : [],
@@ -285,7 +293,7 @@ export async function getAllLessons() {
     energy: r.energy ?? null,
     enjoyment: r.enjoyment ?? null,
     createdAt: r.created_at,
-  }));
+  }, data));
 }
 
 export async function saveLesson(lesson) {
@@ -297,8 +305,8 @@ export async function saveLesson(lesson) {
   const db = await getDB();
   await db.runAsync(
     `INSERT OR REPLACE INTO lessons
-       (id, date, teacher, duration, pieces, overall_notes, wins, next_focus, energy, enjoyment, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, date, teacher, duration, pieces, overall_notes, wins, next_focus, energy, enjoyment, created_at, data)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       lesson.id, lesson.date, lesson.teacher || null,
       lesson.duration || null,
@@ -309,6 +317,7 @@ export async function saveLesson(lesson) {
       lesson.energy ?? null,
       lesson.enjoyment ?? null,
       lesson.createdAt || new Date().toISOString(),
+      packRecord(lesson),
     ]
   );
 }
