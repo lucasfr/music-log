@@ -10,6 +10,7 @@ import { gradePathway } from '../utils/planning';
 import { AnimatedFill } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { coverageColour, readableOn } from '../utils/chartColours';
+import { parseCollapsed, serializeCollapsed, toggleCollapsed } from '../utils/collapsed';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
@@ -312,6 +313,11 @@ function weekLabel(isoWeek) {
 // Which x-axis date labels fit, and where they anchor, is in utils/chartLabels.js (labelIndices,
 // labelAnchor): the newest label is always shown and no two are closer than a label's width.
 
+// A diamond marker, so a second series on a chart differs from the first in shape as well as colour.
+function diamondPath(x, y, r = 4.5) {
+  return `M${x},${y - r} L${x + r},${y} L${x},${y + r} L${x - r},${y} Z`;
+}
+
 // ─── Practice volume chart ───────────────────────────────────────────────────
 
 function PracticeVolumeChart({ sessions, period }) {
@@ -540,7 +546,7 @@ function WeeklyTrendChart({ sessions, period }) {
           {likingPts.map((v, i) => {
             if (v === null) return null;
             const x = xAt(i);
-            return <Circle key={`l${i}`} cx={x} cy={toYLiking(v)} r={3} fill="#E87EA1" />;
+            return <Path key={`l${i}`} d={diamondPath(x, toYLiking(v))} fill="#E87EA1" />;
           })}
           {visible.map((key, i) => {
             const label = xLabel(key, i);
@@ -1581,10 +1587,34 @@ function GradePathway({ compositions, sessions }) {
   );
 }
 
+// One section of the page with a tappable title that folds it away. Stats is about nine screens
+// long on a phone, so you can fold what you don't look at; the choice is remembered.
+function StatsSection({ id, title, first, collapsed, onToggle, children }) {
+  const open = !collapsed.includes(id);
+  return (
+    <View>
+      <TouchableOpacity onPress={() => onToggle(id)} activeOpacity={0.8} hitSlop={HIT_PILL}
+        accessibilityRole="button" accessibilityState={{ expanded: open }}
+        accessibilityLabel={`${title}, ${open ? 'expanded' : 'collapsed'}`}
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, minHeight: 44, marginTop: first ? 0 : 8 }}>
+        <SectionTitle style={{ marginTop: 0, marginBottom: 0, flex: 1 }}>{title}</SectionTitle>
+        <Text style={{ fontSize: 13, color: COLOURS.textDim }}>{open ? '\u25b4' : '\u25be'}</Text>
+      </TouchableOpacity>
+      {open ? <View style={{ marginTop: 8 }}>{children}</View> : null}
+    </View>
+  );
+}
+
 export default function StatsScreen({ sessions, compositions, lessons, isDesktop }) {
   const onNavScroll = useNavScrollHandler(); // collapses the floating tab pill on scroll, like Home
   const [period, setPeriod] = useState('30d');
   const [pieceSort, setPieceSort] = useState('count');
+  const [collapsed, setCollapsed] = useState(() => parseCollapsed(getLocalPref('statsCollapsed', '[]')));
+  function toggleSection(id) {
+    const next = toggleCollapsed(collapsed, id);
+    setCollapsed(next);
+    setLocalPref('statsCollapsed', serializeCollapsed(next));
+  }
 
   const PERIODS = [
     { key: '7d',  label: '7 days' },
@@ -1792,12 +1822,13 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           ))}
         </View>
 
-        <SectionTitle>Activity</SectionTitle>
+        <StatsSection id="activity" title="Activity" first collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <ActivityGrid sessions={sessions} lessons={lessons} compositions={compositions} />
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 16 }}>{period === '7d' ? 'Daily' : 'Weekly'} trends & session quality ({periodLabel})</SectionTitle>
+        </StatsSection>
+        <StatsSection id="trends" title={`${period === '7d' ? 'Daily' : 'Weekly'} trends & session quality (${periodLabel})`} collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: isDesktop ? 1 : undefined, paddingRight: isDesktop ? 20 : 0 }}>
@@ -1822,7 +1853,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           </View>
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 16 }}>Technique & scales ({periodLabel})</SectionTitle>
+        </StatsSection>
+        <StatsSection id="technique" title={`Technique & scales (${periodLabel})`} collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: isDesktop ? 1 : undefined, minWidth: 0, paddingRight: isDesktop ? 20 : 0 }}>
@@ -1837,7 +1869,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           </View>
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 16 }}>Library</SectionTitle>
+        </StatsSection>
+        <StatsSection id="library" title="Library" collapsed={collapsed} onToggle={toggleSection}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
           {STATUS_OPTIONS.map(s => {
             const sc = STATUS_COLOURS[s] || {};
@@ -1869,17 +1902,20 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           })}
         </View>
 
-        <SectionTitle style={{ marginTop: 16 }}>Grade pathway</SectionTitle>
+        </StatsSection>
+        <StatsSection id="gradepath" title="Grade pathway" collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <GradePathway compositions={compositions} sessions={sessions} />
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 16 }}>Lesson insights ({periodLabel})</SectionTitle>
+        </StatsSection>
+        <StatsSection id="lessons" title={`Lesson insights (${periodLabel})`} collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <LessonInsights lessons={lessons || []} sessions={sessions} compositions={compositions} period={period} />
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 16 }}>Library growth & streak history</SectionTitle>
+        </StatsSection>
+        <StatsSection id="growth" title="Library growth & streak history" collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: isDesktop ? 1 : undefined, paddingRight: isDesktop ? 20 : 0 }}>
@@ -1894,7 +1930,8 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
           </View>
         </GlassCard>
 
-        <SectionTitle style={{ marginTop: 16 }}>Most practised & wins ({periodLabel})</SectionTitle>
+        </StatsSection>
+        <StatsSection id="top" title={`Most practised & wins (${periodLabel})`} collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 0, alignItems: isDesktop ? 'flex-start' : 'stretch' }}>
             <View style={{ flex: isDesktop ? 1 : undefined, paddingRight: isDesktop ? 20 : 0 }}>
@@ -1971,6 +2008,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             </View>
           </View>
         </GlassCard>
+        </StatsSection>
 
       </ScrollView>
     </SafeAreaView>
