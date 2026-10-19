@@ -39,6 +39,7 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 👆 **Touch-first editing** — segments reorder by dragging a grip handle (the page auto-scrolls near the screen edge, with a dashed landing slot and haptic ticks), and swipe left to delete segments, History entries and library pieces; the first swipeable row nudges itself open once to show the gesture
 - ↩️ **Undo instead of "are you sure?"** — deleting a session, lesson or piece hides it immediately and shows an Undo toast for 5 seconds before it's really deleted (it is committed if you close the tab or background the app first); removing a segment from a form can be undone and restores it in the same position
 - 🛡️ **Unsaved-changes guard** — cancelling the session log, lesson log or timer setup asks before throwing away what you've entered, but only when there's something to lose
+- ⏱️ **Resume a timer** — if the app is closed or reloaded mid-session, Home offers the timer back ("Pick up where you left off?") from a snapshot saved as it ran
 - 🚀 **Start practice** — a card at the top of Home opens the timer setup, or starts your last session or any saved routine in one tap
 - 📅 **Day sheet** — on a phone, tap any calendar day to see everything logged that day and to log a practice or lesson; swipe the grid to change month
 - ⚠️ **Sync alerts** — a dot on the Settings tab and a banner on Home when a sync problem needs attention (never just for being offline)
@@ -85,6 +86,7 @@ music-log/
 │   ├── chartColours.test.mjs      # Circle-of-fifths segment colours and readable label colours on both themes
 │   ├── syncIssue.test.mjs         # Which sync errors raise the Settings dot and the Home banner (never offline)
 │   ├── tabBarLayout.test.mjs      # Fitting seven tabs on a narrow phone
+│   ├── timerSnapshot.test.mjs     # Saving a running timer and offering it back: snapshot, validation, summary
 │   ├── collapsed.test.mjs         # Remembering which Stats sections are folded
 │   └── motion.test.mjs             # Stagger delays and bar clamping for the animation helpers
 ├── web/
@@ -156,6 +158,7 @@ music-log/
         ├── chartLabels.js           # Which chart x-axis labels fit, and where they anchor; pure, unit-tested
         ├── chartColours.js          # Circle-of-fifths segment ramps and readable label colours; pure, unit-tested
         ├── collapsed.js             # Which Stats sections are folded, remembered between launches; pure, unit-tested
+        ├── timerSnapshot.js         # Save/validate/summarise a running timer so it can be resumed; pure, unit-tested
         ├── tabBarLayout.js          # Fitting the tab bar to the screen width; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)
