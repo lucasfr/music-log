@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, getLocalPref, setLocalPref, sessionToTimerPlan } from '../utils';
+import { fmtDate, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, getLocalPref, setLocalPref, sessionToTimerPlan } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';

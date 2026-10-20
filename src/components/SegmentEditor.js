@@ -3,15 +3,10 @@ import { View, Text } from 'react-native';
 import { Tap as TouchableOpacity } from './Motion';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
-import { TagCloud, Label } from './UI';
+import { TagCloud } from './UI';
 import { Field, TextF, NumberF, SelectF, RatingBar } from './Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf } from '../utils';
-
-// ─── Zelda bar (reused from LogModal pattern) ────────────────────────────────
-
-const CELL_W = 36;
-const CELLS  = 5;
 
 // Felt difficulty / liking: the shared rating bar, with slightly smaller emoji.
 function ZeldaBar(props) {

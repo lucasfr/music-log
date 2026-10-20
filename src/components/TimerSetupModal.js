@@ -5,9 +5,9 @@ import {
 import { Tap as TouchableOpacity } from './Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
-import { GlassCard, SectionTitle, Btn } from './UI';
-import { Field, TextF, SelectF } from './Form';
+import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { SectionTitle, Btn } from './UI';
+import { TextF, SelectF } from './Form';
 import { ArticulationPicker } from './SegmentEditor';
 import { MinutesDial } from './MinutesDial';
 import { ReorderList, SwipeRow, DragHandle } from './Gestures';

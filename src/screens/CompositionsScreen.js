@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, ScrollView, Modal,
-  Alert, KeyboardAvoidingView, Platform, PanResponder,
+  KeyboardAvoidingView, Platform, PanResponder,
 } from 'react-native';
 import { Tap as TouchableOpacity } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -249,21 +249,6 @@ function TimeSigPicker({ value = [], onChange }) {
         })}
       </View>
     </Field>
-  );
-}
-
-// ─── Section divider ─────────────────────────────────────────────────────────
-
-function SectionDivider({ label, icon }) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14, marginTop: 8 }}>
-      <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorderSubtle }} />
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-        {icon && <Ionicons name={icon} size={11} color={COLOURS.textDim} />}
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>{label}</Text>
-      </View>
-      <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.glassBorderSubtle }} />
-    </View>
   );
 }
 
@@ -754,7 +739,6 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('title');
-  const [selectedComp, setSelectedComp] = useState(null);
 
   const composerSuggestions = [...new Set(
     compositions.map(c => c.composer).filter(Boolean).sort()

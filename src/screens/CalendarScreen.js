@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  View, Text, ScrollView, Platform, StyleSheet, PanResponder,
+  View, Text, ScrollView, StyleSheet, PanResponder,
 } from 'react-native';
 import { Tap as TouchableOpacity, FadeInUp } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';

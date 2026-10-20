@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, ScrollView, Alert,
+  View, Text, ScrollView,
   KeyboardAvoidingView, Platform, Modal,
 } from 'react-native';
 import { Tap as TouchableOpacity } from './Motion';

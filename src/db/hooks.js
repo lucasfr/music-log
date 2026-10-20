@@ -76,8 +76,6 @@ export function useSessions() {
       // Write any remote-wins rows back to local db
       for (const row of merged) {
         const localRow = kept.find(l => l.id === row.id);
-        const localTs  = new Date(localRow?.updated_at || 0).getTime();
-        const remoteTs = new Date(row.updated_at || 0).getTime();
         if (!localRow || row !== localRow) await saveSession(row);
       }
       setSessions(merged);
@@ -144,8 +142,6 @@ export function useCompositions() {
         .sort((a, b) => (a.title || '').localeCompare(b.title || ''));
       for (const row of merged) {
         const localRow = kept.find(l => l.id === row.id);
-        const localTs  = new Date(localRow?.updated_at || 0).getTime();
-        const remoteTs = new Date(row.updated_at || 0).getTime();
         if (!localRow || row !== localRow) await saveComposition(row);
       }
       setCompositions(merged);
@@ -208,8 +204,6 @@ export function useLessons() {
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       for (const row of merged) {
         const localRow = kept.find(l => l.id === row.id);
-        const localTs  = new Date(localRow?.updated_at || 0).getTime();
-        const remoteTs = new Date(row.updated_at || 0).getTime();
         if (!localRow || row !== localRow) await saveLesson(row);
       }
       setLessons(merged);

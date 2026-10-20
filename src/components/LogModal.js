@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, ScrollView, Alert,
+  View, Text, ScrollView,
   KeyboardAvoidingView, Platform, Modal,
 } from 'react-native';
 import { Tap as TouchableOpacity } from './Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
-import { GlassCard, SectionTitle, Btn, Label } from '../components/UI';
+import { GlassCard, SectionTitle, Btn } from '../components/UI';
 import { Field, TextF, NumberF, DatePickerF, RatingBar } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
 import { ReorderList, SwipeRow, DragHandle } from '../components/Gestures';
@@ -15,7 +15,7 @@ import { useUndoToast } from './Undo';
 import { useDirtyGuard } from '../utils/useDirtyGuard';
 import { reorder } from '../utils/reorder';
 import { notify } from '../utils/notify';
-import { uid, confirmDelete, confirmDiscard, todayISO } from '../utils';
+import { uid, confirmDiscard, todayISO } from '../utils';
 
 function energyBarToValue(bar) { return bar === 0 ? null : bar - 3; }
 export function energyValueToBar(v) { return v === null || v === undefined ? 0 : v + 3; }

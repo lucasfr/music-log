@@ -37,7 +37,7 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import AboutScreen from './src/screens/AboutScreen';
 import { AppBackground } from './src/components/Background';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
-import { Sidebar, SIDEBAR_W } from './src/components/Sidebar';
+import { Sidebar } from './src/components/Sidebar';
 import { CustomTabBar } from './src/components/CustomTabBar';
 import { NavScrollProvider } from './src/context/NavScrollContext';
 import { useLayout } from './src/utils/useLayout';
@@ -98,7 +98,7 @@ function AppInner({ fontsLoaded }) {
   const { sessions: allSessions, save: saveSession, remove: removeSession, reload: reloadSessions, loading: sessionsLoading } = useSessions();
   const { compositions: allCompositions, save: saveComp, remove: removeComp, reload: reloadComps, loading: compsLoading }   = useCompositions();
   const { lessons: allLessons, save: saveLesson, remove: removeLesson, reload: reloadLessons, loading: lessonsLoading }    = useLessons();
-  const { width, onLayout, isDesktop }                         = useLayout();
+  const { onLayout, isDesktop }                         = useLayout();
 
   // Deletes are undoable app-wide: the item disappears at once but is only really
   // deleted when the undo window closes. Every screen below sees the filtered lists,

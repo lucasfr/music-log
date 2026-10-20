@@ -1,13 +1,13 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, Modal, Alert,
+  View, Text, ScrollView, Modal,
 } from 'react-native';
 import { Tap as TouchableOpacity } from './Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, SIZES, HIT_TEXT } from '../theme';
+import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
 import { BtnRow, Btn, RatingMini } from '../components/UI';
-import { fmtDate, confirmDelete, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
+import { fmtDate, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
 import { formatRunThroughs } from '../utils/insights';
 import { exportSessionJSON, copySessionJSON } from '../utils/export';
 import { notify } from '../utils/notify';

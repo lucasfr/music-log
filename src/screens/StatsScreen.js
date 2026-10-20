@@ -3,8 +3,8 @@ import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '../components/Icon';
-import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '../theme';
-import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
+import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { GlassCard, SectionTitle, Label } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
 import { tempoProgress, describeTempo, staleScales, agoLabel, suggestNextTempo } from '../utils/insights';
@@ -35,7 +35,6 @@ const STATUS_EMOJI = {
 // ─── Activity grid (Jan–Dec calendar year) ──────────────────────────────────
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DAY_LABELS   = ['M','T','W','T','F','S','S'];
 const GAP = 2;
 
 function cellColor(duration) {
@@ -114,8 +113,6 @@ function ActivityGrid({ sessions, lessons, compositions }) {
   // Wrapped rows use a fixed slot per month so the columns line up across rows
   const slotW = maxWeeks * (cell + GAP) - GAP;
 
-  const totalHeight = 7 * (cell + GAP) - GAP;
-  const dayLabelW   = cell + 2;
 
   // The cells are small, so after tapping roughly the right day you can nudge it a
   // day at a time from the detail card instead of aiming at a 10px square.
@@ -1028,21 +1025,12 @@ function ScaleCoverage({ sessions }) {
 
   const {
     counts: scaleCounts, majorCounts, minorCounts, maxCount, totalMinutes: totalScaleMins,
-    totalSessions: totalScaleSess, keysVisited, avgDifficulty: avgDiff, anyTechnique,
+    totalSessions: totalScaleSess, keysVisited, anyTechnique,
   } = useMemo(
     () => scaleCoverage(sessions, { motion: motionFilter, octaves: octaveFilter, interval: intervalFilter }),
     [sessions, motionFilter, octaveFilter, intervalFilter],
   );
   const timeStr        = m => { const r = Math.round(m); return r >= 60 ? `${Math.floor(r / 60)}h ${r % 60}m` : `${r}m`; };
-
-  // Difficulty as dot symbols for SVG — ● = full, ◐ = half, ○ = empty
-  function diffNotes(val) {
-    if (val === null) return '';
-    const full  = Math.floor(val);
-    const half  = (val - full) >= 0.4 ? 1 : 0;
-    const empty = 5 - full - half;
-    return '●'.repeat(full) + (half ? '◐' : '') + '○'.repeat(empty);
-  }
 
   const size = width || 300;
   const cx = size / 2, cy = size / 2;

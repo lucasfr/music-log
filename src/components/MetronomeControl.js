@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import Svg, { Ellipse, Line, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { AudioContext } from 'react-native-audio-api';
-import { COLOURS, RADIUS, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
+import { COLOURS, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { Ionicons } from './Icon';
