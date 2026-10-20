@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
 import { setLocalPref } from '../utils';
 import { buildSnapshot, SNAPSHOT_KEY, SNAPSHOT_EVERY_MS } from './timerSnapshot';
+import { bumpRunThroughs } from './insights';
 
 const TICK_MS = 1000;
 
@@ -126,6 +127,13 @@ export function usePracticeTimer(initialSegments = [], restore = null) {
     setSegments(prev => prev.map((s, i) => (i === currentIndex ? { ...s, plannedMinutes: (s.plannedMinutes || 0) + mins } : s)));
   }, [currentIndex]);
 
+  // The run-through counter: +1 or -1 on the current segment. The count lives on the segment itself,
+  // so the saved snapshot keeps it and a resumed timer carries on from it, and it goes to the log
+  // form with the rest of the segment (see timerLog.js).
+  const addRunThrough = useCallback((delta) => {
+    setSegments(prev => prev.map((s, i) => (i === currentIndex ? { ...s, runThroughs: bumpRunThroughs(s.runThroughs, delta) } : s)));
+  }, [currentIndex]);
+
   // Lets a display component (the countdown ring) opt into frequent
   // refreshes without forcing this hook's caller to re-render — the
   // interval below calls every registered listener directly, and the
@@ -200,6 +208,7 @@ export function usePracticeTimer(initialSegments = [], restore = null) {
     skip,
     finishNow,
     addMinutes,
+    addRunThrough,
     goTo,
     actualMinutesFor,
     totalActualMinutes: () => segments.reduce((sum, _, i) => sum + actualMinutesFor(i), 0),

@@ -12,6 +12,7 @@ import { MetronomeControl } from './MetronomeControl';
 import { Ionicons } from './Icon';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { formatArticulation } from '../utils';
+import { runThroughsOf } from '../utils/insights';
 
 // Isolated from PracticeTimerScreen for the same reason MetronomeControl is
 // memoized against it: the countdown ring's remaining-time display forces
@@ -246,6 +247,34 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>Skip ›</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Run-throughs of a piece: a full play from start to finish without stopping. Tap + each
+          time you do one; the count goes to the log form with the segment (see timerLog.js). */}
+      {timer.currentSegment.type === 'repertoire' ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>run-throughs</Text>
+          <TouchableOpacity
+            onPress={() => timer.addRunThrough(-1)} activeOpacity={0.85} hitSlop={HIT_PILL}
+            accessibilityRole="button" accessibilityLabel="One fewer run-through"
+            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 22, color: COLOURS.textMuted }}>{'\u2212'}</Text>
+          </TouchableOpacity>
+          <Text
+            accessibilityLabel={`${runThroughsOf(timer.currentSegment)} run-throughs`}
+            style={{ minWidth: 34, textAlign: 'center', fontFamily: 'CormorantGaramond', fontSize: 28, color: COLOURS.text, fontVariant: ['lining-nums'] }}
+          >
+            {runThroughsOf(timer.currentSegment)}
+          </Text>
+          <TouchableOpacity
+            onPress={() => timer.addRunThrough(1)} activeOpacity={0.85} hitSlop={HIT_PILL}
+            accessibilityRole="button" accessibilityLabel="One more run-through"
+            style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 26, color: '#fff' }}>+</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       {timer.nextSegment ? (
         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>

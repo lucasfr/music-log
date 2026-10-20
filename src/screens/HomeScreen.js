@@ -20,6 +20,7 @@ import { usePref } from '../utils/usePref';
 import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, relativeDay, todaySummary } from '../utils/planning';
 import { Ionicons } from '../components/Icon';
 import { SNAPSHOT_KEY, parseSnapshot, snapshotSummary, worthResuming } from '../utils/timerSnapshot';
+import { timerToLogSegments } from '../utils/timerLog';
 import { SyncIssueBanner } from '../components/SyncIssueBanner';
 import { FadeInUp, AnimatedFill, Tap as TouchableOpacity } from '../components/Motion';
 import { delayFor } from '../utils/motion';
@@ -768,19 +769,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
     // remapped to group here or the pill shows nothing selected when the
     // log form opens, and saving without manually re-clicking it drops the
     // technique group entirely.
-    const prefilled = timer.segments.map((s, i) => {
-      const isTech = s.type === 'technique';
-      return {
-        id: s.id,
-        type: s.type,
-        group: isTech ? (s.title || '') : undefined,
-        title: isTech ? '' : (s.title || ''),
-        compositionId: s.compositionId || '',
-        duration: timer.actualMinutesFor(i),
-        articulation: isTech ? (s.articulation || null) : undefined,
-        notes: '', challenges: [], progress: [],
-      };
-    });
+    const prefilled = timerToLogSegments(timer.segments, i => timer.actualMinutesFor(i));
     setTimerSegments(null);
     setTimerRestore(null);
     setLocalPref(SNAPSHOT_KEY, '');

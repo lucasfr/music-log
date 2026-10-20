@@ -533,6 +533,12 @@ export function formatRunThroughs(seg) {
   return n ? plural(n, 'run-through') : null;
 }
 
+// A run-through count after adding `delta` (+1 or -1, from the practice timer's buttons), kept
+// between 0 and 99. A blank or junk count is taken as zero.
+export function bumpRunThroughs(current, delta) {
+  return Math.min(99, Math.max(0, runThroughsOf({ runThroughs: current }) + delta));
+}
+
 // ── Scales for today ──────────────────────────────────────────────────────────────────────────
 //
 // Which scales and arpeggios to practise today. If you have a grade target its requirements come
