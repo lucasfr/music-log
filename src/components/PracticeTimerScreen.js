@@ -25,12 +25,12 @@ import { formatArticulation } from '../utils';
 // through creating this section's elements — still costs real JS-thread
 // time every 250ms unless this section is memoized too, with props that
 // stay referentially stable across pure countdown ticks.
-const MetronomeSection = React.memo(function MetronomeSection({ composition, segmentKey, compact }) {
+const MetronomeSection = React.memo(function MetronomeSection({ composition, segmentKey, compact, suggestedBpm }) {
   // Always on screen. On a phone it starts as a compact bar (tempo and play) with the time
   // signature, subdivision and ramp folded away; it used to sit behind a toggle you had to find.
   return (
     <View style={{ width: '100%', maxWidth: 320, marginTop: compact ? 4 : 0 }}>
-      <MetronomeControl key={segmentKey} composition={composition} compact={compact} />
+      <MetronomeControl key={segmentKey} composition={composition} compact={compact} suggestedBpm={suggestedBpm} />
     </View>
   );
 });
@@ -96,7 +96,7 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
   );
 }
 
-export function PracticeTimerScreen({ visible, initialSegments, restore, compositions, onFinish, isDesktop }) {
+export function PracticeTimerScreen({ visible, initialSegments, restore, compositions, tempoSuggestions, onFinish, isDesktop }) {
   const timer = usePracticeTimer(initialSegments, restore);
   useKeepAwake(visible && timer.isRunning);
   // True right after a segment transition that landed paused (timeout or
@@ -264,6 +264,7 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
       composition={linkedComposition}
       segmentKey={timer.currentIndex}
       compact={!isDesktop}
+      suggestedBpm={(tempoSuggestions && timer.currentSegment.compositionId && tempoSuggestions[timer.currentSegment.compositionId]) || null}
     />
   );
 

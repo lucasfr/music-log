@@ -26,8 +26,8 @@ function toBlocks(text) {
   });
 }
 
-export function LessonBriefModal({ visible, brief, onClose }) {
-  const text = useMemo(() => (brief ? briefText(brief) : ''), [brief]);
+export function LessonBriefModal({ visible, brief, text: given, title = 'Lesson summary', onClose }) {
+  const text = useMemo(() => (given != null ? given : (brief ? briefText(brief) : '')), [given, brief]);
   const blocks = useMemo(() => toBlocks(text), [text]);
   const [done, setDone] = useState(false);
   useEffect(() => { if (!visible) setDone(false); }, [visible]);
@@ -44,7 +44,7 @@ export function LessonBriefModal({ visible, brief, onClose }) {
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Lesson summary</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>{title}</Text>
               <TouchableOpacity
                 onPress={onClose} activeOpacity={0.75} hitSlop={HIT_PILL}
                 accessibilityRole="button" accessibilityLabel="Close"

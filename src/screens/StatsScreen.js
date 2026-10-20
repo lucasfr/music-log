@@ -7,7 +7,7 @@ import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH, TOUCH_PILL, HIT_PILL } from '..
 import { GlassCard, SectionTitle, Label, Divider } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
-import { tempoProgress, describeTempo, staleScales, agoLabel } from '../utils/insights';
+import { tempoProgress, describeTempo, staleScales, agoLabel, suggestNextTempo } from '../utils/insights';
 import { GradeTargetCard } from '../components/GradeTargetCard';
 import { RunThroughsCard } from '../components/RunThroughsCard';
 import {
@@ -1343,7 +1343,20 @@ function Sparkline({ points, width = 96, height = 28, colour }) {
   );
 }
 
+// "Next: 82 bpm" under a tempo row: a small step above the last clean reading (suggestNextTempo in
+// utils/insights.js). Nothing to show for a piece that has reached its target.
+function NextTempoLine({ p, today }) {
+  const next = suggestNextTempo(p, today);
+  if (next.kind === 'at-target') return null;
+  return (
+    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel, marginTop: 1 }}>
+      {next.kind === 'return' ? `Start again from ${next.bpm} bpm` : `Next: ${next.bpm} bpm`}
+    </Text>
+  );
+}
+
 function TempoProgress({ sessions, compositions }) {
+  const today = todayISO();
   const items = useMemo(() => tempoProgress(sessions, compositions), [sessions, compositions]);
   if (items.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>
@@ -1359,6 +1372,7 @@ function TempoProgress({ sessions, compositions }) {
             <View style={{ flex: 1 }}>
               <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>{p.name}</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{describeTempo(p)}</Text>
+              <NextTempoLine p={p} today={today} />
             </View>
             <Sparkline points={p.points} colour={p.reachedTarget ? COLOURS.success : COLOURS.steel} />
           </View>

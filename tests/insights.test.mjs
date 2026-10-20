@@ -13,7 +13,7 @@ const {
   lessonAssignments, setAssignmentDone,
   suggestScope, energyLinks, describeLink,
   emptyTarget, parseTarget, serializeTarget, targetHasContent, describeRequirement, readiness, splitScales, joinScales,
-  runThroughsOf, runThroughStats, describeRunThroughs, formatRunThroughs, suggestScales, lessonBrief, briefText, shortDate,
+  runThroughsOf, runThroughStats, describeRunThroughs, formatRunThroughs, suggestNextTempo, nextTempos, tempoSuggestionMap, weeklyReviewDue, weeklyReview, weeklyText, suggestScales, lessonBrief, briefText, shortDate,
 } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
@@ -781,4 +781,204 @@ test('formatRunThroughs reads naturally and is null when none were logged', () =
   assert.equal(formatRunThroughs({ runThroughs: 3 }), '3 run-throughs');
   assert.equal(formatRunThroughs({ runThroughs: '1' }), '1 run-through');
   for (const none of [{}, { runThroughs: 0 }, { runThroughs: '' }, { runThroughs: 'x' }, undefined]) assert.equal(formatRunThroughs(none), null);
+});
+
+// ── the next tempo ────────────────────────────────────────────────────────────────────────────
+
+const series = (readings, target = null) => {
+  const points = readings.map(([date, bpm]) => ({ date, bpm }));
+  const last = points[points.length - 1];
+  return { points, latest: last.bpm, lastDate: last.date, target };
+};
+
+test('the step is about 5% of the last clean reading, between 2 and 6 bpm', () => {
+  const next = latest => suggestNextTempo(series([['2026-10-10', latest]]), NOW);
+  assert.equal(next(40).step, 2, '5% of 40 is 2');
+  assert.equal(next(30).step, 2, 'never less than 2');
+  assert.equal(next(60).step, 3);
+  assert.equal(next(100).step, 5);
+  assert.equal(next(160).step, 6, 'never more than 6');
+  assert.equal(next(200).step, 6);
+  assert.deepEqual(next(100), { kind: 'step', bpm: 105, from: 100, step: 5, reason: '5 above your last clean 100.' });
+});
+
+test('the step stops at the piece\'s own tempo', () => {
+  const out = suggestNextTempo(series([['2026-10-10', 90]], 92), NOW);
+  assert.equal(out.bpm, 92);
+  assert.equal(out.step, 2);
+  assert.equal(out.kind, 'step');
+  assert.equal(suggestNextTempo(series([['2026-10-10', 91]], 92), NOW).step, 1, 'one short of the target is a step of one');
+});
+
+test('at or above the target there is nothing to climb, and it says so', () => {
+  const at = suggestNextTempo(series([['2026-10-10', 92]], 92), NOW);
+  assert.deepEqual([at.kind, at.bpm, at.step], ['at-target', 92, 0]);
+  assert.match(at.reason, /reached the 92 target/);
+  assert.equal(suggestNextTempo(series([['2026-10-10', 120]], 92), NOW).kind, 'at-target');
+});
+
+test('without a target it keeps stepping up', () => {
+  assert.equal(suggestNextTempo(series([['2026-10-10', 80]]), NOW).bpm, 84);
+});
+
+test('three readings that have sat within 1 bpm for a week or more halve the step', () => {
+  const flat = suggestNextTempo(series([['2026-10-01', 80], ['2026-10-06', 80], ['2026-10-12', 81]]), NOW);
+  assert.equal(flat.kind, 'small-step');
+  assert.equal(flat.step, 2, 'half of 4, but never less than 2');
+  assert.equal(flat.bpm, 83);
+  assert.match(flat.reason, /smaller step/);
+  const big = suggestNextTempo(series([['2026-10-01', 160], ['2026-10-06', 160], ['2026-10-12', 161]]), NOW);
+  assert.equal(big.step, 3, 'half of 6');
+});
+
+test('it is not stalled when the readings span under a week, differ by more than 1, or there are fewer than three', () => {
+  assert.equal(suggestNextTempo(series([['2026-10-10', 80], ['2026-10-12', 80], ['2026-10-14', 80]]), NOW).kind, 'step', 'only 4 days');
+  assert.equal(suggestNextTempo(series([['2026-10-01', 80], ['2026-10-06', 82], ['2026-10-12', 80]]), NOW).kind, 'step', 'a spread of 2');
+  assert.equal(suggestNextTempo(series([['2026-10-01', 80], ['2026-10-12', 80]]), NOW).kind, 'step', 'only two readings');
+});
+
+test('only the last three readings decide whether it has stalled', () => {
+  const rising = suggestNextTempo(series([['2026-09-01', 70], ['2026-09-10', 70], ['2026-10-01', 80], ['2026-10-06', 80], ['2026-10-12', 81]]), NOW);
+  assert.equal(rising.kind, 'small-step', 'the earlier climb does not hide a recent plateau');
+});
+
+test('after four weeks without a reading it starts again from the last one', () => {
+  const back = suggestNextTempo(series([['2026-09-21', 80]]), NOW);   // 28 days ago
+  assert.deepEqual([back.kind, back.bpm, back.step], ['return', 80, 0]);
+  assert.equal(suggestNextTempo(series([['2026-09-22', 80]]), NOW).kind, 'step', '27 days ago is still recent');
+});
+
+test('the suggestion always stays inside the metronome\'s 30 to 240', () => {
+  assert.equal(suggestNextTempo(series([['2026-10-10', 239]]), NOW).bpm, 240);
+  assert.equal(suggestNextTempo(series([['2026-10-10', 240]]), NOW).bpm, 240);
+  assert.equal(suggestNextTempo(series([['2026-10-10', 20]]), NOW).bpm, 30);
+});
+
+test('a suggestion for each piece and exercise, and a map for the metronome with only the ones that have a step', () => {
+  const comps = [{ id: 'c1', title: 'Minuet', tempo: 92 }, { id: 'c2', title: 'Ocean View', tempo: 80 }, { id: 'c3', title: 'Old piece' }];
+  const sessions = [
+    session('2026-10-10', [rep('c1', 70), rep('c2', 80), rep('c3', 60), tech('Hanon', 'Hanon 1', 90)]),
+    session('2026-08-01', [rep('c3', 60)]),
+  ];
+  const all = nextTempos(sessions, comps, NOW);
+  assert.deepEqual(all.map(x => [x.name, x.kind]).sort(), [['Hanon \u00b7 Hanon 1', 'technique'], ['Minuet', 'piece'], ['Ocean View', 'piece'], ['Old piece', 'piece']].sort());
+  const map = tempoSuggestionMap(sessions, comps, NOW);
+  assert.deepEqual(map, { c1: 74, c3: 63 }, 'Ocean View is at its target and Hanon is an exercise, so neither is in the map');
+});
+
+test('readings dated after today are ignored, and nothing logged gives nothing', () => {
+  assert.deepEqual(nextTempos([session('2026-12-01', [rep('c1', 70)])], [], NOW), []);
+  assert.deepEqual(tempoSuggestionMap([], [], NOW), {});
+  assert.deepEqual(tempoSuggestionMap(undefined, undefined, NOW), {});
+});
+
+// ── the week in review ────────────────────────────────────────────────────────────────────────
+
+// NOW is Monday 19 October 2026, so the week reviewed is Monday 12 to Sunday 18 October.
+function weekStory() {
+  const sessions = [
+    { ...session('2026-10-06', [rseg('c1', { tempo: 60, duration: 20 })]), duration: 20 },                       // the week before: 5-11 Oct
+    { ...session('2026-10-09', [rseg('c1', { duration: 15 })]), duration: 15 },
+    { ...session('2026-10-11', [rseg('c1', { tempo: 70, duration: 10 })]), duration: 10 },                       // its Sunday: the last reading before the week
+    { ...session('2026-10-12', [rseg('c1', { tempo: 76, runThroughs: 2, challenges: ['tempo'], duration: 20 }), { type: 'technique', group: 'Scales', duration: 10, scales: ['Bb major'] }]), energy: 1, enjoyment: 4, wins: 'Clean left hand', duration: 30 },
+    { ...session('2026-10-18', [rseg('c1', { tempo: 88, runThroughs: 1, challenges: ['tempo'], duration: 25 })]), energy: 0, enjoyment: 5, tomorrowFocus: 'Bars 9-16', duration: 25 },
+    session('2026-10-19', [rseg('c1', { tempo: 99, duration: 99 })]),                                            // today: not in last week
+  ];
+  const comps = [{ id: 'c1', title: 'Minuet in F', tempo: 92, status: 'learning' }, { id: 'c2', title: 'Ocean View', status: 'consolidating' }, { id: 'c3', title: 'Dream', status: 'ambition' }];
+  return { sessions, comps };
+}
+
+test('the review is offered on Monday, Tuesday and Wednesday only', () => {
+  assert.deepEqual(['2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22', '2026-10-23', '2026-10-24', '2026-10-25'].map(weeklyReviewDue),
+    [true, true, true, false, false, false, false]);
+});
+
+test('it reviews the last full Monday-to-Sunday week, whichever day of this week it is', () => {
+  for (const day of ['2026-10-19', '2026-10-21', '2026-10-25']) {
+    const r = weeklyReview([], [], [], day);
+    assert.deepEqual(r.week, { from: '2026-10-12', to: '2026-10-18' }, day);
+    assert.equal(r.brief.period.label, 'Week of 12 Oct to 18 Oct');
+    assert.equal(r.brief.period.days, 7);
+  }
+  assert.deepEqual(weeklyReview([], [], [], '2026-10-26').week, { from: '2026-10-19', to: '2026-10-25' }, 'the next Monday moves on');
+});
+
+test('only that week\'s practice counts: the Sunday before and today are outside it', () => {
+  const { sessions, comps } = weekStory();
+  const r = weeklyReview([], sessions, comps, NOW);
+  assert.equal(r.brief.totals.sessions, 2);
+  assert.equal(r.brief.totals.minutes, 55);
+  assert.equal(r.brief.totals.practiceDays, 2);
+  assert.deepEqual(r.brief.wins, [{ date: '2026-10-12', text: 'Clean left hand' }]);
+  assert.equal(r.brief.plannedNext, 'Bars 9-16');
+});
+
+test('it is compared with the week before', () => {
+  const { sessions, comps } = weekStory();
+  const r = weeklyReview([], sessions, comps, NOW);
+  assert.deepEqual(r.previous, { sessions: 3, minutes: 45 });
+  assert.ok(weeklyText(r).includes('Compared with the week before: 10m more (2 sessions against 3).'));
+  const timed = (date, minutes) => ({ ...session(date, [rseg('c1', { duration: minutes })]), duration: minutes });
+  const quiet = weeklyReview([], [timed('2026-10-06', 60), timed('2026-10-13', 30)], comps2, NOW);
+  assert.ok(weeklyText(quiet).includes('30m less (1 session against 1)'));
+  const same = weeklyReview([], [timed('2026-10-06', 30), timed('2026-10-13', 30)], comps2, NOW);
+  assert.ok(weeklyText(same).includes('the same time'));
+});
+
+test('tempo is shown from where it stood at the end of the week before to where it ended the week', () => {
+  const { sessions, comps } = weekStory();
+  const minuet = weeklyReview([], sessions, comps, NOW).brief.pieces.find(p => p.compositionId === 'c1');
+  assert.deepEqual(minuet.tempo, { from: 70, to: 88, change: 18, target: 92 }, 'from the Sunday reading to the last one that week');
+  assert.equal(minuet.runThroughs, 3);
+  assert.equal(minuet.minutes, 45);
+});
+
+test('what to carry forward: scales left for two weeks and pieces being worked on that have gone quiet', () => {
+  const { sessions, comps } = weekStory();
+  const sessionsWithOld = [...sessions, session('2026-09-20', [{ type: 'technique', group: 'Arpeggios', scales: ['D major'], duration: 5 }])];
+  const r = weeklyReview([], sessionsWithOld, comps, NOW);
+  assert.deepEqual(r.carry.scales.map(x => x.name), ['D major'], 'Bb major was played on the 12th, 7 days ago');
+  assert.deepEqual(r.carry.pieces.map(p => [p.name, p.daysSince]), [['Ocean View', null]], 'never practised; Minuet was played today and Dream is only an ambition');
+  const text = weeklyText(r);
+  assert.ok(text.includes('To carry into this week\n- Scales to revisit: D major (4 weeks ago)'));
+  assert.ok(text.includes('- Pieces not played for a week: Ocean View (not yet)'));
+});
+
+test('pieces count as quiet from seven days, most overdue first, at most three', () => {
+  const comps = ['a', 'b', 'c', 'd'].map(id => ({ id, title: id.toUpperCase(), status: 'learning' }));
+  const sessions = [
+    session('2026-10-12', [rseg('a')]),   // 7 days: quiet
+    session('2026-10-13', [rseg('b')]),   // 6 days: not yet
+    session('2026-09-01', [rseg('c')]),
+    session('2026-10-01', [rseg('d')]),
+  ];
+  assert.deepEqual(weeklyReview([], sessions, comps, NOW).carry.pieces.map(p => p.name), ['C', 'D', 'A']);
+  const many = ['a', 'b', 'c', 'd', 'e'].map(id => ({ id, title: id, status: 'learning' }));
+  assert.equal(weeklyReview([], [], many, NOW).carry.pieces.length, 3);
+});
+
+test('an empty week gives a short, well-formed review', () => {
+  const r = weeklyReview([], [], [], NOW);
+  const text = weeklyText(r);
+  assert.equal(text.split('\n')[0], 'Week of 12 Oct to 18 Oct');
+  assert.ok(text.includes('No practice logged in this time.'));
+  assert.ok(!text.includes('Compared with the week before'), 'nothing to compare when neither week has practice');
+});
+
+test('the lesson summary is unchanged by the weekly window', () => {
+  const { lessons, sessions } = story();
+  const b = lessonBrief(lessons, sessions, comps2, NOW);
+  assert.equal(b.period.label, undefined);
+  assert.equal(briefText(b).split('\n')[0], 'Since my last lesson on 5 Oct 2026 (14 days ago)');
+});
+
+test('at most three scales are carried forward, the longest-neglected first', () => {
+  const sessions = [
+    session('2026-09-01', [{ type: 'technique', group: 'Scales', scales: ['A major'] }]),
+    session('2026-08-01', [{ type: 'technique', group: 'Scales', scales: ['B major'] }]),
+    session('2026-09-10', [{ type: 'technique', group: 'Scales', scales: ['C major'] }]),
+    session('2026-07-01', [{ type: 'technique', group: 'Scales', scales: ['D major'] }]),
+    session('2026-09-15', [{ type: 'technique', group: 'Scales', scales: ['E major'] }]),
+  ];
+  assert.deepEqual(weeklyReview([], sessions, [], NOW).carry.scales.map(x => x.name), ['D major', 'B major', 'A major']);
 });

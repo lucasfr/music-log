@@ -590,9 +590,14 @@ export function lessonBrief(lessons, sessions, compositions, today, opts = {}) {
   const fallbackDays = opts.fallbackDays || 28;
   const past = (lessons || []).filter(l => l.date && l.date <= today).sort((a, b) => b.date.localeCompare(a.date));
   const last = past[0] || null;
-  const since = last ? last.date : null;
-  const from = since || addDays(today, -fallbackDays);
-  const inWindow = s => s.date && s.date <= today && (since ? s.date > since : s.date >= from);
+  // Usually the window is "since the last lesson"; `opts.range` ({ from, to, label }) gives it explicitly
+  // instead, as the weekly review does.
+  const range = opts.range || null;
+  const since = range ? null : (last ? last.date : null);
+  const from = range ? range.from : (since || addDays(today, -fallbackDays));
+  const upper = range && range.to < today ? range.to : today;
+  const inRange = d => d <= upper && (since ? d > since : d >= from);
+  const inWindow = s => s.date && inRange(s.date);
   const win = (sessions || []).filter(inWindow).sort((a, b) => a.date.localeCompare(b.date));
 
   const energies = win.filter(s => s.energy != null && s.energy !== '').map(s => Number(s.energy));
@@ -648,9 +653,9 @@ export function lessonBrief(lessons, sessions, compositions, today, opts = {}) {
     const sr = series.get(p.key);
     let tempo = null;
     if (sr) {
-      const inWin = sr.points.filter(pt => (since ? pt.date > since : pt.date >= from));
+      const inWin = sr.points.filter(pt => inRange(pt.date));
       if (inWin.length) {
-        const before = since ? sr.points.filter(pt => pt.date <= since).pop() : null;
+        const before = since ? sr.points.filter(pt => pt.date <= since).pop() : (range ? sr.points.filter(pt => pt.date < from).pop() : null);
         const to = inWin[inWin.length - 1].bpm;
         const start = before ? before.bpm : (inWin.length > 1 ? inWin[0].bpm : null);
         tempo = { from: start, to, change: start === null ? null : to - start, target: sr.target };
@@ -670,7 +675,9 @@ export function lessonBrief(lessons, sessions, compositions, today, opts = {}) {
   const scaleList = [...scaleSet.values()];
 
   return {
-    period: { hasLesson: !!last, since, from, days: since ? daysBetween(since, today) : fallbackDays },
+    period: range
+      ? { hasLesson: false, since: null, from, to: upper, days: daysBetween(from, upper) + 1, label: range.label || null }
+      : { hasLesson: !!last, since, from, days: since ? daysBetween(since, today) : fallbackDays },
     totals,
     pieces,
     runThroughs: pieces.reduce((t, p) => t + p.runThroughs, 0),
@@ -704,9 +711,11 @@ export function lessonBrief(lessons, sessions, compositions, today, opts = {}) {
 export function briefText(b) {
   const L = [];
   const signed = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(Math.round(v * 10) / 10)}`;
-  L.push(b.period.hasLesson
-    ? `Since my last lesson on ${shortDate(b.period.since, true)} (${plural(b.period.days, 'day')} ago)`
-    : `The last ${b.period.days} days (no lesson logged yet)`);
+  L.push(b.period.label
+    ? b.period.label
+    : b.period.hasLesson
+      ? `Since my last lesson on ${shortDate(b.period.since, true)} (${plural(b.period.days, 'day')} ago)`
+      : `The last ${b.period.days} days (no lesson logged yet)`);
 
   if (!b.totals.sessions) {
     L.push('', 'No practice logged in this time.');
@@ -760,4 +769,128 @@ export function briefText(b) {
   }
   if (b.plannedNext) L.push('', `Planned next: ${b.plannedNext}`);
   return L.join('\n');
+}
+
+// ── The next tempo to aim for ───────────────────────────────────────────────────────────────
+//
+// From a piece's (or exercise's) logged clean BPMs, and for a piece its reference tempo, a sensible
+// next step. The rule of thumb is a small, steady increase from the last clean reading, not a jump
+// to the target:
+//  - a step of about 5% of the last reading, never less than 2 bpm or more than 6;
+//  - never past the piece's own tempo: at or above it there is nothing to climb, so it says so;
+//  - if the last three readings, at least a week apart in all, are within 1 bpm of each other it has
+//    stalled, and the step is halved (small steps get through a plateau where big ones don't);
+//  - after four weeks without a reading, start again from the last one rather than adding to it.
+// The result is always inside the metronome's range, 30 to 240.
+
+const METRONOME_MIN = 30;
+const METRONOME_MAX = 240;
+const clampBpm = v => Math.min(METRONOME_MAX, Math.max(METRONOME_MIN, v));
+
+// `p` is one item from tempoProgress. -> { kind: 'step' | 'small-step' | 'return' | 'at-target',
+// bpm, from, step, reason }
+export function suggestNextTempo(p, today) {
+  const latest = p.latest;
+  if (p.target && latest >= p.target) {
+    return { kind: 'at-target', bpm: clampBpm(p.target), from: latest, step: 0, reason: `You have reached the ${p.target} target. Hold it, or play the piece through.` };
+  }
+  const idle = daysBetween(p.lastDate, today);
+  if (idle >= 28) {
+    return { kind: 'return', bpm: clampBpm(latest), from: latest, step: 0, reason: `${agoLabel(idle)} since your last reading. Start again from ${latest}.` };
+  }
+  const full = Math.min(6, Math.max(2, Math.round(latest * 0.05)));
+  const lastThree = p.points.slice(-3);
+  const flat = lastThree.length >= 3
+    && Math.max(...lastThree.map(x => x.bpm)) - Math.min(...lastThree.map(x => x.bpm)) <= 1
+    && daysBetween(lastThree[0].date, lastThree[2].date) >= 7;
+  const step = flat ? Math.max(2, Math.round(full / 2)) : full;
+  const bpm = clampBpm(Math.min(p.target || Infinity, latest + step));
+  return {
+    kind: flat ? 'small-step' : 'step',
+    bpm, from: latest, step: bpm - latest,
+    reason: flat ? `Your last readings have sat at about ${latest}, so a smaller step.` : `${bpm - latest} above your last clean ${latest}.`,
+  };
+}
+
+// A suggestion for everything with a logged tempo, most recently practised first.
+// -> [{ key, kind: 'piece' | 'technique', name, compositionId, suggestion }]
+export function nextTempos(sessions, compositions, today) {
+  return tempoProgress((sessions || []).filter(s => s.date && s.date <= today), compositions)
+    .map(p => ({ key: p.key, kind: p.kind, name: p.name, compositionId: p.compositionId, suggestion: suggestNextTempo(p, today) }));
+}
+
+// Library piece id -> the bpm to try next, for the metronome. Only pieces with a step to take (a piece
+// at its target, or one left for a month, has nothing to suggest beyond what it already has).
+export function tempoSuggestionMap(sessions, compositions, today) {
+  const map = {};
+  nextTempos(sessions, compositions, today).forEach(x => {
+    const k = x.suggestion.kind;
+    if (x.kind === 'piece' && x.compositionId && (k === 'step' || k === 'small-step')) map[x.compositionId] = x.suggestion.bpm;
+  });
+  return map;
+}
+
+// ── The week in review ─────────────────────────────────────────────────────────────────────
+//
+// A short summary of the last full Monday-to-Sunday week, for the start of the next one: the same
+// report as the lesson summary (lessonBrief) over that week, compared with the week before, and what
+// to carry into this week.
+
+function mondayOf(iso) {
+  const dow = (new Date(Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10)))).getUTCDay() + 6) % 7;
+  return addDays(iso, -dow);
+}
+
+// The review is offered on Monday, Tuesday and Wednesday, while last week is still fresh.
+export function weeklyReviewDue(today) {
+  const dow = (new Date(Date.UTC(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, Number(today.slice(8, 10)))).getUTCDay() + 6) % 7;
+  return dow <= 2;
+}
+
+// -> { week: { from, to }, brief, previous: { sessions, minutes }, carry: { scales, pieces } }
+//  - brief: lessonBrief over the week, so everything in it applies;
+//  - previous: the week before, for a comparison;
+//  - carry: up to three scales not played for two weeks, and up to three pieces being worked on that
+//    have not been practised for a week (never-practised first), as of today.
+export function weeklyReview(lessons, sessions, compositions, today) {
+  const from = addDays(mondayOf(today), -7);
+  const to = addDays(from, 6);
+  const label = `Week of ${shortDate(from)} to ${shortDate(to)}`;
+  const brief = lessonBrief(lessons, sessions, compositions, today, { range: { from, to, label } });
+
+  const before = (sessions || []).filter(s => s.date && s.date >= addDays(from, -7) && s.date < from);
+  const previous = { sessions: before.length, minutes: before.reduce((t, s) => t + num(s.duration), 0) };
+
+  const lastSeen = new Map();
+  (sessions || []).forEach(s => {
+    if (!s.date || s.date > today) return;
+    (s.segments || []).forEach(seg => {
+      if (seg.compositionId && (!lastSeen.has(seg.compositionId) || s.date > lastSeen.get(seg.compositionId))) lastSeen.set(seg.compositionId, s.date);
+    });
+  });
+  const pieces = (compositions || [])
+    .filter(c => c.status === 'learning' || c.status === 'consolidating')
+    .map(c => ({ name: c.title || 'Untitled', daysSince: lastSeen.has(c.id) ? daysBetween(lastSeen.get(c.id), today) : null }))
+    .filter(p => p.daysSince === null || p.daysSince >= 7)
+    .sort((a, b) => (a.daysSince === null ? -1 : b.daysSince === null ? 1 : b.daysSince - a.daysSince) || a.name.localeCompare(b.name))
+    .slice(0, 3);
+  const scales = staleScales(sessions, today, 14).slice(0, 3).map(x => ({ name: x.name, group: x.kind, daysSince: x.daysSince }));
+
+  return { week: { from, to }, brief, previous, carry: { scales, pieces } };
+}
+
+// The review as plain text, to read or share: the report, the comparison, and what to carry forward.
+export function weeklyText(r) {
+  const parts = [briefText(r.brief)];
+  const now = r.brief.totals;
+  if (now.sessions || r.previous.sessions) {
+    const delta = now.minutes - r.previous.minutes;
+    const how = delta === 0 ? 'the same time' : `${minutesLabel(Math.abs(delta))} ${delta > 0 ? 'more' : 'less'}`;
+    parts.push(`Compared with the week before: ${how} (${plural(now.sessions, 'session')} against ${r.previous.sessions}).`);
+  }
+  const carry = [];
+  if (r.carry.scales.length) carry.push(`- Scales to revisit: ${r.carry.scales.map(x => `${x.name} (${agoLabel(x.daysSince)})`).join(', ')}`);
+  if (r.carry.pieces.length) carry.push(`- Pieces not played for a week: ${r.carry.pieces.map(p => (p.daysSince === null ? `${p.name} (not yet)` : `${p.name} (${plural(p.daysSince, 'day')})`)).join(', ')}`);
+  if (carry.length) parts.push(['To carry into this week', ...carry].join('\n'));
+  return parts.join('\n\n');
 }

@@ -16,7 +16,7 @@ import { LessonBriefModal } from './LessonBriefModal';
 import { ENERGY_LABELS } from '../constants';
 import {
   lessonAssignments, setAssignmentDone, suggestScope, energyLinks, describeLink,
-  suggestScales, parseTarget, lessonBrief,
+  suggestScales, parseTarget, lessonBrief, weeklyReview, weeklyText, weeklyReviewDue,
 } from '../utils/insights';
 
 const ENERGY_LEVELS = [-2, -1, 0, 1, 2];
@@ -229,10 +229,41 @@ function LessonBriefCard({ lessons, sessions, compositions, today }) {
   );
 }
 
+// ─── Last week ─────────────────────────────────────────────────
+// On Monday, Tuesday and Wednesday, a short review of the week just gone and what to carry into this one.
+
+function WeeklyReviewCard({ lessons, sessions, compositions, today }) {
+  const [open, setOpen] = useState(false);
+  const due = weeklyReviewDue(today);
+  const review = useMemo(() => (due ? weeklyReview(lessons, sessions, compositions, today) : null), [due, lessons, sessions, compositions, today]);
+  const text = useMemo(() => (review ? weeklyText(review) : ''), [review]);
+  if (!review || !review.brief.totals.sessions) return null;
+
+  const { totals, runThroughs } = review.brief;
+  const what = `${totals.sessions} ${totals.sessions === 1 ? 'session' : 'sessions'}, ${minutesText(totals.minutes)}${runThroughs ? `, ${runThroughs} ${runThroughs === 1 ? 'run-through' : 'run-throughs'}` : ''}.`;
+
+  return (
+    <Card title="Last week" subtitle={`${fmtDate(review.week.from)} to ${fmtDate(review.week.to)}`}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
+      <View style={{ flexDirection: 'row', marginTop: 12 }}>
+        <TouchableOpacity
+          onPress={() => setOpen(true)} activeOpacity={0.75} hitSlop={HIT_PILL}
+          accessibilityRole="button" accessibilityLabel="Open the review of last week"
+          style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
+        >
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Open review</Text>
+        </TouchableOpacity>
+      </View>
+      <LessonBriefModal visible={open} text={text} title="Week in review" onClose={() => setOpen(false)} />
+    </Card>
+  );
+}
+
 export function HomeInsightCards({ sessions, lessons, compositions, today, onSaveLesson }) {
   return (
     <>
       <LessonChecklist lessons={lessons} sessions={sessions} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
+      <WeeklyReviewCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
       <TodaysScales sessions={sessions} today={today} />
       <LessonBriefCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
       <EnergyScope sessions={sessions} />

@@ -24,6 +24,7 @@ import { SyncIssueBanner } from '../components/SyncIssueBanner';
 import { FadeInUp, AnimatedFill, Tap as TouchableOpacity } from '../components/Motion';
 import { delayFor } from '../utils/motion';
 import { HomeInsightCards } from '../components/HomeInsightCards';
+import { tempoSuggestionMap } from '../utils/insights';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 
@@ -797,6 +798,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   useEffect(() => { todayWasOpen.current = todayOpen; }, [todayOpen]);
 
   const currentStreak = useMemo(() => streakFrom(sessions, today), [sessions, today]);
+  // The next tempo to try on each library piece, offered beside "Use piece tempo" in the metronome.
+  const tempoSuggestions = useMemo(() => tempoSuggestionMap(sessions, compositions, today), [sessions, compositions, today]);
 
   const week   = useMemo(() => weekSummary(sessions, lessons, today), [sessions, lessons, today]);
   const nextUp = useMemo(() => latestFocus(sessions), [sessions]);
@@ -1123,6 +1126,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             initialSegments={timerSegments}
             restore={timerRestore}
             compositions={compositions}
+            tempoSuggestions={tempoSuggestions}
             onFinish={handleTimerFinish}
             isDesktop
           />
@@ -1186,6 +1190,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           initialSegments={timerSegments}
           restore={timerRestore}
           compositions={compositions}
+          tempoSuggestions={tempoSuggestions}
           onFinish={handleTimerFinish}
         />
       )}

@@ -183,7 +183,7 @@ function SigChip({ sig, active, onPress }) {
 // own tick/animation state and knocking the visuals out of sync with the
 // audio, which kept ticking fine underneath since its scheduler lives in a
 // ref-held closure unaffected by re-renders.
-export const MetronomeControl = React.memo(function MetronomeControl({ composition, compact = false }) {
+export const MetronomeControl = React.memo(function MetronomeControl({ composition, compact = false, suggestedBpm = null }) {
   // Tempo and time signature of the linked piece (90 bpm and 4/4 when it has none).
   const piece = pieceMetronomeDefaults(composition);
   const defaultBpm = piece.bpm;
@@ -549,6 +549,16 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
               style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: COLOURS.steelA(0.10) }}>
               <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>Use piece tempo</Text>
+            </TouchableOpacity>
+          ) : null}
+          {/* The next tempo to try on this piece, a small step above your last clean reading (see
+              suggestNextTempo in utils/insights.js). */}
+          {suggestedBpm ? (
+            <TouchableOpacity onPress={() => setBpm(suggestedBpm)} activeOpacity={0.75}
+              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              accessibilityRole="button" accessibilityLabel={`Set the metronome to ${suggestedBpm} beats per minute, the next tempo to try`}
+              style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: COLOURS.steelA(0.10) }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>Next: {suggestedBpm}</Text>
             </TouchableOpacity>
           ) : null}
           {/* Play/pause lives here, in the header, rather than at the foot of
