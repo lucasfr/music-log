@@ -4,7 +4,7 @@ import {
   getAllCompositions, saveComposition, deleteComposition,
   getAllLessons, saveLesson, deleteLesson,
 } from '../db';
-import { deleteRecord, pullTable, mergeRows } from './sync';
+import { pullTable, mergeRows } from './sync';
 import { fromRemoteComposition } from './records';
 import { outbox } from './outbox';
 import { notify } from '../utils/notify';
@@ -58,19 +58,24 @@ export function useSessions() {
       // Retry edits that never reached the server, and keep a copy of whichever side loses when
       // two devices edited the same record (see utils/syncQueue.js).
       outbox.processPull('sessions', local, remote);
+      // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed
+      // here too, and one this device deleted stays gone while the server still has the row.
+      const plan = outbox.processDeletes('sessions', local, remote);
+      for (const id of plan.deleteLocal) await deleteSession(id);
+      const kept = plan.deleteLocal.length ? local.filter(r => !plan.deleteLocal.includes(r.id)) : local;
       // Filter out anything we've locally deleted or recently saved
       const safeRemote = remote
-        .filter(r => !pendingDeletes.sessions.has(r.id))
+        .filter(r => !plan.skip.has(r.id) && !pendingDeletes.sessions.has(r.id))
         .map(r => {
           const guarded = pendingSaves.sessions.get(r.id);
           return guarded ? guarded : r;
         });
-      const merged = mergeRows(local, safeRemote)
+      const merged = mergeRows(kept, safeRemote)
         .filter(r => !pendingDeletes.sessions.has(r.id))
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       // Write any remote-wins rows back to local db
       for (const row of merged) {
-        const localRow = local.find(l => l.id === row.id);
+        const localRow = kept.find(l => l.id === row.id);
         const localTs  = new Date(localRow?.updated_at || 0).getTime();
         const remoteTs = new Date(row.updated_at || 0).getTime();
         if (!localRow || row !== localRow) await saveSession(row);
@@ -95,7 +100,7 @@ export function useSessions() {
   const remove = useCallback(async (id) => {
     pendingDeletes.sessions.add(id);
     await deleteSession(id);
-    deleteRecord('sessions', id).finally(() => {
+    outbox.trackDelete('sessions', id).finally(() => {
       // Keep the guard for a while to survive any in-flight pulls
       setTimeout(() => pendingDeletes.sessions.delete(id), SAVE_GUARD_MS);
     });
@@ -122,17 +127,23 @@ export function useCompositions() {
     const remote = pulled ? pulled.map(fromRemoteComposition) : null;
     if (remote) {
       outbox.processPull('compositions', local, remote);
+      // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed
+      // here too, and one this device deleted stays gone while the server still has the row.
+      const plan = outbox.processDeletes('compositions', local, remote);
+      for (const id of plan.deleteLocal) await deleteComposition(id);
+      const kept = plan.deleteLocal.length ? local.filter(r => !plan.deleteLocal.includes(r.id)) : local;
+      // Filter out anything we've locally deleted or recently saved
       const safeRemote = remote
-        .filter(r => !pendingDeletes.compositions.has(r.id))
+        .filter(r => !plan.skip.has(r.id) && !pendingDeletes.compositions.has(r.id))
         .map(r => {
           const guarded = pendingSaves.compositions.get(r.id);
           return guarded ? guarded : r;
         });
-      const merged = mergeRows(local, safeRemote)
+      const merged = mergeRows(kept, safeRemote)
         .filter(r => !pendingDeletes.compositions.has(r.id))
         .sort((a, b) => (a.title || '').localeCompare(b.title || ''));
       for (const row of merged) {
-        const localRow = local.find(l => l.id === row.id);
+        const localRow = kept.find(l => l.id === row.id);
         const localTs  = new Date(localRow?.updated_at || 0).getTime();
         const remoteTs = new Date(row.updated_at || 0).getTime();
         if (!localRow || row !== localRow) await saveComposition(row);
@@ -157,7 +168,7 @@ export function useCompositions() {
   const remove = useCallback(async (id) => {
     pendingDeletes.compositions.add(id);
     await deleteComposition(id);
-    deleteRecord('compositions', id).finally(() => {
+    outbox.trackDelete('compositions', id).finally(() => {
       setTimeout(() => pendingDeletes.compositions.delete(id), SAVE_GUARD_MS);
     });
     await reload();
@@ -180,17 +191,23 @@ export function useLessons() {
     const remote = await pullTable('lessons');
     if (remote) {
       outbox.processPull('lessons', local, remote);
+      // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed
+      // here too, and one this device deleted stays gone while the server still has the row.
+      const plan = outbox.processDeletes('lessons', local, remote);
+      for (const id of plan.deleteLocal) await deleteLesson(id);
+      const kept = plan.deleteLocal.length ? local.filter(r => !plan.deleteLocal.includes(r.id)) : local;
+      // Filter out anything we've locally deleted or recently saved
       const safeRemote = remote
-        .filter(r => !pendingDeletes.lessons.has(r.id))
+        .filter(r => !plan.skip.has(r.id) && !pendingDeletes.lessons.has(r.id))
         .map(r => {
           const guarded = pendingSaves.lessons.get(r.id);
           return guarded ? guarded : r;
         });
-      const merged = mergeRows(local, safeRemote)
+      const merged = mergeRows(kept, safeRemote)
         .filter(r => !pendingDeletes.lessons.has(r.id))
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       for (const row of merged) {
-        const localRow = local.find(l => l.id === row.id);
+        const localRow = kept.find(l => l.id === row.id);
         const localTs  = new Date(localRow?.updated_at || 0).getTime();
         const remoteTs = new Date(row.updated_at || 0).getTime();
         if (!localRow || row !== localRow) await saveLesson(row);
@@ -215,7 +232,7 @@ export function useLessons() {
   const remove = useCallback(async (id) => {
     pendingDeletes.lessons.add(id);
     await deleteLesson(id);
-    deleteRecord('lessons', id).finally(() => {
+    outbox.trackDelete('lessons', id).finally(() => {
       setTimeout(() => pendingDeletes.lessons.delete(id), SAVE_GUARD_MS);
     });
     await reload();

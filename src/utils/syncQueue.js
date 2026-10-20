@@ -65,6 +65,13 @@ export function clearDirty(box, table, id, pushedAt) {
   return { ...box, [table]: rest };
 }
 
+// Forget an unsynced edit altogether (the record has been deleted, so there is nothing to push).
+export function dropDirty(box, table, id) {
+  if (!box[table] || !(id in box[table])) return box;
+  const { [id]: _gone, ...rest } = box[table];
+  return { ...box, [table]: rest };
+}
+
 export function dirtyCount(box) {
   return TABLES.reduce((n, t) => n + Object.keys(box[t] || {}).length, 0);
 }
@@ -98,7 +105,9 @@ export function reconcile(local, remote, entries) {
     if (!theyChanged) { push.push(mine); continue; }
 
     const localWins = time(mine.updated_at) >= theirTs;
-    conflicts.push({ id, winner: localWins ? 'local' : 'remote', keep: localWins ? theirs : mine });
+    // When the other side is a deletion (a tombstone) that loses to this newer edit, there is nothing
+    // worth keeping a copy of; when this edit loses to a deletion, the edit is kept so it can be restored.
+    if (!(localWins && theirs.deletedAt)) conflicts.push({ id, winner: localWins ? 'local' : 'remote', keep: localWins ? theirs : mine });
     if (localWins) push.push(mine);
   }
   return { push, clear, conflicts };
@@ -138,6 +147,86 @@ export function removeConflict(list, table, id, updatedAt) {
   return list.filter(c => !(c.table === table && c.id === id && time(c.record.updated_at) === time(updatedAt)));
 }
 
+// ── Deletes ──
+//
+// Deleting a record used to remove the row from the server and nothing else. If that request failed (no
+// signal) nothing retried it, and a pull then put the record straight back from the server; and any
+// device that still had the record could push it back at any time. Now a delete is a tombstone: the
+// server row is kept and marked `deletedAt` (in its `data` column, so the tables need no change), which
+// every device learns of on its next pull. And a delete made here is remembered (and retried) until the
+// server has the tombstone.
+
+const MAX_DELETES = 300;   // per table, newest kept, so a device that never syncs doesn't grow this for ever
+
+export const emptyDeletes = () => ({ sessions: {}, lessons: {}, compositions: {} });
+
+// Stored JSON -> { [table]: { [id]: deletedAt } }. Anything malformed is dropped.
+export function parseDeletes(raw) {
+  const out = emptyDeletes();
+  try {
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return out;
+    for (const t of TABLES) {
+      const entries = data[t];
+      if (!entries || typeof entries !== 'object' || Array.isArray(entries)) continue;
+      for (const [id, at] of Object.entries(entries)) if (typeof at === 'string' && at) out[t][id] = at;
+    }
+  } catch { /* not JSON: nothing is waiting */ }
+  return out;
+}
+
+export const serializeDeletes = deletes => JSON.stringify(deletes);
+
+// A pulled row that records a deletion. (`unpackRemote` folds the `data` column into the row, so
+// `deletedAt` is on it directly.)
+export const isTombstone = row => !!(row && row.deletedAt);
+
+// What to do about deletions after a pull, for one table. `local` and `remote` are row lists (remote as
+// pulled, tombstones included) and `pending` is this device's { id: deletedAt } for deletes the server
+// may not have yet. A deletion and an edit are compared by timestamp, so the newer one wins.
+// -> {
+//   skip:        ids of remote rows to leave out of the merge (a tombstone, or a row this device deleted),
+//   deleteLocal: ids to remove from this device (deleted elsewhere, not edited here since),
+//   revive:      ids of local rows edited after the deletion (they come back, and are pushed),
+//   push:        ids whose tombstone should be (re)sent,
+//   forget:      ids to drop from `pending` (the server knows, was edited since, or has no row),
+// }
+export function planDeletes(local, remote, pending) {
+  const mineById = new Map((local || []).map(r => [r.id, r]));
+  const owed = pending || {};
+  const skip = new Set();
+  const deleteLocal = [];
+  const revive = [];
+  const push = [];
+  const forget = [];
+  const seen = new Set();
+
+  for (const r of remote || []) {
+    seen.add(r.id);
+    const mine = mineById.get(r.id);
+    const owedAt = owed[r.id];
+    if (isTombstone(r)) {
+      skip.add(r.id);
+      if (owedAt) forget.push(r.id);
+      if (mine) (time(mine.updated_at) > time(r.updated_at) ? revive : deleteLocal).push(r.id);
+    } else if (owedAt) {
+      if (time(r.updated_at) > time(owedAt)) forget.push(r.id);          // edited elsewhere after this delete: the edit wins
+      else { skip.add(r.id); push.push(r.id); }                           // still to be deleted: keep it out, send the tombstone
+    }
+  }
+  for (const id of Object.keys(owed)) if (!seen.has(id)) forget.push(id); // no row on the server: nothing to mark
+  return { skip, deleteLocal, revive, push, forget };
+}
+
+// For pushing everything ("Push all"): the deletions on the server, by id, as timestamps; and whether a
+// record would only undo one (the server's deletion is at least as new as the record).
+export function tombstoneIndex(remote) {
+  const index = new Map();
+  (remote || []).forEach(r => { if (isTombstone(r)) index.set(r.id, time(r.updated_at)); });
+  return index;
+}
+export const blockedByDeletion = (record, index) => index.has(record.id) && index.get(record.id) >= time(record.updated_at);
+
 // ── The outbox as the app uses it ──
 //
 // Storage and the network are passed in, so the whole flow is testable without a device:
@@ -147,13 +236,40 @@ export function removeConflict(list, table, id, updatedAt) {
 
 const BOX_KEY = 'syncOutbox';
 const CONFLICTS_KEY = 'syncConflicts';
+const DELETES_KEY = 'syncDeletes';
 
-export function createOutbox({ getPref, setPref, push, now = () => new Date().toISOString() }) {
+export function createOutbox({ getPref, setPref, push, tombstone = async () => null, now = () => new Date().toISOString() }) {
   let box = null;
   const load = () => box || (box = parseOutbox(getPref(BOX_KEY, '')));
   const store = next => { box = next; setPref(BOX_KEY, serializeOutbox(next)); };
   const conflictList = () => parseConflicts(getPref(CONFLICTS_KEY, '[]'));
   const storeConflicts = list => setPref(CONFLICTS_KEY, serializeConflicts(list));
+
+  // Deletes the server may not have yet: { [table]: { [id]: deletedAt } }, kept across restarts.
+  const loadDeletes = () => parseDeletes(getPref(DELETES_KEY, ''));
+  const rememberDelete = (table, id, at) => {
+    const all = loadDeletes();
+    all[table][id] = at;
+    const ids = Object.keys(all[table]);
+    if (ids.length > MAX_DELETES) {
+      ids.sort((a, b) => all[table][a].localeCompare(all[table][b])).slice(0, ids.length - MAX_DELETES).forEach(k => delete all[table][k]);
+    }
+    setPref(DELETES_KEY, serializeDeletes(all));
+  };
+  const forgetDelete = (table, id) => {
+    const all = loadDeletes();
+    if (!(id in all[table])) return;
+    delete all[table][id];
+    setPref(DELETES_KEY, serializeDeletes(all));
+  };
+  // Send a tombstone; it stops being owed only once the server has it (true). Nobody signed in (null) or
+  // a failure keeps it owed, to be sent again after the next pull.
+  async function sendTombstone(table, id, at) {
+    let ok;
+    try { ok = await tombstone(table, id, at); } catch { ok = false; }
+    if (ok === true) forgetDelete(table, id);
+    return ok;
+  }
 
   // Push a record and, if it got there, forget it was waiting. A push that fails (or throws) leaves
   // it waiting; so does an edit made again while this push was in flight. When nobody is signed in
@@ -172,7 +288,32 @@ export function createOutbox({ getPref, setPref, push, now = () => new Date().to
     // this edit (undefined for a new record).
     trackEdit(table, record, base) {
       store(markDirty(load(), table, record.id, base, record.updated_at));
+      forgetDelete(table, record.id);   // saved again after being deleted (an undo): it is back
     },
+
+    // Call when a record is deleted here, after removing it from this device. Remembers the delete,
+    // forgets any unsynced edit of the record, and sends the tombstone. Resolves to true / false / null
+    // like push.
+    trackDelete(table, id, at = now()) {
+      store(dropDirty(load(), table, id));
+      rememberDelete(table, id, at);
+      return sendTombstone(table, id, at);
+    },
+
+    // Call after pulling a table, before merging: sorts out deletions (see planDeletes), sends owed
+    // tombstones again, and pushes back any record edited after it was deleted elsewhere. The caller
+    // removes `deleteLocal` from the device and leaves `skip` out of the merge.
+    processDeletes(table, local, remote) {
+      const owed = loadDeletes()[table];
+      const plan = planDeletes(local, remote, owed);
+      plan.forget.forEach(id => forgetDelete(table, id));
+      plan.push.forEach(id => { sendTombstone(table, id, owed[id]); });
+      const mineById = new Map((local || []).map(r => [r.id, r]));
+      plan.revive.forEach(id => { pushTracked(table, mineById.get(id)); });
+      return plan;
+    },
+
+    pendingDeleteCount: () => TABLES.reduce((n, t) => n + Object.keys(loadDeletes()[t]).length, 0),
 
     // Call after pulling a table: pushes edits that never got there, and keeps a copy of whichever
     // side loses when both changed. `remote` is the pulled rows as they came, before any merge.

@@ -21,10 +21,10 @@ import {
   signInWithGitHub,
   signOut,
 } from '../lib/supabase';
-import { pushRecord } from '../db/sync';
+import { pushRecord, pullTable } from '../db/sync';
 import { getSyncStatus, subscribeSyncStatus } from '../db/syncStatus';
 import { exportAllJSON, copyAllJSON, parseImportJSON, planImport, describeImport, pickJSONFile } from '../utils/export';
-import { parseConflicts, parseOutbox, dirtyCount } from '../utils/syncQueue';
+import { parseConflicts, parseOutbox, dirtyCount, tombstoneIndex, blockedByDeletion } from '../utils/syncQueue';
 import { outbox } from '../db/outbox';
 
 function timeAgo(iso) {
@@ -258,13 +258,24 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     // Pieces are stamped as just edited, so another device takes this copy even when its own
     // has the same timestamp (it had the piece before the tempo could be synced).
     const stamp = new Date().toISOString();
+    // Look at what the server has first, so a record another device has deleted is not pushed back over
+    // its deletion. A table the server can't be read for is not pushed blind.
+    const deletions = {};
+    for (const table of ['sessions', 'lessons', 'compositions']) {
+      const rows = await pullTable(table);
+      deletions[table] = rows ? tombstoneIndex(rows) : null;
+    }
+    let skipped = 0;
     for (const { table, record } of all) {
       try {
+        if (!deletions[table]) { errors++; continue; }
+        if (blockedByDeletion(record, deletions[table])) { skipped++; continue; }
         const ok = await pushRecord(table, table === 'compositions' ? { ...record, updated_at: stamp } : record);
         if (ok) pushed++; else errors++;
       } catch { errors++; }
     }
-    setSyncResult({ pushed, errors, message: errors > 0 ? `${pushed} pushed · ${errors} failed` : `${pushed} records synced` });
+    const left = skipped ? ` · ${skipped} deleted elsewhere, left alone` : '';
+    setSyncResult({ pushed, errors, message: errors > 0 ? `${pushed} pushed · ${errors} failed${left}` : `${pushed} records synced${left}` });
     setPhase('idle');
   }
 

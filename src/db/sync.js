@@ -103,6 +103,39 @@ export async function deleteRecord(table, id) {
   }
 }
 
+// Marks a record deleted on the server instead of removing its row, so every device learns of the
+// delete on its next pull and none can put the record back (see the Deletes section of
+// utils/syncQueue.js). The mark is `deletedAt` in the row's `data` column, so the tables need no
+// change; the rest of the row is left as it was, so a mistaken delete can be undone from the
+// dashboard. A table that has no `data` column cannot hold the mark, and falls back to removing the
+// row, as deleting always did. Resolves true when the server has the delete (including when it had no
+// such row, which means nothing was ever synced), false when it doesn't, and null when nobody is
+// signed in.
+export async function tombstoneRecord(table, id, deletedAt) {
+  const scope = `delete:${table}`;
+  try {
+    const session = await getSession();
+    if (!session) return null;
+    reportSyncStart();
+    const client = await getClient();
+    let { error } = await client.from(table).update({ updated_at: deletedAt, data: { deletedAt } }).eq('id', id);
+    if (error && missingColumn(error.message) === 'data') {
+      ({ error } = await client.from(table).delete().eq('id', id));
+    }
+    if (error) {
+      console.warn(`[sync] delete ${table} failed:`, error.message);
+      reportSyncError(error.message, scope);
+      return false;
+    }
+    reportSyncSuccess(scope);
+    return true;
+  } catch (e) {
+    console.warn(`[sync] delete ${table} exception:`, e.message);
+    reportSyncError(e.message, scope);
+    return false;
+  }
+}
+
 // ─── Pull (load) ──────────────────────────────────────────────────────────────
 
 // Fetches all rows for the current user from a table.
