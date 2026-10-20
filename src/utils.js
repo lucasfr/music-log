@@ -1,7 +1,7 @@
 import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PROGRESS_TAG_TO_STATUS, STATUS_RANK, RANK_TO_STATUS, SHELVED_AFTER_DAYS, ARTICULATION_LABELS } from './constants';
-import { daysBetween } from './utils/statsCalc';
+import { ARTICULATION_LABELS } from './constants';
+import { deriveCompositionStatus as deriveStatusOn, deriveStatusHistory as deriveHistoryOn } from './utils/status';
 import { scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf } from './utils/scaleStats';
 
 export function uid() {
@@ -179,41 +179,7 @@ export function confirmDelete(title, message, onConfirm) {
 // derivation resumes normally (same auto-unshelve behaviour as the
 // inactivity case).
 export function deriveCompositionStatus(compositionId, sessions, lessons, manualShelvedAt) {
-  const logs = [];
-  (sessions || []).forEach(s => {
-    (s.segments || []).forEach(seg => {
-      if (seg.compositionId === compositionId) {
-        logs.push({ date: s.date, progress: seg.progress || [] });
-      }
-    });
-  });
-  (lessons || []).forEach(l => {
-    (l.segments || []).forEach(seg => {
-      if (seg.compositionId === compositionId) {
-        logs.push({ date: l.date, progress: seg.progress || [] });
-      }
-    });
-  });
-
-  if (logs.length === 0) return 'ambition';
-
-  const lastDate = logs.map(l => l.date).sort().at(-1);
-
-  if (manualShelvedAt && lastDate <= manualShelvedAt) return 'shelved';
-
-  let rank = STATUS_RANK.new;
-  logs.forEach(({ progress }) => {
-    progress.forEach(tag => {
-      const status = PROGRESS_TAG_TO_STATUS[tag];
-      if (status && STATUS_RANK[status] > rank) rank = STATUS_RANK[status];
-    });
-  });
-  if (rank === STATUS_RANK.new && logs.length > 1) rank = STATUS_RANK.learning;
-
-  const daysSince = daysBetween(lastDate, todayISO());
-  if (daysSince >= SHELVED_AFTER_DAYS) return 'shelved';
-
-  return RANK_TO_STATUS[rank];
+  return deriveStatusOn(compositionId, sessions, lessons, manualShelvedAt, todayISO());
 }
 
 // Reconstructs a piece's full status history with per-stage tallies: how
@@ -225,81 +191,7 @@ export function deriveCompositionStatus(compositionId, sessions, lessons, manual
 // and no log has happened since, the tail of the history is trimmed/replaced
 // with a 'shelved' segment running from that date to today.
 export function deriveStatusHistory(compositionId, sessions, lessons, manualShelvedAt) {
-  const logs = [];
-  (sessions || []).forEach(s => {
-    (s.segments || []).forEach(seg => {
-      if (seg.compositionId === compositionId) {
-        logs.push({ date: s.date, progress: seg.progress || [], minutes: Number(seg.duration) || 0 });
-      }
-    });
-  });
-  (lessons || []).forEach(l => {
-    (l.segments || []).forEach(seg => {
-      if (seg.compositionId === compositionId) {
-        logs.push({ date: l.date, progress: seg.progress || [], minutes: Number(seg.duration) || 0 });
-      }
-    });
-  });
-  logs.sort((a, b) => a.date.localeCompare(b.date));
-
-  if (logs.length === 0) return [];
-
-  const todayISO = localISO(new Date());
-  const addDays = (iso, n) => {
-    const d = new Date(iso + 'T12:00:00');
-    d.setDate(d.getDate() + n);
-    return localISO(d);
-  };
-  const raw = [];
-  let rank = STATUS_RANK.new;
-
-  for (let i = 0; i < logs.length; i++) {
-    logs[i].progress.forEach(tag => {
-      const status = PROGRESS_TAG_TO_STATUS[tag];
-      if (status && STATUS_RANK[status] > rank) rank = STATUS_RANK[status];
-    });
-    if (rank === STATUS_RANK.new && i > 0) rank = STATUS_RANK.learning;
-
-    const status  = RANK_TO_STATUS[rank];
-    const segStart = logs[i].date;
-    const nextDate = logs[i + 1]?.date ?? todayISO;
-    const gapDays  = daysBetween(segStart, nextDate);
-
-    if (gapDays > SHELVED_AFTER_DAYS) {
-      const activeEnd = addDays(segStart, SHELVED_AFTER_DAYS);
-      raw.push({ status, start: segStart, end: activeEnd, count: 1, minutes: logs[i].minutes });
-      raw.push({ status: 'shelved', start: activeEnd, end: nextDate, count: 0, minutes: 0 });
-    } else {
-      raw.push({ status, start: segStart, end: nextDate, count: 1, minutes: logs[i].minutes });
-    }
-  }
-
-  const merged = [];
-  raw.forEach(seg => {
-    const last = merged[merged.length - 1];
-    if (last && last.status === seg.status) {
-      last.end = seg.end;
-      last.count += seg.count;
-      last.minutes += seg.minutes;
-    } else {
-      merged.push({ ...seg });
-    }
-  });
-
-  const lastLogDate = logs[logs.length - 1].date;
-  if (manualShelvedAt && lastLogDate <= manualShelvedAt) {
-    // Trim any segments that start on/after the manual shelve date, clip
-    // whatever remains up to that date, then append the manual shelved tail.
-    while (merged.length && merged[merged.length - 1].start >= manualShelvedAt) {
-      merged.pop();
-    }
-    if (merged.length && merged[merged.length - 1].end > manualShelvedAt) {
-      merged[merged.length - 1].end = manualShelvedAt;
-    }
-    merged.push({ status: 'shelved', start: manualShelvedAt, end: todayISO, count: 0, minutes: 0 });
-  }
-
-  return merged;
+  return deriveHistoryOn(compositionId, sessions, lessons, manualShelvedAt, todayISO());
 }
 
 // Reconstructs how a piece's derived status changed over time, for the
