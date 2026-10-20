@@ -13,6 +13,7 @@ const {
   lessonAssignments, setAssignmentDone,
   suggestScope, energyLinks, describeLink,
   emptyTarget, parseTarget, serializeTarget, targetHasContent, describeRequirement, readiness, splitScales, joinScales,
+  runThroughsOf, runThroughStats, describeRunThroughs, suggestScales, lessonBrief, briefText, shortDate,
 } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
@@ -492,4 +493,286 @@ test('splitting and joining a target\'s scales loses nothing', () => {
 
 test('legacy string entries from a picker are given the defaults, and blanks are dropped', () => {
   assert.deepEqual(joinScales(['C major', '', null, { scale: '' }], []), [{ scale: 'C major', octaves: 1, interval: 'unison', motion: 'parallel' }]);
+});
+
+// ── run-throughs ──────────
+
+const RT = (compositionId, runThroughs, extra = {}) => ({ type: 'repertoire', compositionId, runThroughs, ...extra });
+
+test('a run-through count is a whole number from zero to 99; anything else is zero', () => {
+  assert.equal(runThroughsOf({ runThroughs: 3 }), 3);
+  assert.equal(runThroughsOf({ runThroughs: '4' }), 4, 'typed like the BPM, so it may be text');
+  assert.equal(runThroughsOf({ runThroughs: 2.9 }), 2);
+  assert.equal(runThroughsOf({ runThroughs: 250 }), 99, 'a slip of the finger can\'t swamp the totals');
+  for (const bad of [0, -3, '', 'abc', null, undefined, NaN]) assert.equal(runThroughsOf({ runThroughs: bad }), 0, `${bad}`);
+  assert.equal(runThroughsOf(undefined), 0);
+  assert.equal(runThroughsOf({}), 0);
+});
+
+test('run-throughs are totalled per piece, with the last month, the last date and the best single go', () => {
+  const sessions = [
+    session('2026-08-01', [RT('c1', 2)]),
+    session('2026-10-10', [RT('c1', 3), RT('c2', 1)]),
+    session('2026-10-18', [RT('c1', 5)]),
+  ];
+  const out = runThroughStats(sessions, [{ id: 'c1', title: 'Minuet in F' }, { id: 'c2', title: 'Gymnopédie' }], NOW);
+  const minuet = out.find(p => p.compositionId === 'c1');
+  assert.equal(minuet.name, 'Minuet in F');
+  assert.equal(minuet.total, 10);
+  assert.equal(minuet.recent, 8, 'the August one is more than 30 days ago');
+  assert.equal(minuet.lastDate, '2026-10-18');
+  assert.equal(minuet.segments, 3);
+  assert.equal(minuet.best, 5);
+  assert.deepEqual(out.map(p => p.name), ['Minuet in F', 'Gymnopédie'], 'most recent activity first');
+});
+
+test('the last-month window includes today and the 29 days before it, not the 30th', () => {
+  const edge = (date) => runThroughStats([session(date, [RT('c1', 1)])], [], NOW)[0].recent;
+  assert.equal(edge('2026-10-19'), 1);
+  assert.equal(edge('2026-09-20'), 1, '29 days back is inside');
+  assert.equal(edge('2026-09-19'), 0, '30 days back is outside');
+});
+
+test('only repertoire segments count, and pieces with no library entry are followed by title', () => {
+  const sessions = [session('2026-10-18', [
+    { type: 'technique', runThroughs: 9 },
+    { type: 'repertoire', title: 'Free piece', runThroughs: 2 },
+    { type: 'repertoire', title: 'free piece', runThroughs: 1 },
+    { type: 'repertoire', runThroughs: 7 },            // no piece and no title: nowhere to put it
+    RT('c1', 0), RT('c1', ''),
+  ])];
+  const out = runThroughStats(sessions, [], NOW);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].name, 'Free piece');
+  assert.equal(out[0].total, 3);
+});
+
+test('run-throughs dated after today are ignored, and none gives an empty list', () => {
+  assert.deepEqual(runThroughStats([session('2026-12-01', [RT('c1', 4)])], [], NOW), []);
+  assert.deepEqual(runThroughStats([], [], NOW), []);
+  assert.deepEqual(runThroughStats(undefined, undefined, NOW), []);
+});
+
+test('describeRunThroughs', () => {
+  assert.equal(describeRunThroughs({ total: 1, recent: 1 }), '1 run-through');
+  assert.equal(describeRunThroughs({ total: 6, recent: 2 }), '6 run-throughs, 2 in the last month');
+  assert.equal(describeRunThroughs({ total: 6, recent: 6 }), '6 run-throughs');
+  assert.equal(describeRunThroughs({ total: 6, recent: 0 }), '6 run-throughs');
+  assert.equal(describeRunThroughs({ total: 0, recent: 0 }), 'none yet');
+  assert.equal(describeRunThroughs(undefined), 'none yet');
+});
+
+// ── scales for today ──────────
+
+const sc = (name, extra = {}) => ({ scale: name, motion: 'parallel', octaves: 2, interval: 'unison', ...extra });
+const playedOn = (date, group, ...entries) => session(date, [{ type: 'technique', group, scales: entries }]);
+
+test('requirements never practised come before stale ones, and recent ones come last', () => {
+  const t = target({ scales: [sc('A major'), sc('B major'), sc('C major'), sc('D major')] });
+  const sessions = [playedOn('2026-10-17', 'Scales', sc('A major')), playedOn('2026-09-01', 'Scales', sc('B major'))];   // A recent, B stale, C and D never
+  const out = suggestScales(t, sessions, NOW, 10);
+  assert.deepEqual(out.map(x => x.status), ['never', 'never', 'stale', 'recent']);
+  assert.deepEqual(out.slice(2).map(x => x.name), ['B major', 'A major']);
+  assert.deepEqual(out.map(x => x.fromTarget), [true, true, true, true]);
+});
+
+test('stale requirements go in the order they have been left, longest first', () => {
+  const t = target({ scales: [sc('A major'), sc('B major'), sc('C major')] });
+  const sessions = [playedOn('2026-09-10', 'Scales', sc('A major')), playedOn('2026-08-01', 'Scales', sc('B major')), playedOn('2026-09-25', 'Scales', sc('C major'))];
+  assert.deepEqual(suggestScales(t, sessions, NOW, 10).map(x => x.name), ['B major', 'A major', 'C major']);
+});
+
+test('the reason says it plainly, and today reads as today', () => {
+  const t = target({ scales: [sc('A major'), sc('B major'), sc('C major')] });
+  const sessions = [playedOn('2026-09-26', 'Scales', sc('A major')), playedOn('2026-10-19', 'Scales', sc('B major'))];   // A: 23 days ago
+  const byName = Object.fromEntries(suggestScales(t, sessions, NOW, 10).map(x => [x.name, x.reason]));
+  assert.equal(byName['C major'], 'not practised yet');
+  assert.equal(byName['A major'], 'last played 3 weeks ago');
+  assert.equal(byName['B major'], 'played today');
+});
+
+test('scales outside the target that have been dropped for two weeks come before the target\'s recent ones', () => {
+  const t = target({ scales: [sc('A major')] });
+  const sessions = [playedOn('2026-10-18', 'Scales', sc('A major')), playedOn('2026-09-01', 'Scales', sc('F# major'))];
+  const out = suggestScales(t, sessions, NOW, 10);
+  assert.deepEqual(out.map(x => [x.name, x.fromTarget]), [['F# major', false], ['A major', true]]);
+});
+
+test('a scale and an arpeggio of the same name are different things, and are not listed twice', () => {
+  const t = target({ scales: [sc('G major')], arpeggios: [sc('G major')] });
+  const sessions = [playedOn('2026-08-01', 'Scales', sc('G major'))];
+  const out = suggestScales(t, sessions, NOW, 10);
+  assert.deepEqual(out.map(x => `${x.group}:${x.status}`), ['Arpeggios:never', 'Scales:stale']);
+  assert.equal(out.length, 2);
+});
+
+test('without a target the suggestions are the scales you used to play and have dropped', () => {
+  const sessions = [playedOn('2026-08-01', 'Scales', 'C major'), playedOn('2026-09-15', 'Arpeggios', 'D major'), playedOn('2026-10-17', 'Scales', 'E major')];
+  const out = suggestScales(null, sessions, NOW, 10);
+  assert.deepEqual(out.map(x => x.name), ['C major', 'D major']);
+  assert.deepEqual(suggestScales(null, [], NOW), []);
+  assert.deepEqual(suggestScales(target(), [], NOW), [], 'a target with no requirements asks for nothing');
+});
+
+test('the limit is respected', () => {
+  const t = target({ scales: Array.from({ length: 12 }, (_, i) => sc(`${'ABCDEFGHIJKL'[i]} major`)) });
+  assert.equal(suggestScales(t, [], NOW).length, 5);
+  assert.equal(suggestScales(t, [], NOW, 3).length, 3);
+  assert.equal(suggestScales(t, [], NOW, 20).length, 12);
+});
+
+test('never-practised requirements are shown in an order that changes from day to day, but not within a day', () => {
+  const names = Array.from({ length: 12 }, (_, i) => `${'ABCDEFGHIJKL'[i]} major`);
+  const t = target({ scales: names.map(n => sc(n)) });
+  const day = d => suggestScales(t, [], d, 12).map(x => x.name).join(',');
+  assert.equal(day('2026-10-19'), day('2026-10-19'), 'the same on the same day');
+  const orders = new Set(['2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22'].map(day));
+  assert.ok(orders.size >= 3, 'a different order on most days');
+  assert.deepEqual(day('2026-10-19').split(',').sort(), names, 'always the same set');
+});
+
+test('a requirement is described as the target states it', () => {
+  const t = target({ scales: [sc('E major', { motion: 'contrary' })] });
+  assert.equal(suggestScales(t, [], NOW)[0].label, 'E major, 2 oct, contrary');
+});
+
+// ── the summary for a lesson ──────────
+
+const rseg = (compositionId, extra = {}) => ({ type: 'repertoire', compositionId, duration: 10, ...extra });
+const comps2 = [{ id: 'c1', title: 'Minuet in F', tempo: 92 }, { id: 'c2', title: 'Ocean View' }];
+
+function story() {
+  const lessons = [
+    lesson('l0', '2026-09-20', [aSeg({ id: 'old', compositionId: 'c2', assignment: 'Left hand alone', feedback: 'Older note' })]),
+    lesson('l1', '2026-10-05', [
+      aSeg({ id: 'a1', compositionId: 'c2', assignment: 'Hands together, bars 1-8', feedback: 'Shape the melody' }),
+      aSeg({ id: 'a2', compositionId: 'c1', assignment: 'Clean the trill' }),
+    ].map(g => g)),
+  ];
+  lessons[1].teacher = 'Kerrin';
+  lessons[1].wins = 'Pedalling clicked';
+  // 'pedalling' appears once (on 17 Oct), so it must not be listed as a recurring challenge.
+  const sessions = [
+    session('2026-10-05', [rseg('c1', { tempo: 70, duration: 99 })]),          // the lesson day: its minutes are not counted, its BPM is the baseline
+    session('2026-10-02', [rseg('c1', { tempo: 65 })]),                        // earlier still
+    { ...session('2026-10-08', [rseg('c1', { tempo: 76, runThroughs: 1, challenges: ['tempo'], duration: 20 }), { type: 'technique', group: 'Scales', duration: 15, scales: ['Bb major'], challenges: ['evenness'] }]), energy: 1, enjoyment: 4, wins: 'First clean run', duration: 35 },
+    { ...session('2026-10-12', [rseg('c1', { tempo: 88, runThroughs: 3, challenges: ['tempo', 'evenness'], progress: ['breakthrough'] }), rseg('c2', { duration: 25, challenges: ['tempo'] }), { type: 'technique', group: 'Arpeggios', duration: 5, scales: [{ scale: 'Eb major' }] }]), energy: 0, enjoyment: 5, wins: '', duration: 40 },
+    { ...session('2026-10-17', [rseg('c1', { duration: 10, runThroughs: 2, challenges: ['pedalling'] })]), energy: -1, tomorrowFocus: 'Bars 9-16 slowly', duration: 10 },
+  ];
+  return { lessons, sessions };
+}
+
+test('the summary covers practice after the last lesson, and not the lesson day or earlier', () => {
+  const { lessons, sessions } = story();
+  const b = lessonBrief(lessons, sessions, comps2, NOW);
+  assert.deepEqual(b.period, { hasLesson: true, since: '2026-10-05', from: '2026-10-05', days: 14 });
+  assert.equal(b.totals.sessions, 3);
+  assert.equal(b.totals.practiceDays, 3);
+  assert.equal(b.totals.minutes, 35 + 40 + 10);
+  assert.equal(b.totals.avgMinutes, 28);
+  assert.equal(b.totals.avgEnergy, 0, '+1, 0 and -1');
+  assert.equal(b.totals.avgEnjoyment, 4.5, 'only the two sessions that have one');
+});
+
+test('pieces show minutes, run-throughs and tempo from where it stood at the lesson to where it is now', () => {
+  const { lessons, sessions } = story();
+  const b = lessonBrief(lessons, sessions, comps2, NOW);
+  const minuet = b.pieces.find(p => p.compositionId === 'c1');
+  assert.equal(minuet.name, 'Minuet in F');
+  assert.equal(minuet.sessions, 3);
+  assert.equal(minuet.runThroughs, 6);
+  assert.deepEqual(minuet.tempo, { from: 70, to: 88, change: 18, target: 92 }, 'the baseline is the last BPM logged on or before the lesson day');
+  assert.equal(b.pieces.find(p => p.compositionId === 'c2').tempo, null, 'no BPM logged for it');
+  assert.equal(b.runThroughs, 6);
+  assert.deepEqual(b.pieces.map(p => p.name), ['Minuet in F', 'Ocean View'], 'most time first');
+});
+
+test('with no earlier reading the first one in the window is the starting point, and a single one has no change', () => {
+  const lessons = [lesson('l1', '2026-10-05', [])];
+  const two = lessonBrief(lessons, [session('2026-10-08', [rseg('c1', { tempo: 60 })]), session('2026-10-12', [rseg('c1', { tempo: 72 })])], comps2, NOW);
+  assert.deepEqual(two.pieces[0].tempo, { from: 60, to: 72, change: 12, target: 92 });
+  const one = lessonBrief(lessons, [session('2026-10-12', [rseg('c1', { tempo: 72 })])], comps2, NOW);
+  assert.deepEqual(one.pieces[0].tempo, { from: null, to: 72, change: null, target: 92 });
+});
+
+test('a challenge counts only when it kept coming up, with the pieces it was about', () => {
+  const { lessons, sessions } = story();
+  const b = lessonBrief(lessons, sessions, comps2, NOW);
+  assert.deepEqual(b.challenges.map(c => [c.tag, c.count]), [['tempo', 3], ['evenness', 2]], 'a tag seen once is left out');
+  assert.deepEqual(b.challenges[0].where, ['Minuet in F', 'Ocean View']);
+  assert.deepEqual(b.challenges[1].where.sort(), ['Minuet in F', 'Scales']);
+  assert.deepEqual(b.progress, [{ tag: 'breakthrough', count: 1 }]);
+});
+
+test('wins newest first, blanks skipped; technique and scales are summarised', () => {
+  const { lessons, sessions } = story();
+  const b = lessonBrief(lessons, sessions, comps2, NOW);
+  assert.deepEqual(b.wins, [{ date: '2026-10-08', text: 'First clean run' }]);
+  assert.deepEqual(b.technique.map(t => [t.name, t.minutes]), [['Scales', 15], ['Arpeggios', 5]]);
+  assert.deepEqual(b.scales, { scales: 1, arpeggios: 1, names: ['Bb major', 'Eb major'] });
+  assert.equal(b.plannedNext, 'Bars 9-16 slowly');
+});
+
+test('open assignments from the lesson, and what the teacher said, are included', () => {
+  const { lessons, sessions } = story();
+  const b = lessonBrief(lessons, sessions, comps2, NOW);
+  assert.equal(b.assignments.lessonDate, '2026-10-05');
+  assert.deepEqual(b.assignments.open, [], 'both were practised since, so they are covered, not open');
+  assert.equal(b.assignments.covered, 2);
+  assert.deepEqual(b.lastLesson.feedback, [{ label: 'Ocean View', text: 'Shape the melody' }]);
+  assert.equal(b.lastLesson.teacher, 'Kerrin');
+  const open = lessonBrief(lessons, [], comps2, NOW);
+  assert.deepEqual(open.assignments.open.map(a => a.label).sort(), ['Minuet in F', 'Ocean View']);
+});
+
+test('with no lesson logged it covers the last four weeks, and says so', () => {
+  const b = lessonBrief([], [session('2026-10-01', [rseg('c1')]), session('2026-09-01', [rseg('c1')])], comps2, NOW);
+  assert.deepEqual(b.period, { hasLesson: false, since: null, from: '2026-09-21', days: 28 });
+  assert.equal(b.totals.sessions, 1);
+  assert.equal(b.lastLesson, null);
+  assert.equal(lessonBrief([], [], comps2, NOW, { fallbackDays: 7 }).period.from, '2026-10-12');
+});
+
+test('an empty stretch gives an empty, well-formed summary', () => {
+  const b = lessonBrief([lesson('l1', '2026-10-18', [])], [], comps2, NOW);
+  assert.equal(b.totals.sessions, 0);
+  assert.deepEqual([b.pieces, b.wins, b.challenges, b.progress, b.technique], [[], [], [], [], []]);
+  assert.equal(b.totals.avgEnergy, null);
+  assert.equal(b.plannedNext, null);
+  assert.ok(briefText(b).includes('No practice logged in this time.'));
+});
+
+test('lessons dated in the future are ignored', () => {
+  const b = lessonBrief([lesson('f', '2026-12-01', []), lesson('p', '2026-10-01', [])], [session('2026-10-10', [rseg('c1')])], comps2, NOW);
+  assert.equal(b.period.since, '2026-10-01');
+});
+
+test('the text reads as a short report', () => {
+  const { lessons, sessions } = story();
+  const text = briefText(lessonBrief(lessons, sessions, comps2, NOW));
+  const lines = text.split('\n');
+  assert.equal(lines[0], 'Since my last lesson on 5 Oct 2026 (14 days ago)');
+  assert.ok(text.includes('Practice: 3 sessions on 3 days, 1h 25m (about 28 min each).'));
+  assert.ok(text.includes('Energy averaged 0 and enjoyment 4.5 out of 5.'));
+  assert.ok(text.includes('- Minuet in F: 3 sessions, 40m, 70 → 88 bpm (+18), target 92, 6 run-throughs'));
+  assert.ok(text.includes('- Ocean View: 1 session, 25m'));
+  assert.ok(text.includes('Scales and arpeggios: 1 scale and 1 arpeggio practised (Bb major, Eb major).'));
+  assert.ok(text.includes('- 8 Oct: First clean run'));
+  assert.ok(text.includes('- tempo (3 times: Minuet in F, Ocean View)'));
+  assert.ok(text.includes('Progress marked: breakthrough 1x.'));
+  assert.ok(text.includes('What Kerrin said last time\n- Ocean View: Shape the melody'));
+  assert.ok(text.includes('Planned next: Bars 9-16 slowly'));
+  assert.ok(!/[*#_`]/.test(text.replace(/_/g, '')), 'no formatting characters');
+});
+
+test('the text lists what is still open, and uses plain wording with no lesson on record', () => {
+  const { lessons } = story();
+  assert.ok(briefText(lessonBrief(lessons, [], comps2, NOW)).includes('Still open from the lesson\n- '));
+  assert.equal(briefText(lessonBrief([], [], comps2, NOW)).split('\n')[0], 'The last 28 days (no lesson logged yet)');
+});
+
+test('shortDate', () => {
+  assert.equal(shortDate('2026-10-05'), '5 Oct');
+  assert.equal(shortDate('2026-12-25', true), '25 Dec 2026');
+  assert.equal(shortDate('2026-01-31'), '31 Jan');
 });

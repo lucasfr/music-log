@@ -78,6 +78,8 @@ export function LogModal({ visible, onClose, onSave, compositions, initialDate, 
     setSegments((prev.segments || []).map(s => ({
       ...s, id: uid(), notes: '', feedback: '', assignment: '',
       challenges: [], progress: [], feltDifficulty: 0, liking: 0,
+      // BPM and run-throughs are results, like difficulty: they start empty, not as last time's.
+      tempo: null, runThroughs: null,
     })));
     if (prev.duration) setDuration(String(prev.duration));
   }

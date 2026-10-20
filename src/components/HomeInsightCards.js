@@ -1,5 +1,7 @@
-// Two cards for Home, both built from what is already in the log (see utils/insights.js):
+// Cards for Home, all built from what is already in the log (see utils/insights.js):
 //  - the assignments from your latest lesson, as a checklist;
+//  - which scales and arpeggios to practise today;
+//  - a summary of everything since your last lesson, to read or send;
 //  - what you usually do at the energy you have today.
 // Each renders nothing when there is nothing to show, so Home only adds a line for them.
 
@@ -9,8 +11,13 @@ import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { Ionicons } from './Icon';
 import { Tap as TouchableOpacity } from './Motion';
 import { fmtDate } from '../utils';
+import { usePref } from '../utils/usePref';
+import { LessonBriefModal } from './LessonBriefModal';
 import { ENERGY_LABELS } from '../constants';
-import { lessonAssignments, setAssignmentDone, suggestScope, energyLinks, describeLink } from '../utils/insights';
+import {
+  lessonAssignments, setAssignmentDone, suggestScope, energyLinks, describeLink,
+  suggestScales, parseTarget, lessonBrief,
+} from '../utils/insights';
 
 const ENERGY_LEVELS = [-2, -1, 0, 1, 2];
 
@@ -152,10 +159,82 @@ function EnergyScope({ sessions }) {
   );
 }
 
+// ─── Scales for today ────────────────────────────────────
+// From your grade target if you have set one: what you have never practised, then what has been
+// left longest. Otherwise the scales you used to play and have let slip.
+
+const SCALE_STATUS_COLOUR = { never: COLOURS.red, stale: COLOURS.amber, recent: COLOURS.steel };
+
+function TodaysScales({ sessions, today }) {
+  const [targetRaw] = usePref('gradeTarget', '');
+  const target = useMemo(() => parseTarget(targetRaw), [targetRaw]);
+  const items = useMemo(() => suggestScales(target, sessions, today), [target, sessions, today]);
+  if (!items.length) return null;
+  const fromTarget = items.some(x => x.fromTarget);
+  return (
+    <Card title="Scales for today" subtitle={fromTarget ? 'From your grade target, the ones that need it most' : 'Ones you have let slip'}>
+      {items.map(x => (
+        <View
+          key={`${x.group}|${x.label}`}
+          accessible
+          accessibilityLabel={`${x.label}, ${x.reason}`}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}
+        >
+          <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: SCALE_STATUS_COLOUR[x.status] }} />
+          <View style={{ flex: 1 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>{x.label}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
+              {x.group === 'Arpeggios' ? 'Arpeggio' : 'Scale'} {'\u00b7'} {x.reason}
+            </Text>
+          </View>
+        </View>
+      ))}
+    </Card>
+  );
+}
+
+// ─── Lesson summary ───────────────────────────────────────────────
+// Everything since the last lesson, on one screen that can be copied or shared.
+
+const minutesText = m => {
+  const r = Math.round(m);
+  return r >= 60 ? `${Math.floor(r / 60)}h ${r % 60}m` : `${r}m`;
+};
+
+function LessonBriefCard({ lessons, sessions, compositions, today }) {
+  const [open, setOpen] = useState(false);
+  const brief = useMemo(() => lessonBrief(lessons, sessions, compositions, today), [lessons, sessions, compositions, today]);
+  if (!brief.totals.sessions && !brief.period.hasLesson) return null;
+
+  const { totals, runThroughs, period } = brief;
+  const when = period.hasLesson ? `Since your lesson on ${fmtDate(period.since)}` : 'Over the last 4 weeks';
+  const what = totals.sessions === 0
+    ? 'No practice logged yet.'
+    : `${totals.sessions} ${totals.sessions === 1 ? 'session' : 'sessions'}, ${minutesText(totals.minutes)}${runThroughs ? `, ${runThroughs} ${runThroughs === 1 ? 'run-through' : 'run-throughs'}` : ''}.`;
+
+  return (
+    <Card title="Lesson summary" subtitle={when}>
+      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
+      <View style={{ flexDirection: 'row', marginTop: 12 }}>
+        <TouchableOpacity
+          onPress={() => setOpen(true)} activeOpacity={0.75} hitSlop={HIT_PILL}
+          accessibilityRole="button" accessibilityLabel="Open the lesson summary"
+          style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
+        >
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Open summary</Text>
+        </TouchableOpacity>
+      </View>
+      <LessonBriefModal visible={open} brief={brief} onClose={() => setOpen(false)} />
+    </Card>
+  );
+}
+
 export function HomeInsightCards({ sessions, lessons, compositions, today, onSaveLesson }) {
   return (
     <>
       <LessonChecklist lessons={lessons} sessions={sessions} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
+      <TodaysScales sessions={sessions} today={today} />
+      <LessonBriefCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
       <EnergyScope sessions={sessions} />
     </>
   );

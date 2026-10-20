@@ -9,6 +9,7 @@ import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
 import { tempoProgress, describeTempo, staleScales, agoLabel } from '../utils/insights';
 import { GradeTargetCard } from '../components/GradeTargetCard';
+import { RunThroughsCard } from '../components/RunThroughsCard';
 import {
   inPeriod, periodCutoff, volumeBuckets, trendBuckets, dayOfWeekBuckets, streakRuns, topStreaks, longestStreak,
   periodAverages, daysSinceLatest, neglectedPieces, pieceStats, lessonInsights,
@@ -1610,6 +1611,12 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <StatsSection id="tempo" title="Tempo progress" collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <TempoProgress sessions={sessions} compositions={compositions} />
+        </GlassCard>
+
+        </StatsSection>
+        <StatsSection id="runthroughs" title="Run-throughs" collapsed={collapsed} onToggle={toggleSection}>
+        <GlassCard>
+          <RunThroughsCard sessions={sessions} compositions={compositions} />
         </GlassCard>
 
         </StatsSection>

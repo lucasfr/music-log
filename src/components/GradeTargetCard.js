@@ -18,7 +18,7 @@ import { notify } from '../utils/notify';
 import { GRADES } from '../constants';
 import {
   emptyTarget, parseTarget, serializeTarget, targetHasContent, describeRequirement, readiness,
-  splitScales, joinScales, agoLabel,
+  splitScales, joinScales, agoLabel, runThroughStats, describeRunThroughs,
 } from '../utils/insights';
 
 const STATUS_TEXT = { recent: COLOURS.success, stale: COLOURS.amber, never: COLOURS.red };
@@ -58,6 +58,11 @@ export function GradeTargetCard({ sessions, compositions }) {
   const today = todayISO();
   const has = targetHasContent(target);
   const r = useMemo(() => (has ? readiness(target, sessions, compositions, today) : null), [has, target, sessions, compositions, today]);
+  // Run-throughs per library piece, since an exam asks for pieces played right through.
+  const runThroughsById = useMemo(
+    () => Object.fromEntries(runThroughStats(sessions, compositions, today).filter(p => p.compositionId).map(p => [p.compositionId, p])),
+    [sessions, compositions, today],
+  );
 
   const modal = (
     <GradeTargetModal
@@ -123,11 +128,14 @@ export function GradeTargetCard({ sessions, compositions }) {
             Pieces: {pieces.ready} of {pieces.needed} performance-ready
           </Text>
           {pieces.list.map(p => (
-            <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flexShrink: 1 }} numberOfLines={1}>{p.title}</Text>
-              <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[p.status]?.bg || COLOURS.tealAccent }}>
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: STATUS_COLOURS[p.status]?.text || COLOURS.navy }}>{p.status}</Text>
+            <View key={p.id} style={{ marginTop: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flexShrink: 1 }} numberOfLines={1}>{p.title}</Text>
+                <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[p.status]?.bg || COLOURS.tealAccent }}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: STATUS_COLOURS[p.status]?.text || COLOURS.navy }}>{p.status}</Text>
+                </View>
               </View>
+              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{describeRunThroughs(runThroughsById[p.id])}</Text>
             </View>
           ))}
           {pieces.candidates < pieces.needed ? (

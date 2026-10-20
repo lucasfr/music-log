@@ -435,6 +435,11 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
                   </Field>
                 </View>
               </View>
+              {!lessonMode && (
+                <Field label="Run-throughs (full plays without stopping)" icon="repeat-outline">
+                  <NumberF value={segment.runThroughs || ''} onChange={v => field('runThroughs', v)} />
+                </Field>
+              )}
             </>
           )}
 
