@@ -527,6 +527,12 @@ export function describeRunThroughs(p, recentLabel = 'in the last month') {
   return `${plural(p.total, 'run-through')}${p.recent > 0 && p.recent < p.total ? `, ${p.recent} ${recentLabel}` : ''}`;
 }
 
+// "3 run-throughs" for one practice segment, or null when none were logged.
+export function formatRunThroughs(seg) {
+  const n = runThroughsOf(seg);
+  return n ? plural(n, 'run-through') : null;
+}
+
 // ── Scales for today ──────────────────────────────────────────────────────────────────────────
 //
 // Which scales and arpeggios to practise today. If you have a grade target its requirements come

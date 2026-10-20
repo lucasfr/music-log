@@ -9,6 +9,7 @@ import { SwipeRow } from '../components/Gestures';
 import { TextF } from '../components/Form';
 import { RatingMini } from '../components/UI';
 import { fmtDate, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
+import { formatRunThroughs } from '../utils/insights';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
 
@@ -28,6 +29,8 @@ function StarRow({ value, total = 5, emoji = '🎵' }) {
 
 function SegDetail({ seg, compName, accentColor }) {
   const isTech = seg.type === 'technique';
+  // Technique shows its articulation and clean tempo; a piece shows its clean tempo and run-throughs.
+  const detailBits = (isTech ? [formatArticulation(seg), formatTempo(seg)] : [formatTempo(seg), formatRunThroughs(seg)]).filter(Boolean);
   const name = isTech
     ? (seg.title || seg.group || 'Technical work')
     : (seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName || 'Piece'));
@@ -45,7 +48,7 @@ function SegDetail({ seg, compName, accentColor }) {
           ? <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{'⏱ ' + seg.duration + ' min'}</Text></View>
           : null}
       </View>
-      {isTech && (formatArticulation(seg) || formatTempo(seg)) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.steel, marginTop: 3 }}>{[formatArticulation(seg), formatTempo(seg)].filter(Boolean).join(' · ')}</Text> : null}
+      {detailBits.length > 0 ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.steel, marginTop: 3 }}>{detailBits.join(' · ')}</Text> : null}
       {(seg.scales && seg.scales.length > 0) ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text> : null}
       {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
       {seg.feltDifficulty ? <View style={{ marginTop: 4 }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 2 }}>Difficulty</Text><StarRow value={seg.feltDifficulty} emoji="🎵" /></View> : null}

@@ -13,7 +13,7 @@ const {
   lessonAssignments, setAssignmentDone,
   suggestScope, energyLinks, describeLink,
   emptyTarget, parseTarget, serializeTarget, targetHasContent, describeRequirement, readiness, splitScales, joinScales,
-  runThroughsOf, runThroughStats, describeRunThroughs, suggestScales, lessonBrief, briefText, shortDate,
+  runThroughsOf, runThroughStats, describeRunThroughs, formatRunThroughs, suggestScales, lessonBrief, briefText, shortDate,
 } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
@@ -775,4 +775,10 @@ test('shortDate', () => {
   assert.equal(shortDate('2026-10-05'), '5 Oct');
   assert.equal(shortDate('2026-12-25', true), '25 Dec 2026');
   assert.equal(shortDate('2026-01-31'), '31 Jan');
+});
+
+test('formatRunThroughs reads naturally and is null when none were logged', () => {
+  assert.equal(formatRunThroughs({ runThroughs: 3 }), '3 run-throughs');
+  assert.equal(formatRunThroughs({ runThroughs: '1' }), '1 run-through');
+  for (const none of [{}, { runThroughs: 0 }, { runThroughs: '' }, { runThroughs: 'x' }, undefined]) assert.equal(formatRunThroughs(none), null);
 });
