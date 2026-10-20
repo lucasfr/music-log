@@ -182,6 +182,14 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
 // ─── Detail panel ─────────────────────────────────────────────────────────────
 
 function DetailPanel({ comp, sessions, lessons }) {
+  // Hooks run on every render, so this comes before the early return below (the parent only mounts
+  // the panel for a selected piece today, but a hook after a return is a crash waiting to happen).
+  const compId = comp ? comp.id : null;
+  const shelvedAt = comp ? comp.shelvedAt : undefined;
+  const history = useMemo(
+    () => (compId ? deriveStatusHistory(compId, sessions, lessons, shelvedAt) : []),
+    [compId, sessions, lessons, shelvedAt]
+  );
   if (!comp) return null;
   const sc = statusColour(comp.status);
 
@@ -193,10 +201,6 @@ function DetailPanel({ comp, sessions, lessons }) {
     return acc + (seg?.duration ? Number(seg.duration) : 0);
   }, 0);
 
-  const history = useMemo(
-    () => deriveStatusHistory(comp.id, sessions, lessons, comp.shelvedAt),
-    [comp.id, sessions, lessons, comp.shelvedAt]
-  );
   const todayISO = localISO(new Date());
   const histStart = history.length ? parseDate(history[0].start) : null;
   const histEnd    = history.length ? parseDate(history[history.length - 1].end) : null;

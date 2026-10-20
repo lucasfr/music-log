@@ -1,0 +1,42 @@
+{
+  "root": true,
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false,
+    "babelOptions": { "presets": ["@babel/preset-react"] },
+    "sourceType": "module",
+    "ecmaVersion": 2022
+  },
+  "env": { "es2022": true, "browser": true, "node": true },
+  "globals": { "__DEV__": "readonly" },
+  "plugins": ["react", "react-hooks"],
+  "settings": { "react": { "version": "detect" } },
+  "ignorePatterns": ["node_modules/", "dist/", "ios/", "android/", ".expo/", "web/", "assets/", "patch-dist.js", "metro.config.js"],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/jsx-uses-vars": "error",
+    "react/jsx-uses-react": "error",
+    "react/jsx-no-undef": "error",
+    "no-undef": "error",
+    "no-redeclare": "error",
+    "no-dupe-keys": "error",
+    "no-dupe-args": "error",
+    "no-dupe-else-if": "error",
+    "no-duplicate-case": "error",
+    "no-const-assign": "error",
+    "no-func-assign": "error",
+    "no-class-assign": "error",
+    "no-import-assign": "error",
+    "no-self-assign": "error",
+    "no-unreachable": "error",
+    "no-unsafe-negation": "error",
+    "no-unsafe-finally": "error",
+    "no-ex-assign": "error",
+    "no-obj-calls": "error",
+    "getter-return": "error",
+    "use-isnan": "error",
+    "valid-typeof": "error",
+    "no-unused-vars": ["warn", { "args": "none", "varsIgnorePattern": "^_", "caughtErrors": "none" }]
+  }
+}

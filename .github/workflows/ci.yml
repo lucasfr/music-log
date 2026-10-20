@@ -1,0 +1,48 @@
+# Runs the linter and the tests on every push to main and every pull request.
+#
+# The tests run in several timezones on purpose. A day is not always 24 hours on the days the clocks
+# change, and several date bugs in this app only showed up in a timezone with daylight saving, which a
+# developer's machine (or a plain UTC server) would never reveal.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # --ignore-scripts: nothing here needs the native modules' install scripts.
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+
+  test:
+    name: Tests (${{ matrix.tz }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tz: [UTC, Europe/London, America/Los_Angeles, Pacific/Auckland]
+    env:
+      TZ: ${{ matrix.tz }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
