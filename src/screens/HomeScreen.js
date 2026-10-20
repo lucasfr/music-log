@@ -14,7 +14,7 @@ import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/expo
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
 import { TimerSetupModal } from '../components/TimerSetupModal';
-import { weekSummary, latestFocus } from '../utils/progress';
+import { weekSummary, latestFocus, currentStreak as streakFrom } from '../utils/progress';
 import { RatingMini } from '../components/UI';
 import { usePref } from '../utils/usePref';
 import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, relativeDay, todaySummary } from '../utils/planning';
@@ -796,21 +796,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const todayJustOpened = todayOpen && !todayWasOpen.current;
   useEffect(() => { todayWasOpen.current = todayOpen; }, [todayOpen]);
 
-  const currentStreak = useMemo(() => {
-    let count = 0;
-    const dateSet = new Set(sessions.map(s => s.date));
-    const d = new Date();
-    // If today isn't logged yet, start counting from yesterday
-    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    if (!dateSet.has(todayStr)) d.setDate(d.getDate() - 1);
-    while (true) {
-      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      if (!dateSet.has(iso)) break;
-      count++;
-      d.setDate(d.getDate() - 1);
-    }
-    return count;
-  }, [sessions]);
+  const currentStreak = useMemo(() => streakFrom(sessions, today), [sessions, today]);
 
   const week   = useMemo(() => weekSummary(sessions, lessons, today), [sessions, lessons, today]);
   const nextUp = useMemo(() => latestFocus(sessions), [sessions]);
