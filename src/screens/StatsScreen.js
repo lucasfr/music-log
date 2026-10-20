@@ -13,13 +13,14 @@ import {
   inPeriod, periodCutoff, volumeBuckets, trendBuckets, dayOfWeekBuckets, streakRuns, topStreaks, longestStreak,
   periodAverages, daysSinceLatest, neglectedPieces, pieceStats, lessonInsights,
 } from '../utils/statsCalc';
+import { scaleCoverage, techniqueBreakdown, COF_KEYS, COF_MINORS } from '../utils/scaleStats';
 import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { coverageColour, readableOn } from '../utils/chartColours';
 import { parseCollapsed, serializeCollapsed, toggleCollapsed } from '../utils/collapsed';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf, getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
+import { getLocalPref, setLocalPref, deriveStatusHistory, todayISO, localISO } from '../utils';
 
 const STATUS_EMOJI = {
   new:                 '🌿',
@@ -321,7 +322,8 @@ function PracticeVolumeChart({ sessions, period }) {
   const [width, setWidth] = useState(0);
   const isDaily = period === '7d';
 
-  const { visible, mins } = volumeBuckets(sessions, period, todayISO());
+  const today = todayISO();
+  const { visible, mins } = useMemo(() => volumeBuckets(sessions, period, today), [sessions, period, today]);
 
   if (mins.every(v => v === 0)) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
@@ -397,7 +399,8 @@ function WeeklyTrendChart({ sessions, period }) {
   const [width, setWidth] = useState(0);
   const isDaily = period === '7d';
 
-  const { visible, energyPts, likingPts } = trendBuckets(sessions, period, todayISO());
+  const today = todayISO();
+  const { visible, energyPts, likingPts } = useMemo(() => trendBuckets(sessions, period, today), [sessions, period, today]);
 
   const hasData = energyPts.some(v => v !== null) || likingPts.some(v => v !== null);
   if (!hasData) return (
@@ -583,7 +586,8 @@ function ScatterPlot({ sessions }) {
 // ─── Neglected pieces ─────────────────────────────────────────────────────
 
 function NeglectedPieces({ sessions, compositions }) {
-  const neglected = neglectedPieces(sessions, compositions, todayISO());
+  const today = todayISO();
+  const neglected = useMemo(() => neglectedPieces(sessions, compositions, today), [sessions, compositions, today]);
 
   if (neglected.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>
@@ -661,16 +665,16 @@ function WinsTimeline({ sessions, period }) {
 // ─── Streak history ─────────────────────────────────────────────────────
 
 function StreakHistory({ sessions }) {
+  const streaks = useMemo(() => streakRuns(sessions), [sessions]);
+  const { top: visible, maxLen } = useMemo(() => topStreaks(streaks), [streaks]);
+
   if (sessions.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No sessions yet.</Text>
   );
 
-  const streaks = streakRuns(sessions);
   if (streaks.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No streaks of 2+ days yet.</Text>
   );
-
-  const { top: visible, maxLen } = topStreaks(streaks);
 
   return (
     <View>
@@ -701,7 +705,8 @@ function StreakHistory({ sessions }) {
 // ─── Lesson insights ────────────────────────────────────────────────────────
 
 function LessonInsights({ lessons, sessions, compositions, period }) {
-  const r = lessonInsights(lessons, sessions, compositions, period, todayISO());
+  const today = todayISO();
+  const r = useMemo(() => lessonInsights(lessons, sessions, compositions, period, today), [lessons, sessions, compositions, period, today]);
 
   if (r.count === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No lessons logged in this period.</Text>
@@ -775,6 +780,13 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
 
 function LibraryGrowthChart({ compositions, sessions, lessons }) {
   const [width, setWidth] = useState(0);
+  // Each piece's full status history, reconstructed once so the active-count
+  // line reflects what was actually active at each past checkpoint — not
+  // just today's snapshot.
+  const histories = useMemo(
+    () => compositions.map(c => deriveStatusHistory(c.id, sessions, lessons, c.shelvedAt)),
+    [compositions, sessions, lessons]
+  );
   const H = 150;
   const padL = 6, padR = 6, padT = 8, padB = 24;
 
@@ -796,14 +808,6 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
   let running = 0;
   const pts = months.map(m => { running += byMonth[m]; return { m, total: running, added: byMonth[m] }; });
   const maxTotal = pts[pts.length - 1].total;
-
-  // Each piece's full status history, reconstructed once so the active-count
-  // line reflects what was actually active at each past checkpoint — not
-  // just today's snapshot.
-  const histories = useMemo(
-    () => compositions.map(c => deriveStatusHistory(c.id, sessions, lessons, c.shelvedAt)),
-    [compositions, sessions, lessons]
-  );
 
   function lastDayOfMonthISO(monthKey) {
     const [y, mo] = monthKey.split('-').map(Number);
@@ -891,43 +895,18 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
 function TechniqueBreakdown({ sessions }) {
   const [articulationFilter, setArticulationFilter] = useState('all');
 
-  // Filter pills only offer articulations actually present in this period's
-  // data, so the row doesn't appear at all until something has been logged
-  // with one. A segment matches if either hand uses the chosen articulation.
-  const used = new Set();
-  sessions.forEach(s => {
-    (s.segments || []).forEach(seg => {
-      if (seg.type !== 'technique') return;
-      const { rh, lh } = articulationOf(seg);
-      if (rh) used.add(rh);
-      if (lh) used.add(lh);
-    });
-  });
+  // Filter pills only offer articulations actually present in this period's data, so the row doesn't
+  // appear at all until something has been logged with one. A segment matches if either hand uses the
+  // chosen articulation. A previously chosen filter that has no data after switching period falls back
+  // to 'all' rather than showing an empty chart with no way out.
+  const { available, activeFilter, sorted } = useMemo(
+    () => techniqueBreakdown(sessions, articulationFilter, ARTICULATION_OPTIONS),
+    [sessions, articulationFilter],
+  );
   const filterOptions = [
     { key: 'all', label: 'All' },
-    ...ARTICULATION_OPTIONS.filter(a => used.has(a)).map(a => ({ key: a, label: ARTICULATION_LABELS[a] })),
+    ...available.map(a => ({ key: a, label: ARTICULATION_LABELS[a] })),
   ];
-  // A previously chosen filter may have no data after switching period —
-  // fall back to 'all' rather than showing an empty chart with no way out.
-  const activeFilter = filterOptions.some(o => o.key === articulationFilter) ? articulationFilter : 'all';
-
-  const groups = {};
-  sessions.forEach(s => {
-    (s.segments || []).forEach(seg => {
-      if (seg.type !== 'technique') return;
-      if (activeFilter !== 'all') {
-        const { rh, lh } = articulationOf(seg);
-        if (rh !== activeFilter && lh !== activeFilter) return;
-      }
-      const g = seg.group || seg.title || 'Technique';
-      if (!groups[g]) groups[g] = { count: 0, minutes: 0, difficulty: [] };
-      groups[g].count++;
-      groups[g].minutes += Number(seg.duration) || 0;
-      if (seg.feltDifficulty) groups[g].difficulty.push(Number(seg.feltDifficulty));
-    });
-  });
-
-  const sorted = Object.entries(groups).sort((a, b) => b[1].count - a[1].count);
   if (sorted.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No technique segments logged in this period.</Text>
   );
@@ -964,46 +943,6 @@ function TechniqueBreakdown({ sessions }) {
 }
 
 // ─── Scale coverage — circle of fifths ───────────────────────────────────────
-
-const COF_KEYS   = ['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
-const COF_MINORS = ['Am','Em','Bm','F#m','C#m','G#m','D#m','Bbm','Fm','Cm','Gm','Dm'];
-
-// Maps the scale label stored in session data to a COF key or minor key
-// Built explicitly to avoid any root collision between major and minor
-const SCALE_LABEL_TO_COF = {
-  // Major
-  'C major': 'C', 'G major': 'G', 'D major': 'D', 'A major': 'A',
-  'E major': 'E', 'B major': 'B', 'F# major': 'F#', 'Gb major': 'F#', 'Db major': 'Db',
-  'Ab major': 'Ab', 'Eb major': 'Eb', 'Bb major': 'Bb', 'F major': 'F',
-  // Natural minor
-  'A natural minor': 'Am', 'E natural minor': 'Em', 'B natural minor': 'Bm',
-  'F# natural minor': 'F#m', 'C# natural minor': 'C#m', 'G# natural minor': 'G#m',
-  'D# natural minor': 'D#m', 'Bb natural minor': 'Bbm', 'F natural minor': 'Fm',
-  'C natural minor': 'Cm', 'G natural minor': 'Gm', 'D natural minor': 'Dm',
-  // Harmonic minor
-  'A harmonic minor': 'Am', 'E harmonic minor': 'Em', 'B harmonic minor': 'Bm',
-  'F# harmonic minor': 'F#m', 'C# harmonic minor': 'C#m', 'G# harmonic minor': 'G#m',
-  'D# harmonic minor': 'D#m', 'Bb harmonic minor': 'Bbm', 'F harmonic minor': 'Fm',
-  'C harmonic minor': 'Cm', 'G harmonic minor': 'Gm', 'D harmonic minor': 'Dm',
-  // Melodic minor
-  'A melodic minor': 'Am', 'E melodic minor': 'Em', 'B melodic minor': 'Bm',
-  'F# melodic minor': 'F#m', 'C# melodic minor': 'C#m', 'G# melodic minor': 'G#m',
-  'D# melodic minor': 'D#m', 'Bb melodic minor': 'Bbm', 'F melodic minor': 'Fm',
-  'C melodic minor': 'Cm', 'G melodic minor': 'Gm', 'D melodic minor': 'Dm',
-  // Chromatic — no inherent major/minor quality, but named by tonic the same
-  // way major scales are, so grouped onto the outer (major) ring
-  'C chromatic': 'C', 'G chromatic': 'G', 'D chromatic': 'D', 'A chromatic': 'A',
-  'E chromatic': 'E', 'B chromatic': 'B', 'F# chromatic': 'F#', 'Db chromatic': 'Db',
-  'Ab chromatic': 'Ab', 'Eb chromatic': 'Eb', 'Bb chromatic': 'Bb', 'F chromatic': 'F',
-  // Dominant 7th arpeggios — also grouped onto the outer ring by tonic
-  'C dominant 7th': 'C', 'G dominant 7th': 'G', 'D dominant 7th': 'D', 'A dominant 7th': 'A',
-  'E dominant 7th': 'E', 'B dominant 7th': 'B', 'F# dominant 7th': 'F#', 'Db dominant 7th': 'Db',
-  'Ab dominant 7th': 'Ab', 'Eb dominant 7th': 'Eb', 'Bb dominant 7th': 'Bb', 'F dominant 7th': 'F',
-  // Diminished 7th arpeggios — symmetrical, but grouped by named tonic same as above
-  'C diminished 7th': 'C', 'G diminished 7th': 'G', 'D diminished 7th': 'D', 'A diminished 7th': 'A',
-  'E diminished 7th': 'E', 'B diminished 7th': 'B', 'F# diminished 7th': 'F#', 'Db diminished 7th': 'Db',
-  'Ab diminished 7th': 'Ab', 'Eb diminished 7th': 'Eb', 'Bb diminished 7th': 'Bb', 'F diminished 7th': 'F',
-};
 
 // Segment colours follow the theme, and each key name takes whichever of near-black or white reads
 // on its segment (utils/chartColours.js).
@@ -1086,49 +1025,13 @@ function ScaleCoverage({ sessions }) {
   const [octaveFilter, setOctaveFilter] = useState('all'); // 'all' | 1 | 2
   const [intervalFilter, setIntervalFilter] = useState('all'); // 'all' | 'unison' | 'third' | 'sixth' | 'tenth'
 
-  function matchesFilters(l, seg) {
-    if (motionFilter !== 'all' && scaleMotion(l) !== motionFilter) return false;
-    if (octaveFilter !== 'all' && scaleOctaves(l, seg.octaves || 1) !== octaveFilter) return false;
-    if (intervalFilter !== 'all' && scaleInterval(l) !== intervalFilter) return false;
-    return true;
-  }
-
-  const scaleCounts = {};
-  sessions.forEach(s => {
-    (s.segments || []).forEach(seg => {
-      if (seg.type !== 'technique') return;
-      const cofKeys = [...new Set(
-        (seg.scales || [])
-          .filter(l => matchesFilters(l, seg))
-          .map(l => SCALE_LABEL_TO_COF[scaleName(l)])
-          .filter(Boolean)
-      )];
-      if (cofKeys.length === 0) return;
-      // Apportion duration evenly across distinct keys so total time isn't inflated
-      const durPerKey = (Number(seg.duration) || 0) / cofKeys.length;
-      cofKeys.forEach(cofKey => {
-        if (!scaleCounts[cofKey]) scaleCounts[cofKey] = { sessions: 0, minutes: 0, difficulty: [] };
-        scaleCounts[cofKey].sessions++;
-        scaleCounts[cofKey].minutes += durPerKey;
-        if (seg.feltDifficulty) scaleCounts[cofKey].difficulty.push(Number(seg.feltDifficulty));
-      });
-    });
-  });
-
-  const majorCounts = COF_KEYS.map(k => scaleCounts[k]?.sessions || 0);
-  const minorCounts = COF_MINORS.map(k => scaleCounts[k]?.sessions || 0);
-  const maxCount    = Math.max(...majorCounts, ...minorCounts, 1);
-
-  const totalScaleMins = sessions.reduce((acc, s) =>
-    acc + (s.segments || []).reduce((a, seg) =>
-      seg.type === 'technique' && (seg.scales || []).some(l =>
-        matchesFilters(l, seg) && SCALE_LABEL_TO_COF[scaleName(l)]
-      )
-        ? a + (Number(seg.duration) || 0) : a, 0), 0);
-  const totalScaleSess = Object.values(scaleCounts).reduce((a, v) => a + v.sessions, 0);
-  const keysVisited    = [...majorCounts, ...minorCounts].filter(v => v > 0).length;
-  const allDiffs       = Object.values(scaleCounts).flatMap(v => v.difficulty);
-  const avgDiff        = allDiffs.length ? allDiffs.reduce((a, v) => a + v, 0) / allDiffs.length : null;
+  const {
+    counts: scaleCounts, majorCounts, minorCounts, maxCount, totalMinutes: totalScaleMins,
+    totalSessions: totalScaleSess, keysVisited, avgDifficulty: avgDiff, anyTechnique,
+  } = useMemo(
+    () => scaleCoverage(sessions, { motion: motionFilter, octaves: octaveFilter, interval: intervalFilter }),
+    [sessions, motionFilter, octaveFilter, intervalFilter],
+  );
   const timeStr        = m => { const r = Math.round(m); return r >= 60 ? `${Math.floor(r / 60)}h ${r % 60}m` : `${r}m`; };
 
   // Difficulty as dot symbols for SVG — ● = full, ◐ = half, ○ = empty
@@ -1151,7 +1054,7 @@ function ScaleCoverage({ sessions }) {
     ? selData.difficulty.reduce((a, v) => a + v, 0) / selData.difficulty.length
     : null;
 
-  if (totalScaleSess === 0 && sessions.every(s => (s.segments || []).every(seg => seg.type !== 'technique'))) return (
+  if (totalScaleSess === 0 && !anyTechnique) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No scales logged in this period.</Text>
   );
 
@@ -1274,13 +1177,11 @@ const DOW_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function DayOfWeekChart({ sessions }) {
   const [width, setWidth] = useState(0);
+  const { byDay, maxCount, bestDay } = useMemo(() => dayOfWeekBuckets(sessions), [sessions]);
 
   if (sessions.length < 7) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Not enough data yet.</Text>
   );
-
-  // Sessions by day of week (Mon=0 … Sun=6)
-  const { byDay, maxCount, bestDay } = dayOfWeekBuckets(sessions);
 
   const H = 160;
   const padL = 0, padR = 0, padT = 16, padB = 36;
@@ -1559,18 +1460,19 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
     { key: 'all', label: 'All time' },
   ];
 
-  const periodSessions = inPeriod(sessions, period, todayISO());
-  const periodLessons  = inPeriod(lessons || [], period, todayISO());
+  const today = todayISO();
+  const periodSessions = useMemo(() => inPeriod(sessions, period, today), [sessions, period, today]);
+  const periodLessons  = useMemo(() => inPeriod(lessons || [], period, today), [lessons, period, today]);
 
-  const { totalMin, avgEnergy: avgEnergyNum, avgEnjoyment: avgEnjoymentFill } = periodAverages(periodSessions);
-  const allTimeMin  = sessions.reduce((a, s) => a + (Number(s.duration) || 0), 0);
+  const { totalMin, avgEnergy: avgEnergyNum, avgEnjoyment: avgEnjoymentFill } = useMemo(() => periodAverages(periodSessions), [periodSessions]);
+  const allTimeMin  = useMemo(() => sessions.reduce((a, s) => a + (Number(s.duration) || 0), 0), [sessions]);
   // Energy: convert -2…+2 scale to 0…5 fill for the Zelda bar
   const energyFill    = avgEnergyNum !== null ? avgEnergyNum + 3 : null; // -2→1, 0→3, +2→5
 
-  const streak = longestStreak(periodSessions, period, todayISO());
+  const streak = useMemo(() => longestStreak(periodSessions, period, today), [periodSessions, period, today]);
 
 
-  const { byCount: topPieces, byTime: topPiecesByTime } = pieceStats(periodSessions, compositions);
+  const { byCount: topPieces, byTime: topPiecesByTime } = useMemo(() => pieceStats(periodSessions, compositions), [periodSessions, compositions]);
 
   const activePieces = pieceSort === 'time' ? topPiecesByTime : topPieces;
   const activePieceMax = pieceSort === 'time'
@@ -1580,11 +1482,9 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
 
   const periodLabel = period === 'all' ? 'all time' : period === '7d' ? '7d' : '30d';
 
-  const today = todayISO();
+  const daysSinceSession = useMemo(() => daysSinceLatest(sessions, today), [sessions, today]);
 
-  const daysSinceSession = daysSinceLatest(sessions, today);
-
-  const daysSinceLesson = daysSinceLatest(lessons || [], today);
+  const daysSinceLesson = useMemo(() => daysSinceLatest(lessons || [], today), [lessons, today]);
 
   const statItems = [
     { value: totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${Math.round(totalMin)}m`, label: `practice (${periodLabel})`, emoji: '⏱', allTime: period !== 'all' ? (allTimeMin >= 60 ? `${Math.floor(allTimeMin / 60)}h ${allTimeMin % 60}m total` : `${Math.round(allTimeMin)}m total`) : null },

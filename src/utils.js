@@ -2,6 +2,7 @@ import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PROGRESS_TAG_TO_STATUS, STATUS_RANK, RANK_TO_STATUS, SHELVED_AFTER_DAYS, ARTICULATION_LABELS } from './constants';
 import { daysBetween } from './utils/statsCalc';
+import { scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf } from './utils/scaleStats';
 
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -46,22 +47,9 @@ export function fmtDateShort(iso) {
 // callers so older entries without their own octaves value still display
 // correctly.
 
-export function scaleName(entry) {
-  return typeof entry === 'string' ? entry : entry.scale;
-}
-
-export function scaleMotion(entry) {
-  return typeof entry === 'string' ? 'parallel' : (entry.motion || 'parallel');
-}
-
-export function scaleInterval(entry) {
-  return typeof entry === 'string' ? 'unison' : (entry.interval || 'unison');
-}
-
-export function scaleOctaves(entry, fallbackOctaves = 1) {
-  if (typeof entry === 'string') return fallbackOctaves;
-  return entry.octaves || fallbackOctaves;
-}
+// scaleName, scaleMotion, scaleInterval, scaleOctaves and articulationOf live in utils/scaleStats.js
+// (pure, so they're tested); they're re-exported here so imports from this file keep working.
+export { scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf };
 
 export function formatScaleEntry(entry, fallbackOctaves = 1) {
   const name = scaleName(entry);
@@ -84,11 +72,6 @@ export function formatScaleEntry(entry, fallbackOctaves = 1) {
 export function formatTempo(seg) {
   const n = Number(seg?.tempo);
   return n > 0 ? `${n} bpm` : null;
-}
-
-export function articulationOf(seg) {
-  const a = seg?.articulation;
-  return { rh: a?.rh || null, lh: a?.lh || null };
 }
 
 // 'Staccato' when both hands match, 'RH legato · LH staccato' when they
