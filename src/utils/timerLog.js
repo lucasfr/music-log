@@ -12,13 +12,16 @@
 // technique group entirely.
 //
 // `minutesFor(i)` is the minutes actually spent on segment i. A piece's run-throughs (counted on the
-// timer) go with it, and a technique segment's dynamics; each key is left out when there are none.
+// timer) go with it, and a technique segment's dynamics, and the clean tempo logged from the metronome;
+// each key is left out when there are none.
 export function timerToLogSegments(segments, minutesFor) {
   return segments.map((s, i) => {
     const isTech = s.type === 'technique';
     const n = Math.floor(Number(s.runThroughs));
     const runThroughs = !isTech && Number.isFinite(n) && n > 0 ? Math.min(n, 99) : 0;
     const dynamics = isTech && Array.isArray(s.dynamics) && s.dynamics.length ? s.dynamics : null;
+    const tempoN = Math.round(Number(s.tempo));
+    const tempo = Number.isFinite(tempoN) && tempoN > 0 ? tempoN : null;
     return {
       id: s.id,
       type: s.type,
@@ -30,6 +33,7 @@ export function timerToLogSegments(segments, minutesFor) {
       notes: '', challenges: [], progress: [],
       ...(runThroughs ? { runThroughs } : {}),
       ...(dynamics ? { dynamics } : {}),
+      ...(tempo ? { tempo } : {}),
     };
   });
 }

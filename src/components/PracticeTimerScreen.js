@@ -26,12 +26,12 @@ import { runThroughsOf, openSpotsLine } from '../utils/insights';
 // through creating this section's elements — still costs real JS-thread
 // time every 250ms unless this section is memoized too, with props that
 // stay referentially stable across pure countdown ticks.
-const MetronomeSection = React.memo(function MetronomeSection({ composition, segmentKey, compact, suggestedBpm }) {
+const MetronomeSection = React.memo(function MetronomeSection({ composition, segmentKey, compact, suggestedBpm, bpmRef }) {
   // Always on screen. On a phone it starts as a compact bar (tempo and play) with the time
   // signature, subdivision and ramp folded away; it used to sit behind a toggle you had to find.
   return (
     <View style={{ width: '100%', maxWidth: 320, marginTop: compact ? 4 : 0 }}>
-      <MetronomeControl key={segmentKey} composition={composition} compact={compact} suggestedBpm={suggestedBpm} />
+      <MetronomeControl key={segmentKey} composition={composition} compact={compact} suggestedBpm={suggestedBpm} bpmRef={bpmRef} />
     </View>
   );
 });
@@ -99,6 +99,7 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
 
 export function PracticeTimerScreen({ visible, initialSegments, restore, compositions, tempoSuggestions, onFinish, isDesktop }) {
   const timer = usePracticeTimer(initialSegments, restore);
+  const bpmRef = useRef(null); // the metronome's current tempo, written by MetronomeControl
   useKeepAwake(visible && timer.isRunning);
   // True right after a segment transition that landed paused (timeout or
   // skip, both now autoStart:false) — shows an interstitial with its own
@@ -280,6 +281,23 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
         </View>
       ) : null}
 
+      {/* Log the metronome's tempo as this segment's clean tempo: the one you can play it at without mistakes.
+          It goes to the log form with the segment (see timerLog.js), and feeds the tempo progress. */}
+      {timer.currentSegment.title !== 'Sight-reading' ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 }}>
+          <TouchableOpacity
+            onPress={() => { const bpm = bpmRef.current; if (bpm) timer.setSegmentTempo(bpm); }} activeOpacity={0.85} hitSlop={HIT_PILL}
+            accessibilityRole="button" accessibilityLabel="Log the metronome tempo as your clean tempo for this segment"
+            style={{ paddingHorizontal: 16, height: 40, borderRadius: 20, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Log tempo as clean</Text>
+          </TouchableOpacity>
+          {Number(timer.currentSegment.tempo) > 0 ? (
+            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>Clean: {timer.currentSegment.tempo} bpm</Text>
+          ) : null}
+        </View>
+      ) : null}
+
       {timer.nextSegment ? (
         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
           up next: {timer.nextSegment.title} · {timer.nextSegment.plannedMinutes} min
@@ -298,6 +316,7 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
       segmentKey={timer.currentIndex}
       compact={!isDesktop}
       suggestedBpm={(tempoSuggestions && timer.currentSegment.compositionId && tempoSuggestions[timer.currentSegment.compositionId]) || null}
+      bpmRef={bpmRef}
     />
   );
 

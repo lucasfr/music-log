@@ -1022,7 +1022,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       {sessions.length > 0 ? <FadeInUp delay={delayFor(2)}><WeekStrip week={week} lastWeek={lastWeek} goal={goal} streak={currentStreak} /></FadeInUp> : null}
       {sessions.length > 0 || (lessons || []).length > 0 ? (
         <FadeInUp delay={delayFor(3)}>
-          <HomeInsightCards sessions={sessions} lessons={lessons || []} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
+          <HomeInsightCards sessions={sessions} lessons={lessons || []} compositions={compositions} today={today} onSaveLesson={onSaveLesson} practicedToday={todaySessions.length > 0} onStartPlan={startPlan} />
         </FadeInUp>
       ) : null}
       {backupDue ? (

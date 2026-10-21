@@ -16,17 +16,20 @@ import { LessonBriefModal } from './LessonBriefModal';
 import { ENERGY_LABELS } from '../constants';
 import {
   lessonAssignments, setAssignmentDone, suggestScope, energyLinks, describeLink,
-  suggestScales, parseTarget, lessonBrief, weeklyReview, weeklyText, weeklyReviewDue,
+  suggestScales, parseTarget, lessonBrief, weeklyReview, weeklyText, weeklyReviewDue, buildTodayPlan,
 } from '../utils/insights';
 
 const ENERGY_LEVELS = [-2, -1, 0, 1, 2];
 
-function Card({ title, subtitle, children }) {
+// `accent` (a theme colour) puts a coloured bar down the card's left edge, so each kind of card is
+// recognisable at a glance.
+function Card({ title, subtitle, children, accent }) {
   return (
     <View style={{
-      borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 16, marginBottom: 16,
+      borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 16, paddingLeft: accent ? 24 : 16, marginBottom: 16,
       shadowColor: COLOURS.shadow(0.08), shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 2,
     }}>
+      {accent ? <View style={{ position: 'absolute', left: 10, top: 16, bottom: 16, width: 4, borderRadius: 2, backgroundColor: accent }} /> : null}
       <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>{title}</Text>
       {subtitle ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{subtitle}</Text> : null}
       <View style={{ marginTop: 12 }}>{children}</View>
@@ -54,7 +57,7 @@ function LessonChecklist({ lessons, sessions, compositions, today, onSaveLesson 
   }
 
   return (
-    <Card title="From your lesson" subtitle={`${fmtDate(lessonDate)} \u00b7 ${open > 0 ? `${open} to do` : 'all done'}`}>
+    <Card accent={COLOURS.amber} title="From your lesson" subtitle={`${fmtDate(lessonDate)} \u00b7 ${open > 0 ? `${open} to do` : 'all done'}`}>
       {items.map(it => {
         const finished = it.status !== 'open';
         return (
@@ -111,7 +114,7 @@ function EnergyScope({ sessions }) {
   if (links.minutes !== null) linkLines.push(`energy and session length show ${describeLink(links.minutes, 'length')}`);
 
   return (
-    <Card title="How much energy have you got?" subtitle="See what you usually do on days like this">
+    <Card accent={COLOURS.success} title="How much energy have you got?" subtitle="See what you usually do on days like this">
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {ENERGY_LEVELS.map(level => {
           const active = energy === level;
@@ -172,7 +175,7 @@ function TodaysScales({ sessions, today }) {
   if (!items.length) return null;
   const fromTarget = items.some(x => x.fromTarget);
   return (
-    <Card title="Scales for today" subtitle={fromTarget ? 'From your grade target, the ones that need it most' : 'Ones you have let slip'}>
+    <Card accent={COLOURS.red} title="Scales for today" subtitle={fromTarget ? 'From your grade target, the ones that need it most' : 'Ones you have let slip'}>
       {items.map(x => (
         <View
           key={`${x.group}|${x.label}`}
@@ -213,7 +216,7 @@ function LessonBriefCard({ lessons, sessions, compositions, today }) {
     : `${totals.sessions} ${totals.sessions === 1 ? 'session' : 'sessions'}, ${minutesText(totals.minutes)}${runThroughs ? `, ${runThroughs} ${runThroughs === 1 ? 'run-through' : 'run-throughs'}` : ''}.`;
 
   return (
-    <Card title="Lesson summary" subtitle={when}>
+    <Card accent={COLOURS.gold} title="Lesson summary" subtitle={when}>
       <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
       <View style={{ flexDirection: 'row', marginTop: 12 }}>
         <TouchableOpacity
@@ -243,7 +246,7 @@ function WeeklyReviewCard({ lessons, sessions, compositions, today }) {
   const what = `${totals.sessions} ${totals.sessions === 1 ? 'session' : 'sessions'}, ${minutesText(totals.minutes)}${runThroughs ? `, ${runThroughs} ${runThroughs === 1 ? 'run-through' : 'run-throughs'}` : ''}.`;
 
   return (
-    <Card title="Last week" subtitle={`${fmtDate(review.week.from)} to ${fmtDate(review.week.to)}`}>
+    <Card accent={COLOURS.steel} title="Last week" subtitle={`${fmtDate(review.week.from)} to ${fmtDate(review.week.to)}`}>
       <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
       <View style={{ flexDirection: 'row', marginTop: 12 }}>
         <TouchableOpacity
@@ -259,14 +262,79 @@ function WeeklyReviewCard({ lessons, sessions, compositions, today }) {
   );
 }
 
-export function HomeInsightCards({ sessions, lessons, compositions, today, onSaveLesson }) {
+// ─── Today's plan ──────────────────────────────────────────────────────────────────
+// A routine built from what needs attention (see buildTodayPlan), started with one tap. Not shown once
+// you have practised today, when it has nothing to add.
+
+function TodaysPlanCard({ sessions, lessons, compositions, today, practicedToday, onStartPlan }) {
+  const [targetRaw] = usePref('gradeTarget', '');
+  const target = useMemo(() => parseTarget(targetRaw), [targetRaw]);
+  const plan = useMemo(
+    () => buildTodayPlan(target, sessions, lessons, compositions, today, { examDate: (target && target.date) || null }),
+    [target, sessions, lessons, compositions, today],
+  );
+  if (practicedToday || !onStartPlan || !plan.items.length) return null;
+  return (
+    <Card accent={COLOURS.steel} title="Today's plan" subtitle={`${plan.minutes} min, from what needs attention`}>
+      {plan.items.map((x, i) => (
+        <View
+          key={`${x.kind}-${x.title}-${i}`}
+          accessible
+          accessibilityLabel={`${x.title}, ${x.minutes} minutes, ${x.reason}`}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>{x.title}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>{x.reason}</Text>
+          </View>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{x.minutes} min</Text>
+        </View>
+      ))}
+      <TouchableOpacity
+        onPress={() => onStartPlan(plan.segments)} activeOpacity={0.85} hitSlop={HIT_PILL}
+        accessibilityRole="button" accessibilityLabel={`Start today's plan, ${plan.minutes} minutes`}
+        style={{ ...TOUCH_PILL, alignSelf: 'flex-start', marginTop: 10, paddingHorizontal: 22, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Start</Text>
+      </TouchableOpacity>
+    </Card>
+  );
+}
+
+// ─── Reference cards, folded away ─────────────────────────────────────────
+// The cards worth acting on today stay on top; the rest are one tap away, and Home remembers whether
+// you left them open.
+
+function MoreInsights({ children }) {
+  const [open, setOpen] = usePref('homeInsightsOpen', '0');
+  const isOpen = open === '1';
+  return (
+    <View style={{ marginBottom: 16 }}>
+      <TouchableOpacity
+        onPress={() => setOpen(isOpen ? '0' : '1')} activeOpacity={0.8} hitSlop={HIT_PILL}
+        accessibilityRole="button" accessibilityState={{ expanded: isOpen }}
+        accessibilityLabel={isOpen ? 'Hide more insights' : 'Show more insights'}
+        style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 }}
+      >
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>More insights</Text>
+        <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} color={COLOURS.textDim} />
+      </TouchableOpacity>
+      {isOpen ? <View style={{ marginTop: 8 }}>{children}</View> : null}
+    </View>
+  );
+}
+
+export function HomeInsightCards({ sessions, lessons, compositions, today, onSaveLesson, practicedToday, onStartPlan }) {
   return (
     <>
       <LessonChecklist lessons={lessons} sessions={sessions} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
       <WeeklyReviewCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
-      <TodaysScales sessions={sessions} today={today} />
-      <LessonBriefCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
-      <EnergyScope sessions={sessions} />
+      <TodaysPlanCard sessions={sessions} lessons={lessons} compositions={compositions} today={today} practicedToday={practicedToday} onStartPlan={onStartPlan} />
+      <MoreInsights>
+        <TodaysScales sessions={sessions} today={today} />
+        <LessonBriefCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
+        <EnergyScope sessions={sessions} />
+      </MoreInsights>
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
 import { setLocalPref } from '../utils';
 import { buildSnapshot, SNAPSHOT_KEY, SNAPSHOT_EVERY_MS } from './timerSnapshot';
-import { bumpRunThroughs } from './insights';
+import { bumpRunThroughs, withCleanTempo } from './insights';
 
 const TICK_MS = 1000;
 
@@ -134,6 +134,12 @@ export function usePracticeTimer(initialSegments = [], restore = null) {
     setSegments(prev => prev.map((s, i) => (i === currentIndex ? { ...s, runThroughs: bumpRunThroughs(s.runThroughs, delta) } : s)));
   }, [currentIndex]);
 
+  // "Log tempo as clean": the metronome's tempo becomes the current segment's clean tempo. It lives on the
+  // segment like the run-throughs, so the snapshot keeps it and it goes to the log form (see timerLog.js).
+  const setSegmentTempo = useCallback((bpm) => {
+    setSegments(prev => prev.map((s, i) => (i === currentIndex ? withCleanTempo(s, bpm) : s)));
+  }, [currentIndex]);
+
   // Lets a display component (the countdown ring) opt into frequent
   // refreshes without forcing this hook's caller to re-render — the
   // interval below calls every registered listener directly, and the
@@ -209,6 +215,7 @@ export function usePracticeTimer(initialSegments = [], restore = null) {
     finishNow,
     addMinutes,
     addRunThrough,
+    setSegmentTempo,
     goTo,
     actualMinutesFor,
     totalActualMinutes: () => segments.reduce((sum, _, i) => sum + actualMinutesFor(i), 0),

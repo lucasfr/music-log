@@ -183,13 +183,15 @@ function SigChip({ sig, active, onPress }) {
 // own tick/animation state and knocking the visuals out of sync with the
 // audio, which kept ticking fine underneath since its scheduler lives in a
 // ref-held closure unaffected by re-renders.
-export const MetronomeControl = React.memo(function MetronomeControl({ composition, compact = false, suggestedBpm = null }) {
+export const MetronomeControl = React.memo(function MetronomeControl({ composition, compact = false, suggestedBpm = null, bpmRef = null }) {
   // Tempo and time signature of the linked piece (90 bpm and 4/4 when it has none).
   const piece = pieceMetronomeDefaults(composition);
   const defaultBpm = piece.bpm;
   const defaultSig = piece.sig;
 
   const [bpm, setBpm] = useState(defaultBpm);
+  // Lets the practice timer read the tempo (to log it as clean) without re-rendering on every change.
+  useEffect(() => { if (bpmRef) bpmRef.current = bpm; }, [bpm, bpmRef]);
   const [sig, setSig] = useState(defaultSig);
   const [subdivision, setSubdivision] = useState(1);
   const [playing, setPlaying] = useState(false);

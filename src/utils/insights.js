@@ -539,6 +539,15 @@ export function bumpRunThroughs(current, delta) {
   return Math.min(99, Math.max(0, runThroughsOf({ runThroughs: current }) + delta));
 }
 
+// A segment with its clean tempo set from the metronome (the practice timer's "log tempo as clean"
+// button): rounded, and kept within the metronome's own range of 30 to 240 bpm. Something that is not
+// a usable number clears the tempo. A new object; the segment passed in is untouched.
+export function withCleanTempo(seg, bpm) {
+  const { tempo: _previous, ...rest } = seg; // eslint-disable-line no-unused-vars
+  const n = Math.round(Number(bpm));
+  return Number.isFinite(n) && n > 0 ? { ...rest, tempo: clampBpm(n) } : rest;
+}
+
 // ── Scales for today ──────────────────────────────────────────────────────────────────────────
 //
 // Which scales and arpeggios to practise today. If you have a grade target its requirements come
@@ -582,6 +591,94 @@ export function suggestScales(target, sessions, today, limit = 5, recentDays = 2
     return (b.daysSince - a.daysSince) || a.name.localeCompare(b.name);
   });
   return items.slice(0, limit).map(({ tier, ...x }) => ({ ...x, reason: reasonFor(x.status, x.daysSince) }));
+}
+
+// ── Today's plan ──────────────────────────────────────────────────────────────────────────────────
+//
+// A practice routine put together from what the app already knows: a scales warm-up if any are due, then
+// the pieces that most need attention, each with its reason, sharing out the time you usually practise.
+// The segments have the same shape the timer plan uses (see routineToPlan), so one tap starts them.
+
+// How long to plan for: the middle of your last ten sessions (within two months), kept between 20 and 60
+// minutes and rounded to 5. 30 when there is nothing to go on.
+export function planBudget(sessions, today) {
+  const recent = (sessions || [])
+    .filter(s => s.date && s.date <= today && daysBetween(s.date, today) <= 60 && num(s.duration) > 0)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 10)
+    .map(s => num(s.duration))
+    .sort((a, b) => a - b);
+  if (!recent.length) return 30;
+  const mid = recent.length % 2 ? recent[(recent.length - 1) / 2] : (recent[recent.length / 2 - 1] + recent[recent.length / 2]) / 2;
+  return Math.min(60, Math.max(20, Math.round(mid / 5) * 5));
+}
+
+// The pieces your teacher gave a task on in the last four weeks that you haven't ticked off or played
+// since. -> Set of library piece ids.
+export function openAssignmentPieces(lessons, sessions, today) {
+  const out = new Set();
+  (lessons || []).forEach(l => {
+    if (!l.date || l.date > today || daysBetween(l.date, today) > 28) return;
+    (l.segments || []).forEach(seg => {
+      if (!seg.compositionId || !String(seg.assignment || '').trim() || seg.assignmentDone) return;
+      const since = (sessions || []).some(s => s.date > l.date && s.date <= today
+        && (s.segments || []).some(g => g.type === 'repertoire' && g.compositionId === seg.compositionId));
+      if (!since) out.add(seg.compositionId);
+    });
+  });
+  return out;
+}
+
+// -> { segments, items, minutes, budget }. `items` is what the card shows: [{ kind: 'scales' | 'piece',
+// title, minutes, reason }]. Nothing to suggest gives empty lists.
+export function buildTodayPlan(target, sessions, lessons, compositions, today, opts = {}) {
+  const examDate = opts.examDate || null;
+  const makeId = opts.makeId || (() => `plan-${Math.random().toString(36).slice(2, 9)}`);
+  const budget = planBudget(sessions, today);
+  const items = [];
+
+  const due = suggestScales(target, sessions, today, 3).filter(x => x.status !== 'recent');
+  if (due.length) {
+    const hasScale = due.some(x => x.group === 'Scales');
+    items.push({
+      kind: 'scales', title: hasScale ? 'Scales' : 'Arpeggios', compositionId: '',
+      minutes: budget >= 40 ? 10 : 8, reason: due.map(x => x.name).join(', '),
+    });
+  }
+
+  const assigned = openAssignmentPieces(lessons, sessions, today);
+  const ranked = (compositions || [])
+    .filter(c => c.status === 'learning' || c.status === 'consolidating')
+    .map(c => {
+      const r = pieceReport(c, sessions, lessons, today, examDate);
+      const days = r.practice.daysSince;
+      const reasons = [];
+      let score = 0;
+      if (assigned.has(c.id)) { score += 3; reasons.push('open task from your lesson'); }
+      if (r.stalled) { score += 2; reasons.push(`tempo stalled at ${r.stalled.bpm}`); }
+      if (r.trajectory && r.trajectory.status === 'behind') { score += 2; reasons.push('behind on tempo'); }
+      if (r.spots.open.length) { score += 1.5; reasons.push(`${r.spots.open.length === 1 ? '1 tricky spot' : `${r.spots.open.length} tricky spots`}`); }
+      if (days === null) { score += 1; reasons.push('not played yet'); }
+      else if (days >= 7) { score += 1 + Math.min(2, Math.floor((days - 7) / 7)); reasons.push(`not played for ${days} days`); }
+      return { c, score, days: days === null ? 9999 : days, reason: reasons[0] || '' };
+    })
+    .sort((a, b) => b.score - a.score || b.days - a.days || String(a.c.title).localeCompare(String(b.c.title)));
+  const chosen = ranked.filter(x => x.score > 0).slice(0, 3);
+  if (!chosen.length && ranked.length) chosen.push(ranked[0]);
+
+  const warm = items.length ? items[0].minutes : 0;
+  const left = Math.max(5, budget - warm);
+  chosen.forEach((x, i) => {
+    const each = Math.max(5, Math.floor(left / chosen.length / 5) * 5);
+    const minutes = i === chosen.length - 1 ? Math.max(5, left - each * (chosen.length - 1)) : each;
+    items.push({ kind: 'piece', title: x.c.title || 'Untitled', compositionId: x.c.id, minutes, reason: x.reason || 'next in rotation' });
+  });
+
+  const segments = items.map(it => ({
+    id: makeId(), type: it.kind === 'scales' ? 'technique' : 'repertoire', title: it.title,
+    compositionId: it.compositionId, plannedMinutes: Math.min(60, Math.max(1, it.minutes)), confirmed: true,
+  }));
+  return { segments, items, minutes: items.reduce((t, x) => t + x.minutes, 0), budget };
 }
 
 // ── The summary for a lesson ──────────────────────────────────────────────────────────────────
