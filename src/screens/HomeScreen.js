@@ -17,7 +17,8 @@ import { TimerSetupModal } from '../components/TimerSetupModal';
 import { weekSummary, latestFocus, currentStreak as streakFrom } from '../utils/progress';
 import { RatingMini } from '../components/UI';
 import { usePref } from '../utils/usePref';
-import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, relativeDay, todaySummary } from '../utils/planning';
+import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, relativeDay, todaySummary, planSummary, lastPracticedLine } from '../utils/planning';
+import { tint, accentKey } from '../utils/tint';
 import { Ionicons } from '../components/Icon';
 import { SNAPSHOT_KEY, parseSnapshot, snapshotSummary, worthResuming } from '../utils/timerSnapshot';
 import { timerToLogSegments } from '../utils/timerLog';
@@ -315,38 +316,84 @@ const minutesOf = plan => plan.reduce((total, s) => total + (Number(s.plannedMin
 // The way in to practising: the timer is how you practise, but it used to live inside the + menu.
 // "Set up" opens the timer setup; the chips start a plan straight away (the last session's, or one
 // of your saved routines).
-function StartPracticeCard({ repeatPlan, routines, compositions, onSetup, onStartPlan }) {
-  const chip = (key, label, plan, a11y) => (
-    <TouchableOpacity key={key} onPress={() => onStartPlan(plan)} activeOpacity={0.8} hitSlop={HIT_PILL}
-      accessibilityRole="button" accessibilityLabel={a11y}
-      style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{label}</Text>
-      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{minutesOf(plan)} min</Text>
-    </TouchableOpacity>
-  );
+function StartPracticeCard({ repeatPlan, routines, compositions, lastSession, today, onSetup, onStartPlan }) {
   const shortcuts = [
-    ...(repeatPlan.length > 0 ? [chip('repeat', '↻ Repeat last session', repeatPlan, `Start the timer with your last session, ${minutesOf(repeatPlan)} minutes`)] : []),
-    ...routines.map(r => chip(r.id, r.name, routineToPlan(r, compositions), `Start the routine ${r.name}`)),
+    ...(repeatPlan.length > 0 ? [{
+      key: 'repeat', title: 'Repeat last session', plan: repeatPlan, icon: 'repeat-outline',
+      a11y: `Start the timer with your last session, ${minutesOf(repeatPlan)} minutes`,
+    }] : []),
+    ...routines.map(r => ({
+      key: r.id, title: r.name, plan: routineToPlan(r, compositions), icon: 'musical-notes-outline',
+      a11y: `Start the routine ${r.name}`,
+    })),
   ];
+  const subtitle = lastPracticedLine(lastSession, today) || 'Timed segments, with a metronome.';
+  const many = shortcuts.length > 1;
+
+  // Each shortcut has its own colour from the theme, on the icon, the border and the minutes, and says
+  // what it will run (its pieces and exercises) as well as for how long.
+  const tile = (s, i) => {
+    const accent = COLOURS[accentKey(i)];
+    const summary = planSummary(s.plan);
+    return (
+      <TouchableOpacity key={s.key} onPress={() => onStartPlan(s.plan)} activeOpacity={0.8} hitSlop={HIT_PILL}
+        accessibilityRole="button" accessibilityLabel={s.a11y}
+        style={{
+          width: many ? 250 : undefined, flex: many ? undefined : 1,
+          flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12,
+          borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.45), borderWidth: 1, borderColor: tint(accent, 0.4),
+        }}>
+        <View style={{ width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: tint(accent, 0.22) }}>
+          <Ionicons name={s.icon} size={20} color={accent} />
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{s.title}</Text>
+          {summary ? <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>{summary}</Text> : null}
+        </View>
+        <View style={{ paddingHorizontal: 9, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: tint(accent, 0.22) }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.text }}>{minutesOf(s.plan)} min</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={{
       marginBottom: 16, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 14,
+      borderWidth: 1, borderColor: COLOURS.steelA(0.28),
       shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 14, elevation: 4,
     }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text }}>Start practice</Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>Timed segments, with a metronome.</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, lineHeight: 32, color: COLOURS.text }}>Start practice</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 4 }}>{subtitle}</Text>
         </View>
         <TouchableOpacity onPress={onSetup} activeOpacity={0.85} hitSlop={HIT_PILL}
           accessibilityRole="button" accessibilityLabel="Set up a practice timer"
-          style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
-          <Ionicons name="play" size={18} color="#fff" />
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Set up</Text>
+          style={{ alignItems: 'center', gap: 6 }}>
+          <View style={{
+            width: 60, height: 60, borderRadius: 30, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center', paddingLeft: 3,
+            shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 14, elevation: 6,
+          }}>
+            <Ionicons name="play" size={28} color="#fff" />
+          </View>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Set up</Text>
         </TouchableOpacity>
       </View>
       {shortcuts.length > 0 ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>{shortcuts}</View>
+        <View style={{ marginTop: 14 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 8 }}>Quick start</Text>
+          {many ? (
+            // Slides sideways, one tile at a time. It runs to the card's edges so the next tile peeks in.
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled
+              snapToInterval={260} snapToAlignment="start" decelerationRate="fast"
+              style={{ marginHorizontal: -14 }} contentContainerStyle={{ paddingHorizontal: 14, gap: 10 }}>
+              {shortcuts.map(tile)}
+            </ScrollView>
+          ) : (
+            <View style={{ flexDirection: 'row' }}>{shortcuts.map(tile)}</View>
+          )}
+        </View>
       ) : null}
     </View>
   );
@@ -893,6 +940,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           repeatPlan={repeatPlan}
           routines={routines}
           compositions={compositions}
+          lastSession={latestSession(sessions)}
+          today={today}
           onSetup={() => setTimerSetupVisible(true)}
           onStartPlan={startPlan}
         />

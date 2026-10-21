@@ -239,6 +239,29 @@ export function relativeDay(dateStr, today) {
   return null;
 }
 
+// What a plan will run, in one line: 'Hanon · Minuet in F · Ocean View'. At most `max` titles (each once),
+// then '+2' for the rest; '' when none of the segments has a title.
+export function planSummary(plan, max = 3) {
+  const titles = [];
+  (plan || []).forEach(s => {
+    const t = String((s && s.title) || '').trim();
+    if (t && !titles.includes(t)) titles.push(t);
+  });
+  if (!titles.length) return '';
+  const shown = titles.slice(0, max).join(' · ');
+  return titles.length > max ? `${shown} +${titles.length - max}` : shown;
+}
+
+// The line under "Start practice": 'Last practised yesterday · 35 min', 'Practised today · 25 min'. null
+// when there is no session to speak of (the card then says what it is for instead).
+export function lastPracticedLine(session, today) {
+  if (!session || !session.date) return null;
+  const mins = Number(session.duration) > 0 ? ` · ${Math.round(Number(session.duration))} min` : '';
+  const when = relativeDay(session.date, today);
+  if (when === 'Today') return `Practised today${mins}`;
+  return `Last practised ${when ? when.toLowerCase() : 'a while ago'}${mins}`;
+}
+
 const minutesText = m => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}` : `${m} min`);
 
 // One line for what has been logged today: 'Practised 25 min', '2 practices, 1h 10m', plus
