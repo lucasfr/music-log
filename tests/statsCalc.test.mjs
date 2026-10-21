@@ -19,7 +19,7 @@ const {
   volumeBuckets, trendBuckets, dayOfWeekBuckets,
   streakRuns, topStreaks, longestStreak,
   periodAverages, daysSinceLatest,
-  neglectedPieces, pieceStats, lessonInsights,
+  neglectedPieces, pieceStats, lessonInsights, GRID_LAYERS, gridLayers, gridSelection,
 } = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const S = (date, extra = {}) => ({ id: date, date, duration: 20, energy: 1, segments: [], ...extra });
@@ -391,4 +391,47 @@ test('pieces that were in a lesson but never in a practice session are listed A 
   const comps = [comp('z', 'new', 'Zebra'), comp('m', 'new', 'Mango'), comp('done', 'new', 'Done')];
   assert.deepEqual(lessonInsights(lessons, sessions, comps, '30d', TODAY).lessonOnly.map(p => p.title), ['Mango', 'Zebra'],
     'a technique segment linked to the piece does not count as practising it as repertoire');
+});
+
+// ── the activity grid's layers ────────────────────────────────────────────────────────────────
+
+test('one layer on shows only that layer', () => {
+  assert.deepEqual(gridLayers(['practice']), { practice: true, lessons: false });
+  assert.deepEqual(gridLayers(['lessons']), { practice: false, lessons: true });
+});
+
+test('nothing on, or both on, shows both layers', () => {
+  assert.deepEqual(gridLayers([]), { practice: true, lessons: true });
+  assert.deepEqual(gridLayers(['practice', 'lessons']), { practice: true, lessons: true });
+  assert.deepEqual(gridLayers(['lessons', 'practice']), { practice: true, lessons: true }, 'in either order');
+});
+
+test('anything that is not a list of layers shows both, rather than an empty grid', () => {
+  for (const odd of [undefined, null, 'practice', {}, ['bogus'], 7]) assert.deepEqual(gridLayers(odd), { practice: true, lessons: true }, String(odd));
+  assert.deepEqual(gridLayers(['bogus', 'lessons']), { practice: false, lessons: true }, 'a stray entry does not hide a real one');
+});
+
+test('the saved list is read back, in a fixed order, with anything unknown dropped', () => {
+  assert.deepEqual(gridSelection('["practice"]', 'both'), ['practice']);
+  assert.deepEqual(gridSelection('["lessons","practice"]', 'both'), ['practice', 'lessons']);
+  assert.deepEqual(gridSelection('["practice","practice","zzz"]', 'both'), ['practice']);
+  assert.deepEqual(GRID_LAYERS, ['practice', 'lessons']);
+});
+
+test('an empty saved list means nothing on, and beats the older setting', () => {
+  assert.deepEqual(gridSelection('[]', 'lessons'), []);
+});
+
+test('with no saved list, the older single setting is carried over so nobody loses their choice', () => {
+  assert.deepEqual(gridSelection('', 'practice'), ['practice']);
+  assert.deepEqual(gridSelection(null, 'lessons'), ['lessons']);
+  assert.deepEqual(gridSelection(undefined, 'both'), [], '"both" is nothing switched on');
+  assert.deepEqual(gridSelection('', undefined), []);
+  assert.deepEqual(gridSelection('', 'something else'), []);
+});
+
+test('a saved value that cannot be read falls back to the older setting, then to nothing on', () => {
+  assert.deepEqual(gridSelection('not json', 'practice'), ['practice']);
+  assert.deepEqual(gridSelection('{"practice":true}', 'lessons'), ['lessons'], 'an object is not a list');
+  assert.deepEqual(gridSelection('"practice"', 'both'), []);
 });

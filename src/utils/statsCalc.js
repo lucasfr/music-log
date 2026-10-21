@@ -291,3 +291,28 @@ export function lessonInsights(lessons, sessions, compositions, period, today) {
     maxCount: (topPieces[0] && topPieces[0].count) || 1,
   };
 }
+
+// ── The activity grid's layers ──────────────────────────────────────────────────────────────
+//
+// The grid can show practice, lessons, or both. Like the other filters on Stats, they are toggles:
+// switch on Practice, or Lessons, or both, and with nothing on (or both on) you see both.
+
+export const GRID_LAYERS = ['practice', 'lessons'];
+
+// The layers to draw, from the toggles that are on. -> { practice: boolean, lessons: boolean }
+export function gridLayers(selection) {
+  const on = Array.isArray(selection) ? selection : [];
+  const practice = on.includes('practice');
+  const lessons = on.includes('lessons');
+  return practice === lessons ? { practice: true, lessons: true } : { practice, lessons };
+}
+
+// The toggles to start from. `saved` is the list kept from last time (as stored text), and `legacyMode`
+// the older single setting this replaces ('both' | 'practice' | 'lessons'), which is used when no list
+// has been saved yet so nobody's choice is lost. Anything unusable falls back to nothing on.
+export function gridSelection(saved, legacyMode) {
+  let list = null;
+  try { list = JSON.parse(saved); } catch { /* nothing saved, or not readable */ }
+  if (Array.isArray(list)) return GRID_LAYERS.filter(k => list.includes(k));
+  return GRID_LAYERS.includes(legacyMode) ? [legacyMode] : [];
+}

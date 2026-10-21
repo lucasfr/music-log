@@ -12,7 +12,7 @@ import { GradeTargetCard } from '../components/GradeTargetCard';
 import { RunThroughsCard } from '../components/RunThroughsCard';
 import {
   inPeriod, periodCutoff, volumeBuckets, trendBuckets, dayOfWeekBuckets, streakRuns, topStreaks, longestStreak,
-  periodAverages, daysSinceLatest, neglectedPieces, pieceStats, lessonInsights,
+  periodAverages, daysSinceLatest, neglectedPieces, pieceStats, lessonInsights, gridLayers, gridSelection,
 } from '../utils/statsCalc';
 import { scaleCoverage, techniqueBreakdown, toggleFilter, COF_KEYS, COF_MINORS, DYNAMICS_LABELS } from '../utils/scaleStats';
 import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
@@ -74,26 +74,35 @@ function buildYear(year, dateMap) {
   return months;
 }
 
+// The activity grid's two layers, as toggles: either, or both. With none on it shows both.
+const GRID_LAYER_OPTIONS = [
+  { key: 'practice', label: '🎹 Practice' },
+  { key: 'lessons', label: '🎓 Lessons' },
+];
+
 function ActivityGrid({ sessions, lessons, compositions }) {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const [width, setWidth] = useState(0);
   const [selectedDay, setSelectedDay] = useState(null);
-  const [mode, setModeState] = useState(() => getLocalPref('activityGridMode', 'both')); // 'both' | 'practice' | 'lessons'
-  function setMode(m) {
-    setModeState(m);
-    setLocalPref('activityGridMode', m);
+  // Which layers are switched on, remembered between visits. (This replaces an older single choice,
+  // 'both' | 'practice' | 'lessons', which is read as the starting point if there is no saved list yet.)
+  const [layersOn, setLayersOn] = useState(() => gridSelection(getLocalPref('activityGridLayers', ''), getLocalPref('activityGridMode', 'both')));
+  function setLayers(next) {
+    setLayersOn(next);
+    setLocalPref('activityGridLayers', JSON.stringify(next));
   }
+  const layers = gridLayers(layersOn);
 
-  // Gate each dataset on the selected mode so the grid can isolate one type
+  // Gate each dataset on the layers shown so the grid can isolate one type
   const dateMap = {};
-  if (mode !== 'lessons') {
+  if (layers.practice) {
     sessions.forEach(s => {
       dateMap[s.date] = (dateMap[s.date] || 0) + (Number(s.duration) || 0);
     });
   }
 
-  const lessonDates = mode !== 'practice' ? new Set((lessons || []).map(l => l.date)) : new Set();
+  const lessonDates = layers.lessons ? new Set((lessons || []).map(l => l.date)) : new Set();
 
   const months = buildYear(year, dateMap);
   const todayStr = todayISO();
@@ -128,28 +137,11 @@ function ActivityGrid({ sessions, lessons, compositions }) {
 
   return (
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
-      {/* View mode toggle */}
-      <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
-        {[
-          { key: 'both', label: 'Both' },
-          { key: 'practice', label: '🎹 Practice' },
-          { key: 'lessons', label: '🎓 Lessons' },
-        ].map(m => {
-          const active = mode === m.key;
-          return (
-            <TouchableOpacity key={m.key} onPress={() => setMode(m.key)} activeOpacity={0.75}
-              hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
-                paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
-                backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
-                shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
-                shadowOffset: { width: 0, height: active ? 3 : 1 },
-                shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
-              }}>
-              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? '#fff' : COLOURS.textMuted }}>{m.label}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {/* Layers: toggles, any number on, none on means both */}
+      <FilterRow
+        label="Show" options={GRID_LAYER_OPTIONS} selected={layersOn}
+        onToggle={k => setLayers(toggleFilter(layersOn, k))} onClear={() => setLayers([])}
+      />
 
       {/* Year picker */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -246,7 +238,7 @@ function ActivityGrid({ sessions, lessons, compositions }) {
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12, justifyContent: 'flex-end' }}>
-        {mode !== 'lessons' && (
+        {layers.practice && (
           <>
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginRight: 2 }}>Less</Text>
             {[0, 15, 35, 55, 75].map(d => (
@@ -256,10 +248,10 @@ function ActivityGrid({ sessions, lessons, compositions }) {
                 backgroundColor: d === 0 ? COLOURS.emptyCell : cellColor(d),
               }} />
             ))}
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginLeft: 2, marginRight: mode !== 'practice' ? 8 : 0 }}>More</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginLeft: 2, marginRight: layers.lessons ? 8 : 0 }}>More</Text>
           </>
         )}
-        {mode !== 'practice' && (
+        {layers.lessons && (
           <>
             <View style={{ width: cell, height: cell, borderRadius: Math.max(1, cell * 0.2), backgroundColor: COLOURS.heatLesson(0.55) }} />
             <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Lesson</Text>
