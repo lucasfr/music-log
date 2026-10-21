@@ -15,6 +15,9 @@ import { Field, TextF, SelectF, DatePickerF } from '../components/Form';
 import { STATUS_OPTIONS, KEYS, MODES, TIME_SIGS, GRADES } from '../constants';
 import { uid, fmtDate, todayISO } from '../utils';
 import { PIECE_SORTS, sortPieces } from '../utils/planning';
+import { parseTarget } from '../utils/insights';
+import { usePref } from '../utils/usePref';
+import { PieceDetailModal } from '../components/PieceDetailModal';
 
 // ─── Zelda-style 🎹 difficulty ───────────────────────────────────────────────
 
@@ -514,7 +517,7 @@ function CardSummary({ comp }) {
   );
 }
 
-function CompCard({ comp, sessions, onEdit, onDelete }) {
+function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
   const [expanded, setExpanded] = useState(false);
   const [tab, setTab] = useState('details');
   const shadowColor = (STATUS_COLOURS[comp.status] || {}).border || COLOURS.accentMid;
@@ -583,6 +586,7 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
                 {comp.info ? <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22, marginBottom: 14 }}>{comp.info}</Text> : null}
                 <BtnRow>
                   <Btn label="Remove" variant="danger" onPress={() => onDelete(comp.id)} />
+                  {onOpenPage ? <Btn label="Progress" onPress={() => onOpenPage(comp.id)} /> : null}
                   <Btn label="Edit" onPress={() => onEdit(comp)} />
                 </BtnRow>
               </>
@@ -734,8 +738,13 @@ function CompCard({ comp, sessions, onEdit, onDelete }) {
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function CompositionsScreen({ compositions, sessions, onSave, onDelete, isDesktop, onOpenTimeline }) {
+export default function CompositionsScreen({ compositions, sessions, lessons, onSave, onDelete, isDesktop, onOpenTimeline }) {
   const [modal, setModal] = useState(null);
+  // A piece's page (progress, tempo, tricky spots, lesson notes), opened from its card.
+  const [pageId, setPageId] = useState(null);
+  const [targetRaw] = usePref('gradeTarget', '');
+  const examDate = (parseTarget(targetRaw) || {}).date || '';
+  const pagePiece = pageId ? (compositions.find(c => c.id === pageId) || null) : null;
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('title');
@@ -828,7 +837,7 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
         {filtered.map((comp, idx) => (
           <SwipeRow key={comp.id} bottomInset={12} hint={idx === 0} label="Remove"
             onDelete={() => onDelete(comp.id)}>
-            <CompCard comp={comp} sessions={sessions} onEdit={c => setModal({ ...c })} onDelete={onDelete} />
+            <CompCard comp={comp} sessions={sessions} onEdit={c => setModal({ ...c })} onDelete={onDelete} onOpenPage={setPageId} />
           </SwipeRow>
         ))}
       </ScrollView>
@@ -861,6 +870,15 @@ export default function CompositionsScreen({ compositions, sessions, onSave, onD
           arrangementSuggestions={arrangementSuggestions}
         />
       )}
+    <PieceDetailModal
+      visible={!!pagePiece}
+      piece={pagePiece}
+      sessions={sessions}
+      lessons={lessons || []}
+      examDate={examDate}
+      onSavePiece={onSave}
+      onClose={() => setPageId(null)}
+    />
     </SafeAreaView>
   );
 }

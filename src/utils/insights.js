@@ -708,6 +708,9 @@ export function lessonBrief(lessons, sessions, compositions, today, opts = {}) {
       arpeggios: scaleList.filter(x => x.group === 'Arpeggios').length,
       names: scaleList.map(x => x.name).filter((n, i, a) => a.indexOf(n) === i).sort().slice(0, 12),
     },
+    spots: pieces
+      .map(p => ({ name: p.name, line: openSpotsLine((compositions || []).find(c => c.id === p.compositionId)) }))
+      .filter(x => x.line),
     plannedNext: lastFocus ? lastFocus.tomorrowFocus.trim() : null,
   };
 }
@@ -763,6 +766,10 @@ export function briefText(b) {
     L.push('', 'Challenges that kept coming up');
     b.challenges.forEach(c => L.push(`- ${c.tag} (${c.count} times${c.where.length ? `: ${c.where.join(', ')}` : ''})`));
   }
+  if (b.spots && b.spots.length) {
+    L.push('', 'Tricky spots still open');
+    b.spots.forEach(x => L.push(`- ${x.name}: ${x.line}`));
+  }
   if (b.progress.length) L.push('', `Progress marked: ${b.progress.map(p => `${p.tag} ${p.count}x`).join(', ')}.`);
 
   if (b.assignments.open.length) {
@@ -793,6 +800,15 @@ const METRONOME_MIN = 30;
 const METRONOME_MAX = 240;
 const clampBpm = v => Math.min(METRONOME_MAX, Math.max(METRONOME_MIN, v));
 
+// Whether the last three readings have stopped moving: within 1 bpm of each other, and a week or more
+// apart from the first to the last.
+function flatRun(points) {
+  const lastThree = (points || []).slice(-3);
+  return lastThree.length >= 3
+    && Math.max(...lastThree.map(x => x.bpm)) - Math.min(...lastThree.map(x => x.bpm)) <= 1
+    && daysBetween(lastThree[0].date, lastThree[2].date) >= 7;
+}
+
 // `p` is one item from tempoProgress. -> { kind: 'step' | 'small-step' | 'return' | 'at-target',
 // bpm, from, step, reason }
 export function suggestNextTempo(p, today) {
@@ -805,10 +821,7 @@ export function suggestNextTempo(p, today) {
     return { kind: 'return', bpm: clampBpm(latest), from: latest, step: 0, reason: `${agoLabel(idle)} since your last reading. Start again from ${latest}.` };
   }
   const full = Math.min(6, Math.max(2, Math.round(latest * 0.05)));
-  const lastThree = p.points.slice(-3);
-  const flat = lastThree.length >= 3
-    && Math.max(...lastThree.map(x => x.bpm)) - Math.min(...lastThree.map(x => x.bpm)) <= 1
-    && daysBetween(lastThree[0].date, lastThree[2].date) >= 7;
+  const flat = flatRun(p.points);
   const step = flat ? Math.max(2, Math.round(full / 2)) : full;
   const bpm = clampBpm(Math.min(p.target || Infinity, latest + step));
   return {
@@ -834,6 +847,187 @@ export function tempoSuggestionMap(sessions, compositions, today) {
     if (x.kind === 'piece' && x.compositionId && (k === 'step' || k === 'small-step')) map[x.compositionId] = x.suggestion.bpm;
   });
   return map;
+}
+
+// ── Is a piece stalled, and will it get there in time ──────────────────────────────────────
+//
+// A piece has stalled when its last three clean readings have sat within 1 bpm for a week or more and
+// it is still short of its own tempo (and not left for a month, which is a break, not a plateau).
+// -> null, or { bpm, since, days } (how long it has sat at that tempo, up to today).
+export function tempoStalled(p, today) {
+  if (!p || !flatRun(p.points)) return null;
+  if (p.target && p.latest >= p.target) return null;
+  if (daysBetween(p.lastDate, today) >= 28) return null;
+  const since = p.points.slice(-3)[0].date;
+  return { bpm: p.latest, since, days: daysBetween(since, today) };
+}
+
+// Will a piece reach its own tempo by the exam? Compares the pace needed from here with the pace of
+// the last four weeks, when there are readings a week or more apart to measure one from. A piece with
+// no tempo of its own has no projection. `examDate` is the grade target's date.
+// -> null | { status: 'reached' | 'no-date' | 'unknown' | 'on-track' | 'behind', needPerWeek, ratePerWeek,
+//             weeksLeft, projected, message }
+export function tempoTrajectory(p, examDate, today) {
+  if (!p || !p.target) return null;
+  if (p.latest >= p.target) return { status: 'reached', message: `Reached the ${p.target} target.` };
+  if (!examDate || examDate <= today) return { status: 'no-date', message: 'Set a future exam date in your grade target to see whether you are on track.' };
+
+  const weeksLeft = Math.round(daysBetween(today, examDate) / 7 * 10) / 10;
+  const needPerWeek = Math.round((p.target - p.latest) / Math.max(weeksLeft, 1) * 10) / 10;
+  const when = shortDate(examDate);
+  const recent = p.points.filter(x => daysBetween(x.date, today) <= 28);
+  const span = recent.length >= 2 ? daysBetween(recent[0].date, recent[recent.length - 1].date) : 0;
+  if (span < 7) {
+    return {
+      status: 'unknown', needPerWeek, ratePerWeek: null, weeksLeft, projected: null,
+      message: `Needs about ${needPerWeek} bpm a week to reach ${p.target} by ${when}. A few more readings over a couple of weeks will show your pace.`,
+    };
+  }
+  const ratePerWeek = Math.round((recent[recent.length - 1].bpm - recent[0].bpm) / (span / 7) * 10) / 10;
+  const projected = Math.round(p.latest + ratePerWeek * weeksLeft);
+  if (projected >= p.target) {
+    return {
+      status: 'on-track', needPerWeek, ratePerWeek, weeksLeft, projected,
+      message: `On track: ${needPerWeek} bpm a week is needed to reach ${p.target} by ${when}, and you are managing ${ratePerWeek}.`,
+    };
+  }
+  return {
+    status: 'behind', needPerWeek, ratePerWeek, weeksLeft, projected,
+    message: ratePerWeek <= 0
+      ? `Behind: ${needPerWeek} bpm a week is needed to reach ${p.target} by ${when}, and your tempo hasn't risen in the last four weeks.`
+      : `Behind: ${needPerWeek} bpm a week is needed to reach ${p.target} by ${when}, but you are managing ${ratePerWeek}, which would get you to about ${projected}.`,
+  };
+}
+
+// ── Tricky spots ──────────────────────────────────────────────────────────────────────
+//
+// The bars of a piece that keep going wrong ("bars 9-12", "the left hand jump"), kept on the library
+// piece as `spots: [{ id, bars, status: 'open' | 'fixed', added, fixed }]`. You add one when you find it,
+// tick it off when it's solved, and the piece's page, the timer, the lesson summary and the weekly
+// review all show the ones still open.
+
+// Two ways of writing the same spot ("Bars 9-12", "bar 9–12", "9 - 12") are the same spot.
+function spotKey(bars) {
+  return String(bars || '').toLowerCase().replace(/[\u2013\u2014\u2212]/g, '-').replace(/\bbars?\b/g, '').replace(/\s+/g, '').trim();
+}
+
+// How a spot reads: a bare range of bars gets "Bars" in front ("9-12" -> "Bars 9-12"); anything else is as typed.
+export function spotLabel(bars) {
+  const t = String(bars || '').trim().replace(/\s+/g, ' ');
+  return /^\d+(\s*[-\u2013\u2014]\s*\d+)?$/.test(t) ? `Bars ${t}` : t;
+}
+
+// A piece's stored spots, cleaned: only well-formed entries, no blank text, each spot once.
+export function parseSpots(raw) {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set();
+  const out = [];
+  raw.forEach(x => {
+    if (!x || typeof x !== 'object') return;
+    const bars = String(x.bars || '').trim().replace(/\s+/g, ' ');
+    const key = spotKey(bars);
+    if (!bars || !key || seen.has(key)) return;
+    seen.add(key);
+    out.push({ id: String(x.id || key), bars, status: x.status === 'fixed' ? 'fixed' : 'open', added: x.added || null, fixed: x.status === 'fixed' ? (x.fixed || null) : null });
+  });
+  return out;
+}
+
+// The list with a new spot. Nothing is added for blank text, or for one that is already open; a spot you
+// had fixed comes back open (it went wrong again). A new list; the one passed in is untouched.
+export function addSpot(spots, bars, today, makeId = () => `spot-${Math.random().toString(36).slice(2, 9)}`) {
+  const list = parseSpots(spots);
+  const text = String(bars || '').trim().replace(/\s+/g, ' ');
+  const key = spotKey(text);
+  if (!text || !key) return list;
+  const existing = list.find(x => spotKey(x.bars) === key);
+  if (existing) return existing.status === 'open' ? list : list.map(x => (x === existing ? { ...x, status: 'open', fixed: null } : x));
+  return [...list, { id: makeId(), bars: text, status: 'open', added: today, fixed: null }];
+}
+
+// A spot marked fixed (on `today`) or open again.
+export function setSpotFixed(spots, id, fixed, today) {
+  return parseSpots(spots).map(x => (x.id === id ? { ...x, status: fixed ? 'fixed' : 'open', fixed: fixed ? today : null } : x));
+}
+
+export const removeSpot = (spots, id) => parseSpots(spots).filter(x => x.id !== id);
+
+// The spots still to fix on a piece, the longest-standing first.
+export function openSpots(piece) {
+  return parseSpots(piece && piece.spots).filter(x => x.status === 'open').sort((a, b) => String(a.added || '').localeCompare(String(b.added || '')));
+}
+
+// "Bars 9-12, the left hand jump", or '' when nothing is open. For the timer and the summaries.
+export const openSpotsLine = piece => openSpots(piece).map(x => spotLabel(x.bars)).join(', ');
+
+// ── Everything about one piece ─────────────────────────────────────────────────────────────
+//
+// The numbers for a piece's page: how much it has been practised, its tempo (with the next step, whether
+// it has stalled, and whether it will get there by the exam), its run-throughs, what your teacher has said
+// about it, and the last few times you played it. Pure, so the page itself is only layout.
+// `piece` is the library entry; `examDate` the grade target's date, if there is one.
+// The free-text fields a library piece keeps, in the order the page shows them.
+const NOTE_FIELDS = [
+  ['technicalChallenges', 'Technical challenges'], ['musicalFocus', 'Musical focus'], ['practiceNotes', 'Practice notes'],
+  ['kerrinNotes', 'Teacher notes'], ['teacherFeedback', 'Teacher feedback'], ['myNotes', 'My notes'],
+  ['info', 'About the piece'], ['notes', 'Notes'],
+];
+
+export function pieceReport(piece, sessions, lessons, today, examDate = null) {
+  if (!piece) return null;
+  const id = piece.id;
+  const played = [];
+  (sessions || []).forEach(s => {
+    if (!s.date || s.date > today) return;
+    (s.segments || []).forEach(seg => {
+      if (seg.type === 'repertoire' && seg.compositionId === id) played.push({ date: s.date, sessionId: s.id, seg });
+    });
+  });
+  played.sort((a, b) => b.date.localeCompare(a.date));
+
+  const dated = (sessions || []).filter(s => s.date && s.date <= today);
+  const series = tempoProgress(dated, [piece]).find(p => p.compositionId === id && p.kind === 'piece') || null;
+  const lastDate = played.length ? played[0].date : null;
+
+  const fromLessons = [];
+  [...(lessons || [])].filter(l => l.date && l.date <= today).sort((a, b) => b.date.localeCompare(a.date)).forEach(l => {
+    (l.segments || []).forEach(seg => {
+      if (seg.compositionId !== id) return;
+      const assignment = String(seg.assignment || '').trim();
+      const feedback = String(seg.feedback || '').trim();
+      if (assignment || feedback) fromLessons.push({ date: l.date, assignment: assignment || null, feedback: feedback || null, done: !!seg.assignmentDone });
+    });
+  });
+
+  return {
+    id,
+    title: piece.title || 'Untitled',
+    composer: piece.composer || null,
+    status: piece.status || null,
+    grade: piece.grade || null,
+    notes: NOTE_FIELDS.map(([key, label]) => ({ label, text: String(piece[key] || '').trim() })).filter(x => x.text),
+    practice: {
+      sessions: new Set(played.map(m => m.sessionId || m.date)).size,
+      minutes: played.reduce((t, m) => t + num(m.seg.duration), 0),
+      firstDate: played.length ? played[played.length - 1].date : null,
+      lastDate,
+      daysSince: lastDate ? daysBetween(lastDate, today) : null,
+    },
+    tempo: series,
+    next: series ? suggestNextTempo(series, today) : null,
+    stalled: series ? tempoStalled(series, today) : null,
+    trajectory: series ? tempoTrajectory(series, examDate, today) : null,
+    runThroughs: runThroughStats(dated, [piece], today).find(p => p.compositionId === id) || null,
+    recent: played.slice(0, 8).map(m => ({
+      date: m.date,
+      minutes: num(m.seg.duration),
+      tempo: num(m.seg.tempo) > 0 ? num(m.seg.tempo) : null,
+      runThroughs: runThroughsOf(m.seg),
+      section: String(m.seg.section || '').trim() || null,
+    })),
+    fromLessons: fromLessons.slice(0, 4),
+    spots: { open: openSpots(piece), fixed: parseSpots(piece.spots).filter(x => x.status === 'fixed') },
+  };
 }
 
 // ── The week in review ─────────────────────────────────────────────────────────────────────
@@ -882,7 +1076,13 @@ export function weeklyReview(lessons, sessions, compositions, today) {
     .slice(0, 3);
   const scales = staleScales(sessions, today, 14).slice(0, 3).map(x => ({ name: x.name, group: x.kind, daysSince: x.daysSince }));
 
-  return { week: { from, to }, brief, previous, carry: { scales, pieces } };
+  const spots = (compositions || [])
+    .filter(c => c.status === 'learning' || c.status === 'consolidating')
+    .map(c => ({ name: c.title || 'Untitled', line: openSpotsLine(c) }))
+    .filter(x => x.line)
+    .slice(0, 3);
+
+  return { week: { from, to }, brief, previous, carry: { scales, pieces, spots } };
 }
 
 // The review as plain text, to read or share: the report, the comparison, and what to carry forward.
@@ -897,6 +1097,7 @@ export function weeklyText(r) {
   const carry = [];
   if (r.carry.scales.length) carry.push(`- Scales to revisit: ${r.carry.scales.map(x => `${x.name} (${agoLabel(x.daysSince)})`).join(', ')}`);
   if (r.carry.pieces.length) carry.push(`- Pieces not played for a week: ${r.carry.pieces.map(p => (p.daysSince === null ? `${p.name} (not yet)` : `${p.name} (${plural(p.daysSince, 'day')})`)).join(', ')}`);
+  if (r.carry.spots && r.carry.spots.length) carry.push(`- Tricky spots to fix: ${r.carry.spots.map(x => `${x.name} (${x.line})`).join(', ')}`);
   if (carry.length) parts.push(['To carry into this week', ...carry].join('\n'));
   return parts.join('\n\n');
 }

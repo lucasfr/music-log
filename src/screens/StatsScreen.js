@@ -7,8 +7,10 @@ import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL } from '../theme'
 import { GlassCard, SectionTitle, Label } from '../components/UI';
 import { useNavScrollHandler } from '../context/NavScrollContext';
 import { gradePathway } from '../utils/planning';
-import { tempoProgress, describeTempo, staleScales, agoLabel, suggestNextTempo } from '../utils/insights';
+import { tempoProgress, describeTempo, staleScales, agoLabel, suggestNextTempo, tempoStalled, tempoTrajectory, parseTarget } from '../utils/insights';
 import { GradeTargetCard } from '../components/GradeTargetCard';
+import { PieceDetailModal } from '../components/PieceDetailModal';
+import { usePref } from '../utils/usePref';
 import { RunThroughsCard } from '../components/RunThroughsCard';
 import {
   inPeriod, periodCutoff, volumeBuckets, trendBuckets, dayOfWeekBuckets, streakRuns, topStreaks, longestStreak,
@@ -1371,7 +1373,28 @@ function NextTempoLine({ p, today }) {
   );
 }
 
-function TempoProgress({ sessions, compositions }) {
+// For a piece with a tempo of its own: has it stalled, and will the pace so far get it there by the exam.
+// A short line each here; the piece's page has the full wording.
+function TrajectoryLine({ p, examDate, today }) {
+  const stalled = tempoStalled(p, today);
+  const t = p.kind === 'piece' ? tempoTrajectory(p, examDate, today) : null;
+  const behind = !!t && t.status === 'behind';
+  const onTrack = !!t && t.status === 'on-track';
+  if (!stalled && !behind && !onTrack) return null;
+  const weeks = stalled ? Math.max(1, Math.round(stalled.days / 7)) : 0;
+  return (
+    <>
+      {stalled ? <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.amber, marginTop: 1 }}>{`Stalled at ${stalled.bpm} for ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}</Text> : null}
+      {behind || onTrack ? (
+        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: behind ? COLOURS.amber : COLOURS.success, marginTop: 1 }}>
+          {behind ? `Behind: needs ${t.needPerWeek} bpm a week, managing ${t.ratePerWeek}` : `On track for ${p.target} (${t.ratePerWeek} bpm a week)`}
+        </Text>
+      ) : null}
+    </>
+  );
+}
+
+function TempoProgress({ sessions, compositions, examDate, onOpenPiece }) {
   const today = todayISO();
   const items = useMemo(() => tempoProgress(sessions, compositions), [sessions, compositions]);
   if (items.length === 0) return (
@@ -1383,12 +1406,17 @@ function TempoProgress({ sessions, compositions }) {
   return (
     <View>
       {shown.map(p => (
-        <View key={p.key} style={{ marginBottom: 14 }} accessible accessibilityLabel={`${p.name}: ${describeTempo(p)}`}>
+        <TouchableOpacity key={p.key} activeOpacity={0.8} disabled={!(p.compositionId && onOpenPiece)}
+          onPress={() => onOpenPiece(p.compositionId)} style={{ marginBottom: 14 }}
+          accessible accessibilityRole={p.compositionId && onOpenPiece ? 'button' : undefined}
+          accessibilityHint={p.compositionId && onOpenPiece ? "Opens this piece's page" : undefined}
+          accessibilityLabel={`${p.name}: ${describeTempo(p)}`}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <View style={{ flex: 1 }}>
               <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>{p.name}</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{describeTempo(p)}</Text>
               <NextTempoLine p={p} today={today} />
+              <TrajectoryLine p={p} examDate={examDate} today={today} />
             </View>
             <Sparkline points={p.points} colour={p.reachedTarget ? COLOURS.success : COLOURS.steel} />
           </View>
@@ -1397,7 +1425,7 @@ function TempoProgress({ sessions, compositions }) {
               <AnimatedFill fraction={p.fractionOfTarget} style={{ height: '100%', borderRadius: 2, backgroundColor: p.reachedTarget ? COLOURS.success : COLOURS.steel }} />
             </View>
           ) : null}
-        </View>
+        </TouchableOpacity>
       ))}
       {items.length > shown.length ? (
         <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>and {items.length - shown.length} more</Text>
@@ -1472,7 +1500,13 @@ function StatsSection({ id, title, first, collapsed, onToggle, children }) {
   );
 }
 
-export default function StatsScreen({ sessions, compositions, lessons, isDesktop }) {
+export default function StatsScreen({ sessions, compositions, lessons, isDesktop, onSaveComposition }) {
+  // The page for one piece, opened from the tempo list, and the exam date from the grade target (it
+  // decides whether a piece is on track for its tempo).
+  const [openPieceId, setOpenPieceId] = useState(null);
+  const [targetRaw] = usePref('gradeTarget', '');
+  const examDate = useMemo(() => (parseTarget(targetRaw) || {}).date || '', [targetRaw]);
+  const openPiece = openPieceId ? (compositions.find(c => c.id === openPieceId) || null) : null;
   const onNavScroll = useNavScrollHandler(); // collapses the floating tab pill on scroll, like Home
   const [period, setPeriod] = useState('30d');
   const [pieceSort, setPieceSort] = useState('count');
@@ -1640,7 +1674,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         </StatsSection>
         <StatsSection id="tempo" title="Tempo progress" collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
-          <TempoProgress sessions={sessions} compositions={compositions} />
+          <TempoProgress sessions={sessions} compositions={compositions} examDate={examDate} onOpenPiece={setOpenPieceId} />
         </GlassCard>
 
         </StatsSection>
@@ -1804,6 +1838,15 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         </>)}
 
       </ScrollView>
+    <PieceDetailModal
+      visible={!!openPiece}
+      piece={openPiece}
+      sessions={sessions}
+      lessons={lessons || []}
+      examDate={examDate}
+      onSavePiece={onSaveComposition}
+      onClose={() => setOpenPieceId(null)}
+    />
     </SafeAreaView>
   );
 }

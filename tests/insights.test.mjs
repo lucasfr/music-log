@@ -13,7 +13,7 @@ const {
   lessonAssignments, setAssignmentDone,
   suggestScope, energyLinks, describeLink,
   emptyTarget, parseTarget, serializeTarget, targetHasContent, describeRequirement, readiness, splitScales, joinScales,
-  runThroughsOf, runThroughStats, describeRunThroughs, formatRunThroughs, suggestNextTempo, nextTempos, tempoSuggestionMap, weeklyReviewDue, weeklyReview, weeklyText, suggestScales, lessonBrief, briefText, shortDate,
+  runThroughsOf, runThroughStats, describeRunThroughs, formatRunThroughs, suggestNextTempo, nextTempos, tempoSuggestionMap, tempoStalled, tempoTrajectory, pieceReport, spotLabel, parseSpots, addSpot, setSpotFixed, removeSpot, openSpots, openSpotsLine, weeklyReviewDue, weeklyReview, weeklyText, suggestScales, lessonBrief, briefText, shortDate,
 } =
   await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
@@ -981,4 +981,286 @@ test('at most three scales are carried forward, the longest-neglected first', ()
     session('2026-09-15', [{ type: 'technique', group: 'Scales', scales: ['E major'] }]),
   ];
   assert.deepEqual(weeklyReview([], sessions, [], NOW).carry.scales.map(x => x.name), ['D major', 'B major', 'A major']);
+});
+
+// ── stalled, and on track ─────────────────────────────────────────────────────────────────
+
+test('a piece has stalled when its last three readings have sat still for a week', () => {
+  const out = tempoStalled(series([['2026-10-01', 80], ['2026-10-06', 80], ['2026-10-12', 81]], 92), NOW);
+  assert.deepEqual(out, { bpm: 81, since: '2026-10-01', days: 18 });
+  assert.ok(tempoStalled(series([['2026-10-01', 80], ['2026-10-06', 80], ['2026-10-12', 81]]), NOW), 'a piece with no tempo of its own can still stall');
+});
+
+test('it has not stalled while the readings still move, are too close together, or are too few', () => {
+  assert.equal(tempoStalled(series([['2026-10-01', 80], ['2026-10-06', 82], ['2026-10-12', 80]], 92), NOW), null, 'a spread of 2');
+  assert.equal(tempoStalled(series([['2026-10-10', 80], ['2026-10-12', 80], ['2026-10-14', 80]], 92), NOW), null, 'only 4 days');
+  assert.equal(tempoStalled(series([['2026-10-01', 80], ['2026-10-12', 80]], 92), NOW), null, 'two readings');
+  assert.equal(tempoStalled(undefined, NOW), null);
+});
+
+test('a piece at its own tempo, or left for a month, has not stalled', () => {
+  assert.equal(tempoStalled(series([['2026-10-01', 92], ['2026-10-06', 92], ['2026-10-12', 92]], 92), NOW), null, 'nothing left to climb');
+  assert.equal(tempoStalled(series([['2026-08-20', 80], ['2026-08-27', 80], ['2026-09-02', 80]], 92), NOW), null, 'a break is not a plateau');
+});
+
+const EXAM = '2026-12-14';   // eight weeks from NOW
+
+test('a piece at its tempo is done, and one with no tempo has no projection', () => {
+  assert.equal(tempoTrajectory(series([['2026-10-10', 92]], 92), EXAM, NOW).status, 'reached');
+  assert.equal(tempoTrajectory(series([['2026-10-10', 120]], 92), EXAM, NOW).status, 'reached');
+  assert.equal(tempoTrajectory(series([['2026-10-10', 80]]), EXAM, NOW), null);
+  assert.equal(tempoTrajectory(undefined, EXAM, NOW), null);
+});
+
+test('without a future exam date there is nothing to be on track for, and it says how to fix that', () => {
+  for (const date of [null, undefined, '', '2026-10-19', '2026-10-01']) {
+    const t = tempoTrajectory(series([['2026-10-10', 80]], 92), date, NOW);
+    assert.equal(t.status, 'no-date', String(date));
+    assert.match(t.message, /exam date/);
+  }
+});
+
+test('with too few readings it gives the pace needed and does not pretend to know yours', () => {
+  const one = tempoTrajectory(series([['2026-10-10', 80]], 92), EXAM, NOW);
+  assert.equal(one.status, 'unknown');
+  assert.equal(one.needPerWeek, 1.5, '12 bpm over 8 weeks');
+  assert.equal(one.ratePerWeek, null);
+  assert.equal(one.projected, null);
+  assert.equal(tempoTrajectory(series([['2026-10-14', 78], ['2026-10-19', 80]], 92), EXAM, NOW).status, 'unknown', 'readings under a week apart say nothing about a weekly pace');
+  assert.equal(tempoTrajectory(series([['2026-08-01', 60], ['2026-09-01', 70]], 92), EXAM, NOW).status, 'unknown', 'readings older than four weeks are not your pace now');
+});
+
+test('a pace that would get there is on track', () => {
+  const t = tempoTrajectory(series([['2026-09-28', 72], ['2026-10-19', 80]], 92), EXAM, NOW);
+  assert.equal(t.status, 'on-track');
+  assert.equal(t.needPerWeek, 1.5);
+  assert.equal(t.ratePerWeek, 2.7, '8 bpm over 3 weeks');
+  assert.equal(t.projected, 102);
+  assert.equal(t.weeksLeft, 8);
+  assert.match(t.message, /On track.*1\.5 bpm a week.*92 by 14 Dec.*2\.7/);
+});
+
+test('a pace that would fall short is behind, and says where it would end up', () => {
+  const t = tempoTrajectory(series([['2026-09-28', 78], ['2026-10-19', 80]], 92), EXAM, NOW);
+  assert.equal(t.status, 'behind');
+  assert.equal(t.ratePerWeek, 0.7);
+  assert.equal(t.projected, 86);
+  assert.match(t.message, /Behind: 1\.5 bpm a week is needed to reach 92 by 14 Dec, but you are managing 0\.7.*about 86/);
+});
+
+test('a tempo that has not risen, or has fallen, is behind in plain words', () => {
+  for (const [a, b] of [[80, 80], [84, 80]]) {
+    const t = tempoTrajectory(series([['2026-09-28', a], ['2026-10-19', b]], 92), EXAM, NOW);
+    assert.equal(t.status, 'behind');
+    assert.match(t.message, /hasn't risen in the last four weeks/);
+  }
+});
+
+test('with under a week to go, all of the gap is needed at once', () => {
+  const t = tempoTrajectory(series([['2026-09-28', 78], ['2026-10-19', 80]], 92), '2026-10-24', NOW);
+  assert.equal(t.needPerWeek, 12);
+  assert.equal(t.status, 'behind');
+});
+
+test('a pace that lands exactly on the target is on track', () => {
+  const t = tempoTrajectory(series([['2026-10-05', 77], ['2026-10-19', 80]], 92), EXAM, NOW);
+  assert.equal(t.ratePerWeek, 1.5);
+  assert.equal(t.projected, 92);
+  assert.equal(t.status, 'on-track');
+});
+
+// ── a piece's page ────────────────────────────────────────────────────────────────────────────
+
+function pieceStory() {
+  const piece = { id: 'c1', title: 'Minuet in F', composer: 'Mozart', status: 'consolidating', grade: 'Grade 3', tempo: '92', notes: '  LH Alberti  ' };
+  const sessions = [
+    { ...session('2026-09-20', [rseg('c1', { tempo: 70, duration: 20, section: 'Bars 1-8' })]), id: 's1' },
+    { ...session('2026-10-05', [rseg('c1', { tempo: 76, duration: 15, runThroughs: 2 }), rseg('c2', { duration: 30, tempo: 99 })]), id: 's2' },
+    { ...session('2026-10-12', [rseg('c1', { tempo: 80, duration: 10, runThroughs: 3 }), rseg('c1', { duration: 5 }), { type: 'technique', group: 'Hanon', compositionId: 'c1', duration: 40, tempo: 120 }]), id: 's3' },
+    { ...session('2026-10-25', [rseg('c1', { tempo: 99, duration: 99 })]), id: 'future' },
+  ];
+  const lessons = [
+    lesson('l1', '2026-10-01', [aSeg({ id: 'a', compositionId: 'c1', assignment: 'Clean the trill', feedback: 'Lighter left hand' }), aSeg({ id: 'b', compositionId: 'c2', assignment: 'Other piece' })]),
+    lesson('l2', '2026-10-08', [aSeg({ id: 'c', compositionId: 'c1', assignment: '', feedback: 'Better' }), aSeg({ id: 'd', compositionId: 'c1', assignment: '' })]),
+  ];
+  return { piece, sessions, lessons };
+}
+
+test('a piece\'s page counts what has been practised: sessions, minutes and when', () => {
+  const { piece, sessions, lessons } = pieceStory();
+  const r = pieceReport(piece, sessions, lessons, NOW, '2026-12-14');
+  assert.deepEqual(r.practice, { sessions: 3, minutes: 50, firstDate: '2026-09-20', lastDate: '2026-10-12', daysSince: 7 }, 'repertoire only, nothing from the future');
+  assert.equal(r.title, 'Minuet in F');
+  assert.deepEqual(r.notes, [{ label: 'Notes', text: 'LH Alberti' }], 'trimmed');
+  assert.deepEqual([r.composer, r.status, r.grade], ['Mozart', 'consolidating', 'Grade 3']);
+});
+
+test('its tempo, next step and projection come from its own readings only', () => {
+  const { piece, sessions, lessons } = pieceStory();
+  const r = pieceReport(piece, sessions, lessons, NOW, '2026-12-14');
+  assert.deepEqual(r.tempo.points.map(p => p.bpm), [70, 76, 80], 'not the other piece\'s 99, not the technique 120, not the future');
+  assert.equal(r.tempo.target, 92);
+  assert.equal(r.next.bpm, 84);
+  assert.equal(r.trajectory.status, 'on-track', '10 bpm in 3 weeks is more than the 1.5 a week needed');
+  assert.equal(r.stalled, null);
+});
+
+test('its run-throughs and its recent sessions, newest first', () => {
+  const { piece, sessions, lessons } = pieceStory();
+  const r = pieceReport(piece, sessions, lessons, NOW);
+  assert.equal(r.runThroughs.total, 5);
+  assert.deepEqual(r.recent.map(x => [x.date, x.minutes, x.tempo, x.runThroughs]), [
+    ['2026-10-12', 10, 80, 3], ['2026-10-12', 5, null, 0], ['2026-10-05', 15, 76, 2], ['2026-09-20', 20, 70, 0],
+  ]);
+  assert.equal(r.recent[3].section, 'Bars 1-8');
+});
+
+test('what your teacher said about it is listed newest first, and other pieces are left out', () => {
+  const { piece, sessions, lessons } = pieceStory();
+  const r = pieceReport(piece, sessions, lessons, NOW);
+  assert.deepEqual(r.fromLessons, [
+    { date: '2026-10-08', assignment: null, feedback: 'Better', done: false },
+    { date: '2026-10-01', assignment: 'Clean the trill', feedback: 'Lighter left hand', done: false },
+  ], 'a lesson segment with neither is not listed');
+});
+
+test('a piece that has never been practised has an empty but well-formed page', () => {
+  const r = pieceReport({ id: 'new', title: 'Dream' }, [], [], NOW);
+  assert.deepEqual(r.practice, { sessions: 0, minutes: 0, firstDate: null, lastDate: null, daysSince: null });
+  assert.deepEqual([r.tempo, r.next, r.stalled, r.trajectory, r.runThroughs], [null, null, null, null, null]);
+  assert.deepEqual([r.recent, r.fromLessons], [[], []]);
+  assert.equal(r.composer, null);
+  assert.equal(pieceReport(null, [], [], NOW), null);
+});
+
+test('at most eight recent sessions and four lesson notes are shown', () => {
+  const sessions = Array.from({ length: 12 }, (_, i) => ({ ...session(`2026-09-${String(i + 1).padStart(2, '0')}`, [rseg('c1', { duration: 5 })]), id: `s${i}` }));
+  const lessons = Array.from({ length: 6 }, (_, i) => lesson(`l${i}`, `2026-09-${String(i + 10).padStart(2, '0')}`, [aSeg({ id: `a${i}`, compositionId: 'c1', feedback: `note ${i}` })]));
+  const r = pieceReport({ id: 'c1', title: 'P' }, sessions, lessons, NOW);
+  assert.equal(r.recent.length, 8);
+  assert.equal(r.fromLessons.length, 4);
+  assert.equal(r.practice.sessions, 12);
+  assert.equal(r.recent[0].date, '2026-09-12', 'the newest');
+});
+
+// ── tricky spots ──────────────────────────────────────────────────────────────────────────
+
+test('a spot reads naturally: a bare range of bars gets "Bars", anything else is as typed', () => {
+  assert.equal(spotLabel('9-12'), 'Bars 9-12');
+  assert.equal(spotLabel('9'), 'Bars 9');
+  assert.equal(spotLabel('  9 \u2013 12 '), 'Bars 9 \u2013 12');
+  assert.equal(spotLabel('the left hand jump'), 'the left hand jump');
+  assert.equal(spotLabel('Bars 9-12'), 'Bars 9-12', 'already says it');
+  assert.equal(spotLabel('  LH   jump '), 'LH jump', 'spaces tidied');
+  assert.equal(spotLabel(''), '');
+  assert.equal(spotLabel(undefined), '');
+});
+
+test('stored spots are cleaned: junk and blanks dropped, a spot listed once, the status made sensible', () => {
+  const out = parseSpots([
+    { id: 'a', bars: 'Bars 9-12', status: 'open', added: '2026-10-01' },
+    { id: 'b', bars: 'bar 9\u201312', status: 'fixed' },
+    { bars: 'LH jump', status: 'weird', added: '2026-10-02', fixed: '2026-10-09' },
+    { id: 'c', bars: '   ' }, null, 'text', 7, { id: 'd' },
+  ]);
+  assert.deepEqual(out.map(x => x.bars), ['Bars 9-12', 'LH jump'], 'the same spot written two ways is one spot');
+  assert.deepEqual(out[1], { id: 'lhjump', bars: 'LH jump', status: 'open', added: '2026-10-02', fixed: null }, 'a made-up status is open, and an open spot has no fixed date');
+  assert.deepEqual(parseSpots(undefined), []);
+  assert.deepEqual(parseSpots({}), []);
+});
+
+test('adding a spot puts it on the list, open, with the date', () => {
+  let n = 0;
+  const out = addSpot([], '  9-12 ', '2026-10-19', () => `id${++n}`);
+  assert.deepEqual(out, [{ id: 'id1', bars: '9-12', status: 'open', added: '2026-10-19', fixed: null }]);
+  assert.deepEqual(addSpot(out, 'LH jump', '2026-10-20', () => 'id2').map(x => x.id), ['id1', 'id2']);
+});
+
+test('nothing is added for blank text, or for a spot already open however it is written', () => {
+  const one = addSpot([], 'Bars 9-12', '2026-10-19', () => 'a');
+  assert.deepEqual(addSpot(one, '', '2026-10-20'), one);
+  assert.deepEqual(addSpot(one, '   ', '2026-10-20'), one);
+  assert.deepEqual(addSpot(one, 'bar 9 \u2013 12', '2026-10-20'), one);
+  assert.deepEqual(addSpot(one, '9-12', '2026-10-20'), one);
+});
+
+test('a spot you had fixed comes back open when it goes wrong again', () => {
+  const fixed = [{ id: 'a', bars: 'Bars 9-12', status: 'fixed', added: '2026-10-01', fixed: '2026-10-08' }];
+  assert.deepEqual(addSpot(fixed, '9-12', '2026-10-20'), [{ id: 'a', bars: 'Bars 9-12', status: 'open', added: '2026-10-01', fixed: null }]);
+});
+
+test('ticking a spot off records the day, and can be undone; removing deletes it', () => {
+  const list = [{ id: 'a', bars: '9-12', status: 'open', added: '2026-10-01', fixed: null }, { id: 'b', bars: 'LH jump', status: 'open', added: '2026-10-02', fixed: null }];
+  const done = setSpotFixed(list, 'a', true, '2026-10-19');
+  assert.deepEqual([done[0].status, done[0].fixed, done[1].status], ['fixed', '2026-10-19', 'open']);
+  assert.deepEqual([setSpotFixed(done, 'a', false, '2026-10-20')[0].status, setSpotFixed(done, 'a', false, '2026-10-20')[0].fixed], ['open', null]);
+  assert.deepEqual(removeSpot(list, 'a').map(x => x.id), ['b']);
+  assert.deepEqual(setSpotFixed(list, 'nope', true, '2026-10-19'), list, 'an unknown id changes nothing');
+  assert.equal(list[0].status, 'open', 'the list passed in is untouched');
+});
+
+test('the open spots, the longest-standing first, and how they read in a line', () => {
+  const piece = { spots: [
+    { id: 'a', bars: 'LH jump', status: 'open', added: '2026-10-10' },
+    { id: 'b', bars: '9-12', status: 'open', added: '2026-10-01' },
+    { id: 'c', bars: '1-4', status: 'fixed', added: '2026-09-01', fixed: '2026-09-10' },
+  ] };
+  assert.deepEqual(openSpots(piece).map(x => x.id), ['b', 'a']);
+  assert.equal(openSpotsLine(piece), 'Bars 9-12, LH jump');
+  assert.equal(openSpotsLine({}), '');
+  assert.equal(openSpotsLine(undefined), '');
+});
+
+test('a piece\'s page lists its spots, open and fixed apart', () => {
+  const piece = { id: 'c1', title: 'Minuet', spots: [{ id: 'a', bars: '9-12', status: 'open', added: '2026-10-01' }, { id: 'b', bars: '1-4', status: 'fixed', added: '2026-09-01', fixed: '2026-09-10' }] };
+  const r = pieceReport(piece, [], [], NOW);
+  assert.deepEqual(r.spots.open.map(x => x.id), ['a']);
+  assert.deepEqual(r.spots.fixed.map(x => x.id), ['b']);
+  assert.deepEqual(pieceReport({ id: 'x', title: 'Y' }, [], [], NOW).spots, { open: [], fixed: [] });
+});
+
+test('the lesson summary lists the open spots of the pieces you played since the lesson', () => {
+  const { lessons, sessions } = story();
+  const comps = [
+    { id: 'c1', title: 'Minuet in F', tempo: 92, spots: [{ id: 'a', bars: '9-12', status: 'open', added: '2026-10-01' }] },
+    { id: 'c2', title: 'Ocean View', spots: [{ id: 'b', bars: 'trill', status: 'fixed', added: '2026-10-01', fixed: '2026-10-05' }] },
+    { id: 'c3', title: 'Not played', spots: [{ id: 'c', bars: '1-2', status: 'open', added: '2026-10-01' }] },
+  ];
+  const b = lessonBrief(lessons, sessions, comps, NOW);
+  assert.deepEqual(b.spots, [{ name: 'Minuet in F', line: 'Bars 9-12' }]);
+  assert.ok(briefText(b).includes('Tricky spots still open\n- Minuet in F: Bars 9-12'));
+  assert.ok(!briefText(lessonBrief(lessons, sessions, comps2, NOW)).includes('Tricky spots'), 'nothing to say when there are none');
+});
+
+test('the weekly review carries the open spots of pieces being worked on, three at most', () => {
+  const comps = ['a', 'b', 'c', 'd'].map(id => ({ id, title: id.toUpperCase(), status: 'learning', spots: [{ id: `s${id}`, bars: '9-12', status: 'open', added: '2026-10-01' }] }));
+  comps.push({ id: 'z', title: 'Shelved', status: 'shelved', spots: [{ id: 'sz', bars: '1-2', status: 'open' }] });
+  const r = weeklyReview([], [], comps, NOW);
+  assert.equal(r.carry.spots.length, 3);
+  assert.deepEqual(r.carry.spots[0], { name: 'A', line: 'Bars 9-12' });
+  assert.ok(weeklyText(r).includes('- Tricky spots to fix: A (Bars 9-12), B (Bars 9-12), C (Bars 9-12)'));
+  assert.deepEqual(weeklyReview([], [], [{ id: 'q', title: 'Q', status: 'learning' }], NOW).carry.spots, []);
+});
+
+test('spots on a shelved piece are not carried into the week, even when there is room', () => {
+  const comps = [
+    { id: 'z', title: 'Shelved', status: 'shelved', spots: [{ id: 'sz', bars: '1-2', status: 'open' }] },
+    { id: 'l', title: 'Learning', status: 'learning', spots: [{ id: 'sl', bars: '3-4', status: 'open' }] },
+  ];
+  assert.deepEqual(weeklyReview([], [], comps, NOW).carry.spots.map(x => x.name), ['Learning']);
+});
+
+test('a piece\'s notes are the text fields the library keeps, labelled, in a fixed order, with blanks left out', () => {
+  const r = pieceReport({
+    id: 'c1', title: 'P', myNotes: ' keep it light ', technicalChallenges: 'Trill in bar 4', musicalFocus: '   ',
+    kerrinNotes: 'Shape the line', teacherFeedback: '', practiceNotes: 'Hands apart first', info: 'From the grade 3 list',
+  }, [], [], NOW);
+  assert.deepEqual(r.notes, [
+    { label: 'Technical challenges', text: 'Trill in bar 4' },
+    { label: 'Practice notes', text: 'Hands apart first' },
+    { label: 'Teacher notes', text: 'Shape the line' },
+    { label: 'My notes', text: 'keep it light' },
+    { label: 'About the piece', text: 'From the grade 3 list' },
+  ]);
+  assert.deepEqual(pieceReport({ id: 'x', title: 'Y' }, [], [], NOW).notes, []);
 });

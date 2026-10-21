@@ -12,7 +12,7 @@ import { MetronomeControl } from './MetronomeControl';
 import { Ionicons } from './Icon';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { formatTouch } from '../utils';
-import { runThroughsOf } from '../utils/insights';
+import { runThroughsOf, openSpotsLine } from '../utils/insights';
 
 // Isolated from PracticeTimerScreen for the same reason MetronomeControl is
 // memoized against it: the countdown ring's remaining-time display forces
@@ -205,6 +205,10 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
 
       {pieceInfo ? (
         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: -4, marginBottom: 8 }}>{pieceInfo}</Text>
+      ) : null}
+
+      {timer.currentSegment.type === 'repertoire' && openSpotsLine(linkedComposition) ? (
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy, marginBottom: 8 }}>Work on: {openSpotsLine(linkedComposition)}</Text>
       ) : null}
 
       {timer.currentSegment.type === 'technique' && formatTouch(timer.currentSegment) ? (
