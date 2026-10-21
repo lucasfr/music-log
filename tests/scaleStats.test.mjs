@@ -12,7 +12,7 @@ const source = readFileSync(join(here, '../src/utils/scaleStats.js'), 'utf8');
 const {
   scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf,
   COF_KEYS, COF_MINORS, SCALE_LABEL_TO_COF, scaleCoverage, techniqueBreakdown,
-  DYNAMICS_OPTIONS, DYNAMICS_LABELS, dynamicsOf, toggleDynamic, formatDynamics,
+  DYNAMICS_OPTIONS, DYNAMICS_LABELS, dynamicsOf, toggleDynamic, formatDynamics, selectionOf, toggleFilter,
 } = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const session = (...segments) => ({ id: 's', date: '2026-10-19', segments });
@@ -154,21 +154,21 @@ test('a segment matches an articulation if either hand uses it', () => {
     tech({ group: 'D' }),
   )];
   const out = techniqueBreakdown(sessions, 'staccato', OPTIONS);
-  assert.equal(out.activeFilter, 'staccato');
+  assert.deepEqual(out.activeArticulations, ['staccato']);
   assert.deepEqual(out.sorted.map(([n]) => n).sort(), ['A', 'B']);
 });
 
-test('a filter with no data here falls back to all, rather than an empty chart with no way out', () => {
+test('a filter with no data here is left out, so nothing on means everything rather than an empty chart', () => {
   const sessions = [session(tech({ group: 'A', articulation: { rh: 'legato', lh: 'legato' } }), tech({ group: 'B' }))];
   const out = techniqueBreakdown(sessions, 'staccato', OPTIONS);
-  assert.equal(out.activeFilter, 'all');
+  assert.deepEqual(out.activeArticulations, []);
   assert.equal(out.sorted.length, 2);
-  assert.equal(techniqueBreakdown(sessions, 'not-a-thing', OPTIONS).activeFilter, 'all');
+  assert.deepEqual(techniqueBreakdown(sessions, 'not-a-thing', OPTIONS).activeArticulations, []);
 });
 
 test('no technique means nothing to show, and missing input does not throw', () => {
   assert.deepEqual(techniqueBreakdown([session({ type: 'repertoire' })], 'all', OPTIONS).sorted, []);
-  assert.deepEqual(techniqueBreakdown(undefined, 'all', OPTIONS), { available: [], activeFilter: 'all', availableDynamics: [], activeDynamics: 'all', sorted: [] });
+  assert.deepEqual(techniqueBreakdown(undefined, 'all', OPTIONS), { available: [], activeArticulations: [], availableDynamics: [], activeDynamics: [], sorted: [] });
   assert.deepEqual(techniqueBreakdown([], 'all', undefined).available, []);
 });
 
@@ -217,21 +217,112 @@ test('the technique breakdown offers only the dynamics that exist, and filters b
   )];
   const all = techniqueBreakdown(sessions, 'all', OPTIONS);
   assert.deepEqual(all.availableDynamics, ['p', 'f', 'crescendo'], 'the piece\'s ff does not count, and the order is the usual one');
-  assert.equal(all.activeDynamics, 'all');
+  assert.deepEqual(all.activeDynamics, []);
   const p = techniqueBreakdown(sessions, 'all', OPTIONS, 'p');
-  assert.equal(p.activeDynamics, 'p');
+  assert.deepEqual(p.activeDynamics, ['p']);
   assert.deepEqual(p.sorted.map(([n, g]) => [n, g.count]), [['Hanon', 2]]);
   assert.deepEqual(techniqueBreakdown(sessions, 'all', OPTIONS, 'crescendo').sorted.map(([n]) => n), ['Scales']);
 });
 
-test('a dynamics filter with no data here falls back to all, and the two filters combine', () => {
+test('a dynamics filter with no data here is left out, and the two filters combine', () => {
   const sessions = [session(
     tech({ group: 'A', dynamics: ['p'], articulation: { rh: 'legato', lh: 'legato' } }),
     tech({ group: 'B', dynamics: ['p'], articulation: { rh: 'staccato', lh: 'staccato' } }),
     tech({ group: 'C', dynamics: ['f'], articulation: { rh: 'legato', lh: 'legato' } }),
   )];
-  assert.equal(techniqueBreakdown(sessions, 'all', OPTIONS, 'ff').activeDynamics, 'all');
+  assert.deepEqual(techniqueBreakdown(sessions, 'all', OPTIONS, 'ff').activeDynamics, []);
   assert.equal(techniqueBreakdown(sessions, 'all', OPTIONS, 'ff').sorted.length, 3);
   const both = techniqueBreakdown(sessions, 'legato', OPTIONS, 'p');
   assert.deepEqual(both.sorted.map(([n]) => n), ['A'], 'legato AND piano');
+});
+
+// ── filters as toggles ──────────────────────────────────────────────────────────────────────────
+
+test('a filter is a list of the choices on; the older single value still works', () => {
+  assert.deepEqual(selectionOf(['a', 'b']), ['a', 'b']);
+  assert.deepEqual(selectionOf([]), []);
+  assert.deepEqual(selectionOf('all'), [], '"all" is nothing switched on');
+  assert.deepEqual(selectionOf(undefined), []);
+  assert.deepEqual(selectionOf(null), []);
+  assert.deepEqual(selectionOf('legato'), ['legato']);
+  assert.deepEqual(selectionOf(2), [2], 'octaves are numbers');
+  assert.deepEqual(selectionOf(['all', 'a', null]), ['a'], 'a leftover "all" or empty entry is ignored');
+});
+
+test('tapping a toggle switches it on, tapping it again switches it off, and the others are left alone', () => {
+  assert.deepEqual(toggleFilter([], 'legato'), ['legato']);
+  assert.deepEqual(toggleFilter(['legato'], 'staccato'), ['legato', 'staccato']);
+  assert.deepEqual(toggleFilter(['legato', 'staccato'], 'legato'), ['staccato']);
+  assert.deepEqual(toggleFilter(['legato'], 'legato'), [], 'switching the last one off means everything again');
+  assert.deepEqual(toggleFilter('all', 'p'), ['p'], 'from the older "nothing chosen" value');
+  assert.deepEqual(toggleFilter([1], 2), [1, 2], 'numbers too');
+});
+
+test('several articulations on at once show segments with any of them, in either hand', () => {
+  const sessions = [session(
+    tech({ group: 'A', articulation: { rh: 'legato', lh: 'legato' } }),
+    tech({ group: 'B', articulation: { rh: 'staccato', lh: 'legato' } }),
+    tech({ group: 'C', articulation: { rh: 'tenuto', lh: 'tenuto' } }),
+    tech({ group: 'D' }),
+  )];
+  const out = techniqueBreakdown(sessions, ['staccato', 'tenuto'], OPTIONS);
+  assert.deepEqual(out.activeArticulations, ['staccato', 'tenuto']);
+  assert.deepEqual(out.sorted.map(([n]) => n).sort(), ['B', 'C']);
+  assert.deepEqual(techniqueBreakdown(sessions, ['legato', 'tenuto'], OPTIONS).sorted.map(([n]) => n).sort(), ['A', 'B', 'C']);
+  assert.equal(techniqueBreakdown(sessions, [], OPTIONS).sorted.length, 4, 'nothing on is everything');
+});
+
+test('several dynamics on at once show segments with any of them', () => {
+  const sessions = [session(
+    tech({ group: 'A', dynamics: ['p'] }), tech({ group: 'B', dynamics: ['f', 'crescendo'] }),
+    tech({ group: 'C', dynamics: ['mf'] }), tech({ group: 'D' }),
+  )];
+  assert.deepEqual(techniqueBreakdown(sessions, [], OPTIONS, ['p', 'crescendo']).sorted.map(([n]) => n).sort(), ['A', 'B']);
+  assert.deepEqual(techniqueBreakdown(sessions, [], OPTIONS, ['p', 'crescendo']).activeDynamics, ['p', 'crescendo']);
+});
+
+test('the articulation and dynamics filters apply together: any articulation chosen AND any dynamic chosen', () => {
+  const sessions = [session(
+    tech({ group: 'A', articulation: { rh: 'legato', lh: 'legato' }, dynamics: ['p'] }),
+    tech({ group: 'B', articulation: { rh: 'staccato', lh: 'staccato' }, dynamics: ['f'] }),
+    tech({ group: 'C', articulation: { rh: 'legato', lh: 'legato' }, dynamics: ['f'] }),
+    tech({ group: 'D', articulation: { rh: 'tenuto', lh: 'tenuto' }, dynamics: ['p'] }),
+  )];
+  const out = techniqueBreakdown(sessions, ['legato', 'staccato'], OPTIONS, ['p']);
+  assert.deepEqual(out.sorted.map(([n]) => n), ['A'], 'legato or staccato, and piano');
+  assert.deepEqual(techniqueBreakdown(sessions, ['legato', 'staccato'], OPTIONS, ['p', 'f']).sorted.map(([n]) => n).sort(), ['A', 'B', 'C']);
+});
+
+test('choices with no data are dropped, and if none are left it shows everything', () => {
+  const sessions = [session(tech({ group: 'A', articulation: { rh: 'legato', lh: 'legato' }, dynamics: ['p'] }), tech({ group: 'B' }))];
+  const out = techniqueBreakdown(sessions, ['legato', 'accented'], OPTIONS, ['p', 'ff']);
+  assert.deepEqual(out.activeArticulations, ['legato']);
+  assert.deepEqual(out.activeDynamics, ['p']);
+  const none = techniqueBreakdown(sessions, ['accented'], OPTIONS, ['ff']);
+  assert.deepEqual([none.activeArticulations, none.activeDynamics], [[], []]);
+  assert.equal(none.sorted.length, 2);
+});
+
+test('scale coverage with several choices on shows entries with any of them', () => {
+  const sessions = [session(
+    tech({ scales: [{ scale: 'C major', motion: 'parallel', octaves: 1 }, { scale: 'D major', motion: 'contrary', octaves: 2 }, { scale: 'E major', motion: 'parallel', octaves: 4 }] }),
+    tech({ octaves: 3, scales: [{ scale: 'F major', interval: 'third' }, { scale: 'G major', interval: 'sixth' }, { scale: 'A major', interval: 'tenth' }] }),
+  )];
+  const keys = f => Object.keys(scaleCoverage(sessions, f).counts).sort();
+  assert.deepEqual(keys({ octaves: [1, 2] }), ['C', 'D']);
+  assert.deepEqual(keys({ octaves: [3, 4] }), ['A', 'E', 'F', 'G']);
+  assert.deepEqual(keys({ interval: ['third', 'sixth'] }), ['F', 'G']);
+  assert.deepEqual(keys({ motion: ['contrary'] }), ['D']);
+  assert.deepEqual(keys({ interval: ['third', 'tenth'], motion: [] }), ['A', 'F'], 'an empty list is no filter');
+});
+
+test('scale coverage filters combine: any of the motions AND any of the octaves', () => {
+  const sessions = [session(tech({ scales: [
+    { scale: 'C major', motion: 'parallel', octaves: 1 }, { scale: 'D major', motion: 'contrary', octaves: 1 },
+    { scale: 'E major', motion: 'parallel', octaves: 2 }, { scale: 'F major', motion: 'contrary', octaves: 2 },
+  ] }))];
+  const keys = f => Object.keys(scaleCoverage(sessions, f).counts).sort();
+  assert.deepEqual(keys({ motion: ['contrary'], octaves: [1, 2] }), ['D', 'F']);
+  assert.deepEqual(keys({ motion: ['parallel', 'contrary'], octaves: [2] }), ['E', 'F']);
+  assert.deepEqual(keys({ motion: ['parallel', 'contrary'], octaves: [1, 2] }), ['C', 'D', 'E', 'F']);
 });

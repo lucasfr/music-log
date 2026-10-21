@@ -14,7 +14,7 @@ import {
   inPeriod, periodCutoff, volumeBuckets, trendBuckets, dayOfWeekBuckets, streakRuns, topStreaks, longestStreak,
   periodAverages, daysSinceLatest, neglectedPieces, pieceStats, lessonInsights,
 } from '../utils/statsCalc';
-import { scaleCoverage, techniqueBreakdown, COF_KEYS, COF_MINORS, DYNAMICS_LABELS } from '../utils/scaleStats';
+import { scaleCoverage, techniqueBreakdown, toggleFilter, COF_KEYS, COF_MINORS, DYNAMICS_LABELS } from '../utils/scaleStats';
 import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { coverageColour, readableOn } from '../utils/chartColours';
@@ -891,50 +891,46 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
 // ─── Technique breakdown ───────────────────────────────────────────────
 
 function TechniqueBreakdown({ sessions }) {
-  const [articulationFilter, setArticulationFilter] = useState('all');
-  const [dynamicsFilter, setDynamicsFilter] = useState('all');
+  // The filters are toggles: any number can be on, and none on means everything. A segment matches if
+  // it has any of the articulations that are on (in either hand) AND any of the dynamics that are on.
+  const [articulationFilter, setArticulationFilter] = useState([]);
+  const [dynamicsFilter, setDynamicsFilter] = useState([]);
 
-  // Filter pills only offer articulations actually present in this period's data, so the row doesn't
-  // appear at all until something has been logged with one. A segment matches if either hand uses the
-  // chosen articulation. A previously chosen filter that has no data after switching period falls back
-  // to 'all' rather than showing an empty chart with no way out.
-  const { available, activeFilter, availableDynamics, activeDynamics, sorted } = useMemo(
+  // The toggles only offer what is actually in this period's data, so a row doesn't appear until
+  // something has been logged with one; a toggle left on that has no data after switching period is
+  // simply ignored.
+  const { available, activeArticulations, availableDynamics, activeDynamics, sorted } = useMemo(
     () => techniqueBreakdown(sessions, articulationFilter, ARTICULATION_OPTIONS, dynamicsFilter),
     [sessions, articulationFilter, dynamicsFilter],
   );
-  const filterOptions = [
-    { key: 'all', label: 'All' },
-    ...available.map(a => ({ key: a, label: ARTICULATION_LABELS[a] })),
-  ];
-  // The same for dynamics: the pills offer only the ones logged in this period.
-  const dynamicsOptions = [
-    { key: 'all', label: 'All' },
-    ...availableDynamics.map(k => ({ key: k, label: DYNAMICS_LABELS[k] })),
-  ];
-  if (sorted.length === 0) return (
+  const filterOptions = available.map(a => ({ key: a, label: ARTICULATION_LABELS[a] }));
+  const dynamicsOptions = availableDynamics.map(k => ({ key: k, label: DYNAMICS_LABELS[k] }));
+  const filtered = activeArticulations.length > 0 || activeDynamics.length > 0;
+  // With nothing on, no segments means no technique at all this period. With a filter on it can just
+  // mean nothing matches, and then the toggles must stay so it can be changed.
+  if (sorted.length === 0 && !filtered) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No technique segments logged in this period.</Text>
   );
 
-  const maxCount = sorted[0][1].count;
+  const maxCount = sorted.length ? sorted[0][1].count : 1;
   const timeStr  = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
 
   return (
     <View>
-      {filterOptions.length > 1 && (
-        <View style={{ marginBottom: 12 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 4 }}>Articulation</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <PillToggle options={filterOptions} value={activeFilter} onChange={setArticulationFilter} />
-          </ScrollView>
-        </View>
+      {filterOptions.length > 0 && (
+        <FilterRow
+          label="Articulation" options={filterOptions} selected={activeArticulations}
+          onToggle={k => setArticulationFilter(f => toggleFilter(f, k))} onClear={() => setArticulationFilter([])}
+        />
       )}
-      {dynamicsOptions.length > 1 && (
-        <View style={{ marginBottom: 12 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 4 }}>Dynamics</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <PillToggle options={dynamicsOptions} value={activeDynamics} onChange={setDynamicsFilter} />
-          </ScrollView>
-        </View>
+      {dynamicsOptions.length > 0 && (
+        <FilterRow
+          label="Dynamics" options={dynamicsOptions} selected={activeDynamics}
+          onToggle={k => setDynamicsFilter(f => toggleFilter(f, k))} onClear={() => setDynamicsFilter([])}
+        />
+      )}
+      {sorted.length === 0 && (
+        <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>Nothing this period matches those filters.</Text>
       )}
       {sorted.map(([name, data]) => {
         const avgDiff = data.difficulty.length
@@ -975,14 +971,18 @@ function cofArcPath(cx, cy, r1, r2, startDeg, endDeg) {
 }
 
 // Generic pill-row toggle used for the scale coverage filters below.
-function PillToggle({ options, value, onChange }) {
+// A row of filter toggles. Any number can be on, and none on means everything, so there is no "All".
+// Tapping a pill switches it on or off; "Clear" appears only while something is on.
+function TogglePills({ options, selected, onToggle }) {
   return (
     <View style={{ flexDirection: 'row', gap: 6 }}>
       {options.map(o => {
-        const active = value === o.key;
+        const active = selected.includes(o.key);
         return (
-          <TouchableOpacity key={o.key} onPress={() => onChange(o.key)} activeOpacity={0.75}
-            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
+          <TouchableOpacity key={String(o.key)} onPress={() => onToggle(o.key)} activeOpacity={0.75}
+            hitSlop={HIT_PILL}
+            accessibilityRole="button" accessibilityState={{ selected: active }} accessibilityLabel={`${o.label} filter`}
+            style={{ ...TOUCH_PILL,
               paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill,
               backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
               shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
@@ -997,14 +997,31 @@ function PillToggle({ options, value, onChange }) {
   );
 }
 
+function FilterRow({ label, options, selected, onToggle, onClear }) {
+  return (
+    <View style={{ marginBottom: 12 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim }}>{label}</Text>
+        {selected.length > 0 ? (
+          <TouchableOpacity onPress={onClear} activeOpacity={0.75} hitSlop={HIT_PILL}
+            accessibilityRole="button" accessibilityLabel={`Clear the ${label} filter`}>
+            <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.steel }}>Clear</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <TogglePills options={options} selected={selected} onToggle={onToggle} />
+      </ScrollView>
+    </View>
+  );
+}
+
 const MOTION_FILTER_OPTIONS = [
-  { key: 'all', label: 'All' },
   { key: 'parallel', label: 'Parallel' },
   { key: 'contrary', label: 'Contrary' },
 ];
 
 const OCTAVE_FILTER_OPTIONS = [
-  { key: 'all', label: 'All' },
   { key: 1, label: '1 oct' },
   { key: 2, label: '2 oct' },
   { key: 3, label: '3 oct' },
@@ -1012,23 +1029,25 @@ const OCTAVE_FILTER_OPTIONS = [
 ];
 
 const INTERVAL_FILTER_OPTIONS = [
-  { key: 'all', label: 'All' },
   { key: 'unison', label: 'Unison' },
   { key: 'third', label: '3rds' },
   { key: 'sixth', label: '6ths' },
   { key: 'tenth', label: '10ths' },
 ];
 
-// Parallel / Contrary / All, 1oct / 2oct / All, and interval filters for
-// scale coverage — lets Lucas isolate how much contrary-motion, 2-octave, or
-// double-interval (3rds/6ths/10ths) practice he's actually logged, since
-// these are specifically examined from around Grade 5–6.
+// Motion, octave and interval filters for scale coverage — lets Lucas isolate how much
+// contrary-motion, 2-octave, or double-interval (3rds/6ths/10ths) practice he's actually logged,
+// since these are specifically examined from around Grade 5–6. Each is a row of toggles: any number
+// can be on (parallel and contrary, 1 and 2 octaves), and none on means everything.
 function ScaleCoverageFilters({ motionFilter, setMotionFilter, octaveFilter, setOctaveFilter, intervalFilter, setIntervalFilter }) {
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-      <PillToggle options={MOTION_FILTER_OPTIONS} value={motionFilter} onChange={setMotionFilter} />
-      <PillToggle options={OCTAVE_FILTER_OPTIONS} value={octaveFilter} onChange={setOctaveFilter} />
-      <PillToggle options={INTERVAL_FILTER_OPTIONS} value={intervalFilter} onChange={setIntervalFilter} />
+    <View style={{ marginBottom: 2 }}>
+      <FilterRow label="Motion" options={MOTION_FILTER_OPTIONS} selected={motionFilter}
+        onToggle={k => setMotionFilter(f => toggleFilter(f, k))} onClear={() => setMotionFilter([])} />
+      <FilterRow label="Octaves" options={OCTAVE_FILTER_OPTIONS} selected={octaveFilter}
+        onToggle={k => setOctaveFilter(f => toggleFilter(f, k))} onClear={() => setOctaveFilter([])} />
+      <FilterRow label="Interval" options={INTERVAL_FILTER_OPTIONS} selected={intervalFilter}
+        onToggle={k => setIntervalFilter(f => toggleFilter(f, k))} onClear={() => setIntervalFilter([])} />
     </View>
   );
 }
@@ -1036,9 +1055,9 @@ function ScaleCoverageFilters({ motionFilter, setMotionFilter, octaveFilter, set
 function ScaleCoverage({ sessions }) {
   const [width, setWidth] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [motionFilter, setMotionFilter] = useState('all'); // 'all' | 'parallel' | 'contrary'
-  const [octaveFilter, setOctaveFilter] = useState('all'); // 'all' | 1 | 2
-  const [intervalFilter, setIntervalFilter] = useState('all'); // 'all' | 'unison' | 'third' | 'sixth' | 'tenth'
+  const [motionFilter, setMotionFilter] = useState([]);   // the motions switched on: 'parallel', 'contrary'
+  const [octaveFilter, setOctaveFilter] = useState([]);    // the octave counts switched on: 1, 2, 3, 4
+  const [intervalFilter, setIntervalFilter] = useState([]); // the intervals on: 'unison', 'third', 'sixth', 'tenth'
 
   const {
     counts: scaleCounts, majorCounts, minorCounts, maxCount, totalMinutes: totalScaleMins,

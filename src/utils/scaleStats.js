@@ -67,6 +67,24 @@ export function formatDynamics(seg) {
   return d.length ? d.map(k => DYNAMICS_LABELS[k]).join(', ') : null;
 }
 
+// ─── Filters as toggles ──────────────────────────────────────────────────────
+// A filter is a list of the choices switched on. An empty list means "everything", so there is no
+// separate "All" choice to pick. Within one filter a segment matches if it has ANY of the choices on
+// (legato or staccato); different filters apply together (legato AND piano).
+
+// A filter value as a list. The older single-choice form still works: 'all' (or nothing) is [], and a
+// lone value is [value].
+export function selectionOf(value) {
+  if (Array.isArray(value)) return value.filter(v => v !== 'all' && v != null);
+  return value === 'all' || value == null ? [] : [value];
+}
+
+// The list after tapping `key`: switched on if it was off, off if it was on.
+export function toggleFilter(current, key) {
+  const list = selectionOf(current);
+  return list.includes(key) ? list.filter(k => k !== key) : [...list, key];
+}
+
 // ─── Circle of fifths ────────────────────────────────────────────────────────
 
 export const COF_KEYS   = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
@@ -112,17 +130,20 @@ export const SCALE_LABEL_TO_COF = {
 // ─── Scale coverage ──────────────────────────────────────────────────────────
 
 // How much each key of the circle of fifths has been practised. Only technique segments with scales
-// count, and `filters` ({ motion, octaves, interval }, each 'all' or a value) narrow which entries do.
+// count, and `filters` ({ motion, octaves, interval }, each a list of the choices on, [] for any) narrow
+// which entries do.
 // A segment that names several scales in the same key counts that key once, and its minutes are
 // shared out across the distinct keys so total time isn't inflated.
 // -> { counts: { [key]: { sessions, minutes, difficulty: [] } }, majorCounts, minorCounts, maxCount,
 //      totalMinutes, totalSessions, keysVisited, avgDifficulty | null, anyTechnique }
 export function scaleCoverage(sessions, filters = {}) {
-  const { motion = 'all', octaves = 'all', interval = 'all' } = filters;
+  const motion = selectionOf(filters.motion);
+  const octaves = selectionOf(filters.octaves);
+  const interval = selectionOf(filters.interval);
   const matches = (entry, seg) => {
-    if (motion !== 'all' && scaleMotion(entry) !== motion) return false;
-    if (octaves !== 'all' && scaleOctaves(entry, seg.octaves || 1) !== octaves) return false;
-    if (interval !== 'all' && scaleInterval(entry) !== interval) return false;
+    if (motion.length && !motion.includes(scaleMotion(entry))) return false;
+    if (octaves.length && !octaves.includes(scaleOctaves(entry, seg.octaves || 1))) return false;
+    if (interval.length && !interval.includes(scaleInterval(entry))) return false;
     return true;
   };
 
@@ -165,12 +186,12 @@ export function scaleCoverage(sessions, filters = {}) {
 // either hand uses the chosen articulation. `articulationOptions` is the ordered list of
 // articulation keys the app knows; `available` is the ones that appear in this data, in that order
 // (so the filter row only offers what exists). A chosen filter that has no data here (after
-// switching period, say) falls back to 'all'.
-// The same goes for the optional dynamics filter (`availableDynamics`, `activeDynamics`); a segment matches
-// when it includes the chosen dynamic, and both filters apply together.
-// -> { available, activeFilter, availableDynamics, activeDynamics,
+// switching period, say) is simply left out, so nothing on means everything.
+// The same goes for the dynamics filter (`availableDynamics`, `activeDynamics`). Both filters are lists of
+// the choices on (see selectionOf): within one a segment needs any of them, and the two apply together.
+// -> { available, activeArticulations, availableDynamics, activeDynamics,
 //      sorted: [[name, { count, minutes, difficulty: [] }], ...] }
-export function techniqueBreakdown(sessions, articulationFilter, articulationOptions, dynamicsFilter = 'all') {
+export function techniqueBreakdown(sessions, articulationFilter, articulationOptions, dynamicsFilter = []) {
   const used = new Set();
   const usedDynamics = new Set();
   (sessions || []).forEach(s => (s.segments || []).forEach(seg => {
@@ -181,23 +202,23 @@ export function techniqueBreakdown(sessions, articulationFilter, articulationOpt
     dynamicsOf(seg).forEach(k => usedDynamics.add(k));
   }));
   const available = (articulationOptions || []).filter(a => used.has(a));
-  const activeFilter = articulationFilter !== 'all' && available.includes(articulationFilter) ? articulationFilter : 'all';
+  const activeArticulations = selectionOf(articulationFilter).filter(a => available.includes(a));
   const availableDynamics = DYNAMICS_OPTIONS.filter(k => usedDynamics.has(k));
-  const activeDynamics = dynamicsFilter !== 'all' && availableDynamics.includes(dynamicsFilter) ? dynamicsFilter : 'all';
+  const activeDynamics = selectionOf(dynamicsFilter).filter(k => availableDynamics.includes(k));
 
   const groups = {};
   (sessions || []).forEach(s => (s.segments || []).forEach(seg => {
     if (seg.type !== 'technique') return;
-    if (activeFilter !== 'all') {
+    if (activeArticulations.length) {
       const { rh, lh } = articulationOf(seg);
-      if (rh !== activeFilter && lh !== activeFilter) return;
+      if (!activeArticulations.includes(rh) && !activeArticulations.includes(lh)) return;
     }
-    if (activeDynamics !== 'all' && !dynamicsOf(seg).includes(activeDynamics)) return;
+    if (activeDynamics.length && !dynamicsOf(seg).some(k => activeDynamics.includes(k))) return;
     const name = seg.group || seg.title || 'Technique';
     if (!groups[name]) groups[name] = { count: 0, minutes: 0, difficulty: [] };
     groups[name].count++;
     groups[name].minutes += Number(seg.duration) || 0;
     if (seg.feltDifficulty) groups[name].difficulty.push(Number(seg.feltDifficulty));
   }));
-  return { available, activeFilter, availableDynamics, activeDynamics, sorted: Object.entries(groups).sort((a, b) => b[1].count - a[1].count) };
+  return { available, activeArticulations, availableDynamics, activeDynamics, sorted: Object.entries(groups).sort((a, b) => b[1].count - a[1].count) };
 }
