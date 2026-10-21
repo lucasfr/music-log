@@ -14,7 +14,7 @@ import {
   inPeriod, periodCutoff, volumeBuckets, trendBuckets, dayOfWeekBuckets, streakRuns, topStreaks, longestStreak,
   periodAverages, daysSinceLatest, neglectedPieces, pieceStats, lessonInsights,
 } from '../utils/statsCalc';
-import { scaleCoverage, techniqueBreakdown, COF_KEYS, COF_MINORS } from '../utils/scaleStats';
+import { scaleCoverage, techniqueBreakdown, COF_KEYS, COF_MINORS, DYNAMICS_LABELS } from '../utils/scaleStats';
 import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
 import { coverageColour, readableOn } from '../utils/chartColours';
@@ -892,18 +892,24 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
 
 function TechniqueBreakdown({ sessions }) {
   const [articulationFilter, setArticulationFilter] = useState('all');
+  const [dynamicsFilter, setDynamicsFilter] = useState('all');
 
   // Filter pills only offer articulations actually present in this period's data, so the row doesn't
   // appear at all until something has been logged with one. A segment matches if either hand uses the
   // chosen articulation. A previously chosen filter that has no data after switching period falls back
   // to 'all' rather than showing an empty chart with no way out.
-  const { available, activeFilter, sorted } = useMemo(
-    () => techniqueBreakdown(sessions, articulationFilter, ARTICULATION_OPTIONS),
-    [sessions, articulationFilter],
+  const { available, activeFilter, availableDynamics, activeDynamics, sorted } = useMemo(
+    () => techniqueBreakdown(sessions, articulationFilter, ARTICULATION_OPTIONS, dynamicsFilter),
+    [sessions, articulationFilter, dynamicsFilter],
   );
   const filterOptions = [
     { key: 'all', label: 'All' },
     ...available.map(a => ({ key: a, label: ARTICULATION_LABELS[a] })),
+  ];
+  // The same for dynamics: the pills offer only the ones logged in this period.
+  const dynamicsOptions = [
+    { key: 'all', label: 'All' },
+    ...availableDynamics.map(k => ({ key: k, label: DYNAMICS_LABELS[k] })),
   ];
   if (sorted.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim }}>No technique segments logged in this period.</Text>
@@ -915,9 +921,20 @@ function TechniqueBreakdown({ sessions }) {
   return (
     <View>
       {filterOptions.length > 1 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-          <PillToggle options={filterOptions} value={activeFilter} onChange={setArticulationFilter} />
-        </ScrollView>
+        <View style={{ marginBottom: 12 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 4 }}>Articulation</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <PillToggle options={filterOptions} value={activeFilter} onChange={setArticulationFilter} />
+          </ScrollView>
+        </View>
+      )}
+      {dynamicsOptions.length > 1 && (
+        <View style={{ marginBottom: 12 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: 11, color: COLOURS.textDim, marginBottom: 4 }}>Dynamics</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <PillToggle options={dynamicsOptions} value={activeDynamics} onChange={setDynamicsFilter} />
+          </ScrollView>
+        </View>
       )}
       {sorted.map(([name, data]) => {
         const avgDiff = data.difficulty.length

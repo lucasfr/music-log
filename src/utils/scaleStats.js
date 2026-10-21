@@ -34,6 +34,39 @@ export function articulationOf(seg) {
   return { rh: a?.rh || null, lh: a?.lh || null };
 }
 
+// ─── Dynamics ─────────────────────────────────────────────────────────────────
+// How loudly an exercise was played (Hanon in piano, then in forte, or crescendo up and diminuendo
+// down). A technique segment can have several, so `segment.dynamics` is a list of keys from
+// DYNAMICS_OPTIONS (or absent, on any segment logged before it existed). Both hands share it.
+
+export const DYNAMICS_OPTIONS = ['pp', 'p', 'mp', 'mf', 'f', 'ff', 'crescendo', 'diminuendo'];
+
+export const DYNAMICS_LABELS = {
+  pp: 'pp', p: 'p', mp: 'mp', mf: 'mf', f: 'f', ff: 'ff',
+  crescendo: 'Crescendo', diminuendo: 'Diminuendo',
+};
+
+// The dynamics on a segment: only known ones, each once, in the order of DYNAMICS_OPTIONS.
+export function dynamicsOf(seg) {
+  const d = seg && seg.dynamics;
+  if (!Array.isArray(d)) return [];
+  return DYNAMICS_OPTIONS.filter(k => d.includes(k));
+}
+
+// The list after tapping `key` (added if it wasn't there, removed if it was). An unknown key changes
+// nothing. [] when none are left; the picker stores that as null.
+export function toggleDynamic(current, key) {
+  const set = new Set(dynamicsOf({ dynamics: current }));
+  if (DYNAMICS_OPTIONS.includes(key)) { if (set.has(key)) set.delete(key); else set.add(key); }
+  return DYNAMICS_OPTIONS.filter(k => set.has(k));
+}
+
+// 'mf', 'p, f', 'Crescendo, Diminuendo'; null when nothing is set.
+export function formatDynamics(seg) {
+  const d = dynamicsOf(seg);
+  return d.length ? d.map(k => DYNAMICS_LABELS[k]).join(', ') : null;
+}
+
 // ─── Circle of fifths ────────────────────────────────────────────────────────
 
 export const COF_KEYS   = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
@@ -133,17 +166,24 @@ export function scaleCoverage(sessions, filters = {}) {
 // articulation keys the app knows; `available` is the ones that appear in this data, in that order
 // (so the filter row only offers what exists). A chosen filter that has no data here (after
 // switching period, say) falls back to 'all'.
-// -> { available, activeFilter, sorted: [[name, { count, minutes, difficulty: [] }], ...] }
-export function techniqueBreakdown(sessions, articulationFilter, articulationOptions) {
+// The same goes for the optional dynamics filter (`availableDynamics`, `activeDynamics`); a segment matches
+// when it includes the chosen dynamic, and both filters apply together.
+// -> { available, activeFilter, availableDynamics, activeDynamics,
+//      sorted: [[name, { count, minutes, difficulty: [] }], ...] }
+export function techniqueBreakdown(sessions, articulationFilter, articulationOptions, dynamicsFilter = 'all') {
   const used = new Set();
+  const usedDynamics = new Set();
   (sessions || []).forEach(s => (s.segments || []).forEach(seg => {
     if (seg.type !== 'technique') return;
     const { rh, lh } = articulationOf(seg);
     if (rh) used.add(rh);
     if (lh) used.add(lh);
+    dynamicsOf(seg).forEach(k => usedDynamics.add(k));
   }));
   const available = (articulationOptions || []).filter(a => used.has(a));
   const activeFilter = articulationFilter !== 'all' && available.includes(articulationFilter) ? articulationFilter : 'all';
+  const availableDynamics = DYNAMICS_OPTIONS.filter(k => usedDynamics.has(k));
+  const activeDynamics = dynamicsFilter !== 'all' && availableDynamics.includes(dynamicsFilter) ? dynamicsFilter : 'all';
 
   const groups = {};
   (sessions || []).forEach(s => (s.segments || []).forEach(seg => {
@@ -152,11 +192,12 @@ export function techniqueBreakdown(sessions, articulationFilter, articulationOpt
       const { rh, lh } = articulationOf(seg);
       if (rh !== activeFilter && lh !== activeFilter) return;
     }
+    if (activeDynamics !== 'all' && !dynamicsOf(seg).includes(activeDynamics)) return;
     const name = seg.group || seg.title || 'Technique';
     if (!groups[name]) groups[name] = { count: 0, minutes: 0, difficulty: [] };
     groups[name].count++;
     groups[name].minutes += Number(seg.duration) || 0;
     if (seg.feltDifficulty) groups[name].difficulty.push(Number(seg.feltDifficulty));
   }));
-  return { available, activeFilter, sorted: Object.entries(groups).sort((a, b) => b[1].count - a[1].count) };
+  return { available, activeFilter, availableDynamics, activeDynamics, sorted: Object.entries(groups).sort((a, b) => b[1].count - a[1].count) };
 }

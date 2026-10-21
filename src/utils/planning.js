@@ -72,6 +72,7 @@ function cleanSegment(seg) {
     plannedMinutes: clampMinutes(seg.plannedMinutes),
   };
   if (seg.articulation) out.articulation = seg.articulation;
+  if (out.type === 'technique' && Array.isArray(seg.dynamics) && seg.dynamics.length) out.dynamics = seg.dynamics.filter(k => typeof k === 'string');
   return out;
 }
 
@@ -116,6 +117,7 @@ export function routineToPlan(routine, compositions, makeId = makeIdDefault) {
       plannedMinutes: seg.plannedMinutes,
     };
     if (isTech && seg.articulation) draft.articulation = seg.articulation;
+    if (isTech && Array.isArray(seg.dynamics) && seg.dynamics.length) draft.dynamics = seg.dynamics;
     draft.confirmed = isTech ? !!draft.title : !!draft.compositionId;
     return draft;
   });

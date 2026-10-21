@@ -11,7 +11,7 @@ import { scheduleSegmentEndNotification, cancelScheduledNotification } from '../
 import { MetronomeControl } from './MetronomeControl';
 import { Ionicons } from './Icon';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
-import { formatArticulation } from '../utils';
+import { formatTouch } from '../utils';
 import { runThroughsOf } from '../utils/insights';
 
 // Isolated from PracticeTimerScreen for the same reason MetronomeControl is
@@ -207,9 +207,9 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: -4, marginBottom: 8 }}>{pieceInfo}</Text>
       ) : null}
 
-      {timer.currentSegment.type === 'technique' && formatArticulation(timer.currentSegment) ? (
+      {timer.currentSegment.type === 'technique' && formatTouch(timer.currentSegment) ? (
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.steel, marginTop: -2, marginBottom: 10 }}>
-          {formatArticulation(timer.currentSegment)}
+          {formatTouch(timer.currentSegment)}
         </Text>
       ) : null}
 

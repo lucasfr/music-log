@@ -12,6 +12,7 @@ const source = readFileSync(join(here, '../src/utils/scaleStats.js'), 'utf8');
 const {
   scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf,
   COF_KEYS, COF_MINORS, SCALE_LABEL_TO_COF, scaleCoverage, techniqueBreakdown,
+  DYNAMICS_OPTIONS, DYNAMICS_LABELS, dynamicsOf, toggleDynamic, formatDynamics,
 } = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const session = (...segments) => ({ id: 's', date: '2026-10-19', segments });
@@ -167,6 +168,70 @@ test('a filter with no data here falls back to all, rather than an empty chart w
 
 test('no technique means nothing to show, and missing input does not throw', () => {
   assert.deepEqual(techniqueBreakdown([session({ type: 'repertoire' })], 'all', OPTIONS).sorted, []);
-  assert.deepEqual(techniqueBreakdown(undefined, 'all', OPTIONS), { available: [], activeFilter: 'all', sorted: [] });
+  assert.deepEqual(techniqueBreakdown(undefined, 'all', OPTIONS), { available: [], activeFilter: 'all', availableDynamics: [], activeDynamics: 'all', sorted: [] });
   assert.deepEqual(techniqueBreakdown([], 'all', undefined).available, []);
+});
+
+// ── dynamics ────────────────────────────────────────────────────────────────────────────
+
+test('every dynamic has a label, in the order they are shown', () => {
+  assert.deepEqual(DYNAMICS_OPTIONS, ['pp', 'p', 'mp', 'mf', 'f', 'ff', 'crescendo', 'diminuendo']);
+  for (const k of DYNAMICS_OPTIONS) assert.ok(DYNAMICS_LABELS[k], k);
+  assert.equal(Object.keys(DYNAMICS_LABELS).length, DYNAMICS_OPTIONS.length);
+});
+
+test('the dynamics on a segment are only the known ones, once each, in the usual order', () => {
+  assert.deepEqual(dynamicsOf({ dynamics: ['f', 'p'] }), ['p', 'f']);
+  assert.deepEqual(dynamicsOf({ dynamics: ['mf', 'mf', 'loud', 'diminuendo', 'crescendo'] }), ['mf', 'crescendo', 'diminuendo']);
+  for (const none of [{}, { dynamics: null }, { dynamics: 'p' }, { dynamics: {} }, { dynamics: [] }, undefined, null]) assert.deepEqual(dynamicsOf(none), []);
+});
+
+test('tapping a dynamic adds it, tapping it again removes it, and the list stays in order', () => {
+  assert.deepEqual(toggleDynamic(null, 'p'), ['p']);
+  assert.deepEqual(toggleDynamic(['p'], 'f'), ['p', 'f']);
+  assert.deepEqual(toggleDynamic(['f'], 'p'), ['p', 'f'], 'added in the order of the options, not the order tapped');
+  assert.deepEqual(toggleDynamic(['p', 'f'], 'p'), ['f']);
+  assert.deepEqual(toggleDynamic(['p'], 'p'), [], 'nothing left');
+  assert.deepEqual(toggleDynamic(undefined, 'crescendo'), ['crescendo']);
+});
+
+test('tapping something that is not a dynamic changes nothing', () => {
+  assert.deepEqual(toggleDynamic(['p'], 'loud'), ['p']);
+  assert.deepEqual(toggleDynamic(['p', 'junk'], 'f'), ['p', 'f'], 'stored junk is dropped on the way');
+});
+
+test('dynamics read naturally, and are null when there are none', () => {
+  assert.equal(formatDynamics({ dynamics: ['mf'] }), 'mf');
+  assert.equal(formatDynamics({ dynamics: ['f', 'p'] }), 'p, f');
+  assert.equal(formatDynamics({ dynamics: ['diminuendo', 'crescendo'] }), 'Crescendo, Diminuendo');
+  assert.equal(formatDynamics({}), null);
+  assert.equal(formatDynamics({ dynamics: [] }), null);
+  assert.equal(formatDynamics(undefined), null);
+});
+
+test('the technique breakdown offers only the dynamics that exist, and filters by them', () => {
+  const sessions = [session(
+    tech({ group: 'Hanon', dynamics: ['p'] }), tech({ group: 'Hanon', dynamics: ['f', 'p'] }),
+    tech({ group: 'Scales', dynamics: ['crescendo'] }), tech({ group: 'Other' }),
+    { type: 'repertoire', dynamics: ['ff'] },
+  )];
+  const all = techniqueBreakdown(sessions, 'all', OPTIONS);
+  assert.deepEqual(all.availableDynamics, ['p', 'f', 'crescendo'], 'the piece\'s ff does not count, and the order is the usual one');
+  assert.equal(all.activeDynamics, 'all');
+  const p = techniqueBreakdown(sessions, 'all', OPTIONS, 'p');
+  assert.equal(p.activeDynamics, 'p');
+  assert.deepEqual(p.sorted.map(([n, g]) => [n, g.count]), [['Hanon', 2]]);
+  assert.deepEqual(techniqueBreakdown(sessions, 'all', OPTIONS, 'crescendo').sorted.map(([n]) => n), ['Scales']);
+});
+
+test('a dynamics filter with no data here falls back to all, and the two filters combine', () => {
+  const sessions = [session(
+    tech({ group: 'A', dynamics: ['p'], articulation: { rh: 'legato', lh: 'legato' } }),
+    tech({ group: 'B', dynamics: ['p'], articulation: { rh: 'staccato', lh: 'staccato' } }),
+    tech({ group: 'C', dynamics: ['f'], articulation: { rh: 'legato', lh: 'legato' } }),
+  )];
+  assert.equal(techniqueBreakdown(sessions, 'all', OPTIONS, 'ff').activeDynamics, 'all');
+  assert.equal(techniqueBreakdown(sessions, 'all', OPTIONS, 'ff').sorted.length, 3);
+  const both = techniqueBreakdown(sessions, 'legato', OPTIONS, 'p');
+  assert.deepEqual(both.sorted.map(([n]) => n), ['A'], 'legato AND piano');
 });

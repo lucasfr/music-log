@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
 import { BtnRow, Btn, RatingMini } from '../components/UI';
-import { fmtDate, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
+import { fmtDate, formatScaleEntry, formatTouch, formatTempo } from '../utils';
 import { exportSessionJSON } from '../utils/export';
 import { notify } from '../utils/notify';
 
@@ -104,9 +104,9 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 14 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
-                    {formatArticulation(seg) ? (
+                    {formatTouch(seg) ? (
                       <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatTouch(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (

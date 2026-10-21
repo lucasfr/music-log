@@ -8,13 +8,13 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, Btn } from './UI';
 import { TextF, SelectF } from './Form';
-import { ArticulationPicker } from './SegmentEditor';
+import { ArticulationPicker, DynamicsPicker } from './SegmentEditor';
 import { MinutesDial } from './MinutesDial';
 import { ReorderList, SwipeRow, DragHandle } from './Gestures';
 import { useUndoToast } from './Undo';
 import { reorder } from '../utils/reorder';
 import { TECH_GROUPS } from '../constants';
-import { uid, fmtDate, formatArticulation, confirmDiscard, sessionToTimerPlan } from '../utils';
+import { uid, fmtDate, formatTouch, confirmDiscard, sessionToTimerPlan } from '../utils';
 import { usePref } from '../utils/usePref';
 import { parseRoutines, serializeRoutines, addRoutine, removeRoutine, routineToPlan } from '../utils/planning';
 import { notify } from '../utils/notify';
@@ -55,9 +55,9 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
             ? ` · ${(compositions.find(c => c.id === segment.compositionId) || {}).title || ''}`
             : ''}
         </Text>
-        {isTech && formatArticulation(segment) ? (
+        {isTech && formatTouch(segment) ? (
           <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.steel, marginRight: 10 }}>
-            {formatArticulation(segment)}
+            {formatTouch(segment)}
           </Text>
         ) : null}
         <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginRight: 12 }}>
@@ -117,6 +117,15 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
               <ArticulationPicker
                 value={segment.articulation}
                 onChange={v => field('articulation', v)}
+              />
+            </View>
+          )}
+          {segment.title !== 'Sight-reading' && (
+            <View style={{ marginBottom: 10 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Dynamics</Text>
+              <DynamicsPicker
+                value={segment.dynamics}
+                onChange={v => field('dynamics', v)}
               />
             </View>
           )}

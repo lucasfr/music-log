@@ -8,7 +8,7 @@ import { SectionTitle, EmptyState } from '../components/UI';
 import { SwipeRow } from '../components/Gestures';
 import { TextF } from '../components/Form';
 import { RatingMini } from '../components/UI';
-import { fmtDate, formatScaleEntry, formatArticulation, formatTempo } from '../utils';
+import { fmtDate, formatScaleEntry, formatTouch, formatTempo } from '../utils';
 import { formatRunThroughs } from '../utils/insights';
 
 function energyToBar(v) { return v === null || v === undefined ? 0 : v + 3; }
@@ -29,8 +29,8 @@ function StarRow({ value, total = 5, emoji = '🎵' }) {
 
 function SegDetail({ seg, compName, accentColor }) {
   const isTech = seg.type === 'technique';
-  // Technique shows its articulation and clean tempo; a piece shows its clean tempo and run-throughs.
-  const detailBits = (isTech ? [formatArticulation(seg), formatTempo(seg)] : [formatTempo(seg), formatRunThroughs(seg)]).filter(Boolean);
+  // Technique shows how it was played (articulation, dynamics) and its clean tempo; a piece shows its clean tempo and run-throughs.
+  const detailBits = (isTech ? [formatTouch(seg), formatTempo(seg)] : [formatTempo(seg), formatRunThroughs(seg)]).filter(Boolean);
   const name = isTech
     ? (seg.title || seg.group || 'Technical work')
     : (seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName || 'Piece'));

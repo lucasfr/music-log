@@ -2,7 +2,7 @@ import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ARTICULATION_LABELS } from './constants';
 import { deriveCompositionStatus as deriveStatusOn, deriveStatusHistory as deriveHistoryOn } from './utils/status';
-import { scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf } from './utils/scaleStats';
+import { scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf, dynamicsOf, formatDynamics } from './utils/scaleStats';
 
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -49,7 +49,7 @@ export function fmtDateShort(iso) {
 
 // scaleName, scaleMotion, scaleInterval, scaleOctaves and articulationOf live in utils/scaleStats.js
 // (pure, so they're tested); they're re-exported here so imports from this file keep working.
-export { scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf };
+export { scaleName, scaleMotion, scaleInterval, scaleOctaves, articulationOf, dynamicsOf, formatDynamics };
 
 export function formatScaleEntry(entry, fallbackOctaves = 1) {
   const name = scaleName(entry);
@@ -82,6 +82,12 @@ export function formatArticulation(seg) {
   if (rh === lh) return ARTICULATION_LABELS[rh];
   const part = v => (v ? ARTICULATION_LABELS[v].toLowerCase() : '—');
   return `RH ${part(rh)} · LH ${part(lh)}`;
+}
+
+// How a technique segment was played, as one label: its articulation and its dynamics, e.g.
+// 'Legato · mf' or 'Staccato · p, f'. null when neither is set.
+export function formatTouch(seg) {
+  return [formatArticulation(seg), formatDynamics(seg)].filter(Boolean).join(' · ') || null;
 }
 
 // ─── Local UI preferences ──────────────────────────────────────────

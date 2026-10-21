@@ -7,6 +7,7 @@ import { TagCloud } from './UI';
 import { Field, TextF, NumberF, SelectF, RatingBar } from './Form';
 import { TECH_GROUPS, SCALE_OPTIONS, CHALLENGE_TAGS, PROGRESS_TAGS, INTERVAL_OPTIONS, INTERVAL_LABELS, OCTAVE_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import { scaleName, scaleMotion, scaleOctaves, scaleInterval, articulationOf } from '../utils';
+import { DYNAMICS_OPTIONS, DYNAMICS_LABELS, dynamicsOf, toggleDynamic } from '../utils/scaleStats';
 
 // Felt difficulty / liking: the shared rating bar, with slightly smaller emoji.
 function ZeldaBar(props) {
@@ -235,6 +236,44 @@ export function ArticulationPicker({ value, onChange }) {
   );
 }
 
+// ─── Dynamics picker ────────────────────────────────────────────────────────────
+// How loudly the exercise was played. Several can be chosen (piano, then forte; or crescendo up and
+// diminuendo down), so tapping a pill adds or removes it. Both hands share it.
+
+export function DynamicsPicker({ value, onChange }) {
+  const chosen = dynamicsOf({ dynamics: value });
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+      {DYNAMICS_OPTIONS.map(k => {
+        const active = chosen.includes(k);
+        return (
+          <TouchableOpacity
+            key={k}
+            onPress={() => { const next = toggleDynamic(value, k); onChange(next.length ? next : null); }}
+            activeOpacity={0.75}
+            hitSlop={HIT_PILL}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={DYNAMICS_LABELS[k]}
+            style={{ ...TOUCH_PILL,
+              paddingHorizontal: 12, paddingVertical: 6,
+              borderRadius: RADIUS.pill,
+              backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.55),
+              shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
+              shadowOffset: { width: 0, height: active ? 3 : 1 },
+              shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
+            }}
+          >
+            <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>
+              {DYNAMICS_LABELS[k]}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
 export function SegmentEditor({ segment, onChange, onRemove, dragHandle, compositions, lessonMode = false }) {
   const [open, setOpen] = useState(true);
   const isTech = segment.type === 'technique';
@@ -337,6 +376,15 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
                   <ArticulationPicker
                     value={segment.articulation}
                     onChange={v => field('articulation', v)}
+                  />
+                </Field>
+              )}
+
+              {segment.group !== 'Sight-reading' && (
+                <Field label="Dynamics" icon="musical-notes-outline">
+                  <DynamicsPicker
+                    value={segment.dynamics}
+                    onChange={v => field('dynamics', v)}
                   />
                 </Field>
               )}

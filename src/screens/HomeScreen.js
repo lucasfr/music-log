@@ -9,7 +9,7 @@ import { LogModal } from '../components/LogModal';
 import { LessonModal } from '../components/LessonModal';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { LessonDetailModal } from '../components/LessonDetailModal';
-import { fmtDate, formatScaleEntry, formatArticulation, formatTempo, latestSession, localISO, getLocalPref, setLocalPref, sessionToTimerPlan } from '../utils';
+import { fmtDate, formatScaleEntry, formatTouch, formatTempo, latestSession, localISO, getLocalPref, setLocalPref, sessionToTimerPlan } from '../utils';
 import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/export';
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
@@ -438,9 +438,9 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
                       {compName(seg.compositionId) || seg.group || seg.title || 'Technical work'}
                     </Text>
-                    {formatArticulation(seg) ? (
+                    {formatTouch(seg) ? (
                       <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatTouch(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
@@ -594,9 +594,9 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 10 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
-                    {formatArticulation(seg) ? (
+                    {formatTouch(seg) ? (
                       <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatArticulation(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatTouch(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
