@@ -98,7 +98,7 @@ function GanttBar({ comp, sessions, lessons, minDate, maxDate, today, onPress, s
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View style={{ paddingVertical: 11 }}>
+      <View style={{ paddingVertical: 12 }}>
         {/* Track */}
         <View style={{
           height: 22,
@@ -222,7 +222,7 @@ function DetailPanel({ comp, sessions, lessons }) {
           {comp.grade ? (
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Grade</Text>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.navy }}>{comp.grade}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.navy }}>{comp.grade}</Text>
             </View>
           ) : null}
           <View style={{ alignItems: 'center' }}>
@@ -236,13 +236,13 @@ function DetailPanel({ comp, sessions, lessons }) {
           {compSessions.length > 0 && (
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Sessions</Text>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.navy }}>{compSessions.length}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.navy }}>{compSessions.length}</Text>
             </View>
           )}
           {totalMins > 0 && (
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Time logged</Text>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.navy }}>{totalMins} min</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.navy }}>{totalMins} min</Text>
             </View>
           )}
         </View>
@@ -462,17 +462,17 @@ function TimelineChart({ compositions, sessions, lessons, selectedId, onSelect }
         {STATUS_OPTIONS.map(s => {
           const sc = STATUS_COLOURS[s] || {};
           return (
-            <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <View style={{ width: 12, height: 8, borderRadius: 4, backgroundColor: sc.border || COLOURS.steel }} />
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{s}</Text>
             </View>
           );
         })}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 0, height: 12, borderLeftWidth: 1.5, borderLeftColor: COLOURS.accent2, borderStyle: 'dashed', opacity: 0.7 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>lesson</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 2, height: 12, backgroundColor: COLOURS.red, opacity: 0.55 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>today</Text>
         </View>
@@ -509,13 +509,13 @@ export default function TimelineScreen({ compositions, sessions, lessons, isDesk
       >
         <View style={{ marginBottom: 14, marginTop: 4 }}>
           <SectionTitle style={{ marginBottom: 0 }}>Timeline</SectionTitle>
-          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 3 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 4 }}>
             Your repertoire journey, piece by piece
           </Text>
         </View>
 
         {/* Status filter — additive multi-select */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 16 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
           {/* All pill */}
           <TouchableOpacity
             onPress={() => { setActiveFilters([]); setSelectedId(null); }}
