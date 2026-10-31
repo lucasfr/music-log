@@ -244,7 +244,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
 
   const calendar = (
     <BlurView intensity={60} tint={COLOURS.blurTint} style={{
-      borderRadius: 20, overflow: 'hidden',
+      borderRadius: RADIUS.lg, overflow: 'hidden',
       shadowColor: COLOURS.navyA(0.18), shadowOffset:{width:0,height:12}, shadowOpacity:1, shadowRadius:32, elevation:16,
     }}>
       <View style={{ backgroundColor: COLOURS.w(0.65), padding: 16 }}>
