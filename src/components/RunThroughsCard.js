@@ -4,7 +4,7 @@
 
 import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
-import { COLOURS } from '../theme';
+import { COLOURS, SIZES } from '../theme';
 import { AnimatedFill } from './Motion';
 import { todayISO } from '../utils';
 import { runThroughStats, describeRunThroughs, shortDate } from '../utils/insights';
@@ -16,7 +16,7 @@ export function RunThroughsCard({ sessions, compositions }) {
   const items = useMemo(() => runThroughStats(sessions, compositions, today), [sessions, compositions, today]);
 
   if (!items.length) return (
-    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 14, color: COLOURS.textDim, lineHeight: 20 }}>
+    <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.bodySmall, color: COLOURS.textDim, lineHeight: 20 }}>
       Note how many times you played a piece right through without stopping when you log practice, and they show up here.
     </Text>
   );
@@ -28,13 +28,13 @@ export function RunThroughsCard({ sessions, compositions }) {
 
   return (
     <View>
-      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 12 }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 12 }}>
         {count(recent, 'run-through', 'run-throughs')} in the last month, {total} in all, across {count(items.length, 'piece', 'pieces')}
       </Text>
       {shown.map(p => (
         <View key={p.key} style={{ marginBottom: 12 }} accessible accessibilityLabel={`${p.name}: ${describeRunThroughs(p)}, last on ${shortDate(p.lastDate)}`}>
-          <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>{p.name}</Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>{p.name}</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 2 }}>
             {describeRunThroughs(p)} {'\u00b7'} last {shortDate(p.lastDate)}
           </Text>
           <View style={{ height: 4, borderRadius: 2, backgroundColor: COLOURS.bg2, marginTop: 6, overflow: 'hidden' }}>
@@ -43,7 +43,7 @@ export function RunThroughsCard({ sessions, compositions }) {
         </View>
       ))}
       {items.length > shown.length ? (
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>and {items.length - shown.length} more</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>and {items.length - shown.length} more</Text>
       ) : null}
     </View>
   );
