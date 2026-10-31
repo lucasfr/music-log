@@ -234,7 +234,7 @@ function TimeSigPicker({ value = [], onChange }) {
   }
   return (
     <Field label="⏱ Time signatures">
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {TIME_SIGS.map(sig => {
           const active = value.includes(sig);
           return (
@@ -272,7 +272,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 19, color: COLOURS.text }}>
+              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.cardTitle, color: COLOURS.text }}>
                 {comp.title ? 'Edit piece' : 'Add piece'}
               </Text>
               <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT}>
@@ -346,7 +346,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <View style={{ flexDirection: 'row', gap: 2 }}>
                     {[1,2,3,4,5].map(n => (
-                      <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
+                      <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 8 }}>
                         <Text style={{ fontSize: SIZES.display, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
                       </TouchableOpacity>
                     ))}
@@ -364,7 +364,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
               <Field label="Status">
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <View style={{
-                    paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
+                    paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
                     backgroundColor: (STATUS_COLOURS[data.status] || {}).bg || COLOURS.w(0.50),
                   }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: (STATUS_COLOURS[data.status] || {}).text || COLOURS.textMuted }}>
@@ -706,14 +706,14 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
 
                       {/* Challenge + progress tags */}
                       {((seg?.challenges || []).length > 0 || (seg?.progress || []).length > 0) && (
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                           {(seg?.challenges || []).map(t => (
-                            <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
+                            <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
                               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>🚧 {t}</Text>
                             </View>
                           ))}
                           {(seg?.progress || []).map(t => (
-                            <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
+                            <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
                               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>✅ {t}</Text>
                             </View>
                           ))}
@@ -798,7 +798,7 @@ export default function CompositionsScreen({ compositions, sessions, lessons, on
           <TextF value={search} onChange={setSearch} placeholder="Search title, composer, or tag…" />
         </Field>
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 16 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
           {['all', ...STATUS_OPTIONS].map(s => {
             const active = filterStatus === s;
             return (
@@ -818,7 +818,7 @@ export default function CompositionsScreen({ compositions, sessions, lessons, on
           })}
         </View>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginBottom: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginRight: 2 }}>Sort</Text>
           {PIECE_SORTS.map(o => {
             const active = sortBy === o.key;
