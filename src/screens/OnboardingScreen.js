@@ -140,7 +140,7 @@ export function OnboardingScreen({ onComplete }) {
 
         {!slide.isFinal && (
           <TouchableOpacity onPress={onComplete} activeOpacity={0.6} style={{ alignItems: 'center', marginTop: 14 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>Skip</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>Skip</Text>
           </TouchableOpacity>
         )}
       </View>

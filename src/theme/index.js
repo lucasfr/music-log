@@ -23,6 +23,7 @@ export const COLOURS = {
   textMuted: '#088395',
   onNavy:    '#ffffff',   // text and icons on a filled navy, steel, success or danger surface
   onAmber:   '#003049',   // icons on the amber play button (white was 2.6:1)
+  onInk:     '#ffffff',   // text on the dark toasts (ink fill in both themes)
   textDim:   '#3A767C',   // was #7AB2B2 (2.1:1) — now 4.6:1 on the page bg, 5.2:1 on white
 
   // Glass
@@ -68,6 +69,7 @@ export const COLOURS = {
   // Status — danger stays red (destructive actions only)
   danger:      '#C0392B',
   dangerLight: 'rgba(192,57,43,0.10)',
+  dangerMid:   'rgba(192,57,43,0.30)',
   success:     '#2E8A72',
   successLight:'rgba(46,138,114,0.12)',
 
@@ -112,6 +114,7 @@ const DARK = {
   text: '#E4F3F6', textMuted: '#9BD0DA', textDim: '#8FB6BE',
   onNavy: '#0A1418',   // the dark page colour: dark glyphs on the bright teal fills (white was 2.5:1 on steel)
   onAmber: '#0A1418',   // dark glyph on amber (white was 2.1:1)
+  onInk: '#ffffff',   // text on the toasts: ink is dark in both themes
   glass: 'rgba(255,255,255,0.07)', glassHover: 'rgba(255,255,255,0.12)',
   glassBorder: 'rgba(255,255,255,0)', glassBorderSubtle: 'rgba(255,255,255,0.10)',
   glassShadow: 'rgba(59,179,198,0.16)', glassShadowMd: 'rgba(59,179,198,0.24)',
@@ -124,7 +127,7 @@ const DARK = {
   yellowLight: 'rgba(252,191,73,0.16)', yellowMid: 'rgba(252,191,73,0.38)',
   challengeLight: 'rgba(221,174,211,0.16)',
   tealAccent: 'rgba(59,179,198,0.16)', tealBorder: 'rgba(59,179,198,0.40)',
-  danger: '#FF7A6B', dangerLight: 'rgba(255,122,107,0.16)',
+  danger: '#FF7A6B', dangerLight: 'rgba(255,122,107,0.16)', dangerMid: 'rgba(255,122,107,0.40)',
   success: '#4CC3A0', successLight: 'rgba(76,195,160,0.16)',
   // On a dark page, "white glass" is a faint white wash rather than a bright card.
   w:      a => `rgba(255,255,255,${+Math.min(1, a * 0.17).toFixed(3)})`,

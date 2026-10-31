@@ -655,7 +655,7 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
                 key={p.name}
                 onPress={() => setBpm(p.value)}
                 activeOpacity={0.75}
-                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 40, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 8, backgroundColor: active ? COLOURS.navyA(0.08) : 'transparent' }}
+                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 40, paddingVertical: 6, paddingHorizontal: 4, borderRadius: RADIUS.sm, backgroundColor: active ? COLOURS.navyA(0.08) : 'transparent' }}
               >
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: active ? COLOURS.navy : COLOURS.text }}>{p.name}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{p.range} bpm</Text>

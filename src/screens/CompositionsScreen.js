@@ -52,7 +52,7 @@ function DifficultyPicker({ value, onChange }) {
           style={{ flexDirection: 'row', gap: 2 }}
         >
           {[1, 2, 3, 4, 5].map(n => (
-            <Text key={n} style={{ fontSize: 26, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
+            <Text key={n} style={{ fontSize: SIZES.display, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
           ))}
         </View>
         {value > 0 && (
@@ -347,7 +347,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                   <View style={{ flexDirection: 'row', gap: 2 }}>
                     {[1,2,3,4,5].map(n => (
                       <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 7 }}>
-                        <Text style={{ fontSize: 26, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
+                        <Text style={{ fontSize: SIZES.display, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -849,7 +849,7 @@ export default function CompositionsScreen({ compositions, sessions, lessons, on
           position: 'absolute',
           bottom: Platform.OS === 'web' ? 100 : Platform.OS === 'ios' ? 140 : 120,
           right: 20,
-          width: 58, height: 58, borderRadius: 29,
+          width: 58, height: 58, borderRadius: RADIUS.pill,
           backgroundColor: COLOURS.float,
           borderWidth: 1, borderColor: COLOURS.w(0.9),
           alignItems: 'center', justifyContent: 'center',

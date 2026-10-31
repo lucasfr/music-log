@@ -929,8 +929,8 @@ function TechniqueBreakdown({ sessions }) {
         return (
           <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.text, flex: 1 }} numberOfLines={1}>{name}</Text>
-            <View style={{ flex: 1, height: 14, backgroundColor: COLOURS.bg2, borderRadius: 7 }}>
-              <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 7 }} />
+            <View style={{ flex: 1, height: 14, backgroundColor: COLOURS.bg2, borderRadius: RADIUS.pill }}>
+              <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: RADIUS.pill }} />
             </View>
             <View style={{ alignItems: 'flex-end', gap: 3, width: 80, flexShrink: 0 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>

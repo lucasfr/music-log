@@ -15,12 +15,13 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, Text, Animated, TouchableOpacity, AppState } from 'react-native';
-import { COLOURS, RADIUS, HIT_TEXT } from '../theme';
+import { COLOURS, RADIUS, SIZES, HIT_TEXT } from '../theme';
+import { DURATION } from '../utils/motion';
 
 export function UndoToast({ message, onUndo, bottom = 24 }) {
   const a = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(a, { toValue: 1, duration: 180, useNativeDriver: false }).start();
+    Animated.timing(a, { toValue: 1, duration: DURATION.quick, useNativeDriver: false }).start();
   }, [a]);
   return (
     <Animated.View
@@ -35,9 +36,10 @@ export function UndoToast({ message, onUndo, bottom = 24 }) {
         flexDirection: 'row', alignItems: 'center', gap: 16,
         minHeight: 48, paddingLeft: 18, paddingRight: 8,
         borderRadius: RADIUS.pill, backgroundColor: COLOURS.ink,
+        // design: ok black shadow under a dark toast
         shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 14, elevation: 12,
       }}>
-        <Text style={{ fontFamily: 'Lato', fontSize: 14, color: '#fff', flexShrink: 1 }} numberOfLines={1} maxFontSizeMultiplier={1.3}>{message}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.onInk, flexShrink: 1 }} numberOfLines={1} maxFontSizeMultiplier={1.3}>{message}</Text>
         <TouchableOpacity
           onPress={onUndo}
           hitSlop={HIT_TEXT}
@@ -45,7 +47,7 @@ export function UndoToast({ message, onUndo, bottom = 24 }) {
           accessibilityLabel="Undo"
           style={{ minHeight: 40, paddingHorizontal: 14, justifyContent: 'center' }}
         >
-          <Text maxFontSizeMultiplier={1.3} style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.gold, letterSpacing: 0.4 }}>UNDO</Text>
+          <Text maxFontSizeMultiplier={1.3} style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.gold, letterSpacing: 0.4 }}>UNDO</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>

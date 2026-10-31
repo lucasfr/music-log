@@ -24,7 +24,8 @@ export function showUpdateBanner(reload = () => window.location.reload()) {
     bottom: narrow ? 'calc(110px + env(safe-area-inset-bottom, 0px))' : '24px',
     maxWidth: 'calc(100vw - 32px)', display: 'flex', alignItems: 'center', gap: '14px',
     padding: '10px 10px 10px 20px', borderRadius: '999px',
-    background: COLOURS.ink, color: '#fff', font: '14px Lato, system-ui, sans-serif',
+    background: COLOURS.ink, color: COLOURS.onInk, font: '14px Lato, system-ui, sans-serif',
+    // design: ok black shadow under a dark toast
     boxShadow: '0 6px 14px rgba(0,0,0,0.3)', zIndex: '2147483647',
   });
   const text = document.createElement('span');
@@ -36,7 +37,7 @@ export function showUpdateBanner(reload = () => window.location.reload()) {
     Object.assign(b.style, {
       font: (strong ? 'bold ' : '') + '14px Lato, system-ui, sans-serif', cursor: 'pointer',
       minHeight: '40px', padding: '0 14px', border: '0', borderRadius: '999px',
-      background: strong ? COLOURS.gold : 'transparent', color: strong ? COLOURS.ink : '#fff',
+      background: strong ? COLOURS.gold : 'transparent', color: strong ? COLOURS.ink : COLOURS.onInk,
     });
     b.addEventListener('click', onClick);
     return b;

@@ -127,7 +127,7 @@ const styles = live(() => StyleSheet.create({
   },
   logoText: {
     fontFamily: 'CormorantGaramond-Italic',
-    fontSize: 28,
+    fontSize: SIZES.screenTitle,
     color: COLOURS.text,
     letterSpacing: -0.5,
   },
@@ -137,7 +137,7 @@ const styles = live(() => StyleSheet.create({
   navContainer: {
     gap: 2,
     backgroundColor: COLOURS.w(0.50),
-    borderRadius: 16,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: COLOURS.w(0.70),
     padding: 6,
@@ -161,7 +161,7 @@ const styles = live(() => StyleSheet.create({
   iconWrap: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: RADIUS.sm,
     backgroundColor: COLOURS.navyA(0.12),
     alignItems: 'center',
     justifyContent: 'center',
@@ -171,7 +171,7 @@ const styles = live(() => StyleSheet.create({
   },
   navLabel: {
     fontFamily: 'Lato-Bold',
-    fontSize: 14,
+    fontSize: SIZES.bodySmall,
     color: COLOURS.textDim,
   },
   navLabelActive: {

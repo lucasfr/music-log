@@ -24,7 +24,7 @@ export function DaySheet({
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} hitSlop={HIT_PILL}
       accessibilityRole="button" accessibilityLabel={a11y}
       style={{ ...TOUCH_PILL, flex: 1, justifyContent: 'center', alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: bg, paddingVertical: 10 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: fg }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: fg }}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -42,10 +42,10 @@ export function DaySheet({
         </View>
         {ratings}
         {names.length > 0 ? (
-          <Text numberOfLines={2} style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 6, lineHeight: 18 }}>{names.join(' \u00b7 ')}</Text>
+          <Text numberOfLines={2} style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 6, lineHeight: 18 }}>{names.join(' \u00b7 ')}</Text>
         ) : null}
       </View>
-      <Text style={{ alignSelf: 'center', fontSize: 22, color: COLOURS.textDim }}>{'\u203a'}</Text>
+      <Text style={{ alignSelf: 'center', fontSize: SIZES.sectionTitle, color: COLOURS.textDim }}>{'\u203a'}</Text>
     </TouchableOpacity>
   );
 
@@ -72,13 +72,13 @@ export function DaySheet({
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 12 }}>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text }}>{date ? fmtDate(date) : ''}</Text>
             <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT} accessibilityRole="button" accessibilityLabel="Close">
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 16, color: COLOURS.textDim }}>{'\u2715'}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.textDim }}>{'\u2715'}</Text>
             </TouchableOpacity>
           </View>
 
           <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 4 }}>
             {!hasEntries ? (
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textDim, marginBottom: 14 }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, marginBottom: 14 }}>
                 Nothing logged on this day.
               </Text>
             ) : null}

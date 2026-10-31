@@ -1208,7 +1208,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             onPress={() => setShowAbout(false)}
             accessibilityRole="button" accessibilityLabel="Close"
             hitSlop={{ top: 2, bottom: 2, left: 2, right: 2 }}
-            style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: COLOURS.navyA(0.12), alignItems: 'center', justifyContent: 'center' }}
+            style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 40, height: 40, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.12), alignItems: 'center', justifyContent: 'center' }}
           >
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.navy }}>✕</Text>
           </TouchableOpacity>

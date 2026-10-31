@@ -34,9 +34,10 @@ function webToast(text) {
     padding: '12px 20px',
     borderRadius: '999px',
     background: COLOURS.ink,
-    color: '#fff',
+    color: COLOURS.onInk,
     font: '14px Lato, system-ui, sans-serif',
     textAlign: 'center',
+    // design: ok black shadow under a dark toast
     boxShadow: '0 6px 14px rgba(0,0,0,0.3)',
     zIndex: '2147483647',
     opacity: '0',

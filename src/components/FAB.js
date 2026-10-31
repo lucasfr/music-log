@@ -48,7 +48,7 @@ export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
       <PressScale onPress={() => setExpanded(e => !e)} activeOpacity={0.85} scaleTo={0.92}
         accessibilityRole="button" accessibilityLabel={expanded ? 'Close menu' : 'Add session, lesson or timer'}
         style={{
-          width: 58, height: 58, borderRadius: 29, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9),
+          width: 58, height: 58, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9),
           alignItems: 'center', justifyContent: 'center',
           shadowColor: COLOURS.glowPractice, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.55, shadowRadius: 16, elevation: 8,
         }}>
