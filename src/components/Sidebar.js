@@ -98,7 +98,7 @@ const styles = live(() => StyleSheet.create({
     marginLeft: 14,
     marginRight: 12,
     marginBottom: 24,
-    borderRadius: 20,
+    borderRadius: RADIUS.lg,
     backgroundColor: COLOURS.w(0.28),
     borderWidth: 1,
     borderColor: COLOURS.w(0.55),
@@ -123,7 +123,7 @@ const styles = live(() => StyleSheet.create({
   logoImg: {
     width: 32,
     height: 32,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
   logoText: {
     fontFamily: 'CormorantGaramond-Italic',
