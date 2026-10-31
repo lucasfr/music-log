@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
 import { Rotate, FadeInUp, PressScale } from './Motion';
 
 // Shared look of the three option pills; only the glow colour differs.
@@ -27,20 +27,20 @@ export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
             <FadeInUp delay={100}>
               <TouchableOpacity onPress={() => { setExpanded(false); onTimer(); }} activeOpacity={0.85}
                 style={optionStyle(COLOURS.glowTeal)}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.steel }}>{'⏱ Start timer'}</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.steel }}>{'⏱ Start timer'}</Text>
               </TouchableOpacity>
             </FadeInUp>
           )}
           <FadeInUp delay={50}>
             <TouchableOpacity onPress={() => { setExpanded(false); onLesson(); }} activeOpacity={0.85}
               style={optionStyle(COLOURS.glowLesson)}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
             </TouchableOpacity>
           </FadeInUp>
           <FadeInUp>
             <TouchableOpacity onPress={() => { setExpanded(false); onPractice(); }} activeOpacity={0.85}
               style={optionStyle(COLOURS.glowPractice)}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
             </TouchableOpacity>
           </FadeInUp>
         </>
@@ -54,7 +54,7 @@ export function FAB({ onPractice, onLesson, onTimer, isDesktop }) {
         }}>
         {/* A "+" that turns 45° into a "×" when the menu opens. */}
         <Rotate active={expanded}>
-          <Text style={{ fontSize: 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
+          <Text style={{ fontSize: SIZES.screenTitle, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
         </Rotate>
       </PressScale>
     </View>
