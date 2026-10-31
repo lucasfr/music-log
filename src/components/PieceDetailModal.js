@@ -4,7 +4,7 @@ import { Tap as TouchableOpacity } from './Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import Svg, { Polyline, Circle, Line } from 'react-native-svg';
-import { COLOURS, RADIUS, HIT_TEXT, HIT_PILL, STATUS_COLOURS } from '../theme';
+import { COLOURS, RADIUS, SIZES, HIT_TEXT, HIT_PILL, STATUS_COLOURS } from '../theme';
 import { fmtDate, deriveStatusHistory, todayISO } from '../utils';
 import {
   pieceReport, describeTempo, describeRunThroughs, agoLabel, formatRunThroughs,
@@ -17,7 +17,7 @@ import { tint } from '../utils/tint';
 // been through. The numbers come from pieceReport (src/utils/insights.js); this is only layout, plus
 // the list of tricky spots, which you add to and tick off here.
 
-const SECTION = { fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 };
+const SECTION = { fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 };
 
 function Section({ title, children }) {
   return (
@@ -31,7 +31,7 @@ function Section({ title, children }) {
 function Chip({ children, tone }) {
   return (
     <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: tone ? tint(tone, 0.2) : COLOURS.w(0.55) }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{children}</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>{children}</Text>
     </View>
   );
 }
@@ -63,16 +63,16 @@ function SpotRow({ spot, onToggle, onRemove }) {
       <TouchableOpacity onPress={onToggle} hitSlop={HIT_PILL} accessibilityRole="checkbox" accessibilityState={{ checked: fixed }}
         accessibilityLabel={`${spotLabel(spot.bars)}, ${fixed ? 'fixed' : 'still tricky'}`}
         style={{ width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: fixed ? COLOURS.success : COLOURS.w(0.55), borderWidth: 1, borderColor: fixed ? COLOURS.success : COLOURS.glassBorderSubtle }}>
-        {fixed ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, lineHeight: 18, color: '#fff' }}>✓</Text> : null}
+        {fixed ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, lineHeight: 18, color: COLOURS.onNavy }}>✓</Text> : null}
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: fixed ? COLOURS.textDim : COLOURS.text, textDecorationLine: fixed ? 'line-through' : 'none' }}>{spotLabel(spot.bars)}</Text>
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>
           {fixed && spot.fixed ? `Fixed ${fmtDate(spot.fixed)}` : spot.added ? `Since ${fmtDate(spot.added)}` : ''}
         </Text>
       </View>
       <TouchableOpacity onPress={onRemove} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel={`Remove ${spotLabel(spot.bars)}`}>
-        <Text style={{ fontFamily: 'Lato', fontSize: 22, lineHeight: 24, color: COLOURS.textDim }}>×</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.sectionTitle, lineHeight: 24, color: COLOURS.textDim }}>×</Text>
       </TouchableOpacity>
     </View>
   );
@@ -108,7 +108,7 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
               <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'CormorantGaramond-Italic', fontSize: 21, color: COLOURS.text, marginRight: 12 }}>{report.title}</Text>
               <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT} accessibilityRole="button" accessibilityLabel="Close">
-                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.body }}>Done</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -116,13 +116,13 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
 
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-            {report.composer ? <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textDim }}>{report.composer}</Text> : null}
+            {report.composer ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>{report.composer}</Text> : null}
             {status ? (
               <View style={{ paddingHorizontal: 9, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: sc.bg || COLOURS.tealAccent }}>
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: sc.text || COLOURS.navy }}>{status}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: sc.text || COLOURS.navy }}>{status}</Text>
               </View>
             ) : null}
-            {report.grade ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{report.grade}</Text> : null}
+            {report.grade ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{report.grade}</Text> : null}
           </View>
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 }}>
@@ -135,19 +135,19 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
             <Section title="Tempo">
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
                 <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 34, color: COLOURS.text }}>{tempo.latest}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textDim }}>bpm{tempo.target ? ` of ${tempo.target}` : ''}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>bpm{tempo.target ? ` of ${tempo.target}` : ''}</Text>
               </View>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 8 }}>{describeTempo(tempo)}</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 8 }}>{describeTempo(tempo)}</Text>
               <TempoLine points={tempo.points} target={tempo.target} />
               {next && next.kind !== 'at-target' ? (
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy, marginTop: 8 }}>Next: {next.bpm} bpm <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim }}>· {next.reason}</Text></Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.navy, marginTop: 8 }}>Next: {next.bpm} bpm <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim }}>· {next.reason}</Text></Text>
               ) : null}
               {stalled ? (
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.amber, marginTop: 6 }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.amber, marginTop: 6 }}>
                   Stalled at {stalled.bpm} for {Math.max(1, Math.round(stalled.days / 7))} {Math.round(stalled.days / 7) <= 1 ? 'week' : 'weeks'}. A smaller step, or a different way in (hands apart, a slower run, a loop on the hard bars), may help.
                 </Text>
               ) : null}
-              {trajectory ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: trajectoryColour, marginTop: 6, lineHeight: 19 }}>{trajectory.message}</Text> : null}
+              {trajectory ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: trajectoryColour, marginTop: 6, lineHeight: 19 }}>{trajectory.message}</Text> : null}
             </Section>
           ) : null}
 
@@ -166,12 +166,12 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
                 style={{ flex: 1, fontFamily: 'Lato', fontSize: 15, color: COLOURS.text, paddingHorizontal: 12, paddingVertical: 9, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.6), borderWidth: 1, borderColor: COLOURS.glassBorderSubtle }} />
               <TouchableOpacity onPress={addNew} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel="Add spot"
                 style={{ paddingHorizontal: 16, justifyContent: 'center', borderRadius: RADIUS.md, backgroundColor: COLOURS.steel }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Add</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Add</Text>
               </TouchableOpacity>
             </View>
             {spots.fixed.length > 0 ? (
               <View style={{ marginTop: 10 }}>
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Fixed</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Fixed</Text>
                 {spots.fixed.map(s => (
                   <SpotRow key={s.id} spot={s} onToggle={() => save(setSpotFixed(piece.spots, s.id, false, today))} onRemove={() => save(removeSpot(piece.spots, s.id))} />
                 ))}
@@ -189,9 +189,9 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
             <Section title="From your lessons">
               {fromLessons.map((l, i) => (
                 <View key={`${l.date}-${i}`} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.amber, marginBottom: 12 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{fmtDate(l.date)}</Text>
-                  {l.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, marginTop: 2 }}>{l.feedback}</Text> : null}
-                  {l.assignment ? <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.navy, marginTop: 2 }}>{l.done ? '✓ ' : 'To do: '}{l.assignment}</Text> : null}
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{fmtDate(l.date)}</Text>
+                  {l.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, marginTop: 2 }}>{l.feedback}</Text> : null}
+                  {l.assignment ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.navy, marginTop: 2 }}>{l.done ? '✓ ' : 'To do: '}{l.assignment}</Text> : null}
                 </View>
               ))}
             </Section>
@@ -201,8 +201,8 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
             <Section title="Recent sessions">
               {recent.map((r, i) => (
                 <View key={`${r.date}-${i}`} style={{ flexDirection: 'row', gap: 10, paddingVertical: 5 }}>
-                  <Text style={{ width: 92, fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>{fmtDate(r.date)}</Text>
-                  <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: 14, color: COLOURS.text }}>
+                  <Text style={{ width: 92, fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textDim }}>{fmtDate(r.date)}</Text>
+                  <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
                     {[r.minutes ? `${r.minutes} min` : null, r.tempo ? `${r.tempo} bpm` : null, r.runThroughs ? formatRunThroughs({ runThroughs: r.runThroughs }) : null, r.section].filter(Boolean).join(' · ') || 'Played'}
                   </Text>
                 </View>
@@ -217,9 +217,9 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
                 return (
                   <View key={`${st.status}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 5 }}>
                     <View style={{ paddingHorizontal: 9, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: c.bg || COLOURS.tealAccent }}>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: c.text || COLOURS.navy }}>{st.status}</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: c.text || COLOURS.navy }}>{st.status}</Text>
                     </View>
-                    <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>
+                    <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>
                       {fmtDate(st.start)} to {fmtDate(st.end)}{st.count ? ` · ${st.count} ${st.count === 1 ? 'log' : 'logs'}` : ''}
                     </Text>
                   </View>
@@ -232,8 +232,8 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
             <Section title="Notes">
               {report.notes.map(n => (
                 <View key={n.label} style={{ marginBottom: 10 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim }}>{n.label}</Text>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, lineHeight: 20, marginTop: 2 }}>{n.text}</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{n.label}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, lineHeight: 20, marginTop: 2 }}>{n.text}</Text>
                 </View>
               ))}
             </Section>
