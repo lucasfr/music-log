@@ -79,7 +79,7 @@ export function RatingMini({ emoji, value, total = 5, size = 16, gap = 1, shrink
 export function Label({ children, style, icon }) {
   if (icon) {
     return (
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
         <Ionicons name={icon} size={12} color={COLOURS.textDim} />
         <Text style={[{
           fontFamily: 'Lato-Bold',
@@ -142,7 +142,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           minHeight: TOUCH.pill,
           justifyContent: 'center',
           borderRadius: RADIUS.sm,
-          paddingVertical: 9,
+          paddingVertical: 8,
           paddingHorizontal: 14,
           alignItems: 'center',
           shadowColor: COLOURS.dangerLight,
@@ -164,7 +164,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
         minHeight: TOUCH.pill,
         justifyContent: 'center',
         borderRadius: RADIUS.sm,
-        paddingVertical: 9,
+        paddingVertical: 8,
         paddingHorizontal: 14,
         alignItems: 'center',
         shadowColor: COLOURS.glassShadow,
@@ -213,7 +213,7 @@ export function MetaChip({ label }) {
   if (!label) return null;
   return (
     <View style={{
-      paddingHorizontal: 9, paddingVertical: 3,
+      paddingHorizontal: 8, paddingVertical: 4,
       borderRadius: RADIUS.sm,
       backgroundColor: COLOURS.w(0.55),
       shadowColor: COLOURS.glassShadow,
@@ -231,7 +231,7 @@ export function MetaChip({ label }) {
 
 export function TagCloud({ tags, selected, onToggle }) {
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
       {tags.map(t => {
         const active = selected.includes(t);
         return (
@@ -243,8 +243,8 @@ export function TagCloud({ tags, selected, onToggle }) {
             style={{
               minHeight: TOUCH.pill,
               justifyContent: 'center',
-              paddingHorizontal: 11,
-              paddingVertical: 5,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
               borderRadius: RADIUS.pill,
               backgroundColor: active ? COLOURS.accent2Light : COLOURS.w(0.55),
               shadowColor: active ? COLOURS.accent2Mid : COLOURS.glassShadow,
@@ -277,7 +277,7 @@ export function EmptyState({ icon, text }) {
     <View style={{ alignItems: 'center', padding: 48 }}>
       {/* design: ok emoji */}
       <Text style={{ fontSize: 36, marginBottom: 12 }}>{icon}</Text>
-      <Text style={{ fontFamily: 'Lato', fontSize: 15, color: COLOURS.textDim, textAlign: 'center', lineHeight: 22 }}>{text}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.body, color: COLOURS.textDim, textAlign: 'center', lineHeight: 22 }}>{text}</Text>
     </View>
   );
 }
