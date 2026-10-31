@@ -35,7 +35,7 @@ export function DaySheet({
       <View style={{ width: 4, borderRadius: 2, backgroundColor: bar, alignSelf: 'stretch' }} />
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-          <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: kindBg }}>
+          <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: kindBg }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny + 1, color: kindFg }}>{kindLabel}</Text>
           </View>
           {meta ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{meta}</Text> : null}
@@ -70,7 +70,7 @@ export function DaySheet({
             <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: COLOURS.navyA(0.18) }} />
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 12 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text }}>{date ? fmtDate(date) : ''}</Text>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.display, color: COLOURS.text }}>{date ? fmtDate(date) : ''}</Text>
             <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT} accessibilityRole="button" accessibilityLabel="Close">
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.textDim }}>{'\u2715'}</Text>
             </TouchableOpacity>
