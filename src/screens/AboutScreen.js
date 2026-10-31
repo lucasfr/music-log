@@ -40,7 +40,7 @@ export default function AboutScreen({ isDesktop }) {
             source={require('../../assets/icon.png')}
             style={{ width: 90, height: 90, borderRadius: 22 }}
           />
-          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 36, color: COLOURS.text, marginTop: 14, letterSpacing: -0.5 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.hero, color: COLOURS.text, marginTop: 14, letterSpacing: -0.5 }}>
             music<Text style={{ color: COLOURS.practiceText }}>.</Text>
             <Text style={{ color: COLOURS.lessonText }}>log</Text>
           </Text>
@@ -82,7 +82,7 @@ export default function AboutScreen({ isDesktop }) {
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 14 }}>Made with ❤️ and 🎹</Text>
             <View style={{ height: 1, backgroundColor: COLOURS.navyA(0.08), width: '100%', marginBottom: 14 }} />
             <View style={{ alignItems: 'center', gap: 8, marginBottom: 14 }}>
-              <View style={{ paddingVertical: 3, paddingHorizontal: 10, backgroundColor: COLOURS.navy, borderRadius: 6 }}>
+              <View style={{ paddingVertical: 4, paddingHorizontal: 10, backgroundColor: COLOURS.navy, borderRadius: 6 }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.onNavy, letterSpacing: 0.5 }}>MIT</Text>
               </View>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted, lineHeight: 18, textAlign: 'center' }}>
