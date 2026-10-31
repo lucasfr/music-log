@@ -7,7 +7,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL, STATUS_COLOURS } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, STATUS_COLOURS } from '../theme';
 import { Btn } from './UI';
 import { Field, TextF, NumberF, SelectF, DatePickerF } from './Form';
 import { ScalesPicker } from './SegmentEditor';
@@ -30,7 +30,7 @@ function Pill({ label, onPress, primary, a11y }) {
       accessibilityRole="button" accessibilityLabel={a11y || label}
       style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: primary ? COLOURS.navy : COLOURS.navyA(0.10) }}
     >
-      <Text style={{ fontFamily: primary ? 'Lato-Bold' : 'Lato', fontSize: 14, color: primary ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: primary ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: primary ? COLOURS.onNavy : COLOURS.textMuted }}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -98,9 +98,9 @@ export function GradeTargetCard({ sessions, compositions }) {
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text }}>{heading}</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>{heading}</Text>
           {daysLeft !== null ? (
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{daysLeftText(daysLeft)} · {target.date}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{daysLeftText(daysLeft)} · {target.date}</Text>
           ) : null}
         </View>
         <Pill label="Edit" onPress={() => setEditing(true)} a11y="Edit target" />
@@ -108,13 +108,13 @@ export function GradeTargetCard({ sessions, compositions }) {
 
       {counts.total > 0 ? (
         <View style={{ marginTop: 16 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>Scales and arpeggios</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>Scales and arpeggios</Text>
           <View style={{ flexDirection: 'row', height: 8, borderRadius: 4, overflow: 'hidden', marginTop: 8, backgroundColor: COLOURS.navyA(0.10) }}>
             {counts.recent > 0 ? <View style={{ flex: counts.recent, backgroundColor: STATUS_TEXT.recent }} /> : null}
             {counts.stale > 0 ? <View style={{ flex: counts.stale, backgroundColor: STATUS_TEXT.stale }} /> : null}
             {counts.never > 0 ? <View style={{ flex: counts.never, backgroundColor: STATUS_TEXT.never }} /> : null}
           </View>
-          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 6 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 6 }}>
             {counts.recent} of {counts.total} practised in the last 3 weeks
             {counts.stale > 0 ? `, ${counts.stale} not lately` : ''}
             {counts.never > 0 ? `, ${counts.never} not yet` : ''}
@@ -124,7 +124,7 @@ export function GradeTargetCard({ sessions, compositions }) {
 
       {target.grade && pieces.needed > 0 ? (
         <View style={{ marginTop: 16 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
             Pieces: {pieces.ready} of {pieces.needed} performance-ready
           </Text>
           {pieces.list.map(p => (
@@ -132,14 +132,14 @@ export function GradeTargetCard({ sessions, compositions }) {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flexShrink: 1 }} numberOfLines={1}>{p.title}</Text>
                 <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[p.status]?.bg || COLOURS.tealAccent }}>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: STATUS_COLOURS[p.status]?.text || COLOURS.navy }}>{p.status}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: STATUS_COLOURS[p.status]?.text || COLOURS.navy }}>{p.status}</Text>
                 </View>
               </View>
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{describeRunThroughs(runThroughsById[p.id])}</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 2 }}>{describeRunThroughs(runThroughsById[p.id])}</Text>
             </View>
           ))}
           {pieces.candidates < pieces.needed ? (
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 6 }}>
               Your library has {plural(pieces.candidates, 'piece', 'pieces')} marked {target.grade}; the target needs {pieces.needed}.
             </Text>
           ) : null}
@@ -147,8 +147,8 @@ export function GradeTargetCard({ sessions, compositions }) {
       ) : null}
 
       <View style={{ marginTop: 16 }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>Sight-reading</Text>
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>Sight-reading</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>
           {sightReading.sessions > 0
             ? `${plural(sightReading.sessions, 'session', 'sessions')}, ${sightReading.minutes} min in the last 4 weeks`
             : 'None logged in the last 4 weeks'}
@@ -162,7 +162,7 @@ export function GradeTargetCard({ sessions, compositions }) {
               <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: STATUS_TEXT[q.status] }} />
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }} numberOfLines={1}>{describeRequirement(q)}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: STATUS_TEXT[q.status], marginTop: 1 }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: STATUS_TEXT[q.status], marginTop: 1 }}>
                   {q.group === 'Arpeggios' ? 'Arpeggio' : 'Scale'} · {q.status === 'never' ? 'not yet' : q.daysSince === 0 ? 'today' : agoLabel(q.daysSince)}
                 </Text>
               </View>
@@ -221,7 +221,7 @@ function GradeTargetModal({ visible, initial, onClose, onSave }) {
   }
 
   const hint = text => (
-    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 8, lineHeight: 17 }}>{text}</Text>
+    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginBottom: 8, lineHeight: 17 }}>{text}</Text>
   );
 
   return (
@@ -230,7 +230,7 @@ function GradeTargetModal({ visible, initial, onClose, onSave }) {
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Grade target</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>Grade target</Text>
               <Pill label="Cancel" onPress={onClose} />
             </View>
           </BlurView>
