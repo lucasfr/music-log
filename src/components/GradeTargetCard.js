@@ -76,7 +76,7 @@ export function GradeTargetCard({ sessions, compositions }) {
   if (!has) {
     return (
       <View>
-        <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim, lineHeight: 22 }}>
+        <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, lineHeight: 22 }}>
           Set a target to see how ready you are: which scales and arpeggios you have practised lately, how many pieces are performance-ready, and how long is left.
           You enter the requirements yourself, from your syllabus or your teacher's list.
         </Text>
@@ -130,8 +130,8 @@ export function GradeTargetCard({ sessions, compositions }) {
           {pieces.list.map(p => (
             <View key={p.id} style={{ marginTop: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flexShrink: 1 }} numberOfLines={1}>{p.title}</Text>
-                <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[p.status]?.bg || COLOURS.tealAccent }}>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text, flexShrink: 1 }} numberOfLines={1}>{p.title}</Text>
+                <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[p.status]?.bg || COLOURS.tealAccent }}>
                   <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: STATUS_COLOURS[p.status]?.text || COLOURS.navy }}>{p.status}</Text>
                 </View>
               </View>
@@ -161,7 +161,7 @@ export function GradeTargetCard({ sessions, compositions }) {
             <View key={`${q.group}|${q.name}|${q.motion}|${q.interval}`} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 10 }}>
               <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: STATUS_TEXT[q.status] }} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }} numberOfLines={1}>{describeRequirement(q)}</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }} numberOfLines={1}>{describeRequirement(q)}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: STATUS_TEXT[q.status], marginTop: 1 }}>
                   {q.group === 'Arpeggios' ? 'Arpeggio' : 'Scale'} · {q.status === 'never' ? 'not yet' : q.daysSince === 0 ? 'today' : agoLabel(q.daysSince)}
                 </Text>
