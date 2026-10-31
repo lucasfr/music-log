@@ -34,6 +34,10 @@ for (const key of Object.keys(THEMES)) {
     assert.ok(contrast(c.onAmber, c.amber) >= 3, `${c.onAmber} on ${c.amber} is ${contrast(c.onAmber, c.amber).toFixed(2)}:1`);
   });
 
+  test(`${key}: text on the toast ink fill is readable (at least 4.5:1)`, () => {
+    assert.ok(contrast(c.onInk, c.ink) >= 4.5, `${c.onInk} on ${c.ink} is ${contrast(c.onInk, c.ink).toFixed(2)}:1`);
+  });
+
   test(`${key}: the challenge chip tint is defined`, () => {
     assert.match(c.challengeLight, /^rgba\(221,174,211,0\.\d+\)$/);
   });
