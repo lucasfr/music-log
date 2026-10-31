@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
-import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { Ionicons } from './Icon';
 import { Tap as TouchableOpacity } from './Motion';
 import { fmtDate } from '../utils';
@@ -31,7 +31,7 @@ function Card({ title, subtitle, children, accent }) {
     }}>
       {accent ? <View style={{ position: 'absolute', left: 10, top: 16, bottom: 16, width: 4, borderRadius: 2, backgroundColor: accent }} /> : null}
       <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>{title}</Text>
-      {subtitle ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{subtitle}</Text> : null}
+      {subtitle ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{subtitle}</Text> : null}
       <View style={{ marginTop: 12 }}>{children}</View>
     </View>
   );
@@ -72,15 +72,15 @@ function LessonChecklist({ lessons, sessions, compositions, today, onSaveLesson 
           >
             {finished
               ? <Ionicons name="checkmark-circle-outline" size={24} color={it.status === 'done' ? COLOURS.success : COLOURS.steel} />
-              : <View style={{ width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: COLOURS.navyA(0.35) }} />}
+              : <View style={{ width: 24, height: 24, borderRadius: RADIUS.pill, borderWidth: 2, borderColor: COLOURS.navyA(0.35) }} />}
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: finished ? COLOURS.textDim : COLOURS.text }}>{it.label}</Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, lineHeight: 18 }}>{it.text}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: finished ? COLOURS.textDim : COLOURS.text }}>{it.label}</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, lineHeight: 18 }}>{it.text}</Text>
               {it.status === 'covered' ? (
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel, marginTop: 2 }}>Practised {fmtDate(it.coveredOn)}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.steel, marginTop: 2 }}>Practised {fmtDate(it.coveredOn)}</Text>
               ) : null}
               {it.lessonDate !== lessonDate ? (
-                <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>From the lesson on {fmtDate(it.lessonDate)}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 2 }}>From the lesson on {fmtDate(it.lessonDate)}</Text>
               ) : null}
             </View>
           </TouchableOpacity>
@@ -130,7 +130,7 @@ function EnergyScope({ sessions }) {
               accessibilityState={{ selected: active }}
               style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.10) }}
             >
-              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 14, color: active ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? COLOURS.onNavy : COLOURS.textMuted }}>{label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -141,12 +141,12 @@ function EnergyScope({ sessions }) {
           {scope.enough ? (
             <>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 17, color: COLOURS.text, lineHeight: 24 }}>{scopeText(scope)}</Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 6 }}>
                 Based on {scope.n} of your sessions. It is what you have done before, not a target.
               </Text>
             </>
           ) : (
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textDim, lineHeight: 22 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, lineHeight: 22 }}>
               Not enough sessions at this energy yet ({scope.n} so far; it needs 3). Keep logging energy and this fills in.
             </Text>
           )}
@@ -154,7 +154,7 @@ function EnergyScope({ sessions }) {
       ) : null}
 
       {linkLines.length ? (
-        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 10, lineHeight: 17 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 10, lineHeight: 17 }}>
           Across {links.n} sessions, {linkLines.join('; ')}.
         </Text>
       ) : null}
@@ -185,8 +185,8 @@ function TodaysScales({ sessions, today }) {
         >
           <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: SCALE_STATUS_COLOUR[x.status] }} />
           <View style={{ flex: 1 }}>
-            <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>{x.label}</Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>{x.label}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 1 }}>
               {x.group === 'Arpeggios' ? 'Arpeggio' : 'Scale'} {'\u00b7'} {x.reason}
             </Text>
           </View>
@@ -217,14 +217,14 @@ function LessonBriefCard({ lessons, sessions, compositions, today }) {
 
   return (
     <Card accent={COLOURS.gold} title="Lesson summary" subtitle={when}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
       <View style={{ flexDirection: 'row', marginTop: 12 }}>
         <TouchableOpacity
           onPress={() => setOpen(true)} activeOpacity={0.75} hitSlop={HIT_PILL}
           accessibilityRole="button" accessibilityLabel="Open the lesson summary"
           style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Open summary</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Open summary</Text>
         </TouchableOpacity>
       </View>
       <LessonBriefModal visible={open} brief={brief} onClose={() => setOpen(false)} />
@@ -247,14 +247,14 @@ function WeeklyReviewCard({ lessons, sessions, compositions, today }) {
 
   return (
     <Card accent={COLOURS.steel} title="Last week" subtitle={`${fmtDate(review.week.from)} to ${fmtDate(review.week.to)}`}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
       <View style={{ flexDirection: 'row', marginTop: 12 }}>
         <TouchableOpacity
           onPress={() => setOpen(true)} activeOpacity={0.75} hitSlop={HIT_PILL}
           accessibilityRole="button" accessibilityLabel="Open the review of last week"
           style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Open review</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Open review</Text>
         </TouchableOpacity>
       </View>
       <LessonBriefModal visible={open} text={text} title="Week in review" onClose={() => setOpen(false)} />
@@ -284,10 +284,10 @@ function TodaysPlanCard({ sessions, lessons, compositions, today, practicedToday
           style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}
         >
           <View style={{ flex: 1 }}>
-            <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>{x.title}</Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>{x.reason}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>{x.title}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 1 }}>{x.reason}</Text>
           </View>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{x.minutes} min</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>{x.minutes} min</Text>
         </View>
       ))}
       <TouchableOpacity
@@ -295,7 +295,7 @@ function TodaysPlanCard({ sessions, lessons, compositions, today, practicedToday
         accessibilityRole="button" accessibilityLabel={`Start today's plan, ${plan.minutes} minutes`}
         style={{ ...TOUCH_PILL, alignSelf: 'flex-start', marginTop: 10, paddingHorizontal: 22, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center' }}
       >
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Start</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Start</Text>
       </TouchableOpacity>
     </Card>
   );
@@ -316,7 +316,7 @@ function MoreInsights({ children }) {
         accessibilityLabel={isOpen ? 'Hide more insights' : 'Show more insights'}
         style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 }}
       >
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>More insights</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>More insights</Text>
         <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} color={COLOURS.textDim} />
       </TouchableOpacity>
       {isOpen ? <View style={{ marginTop: 8 }}>{children}</View> : null}
