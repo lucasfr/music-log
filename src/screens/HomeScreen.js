@@ -86,18 +86,18 @@ function PracticeEntry({ session, compositions, onPress, showDate = true, isSele
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
                 {techNames.map(t => (
                   <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.navyA(0.08), borderRadius: RADIUS.pill }}>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text>
                   </View>
                 ))}
                 {pieceNames.map(p => (
                   <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.tealAccent, borderRadius: RADIUS.pill }}>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{p}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>{p}</Text>
                   </View>
                 ))}
               </View>
             )}
             {session.wins ? (
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
                 "{session.wins}"
               </Text>
             ) : null}
@@ -152,21 +152,21 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
                 {pieceNames.map(p => (
                   <View key={p} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.tealAccent, borderRadius: RADIUS.pill }}>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{p}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>{p}</Text>
                   </View>
                 ))}
                 {newPieces.map(p => {
                   const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
                   return name ? (
                     <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.yellowLight, borderRadius: RADIUS.pill }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.lessonText }}>✦ {name}</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.lessonText }}>✦ {name}</Text>
                     </View>
                   ) : null;
                 })}
               </View>
             )}
             {lesson.wins ? (
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 8, lineHeight: 19 }} numberOfLines={2}>
                 "{lesson.wins}"
               </Text>
             ) : null}
@@ -224,9 +224,9 @@ function NextUpCard({ focus, date }) {
       <View style={{ padding: 14, flexDirection: 'row', alignItems: 'stretch', gap: 12, backgroundColor: COLOURS.entryWash }}>
         <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.steel, alignSelf: 'stretch' }} />
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🎯 Next up'}</Text>
-          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.text, lineHeight: 24 }}>{focus}</Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6 }}>from {fmtDate(date)}</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🎯 Next up'}</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.cardTitle, color: COLOURS.text, lineHeight: 24 }}>{focus}</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 6 }}>from {fmtDate(date)}</Text>
         </View>
       </View>
     </BlurView>
@@ -240,12 +240,12 @@ function WeekStrip({ week, lastWeek, goal, streak }) {
   const stat = (value, label) => (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 24, color: COLOURS.navy, lineHeight: 28, fontVariant: ['lining-nums'] }}>{value}</Text>
-      <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 2 }}>{label}</Text>
     </View>
   );
   return (
     <View style={{ marginBottom: 16 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>This week</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>This week</Text>
       {/* A plain card (not a blur): on web the blur sets its own background, which hid this in light mode. */}
       <View style={{
         borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5),
@@ -254,7 +254,7 @@ function WeekStrip({ week, lastWeek, goal, streak }) {
         {week.sessions === 0 ? (
           // An empty week is just a new one (it's Monday, or you've had a rest), so say that and show last week.
           <View style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textMuted, lineHeight: 22 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textMuted, lineHeight: 22 }}>
               {lastWeek && lastWeek.sessions > 0
                 ? `A fresh week. Last week: ${lastWeek.sessions} session${lastWeek.sessions === 1 ? '' : 's'}, ${lastWeek.minutes >= 60 ? `${Math.floor(lastWeek.minutes / 60)}h ${lastWeek.minutes % 60}m` : `${lastWeek.minutes}m`}.`
                 : 'Your week starts here.'}
@@ -272,7 +272,7 @@ function WeekStrip({ week, lastWeek, goal, streak }) {
             <View style={{ height: 6, borderRadius: 3, backgroundColor: COLOURS.navyA(0.12), overflow: 'hidden' }}>
               <AnimatedFill fraction={goal.fraction} style={{ height: '100%', borderRadius: 3, backgroundColor: goal.reached ? COLOURS.success : COLOURS.steel }} />
             </View>
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 6 }}>
               {goal.reached
                 ? `Weekly goal reached: ${fmtMin(goal.minutes)} of ${fmtMin(goal.goal)}`
                 : `${fmtMin(goal.minutes)} of ${fmtMin(goal.goal)} · ${fmtMin(goal.remaining)} to go`}
@@ -291,7 +291,7 @@ function ResumeTimerCard({ summary, onResume, onDiscard }) {
   return (
     <View style={{ marginBottom: 16, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 14, borderWidth: 1, borderColor: COLOURS.navyA(0.25) }}>
       <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>Pick up where you left off?</Text>
-      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>
         {`${summary.names}  ·  ${summary.used} of ${summary.planned} min  ·  ${summary.ago}`}
       </Text>
       <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
@@ -299,12 +299,12 @@ function ResumeTimerCard({ summary, onResume, onDiscard }) {
           accessibilityRole="button" accessibilityLabel="Resume the timer"
           style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
           <Ionicons name="play" size={18} color={COLOURS.onNavy} />
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.onNavy }}>Resume</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Resume</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onDiscard} activeOpacity={0.8} hitSlop={HIT_PILL}
           accessibilityRole="button" accessibilityLabel="Discard the saved timer"
           style={{ ...TOUCH_PILL, paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.5) }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.textMuted }}>Discard</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>Discard</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -347,11 +347,11 @@ function StartPracticeCard({ repeatPlan, routines, compositions, lastSession, to
           <Ionicons name={s.icon} size={20} color={accent} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{s.title}</Text>
-          {summary ? <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 1 }}>{summary}</Text> : null}
+          <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{s.title}</Text>
+          {summary ? <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 1 }}>{summary}</Text> : null}
         </View>
         <View style={{ paddingHorizontal: 9, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: tint(accent, 0.22) }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.text }}>{minutesOf(s.plan)} min</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.text }}>{minutesOf(s.plan)} min</Text>
         </View>
       </TouchableOpacity>
     );
@@ -365,8 +365,8 @@ function StartPracticeCard({ repeatPlan, routines, compositions, lastSession, to
     }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 28, lineHeight: 32, color: COLOURS.text }}>Start practice</Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 4 }}>{subtitle}</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.screenTitle, lineHeight: 32, color: COLOURS.text }}>Start practice</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 4 }}>{subtitle}</Text>
         </View>
         <TouchableOpacity onPress={onSetup} activeOpacity={0.85} hitSlop={HIT_PILL}
           accessibilityRole="button" accessibilityLabel="Set up a practice timer"
@@ -377,12 +377,12 @@ function StartPracticeCard({ repeatPlan, routines, compositions, lastSession, to
           }}>
             <Ionicons name="play" size={28} color={COLOURS.onNavy} />
           </View>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Set up</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Set up</Text>
         </TouchableOpacity>
       </View>
       {shortcuts.length > 0 ? (
         <View style={{ marginTop: 14 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginBottom: 8 }}>Quick start</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginBottom: 8 }}>Quick start</Text>
           {many ? (
             // Slides sideways, one tile at a time. It runs to the card's edges so the next tile peeks in.
             <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled
@@ -404,7 +404,7 @@ function BackupNudge({ due, onBackup, onLater }) {
   const pill = (label, onPress, primary) => (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} hitSlop={HIT_PILL}
       style={{ ...TOUCH_PILL, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: primary ? COLOURS.navy : COLOURS.navyA(0.10) }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: primary ? COLOURS.onNavy : COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: primary ? COLOURS.onNavy : COLOURS.textMuted }}>{label}</Text>
     </TouchableOpacity>
   );
   return (
@@ -412,8 +412,8 @@ function BackupNudge({ due, onBackup, onLater }) {
       marginBottom: 16, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 14,
       shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.45, shadowRadius: 14, elevation: 4,
     }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{due.never ? 'Back up your journal' : 'Time for a backup'}</Text>
-      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2, lineHeight: 19 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{due.never ? 'Back up your journal' : 'Time for a backup'}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2, lineHeight: 19 }}>
         {due.never
           ? `You've been logging for ${due.days} days and haven't exported a copy yet.`
           : `Your last backup was ${due.days} days ago.`}
@@ -447,11 +447,11 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {/* Summary chips */}
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 practice</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.practiceText }}>🎹 practice</Text>
           </View>
           {session.duration ? (
             <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.shadow(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {session.duration} min</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>⏱ {session.duration} min</Text>
             </View>
           ) : null}
         </View>
@@ -461,12 +461,12 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
           <View style={glass.inner}>
             <View style={{ flexDirection: 'row', gap: 28 }}>
               <View style={{ gap: 6 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy · {session.energy > 0 ? `+${session.energy}` : session.energy} {energyLabel}</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy · {session.energy > 0 ? `+${session.energy}` : session.energy} {energyLabel}</Text>
                 <ZeldaMini emoji="⚡" value={energyToBar(session.energy)} size={22} />
               </View>
               {session.enjoyment ? (
                 <View style={{ gap: 6 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>❤️ Enjoyment</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>❤️ Enjoyment</Text>
                   <ZeldaMini emoji="❤️" value={session.enjoyment} size={22} />
                 </View>
               ) : null}
@@ -478,36 +478,36 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {techSegs.length > 0 && (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
               {techSegs.map(seg => (
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 10 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
                       {compName(seg.compositionId) || seg.group || seg.title || 'Technical work'}
                     </Text>
                     {formatTouch(seg) ? (
                       <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatTouch(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{formatTouch(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
                       <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
                       </View>
                     ) : null}
                     {seg.compositionId && (seg.group || seg.title) ? (
                       <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accent2Light }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.steel }}>{seg.group || seg.title}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>{seg.group || seg.title}</Text>
                       </View>
                     ) : null}
-                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                   </View>
-                  {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>}
-                  {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+                  {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>}
+                  {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                   {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
-                      {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
+                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                      {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text></View>)}
                     </View>
                   )}
                 </View>
@@ -520,37 +520,37 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {repSegs.length > 0 && (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
               {repSegs.map(seg => {
                 const name = seg.compositionId ? compName(seg.compositionId) : seg.title;
                 return (
                   <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
-                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
+                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                     </View>
-                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                     {seg.feltDifficulty ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Difficulty</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Difficulty</Text>
                         <View style={{ flexDirection: 'row', gap: 2 }}>
-                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}
+                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}
                         </View>
                       </View>
                     ) : null}
                     {seg.liking ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Enjoyment</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Enjoyment</Text>
                         <View style={{ flexDirection: 'row', gap: 2 }}>
-                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 13, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>)}
+                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>)}
                         </View>
                       </View>
                     ) : null}
-                    {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+                    {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                     {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
-                        {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
+                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                        {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text></View>)}
                       </View>
                     )}
                   </View>
@@ -564,7 +564,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {session.wins ? (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Wins</Text>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textMuted, lineHeight: 22 }}>{session.wins}</Text>
             </View>
           </BlurView>
@@ -574,8 +574,8 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {session.tomorrowFocus ? (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Next focus</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted, lineHeight: 21 }}>{session.tomorrowFocus}</Text>
             </View>
           </BlurView>
         ) : null}
@@ -600,7 +600,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <View>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>{fmtDate(lesson.date)}</Text>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>🎓 Lesson{lesson.teacher ? ` · ${lesson.teacher}` : ''}{lesson.duration ? ` · ${lesson.duration} min` : ''}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>🎓 Lesson{lesson.teacher ? ` · ${lesson.teacher}` : ''}{lesson.duration ? ` · ${lesson.duration} min` : ''}</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {onEditLesson && <GlassBtn label="Edit" onPress={() => onEditLesson(lesson)} color={COLOURS.steel} />}
@@ -611,11 +611,11 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {/* Summary chip */}
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 lesson</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.lessonText }}>🎓 lesson</Text>
           </View>
           {lesson.duration ? (
             <View style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.65), shadowColor: COLOURS.shadow(0.10), shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>⏱ {lesson.duration} min</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>⏱ {lesson.duration} min</Text>
             </View>
           ) : null}
         </View>
@@ -625,8 +625,8 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
               <View style={{ flexDirection: 'row', gap: 28 }}>
-                {lesson.energy != null ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy{energyLabel ? ` · ${energyLabel}` : ''}</Text><ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} size={22} /></View> : null}
-                {lesson.enjoyment ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>❤️ Enjoyment</Text><ZeldaMini emoji="❤️" value={lesson.enjoyment} size={22} /></View> : null}
+                {lesson.energy != null ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>⚡ Energy{energyLabel ? ` · ${energyLabel}` : ''}</Text><ZeldaMini emoji="⚡" value={energyToBar(lesson.energy)} size={22} /></View> : null}
+                {lesson.enjoyment ? <View style={{ gap: 6 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>❤️ Enjoyment</Text><ZeldaMini emoji="❤️" value={lesson.enjoyment} size={22} /></View> : null}
               </View>
             </View>
           </BlurView>
@@ -636,31 +636,31 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {techSegs.length > 0 && (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>🎹 Technique</Text>
               {techSegs.map(seg => (
                 <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 10 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{seg.group || seg.title || 'Technical work'}</Text>
                     {formatTouch(seg) ? (
                       <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{formatTouch(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{formatTouch(seg)}</Text>
                       </View>
                     ) : null}
                     {formatTempo(seg) ? (
                       <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{formatTempo(seg)}</Text>
                       </View>
                     ) : null}
-                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                    {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                   </View>
-                  {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>}
-                  {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
-                  {seg.assignment ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>📚 Assignment</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text></View> : null}
-                  {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+                  {seg.scales?.length > 0 && <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>}
+                  {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
+                  {seg.assignment ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>📚 Assignment</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text></View> : null}
+                  {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                   {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
-                      {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
+                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                      {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text></View>)}
                     </View>
                   )}
                 </View>
@@ -673,36 +673,36 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {repSegs.length > 0 && (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={[glass.inner, { paddingBottom: 8 }]}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>📜 Repertoire</Text>
               {repSegs.map(seg => {
                 const name = seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName);
                 return (
                   <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.amber, marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
-                      {seg.isNew && <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.lessonText }}>new</Text></View>}
-                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
+                      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>📜 {name || 'Piece'}</Text>
+                      {seg.isNew && <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.pinkLight }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.lessonText }}>new</Text></View>}
+                      {seg.duration ? <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.7) }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>⏱ {seg.duration}m</Text></View> : null}
                     </View>
-                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
-                    {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
-                    {seg.assignment ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>📚 Assignment</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text></View> : null}
+                    {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                    {seg.feedback ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>💬 Feedback</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text></View> : null}
+                    {seg.assignment ? <View style={{ marginTop: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>📚 Assignment</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text></View> : null}
                     {seg.feltDifficulty ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Difficulty</Text>
-                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}</View>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Difficulty</Text>
+                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}</View>
                       </View>
                     ) : null}
                     {seg.liking ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                        <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Liking</Text>
-                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 13, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>)}</View>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Liking</Text>
+                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>)}</View>
                       </View>
                     ) : null}
-                    {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
+                    {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                     {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
-                        {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
+                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                        {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text></View>)}
                       </View>
                     )}
                   </View>
@@ -716,8 +716,8 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {lesson.overallNotes ? (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Lesson notes</Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>✨ Lesson notes</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.overallNotes}</Text>
             </View>
           </BlurView>
         ) : null}
@@ -726,7 +726,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {lesson.wins ? (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🌟 Wins</Text>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textMuted, lineHeight: 22 }}>{lesson.wins}</Text>
             </View>
           </BlurView>
@@ -736,8 +736,8 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
         {lesson.nextFocus ? (
           <BlurView intensity={40} tint={COLOURS.blurTint} style={glass.card}>
             <View style={glass.inner}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>🎯 Focus before next lesson</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted, lineHeight: 21 }}>{lesson.nextFocus}</Text>
             </View>
           </BlurView>
         ) : null}
@@ -951,11 +951,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       <FadeInUp>
       <View style={{ marginBottom: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Today</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Today</Text>
           {currentStreak > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 9, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}>
-              <Text style={{ fontSize: 12 }}>🔥</Text>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>{currentStreak} day{currentStreak !== 1 ? 's' : ''}</Text>
+              <Text style={{ fontSize: SIZES.labelSmall }}>🔥</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{currentStreak} day{currentStreak !== 1 ? 's' : ''}</Text>
             </View>
           )}
         </View>
@@ -987,12 +987,12 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
               <TouchableOpacity onPress={() => openLogSession(today)} activeOpacity={0.8} hitSlop={HIT_PILL}
                 accessibilityRole="button" accessibilityLabel="Log another practice today"
                 style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.5) }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>+ Log another practice</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.practiceText }}>+ Log another practice</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => openLogLesson(today)} activeOpacity={0.8} hitSlop={HIT_PILL}
                 accessibilityRole="button" accessibilityLabel="Log a lesson today"
                 style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.5) }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>+ Log lesson</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.lessonText }}>+ Log lesson</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1005,11 +1005,11 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity onPress={() => openLogSession(today)} activeOpacity={0.8}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.accentMid, shadowOffset:{width:0,height:0}, shadowOpacity:0.45, shadowRadius:12, elevation:3 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.practiceText }}>{'🎹 Log practice'}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => openLogLesson(today)} activeOpacity={0.8}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.float, borderWidth: 1, borderColor: COLOURS.w(0.9), shadowColor: COLOURS.accent2Mid, shadowOffset:{width:0,height:0}, shadowOpacity:0.45, shadowRadius:12, elevation:3 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.lessonText }}>{'🎓 Log lesson'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1038,7 +1038,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       {/* Feed */}
       {feedItems.length > 0 && (
         <>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 }}>
             Previous sessions
           </Text>
           {/* The first few cards fade up one after another; later ones just appear. */}
@@ -1060,7 +1060,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
 
       {sessions.length === 0 && (lessons || []).length === 0 && (
         <View style={{ alignItems: 'center', padding: 32 }}>
-          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 16, color: COLOURS.textDim, textAlign: 'center', lineHeight: 24 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, textAlign: 'center', lineHeight: 24 }}>
             Your practice journal starts here.{'\n'}Log your first session above.
           </Text>
         </View>
@@ -1142,7 +1142,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           )}
           {!rightPanel && (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.textDim, opacity: 0.5 }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.cardTitle, color: COLOURS.textDim, opacity: 0.5 }}>
                 Select an entry to view details
               </Text>
             </View>
@@ -1187,7 +1187,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           activeOpacity={0.7}
           style={{ marginBottom: 20, marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 10 }}
         >
-          <Image source={require('../../assets/icon.png')} style={{ width: 44, height: 44, borderRadius: 10 }} />
+          <Image source={require('../../assets/icon.png')} style={{ width: 44, height: 44, borderRadius: RADIUS.sm }} />
           <View>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.5 }}>
               music<Text style={{ color: COLOURS.practiceText }}>.</Text><Text style={{ color: COLOURS.lessonText }}>log</Text>
@@ -1209,7 +1209,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             hitSlop={{ top: 2, bottom: 2, left: 2, right: 2 }}
             style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: COLOURS.navyA(0.12), alignItems: 'center', justifyContent: 'center' }}
           >
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 16, color: COLOURS.navy }}>✕</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.navy }}>✕</Text>
           </TouchableOpacity>
           <AboutScreen isDesktop={false} />
         </View>
