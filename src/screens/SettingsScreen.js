@@ -138,7 +138,7 @@ function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, 
           color: COLOURS.text,
           backgroundColor: COLOURS.navyA(0.06),
           paddingHorizontal: 14,
-          paddingVertical: 11,
+          paddingVertical: 12,
           borderRadius: 12,
           borderWidth: 1,
           borderColor: COLOURS.navyA(0.10),
@@ -358,7 +358,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
 
         {/* Page title */}
         <View style={{ marginBottom: 4, marginTop: 4 }}>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 30, color: COLOURS.text, letterSpacing: -0.3 }}>Settings</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.screenTitle, color: COLOURS.text, letterSpacing: -0.3 }}>Settings</Text>
         </View>
 
         {/* Appearance: one chip per registered theme, plus System */}
@@ -503,7 +503,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
         {/* Credentials */}
         <GlassCard>
           <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 17, color: COLOURS.navy, marginBottom: 12 }}>Credentials</Text>
+            <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.cardTitle, color: COLOURS.navy, marginBottom: 12 }}>Credentials</Text>
           </View>
           <GlassInput label="Project URL" value={url} onChangeText={setUrl} placeholder="https://xxxx.supabase.co" keyboardType="url" />
           <GlassInput label="Anon key" value={anonKey} onChangeText={setAnonKey} placeholder="eyJhbGci…" secureTextEntry />
@@ -514,12 +514,12 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           )}
           <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingBottom: 14 }}>
             <TouchableOpacity onPress={handleSaveCredentials} activeOpacity={0.8}
-              style={{ flex: 1, paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
+              style={{ flex: 1, paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>Save</Text>
             </TouchableOpacity>
             {credsSaved && (
               <TouchableOpacity onPress={handleClearCredentials} activeOpacity={0.8}
-                style={{ paddingHorizontal: 18, paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.08)' }}>
+                style={{ paddingHorizontal: 18, paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.08)' }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.red }}>Clear</Text>
               </TouchableOpacity>
             )}
@@ -535,11 +535,11 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
         {credsSaved && !isSignedIn && (
           <GlassCard>
             <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 }}>
-              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 17, color: COLOURS.navy, marginBottom: 14 }}>Sign in</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.cardTitle, color: COLOURS.navy, marginBottom: 14 }}>Sign in</Text>
               {phase !== 'sent' ? (
                 <>
                   <TouchableOpacity onPress={handleGitHub} activeOpacity={0.8}
-                    style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: '#24292e', alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+                    style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: '#24292e', alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>🐙  Continue with GitHub</Text>
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -553,10 +553,10 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                       value={email} onChangeText={setEmail}
                       placeholder="you@example.com" placeholderTextColor={COLOURS.textDim}
                       autoCapitalize="none" autoCorrect={false} keyboardType="email-address"
-                      style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, backgroundColor: COLOURS.navyA(0.06), paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: COLOURS.navyA(0.10), marginBottom: 10 }}
+                      style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, backgroundColor: COLOURS.navyA(0.06), paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: COLOURS.navyA(0.10), marginBottom: 10 }}
                     />
                     <TouchableOpacity onPress={handleSendMagicLink} activeOpacity={0.8} disabled={phase === 'sending'}
-                      style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center' }}>
+                      style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center' }}>
                       {phase === 'sending'
                         ? <ActivityIndicator color={COLOURS.navy} size="small" />
                         : <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.navy }}>Send magic link</Text>
@@ -568,7 +568,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                 <View style={{ alignItems: 'center', paddingVertical: 8, gap: 8 }}>
                   {/* design: ok emoji */}
                   <Text style={{ fontSize: 32 }}>📬</Text>
-                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.navy }}>Check your email</Text>
+                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.navy }}>Check your email</Text>
                   <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, textAlign: 'center', lineHeight: 20 }}>
                     Click the link from Supabase, then come back here.
                   </Text>
