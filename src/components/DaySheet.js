@@ -59,7 +59,7 @@ export function DaySheet({
   return (
     <Modal visible={!!date} transparent animationType="slide" onRequestClose={onClose}>
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-        <Pressable style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.35)' }]}
+        <Pressable style={[StyleSheet.absoluteFillObject, { backgroundColor: COLOURS.backdropColor }]}
           onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" />
         <View style={{
           backgroundColor: COLOURS.sheet, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl,
