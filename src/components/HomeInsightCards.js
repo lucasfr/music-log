@@ -30,7 +30,7 @@ function Card({ title, subtitle, children, accent }) {
       shadowColor: COLOURS.shadow(0.08), shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 2,
     }}>
       {accent ? <View style={{ position: 'absolute', left: 10, top: 16, bottom: 16, width: 4, borderRadius: 2, backgroundColor: accent }} /> : null}
-      <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>{title}</Text>
+      <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>{title}</Text>
       {subtitle ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{subtitle}</Text> : null}
       <View style={{ marginTop: 12 }}>{children}</View>
     </View>
@@ -140,7 +140,7 @@ function EnergyScope({ sessions }) {
         <View style={{ marginTop: 12 }}>
           {scope.enough ? (
             <>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 17, color: COLOURS.text, lineHeight: 24 }}>{scopeText(scope)}</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.cardTitle, color: COLOURS.text, lineHeight: 24 }}>{scopeText(scope)}</Text>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 6 }}>
                 Based on {scope.n} of your sessions. It is what you have done before, not a target.
               </Text>
