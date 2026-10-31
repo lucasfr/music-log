@@ -47,10 +47,10 @@ function energyOpacity(energy) {
 const ind = StyleSheet.create({
   wrap:   { alignItems: 'center', marginTop: 1 },
   line:   { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 1, height: 14, width: 40 },
-  emoji:  { fontSize: 11, lineHeight: 14 },
-  sign:   { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14, width: 7, textAlign: 'right' },
+  emoji:  { fontSize: SIZES.tiny, lineHeight: 14 },
+  sign:   { fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, lineHeight: 14, width: 7, textAlign: 'right' },
   signSlot: { width: 7 },
-  val:    { fontFamily: 'Lato-Bold', fontSize: 11, lineHeight: 14, minWidth: 17 },
+  val:    { fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, lineHeight: 14, minWidth: 17 },
   dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 2, alignSelf: 'center' },
   dot:    { width: 5, height: 5, borderRadius: 3 },
 });
@@ -135,10 +135,10 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
     <View>
       {/* Header */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16, marginTop: 4 }}>
-        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text, letterSpacing: -0.3 }}>Calendar</Text>
+        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.text, letterSpacing: -0.3 }}>Calendar</Text>
         {streak > 0 && (
           <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:3}, shadowOpacity:1, shadowRadius:10, elevation:4 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{streak} day streak 🔥</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>{streak} day streak 🔥</Text>
           </View>
         )}
       </View>
@@ -156,7 +156,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
             <TouchableOpacity onPress={onToday} activeOpacity={0.75} hitSlop={HIT_PILL}
               accessibilityRole="button" accessibilityLabel="Go to the current month"
               style={{ marginTop: 4, paddingHorizontal: 12, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.navy }}>Today</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>Today</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -176,9 +176,10 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
               { value: monthSessions.length ? (monthSessions.reduce((a, s) => a + Number(s.energy), 0) / monthSessions.length).toFixed(1) : '—', label: 'avg energy', emoji: '⚡' },
             ].map((stat, i) => (
               <View key={i} style={{ flex: 1, alignItems: 'center', borderRightWidth: i < 3 ? 1 : 0, borderRightColor: COLOURS.glassBorderSubtle, paddingVertical: 4 }}>
+                {/* design: ok emoji */}
                 <Text style={{ fontSize: 24, lineHeight: 28, marginBottom: 4 }}>{stat.emoji}</Text>
-                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 26, color: COLOURS.navy, lineHeight: 28, fontVariant: ['lining-nums'] }}>{stat.value}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 3, letterSpacing: 0.2 }}>{stat.label}</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.display, color: COLOURS.navy, lineHeight: 28, fontVariant: ['lining-nums'] }}>{stat.value}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 3, letterSpacing: 0.2 }}>{stat.label}</Text>
               </View>
             ))}
           </View>
@@ -193,7 +194,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
           <View style={{ flexDirection: 'row', marginBottom: 6 }}>
             {DAYS.map((d, i) => (
               <View key={i} style={{ flex: 1, height: 36, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy, opacity: 0.7, letterSpacing: 0.5 }}>{d}</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy, opacity: 0.7, letterSpacing: 0.5 }}>{d}</Text>
               </View>
             ))}
           </View>
@@ -235,16 +236,16 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
         {[{ dot: COLOURS.red, label: 'Practice' }, { dot: COLOURS.amber, label: 'Lesson' }].map(({ dot, label }) => (
           <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 11, height: 11, borderRadius: 6, backgroundColor: dot }} />
-            <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{label}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{label}</Text>
           </View>
         ))}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <Text style={{ fontSize: 11 }}>⚡</Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Energy</Text>
+          <Text style={{ fontSize: SIZES.tiny }}>⚡</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Energy</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <Text style={{ fontSize: 11 }}>❤️</Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Enjoyment</Text>
+          <Text style={{ fontSize: SIZES.tiny }}>❤️</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Enjoyment</Text>
         </View>
       </View>
     </View>
@@ -374,15 +375,15 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           {selectedDate ? (
             <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 26, color: COLOURS.text }}>{fmtDate(selectedDate)}</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.display, color: COLOURS.text }}>{fmtDate(selectedDate)}</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity onPress={() => setLogModalDate(selectedDate)} activeOpacity={0.75}
                     hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg, shadowColor: 'rgba(214,40,40,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.practiceText }}>🎹 Log practice</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.practiceText }}>🎹 Log practice</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setLessonModalDate(selectedDate)} activeOpacity={0.75}
                     hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg, shadowColor: 'rgba(247,127,0,0.10)', shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.lessonText }}>🎓 Log lesson</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -402,14 +403,14 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                           <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg }}>
-                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.lessonText }}>{'🎓 lesson'}</Text>
+                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.lessonText }}>{'🎓 lesson'}</Text>
                           </View>
-                          {(l.duration || l.teacher) ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{[l.duration ? l.duration + ' min' : null, l.teacher].filter(Boolean).join(' · ')}</Text> : null}
+                          {(l.duration || l.teacher) ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{[l.duration ? l.duration + ' min' : null, l.teacher].filter(Boolean).join(' · ')}</Text> : null}
                         </View>
                         {(l.energy != null || l.enjoyment) ? (
                           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 6 }}>
-                            {l.energy != null ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 14, opacity: n <= (l.energy + 3) ? 1 : 0.18 }}>⚡</Text>)}</View> : null}
-                            {l.enjoyment ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 14, opacity: n <= l.enjoyment ? 1 : 0.18 }}>❤️</Text>)}</View> : null}
+                            {l.energy != null ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= (l.energy + 3) ? 1 : 0.18 }}>⚡</Text>)}</View> : null}
+                            {l.enjoyment ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= l.enjoyment ? 1 : 0.18 }}>❤️</Text>)}</View> : null}
                           </View>
                         ) : null}
                       </View>
@@ -417,15 +418,15 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                     <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
                       {techSegs.length > 0 && (
                         <View style={{ marginBottom: repSegs.length > 0 ? 12 : 0 }}>
-                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'🎹 Technique'}</Text>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'🎹 Technique'}</Text>
                           {techSegs.map(seg => {
                             const n = seg.title || seg.group || 'Technical work';
                             return (
                               <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 8 }}>
-                                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{n}</Text>
-                                {(formatArticulation(seg) || formatTempo(seg)) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.steel, marginTop: 1 }}>{[formatArticulation(seg), formatTempo(seg)].filter(Boolean).join(' · ')}</Text> : null}
-                                {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
-                                {seg.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19, fontStyle: 'italic' }}>{seg.feedback}</Text> : null}
+                                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text }}>{n}</Text>
+                                {(formatArticulation(seg) || formatTempo(seg)) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.steel, marginTop: 1 }}>{[formatArticulation(seg), formatTempo(seg)].filter(Boolean).join(' · ')}</Text> : null}
+                                {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
+                                {seg.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19, fontStyle: 'italic' }}>{seg.feedback}</Text> : null}
                               </View>
                             );
                           })}
@@ -433,23 +434,23 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       )}
                       {repSegs.length > 0 && (
                         <View style={{ marginBottom: 8 }}>
-                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'📜 Repertoire'}</Text>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'📜 Repertoire'}</Text>
                           {repSegs.map(seg => {
                             const n = seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName || 'Piece');
                             return (
                               <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.amber, marginBottom: 8 }}>
                                 <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }}>{'📜 ' + n}</Text>
-                                {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
-                                {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
-                                {seg.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19, fontStyle: 'italic' }}>{seg.feedback}</Text> : null}
+                                {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                                {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
+                                {seg.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19, fontStyle: 'italic' }}>{seg.feedback}</Text> : null}
                               </View>
                             );
                           })}
                         </View>
                       )}
-                      {l.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
-                      {l.overallNotes ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.overallNotes}</Text></View> : null}
-                      {l.nextFocus ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{l.nextFocus}</Text></View> : null}
+                      {l.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
+                      {l.overallNotes ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.overallNotes}</Text></View> : null}
+                      {l.nextFocus ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.nextFocus}</Text></View> : null}
                     </View>
                   </BlurView>
                 );
@@ -465,42 +466,42 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                           <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
-                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.practiceText }}>{'🎹 practice'}</Text>
+                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.practiceText }}>{'🎹 practice'}</Text>
                           </View>
-                          {s.duration ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{s.duration + ' min'}</Text> : null}
+                          {s.duration ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{s.duration + ' min'}</Text> : null}
                         </View>
                         <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: 14, opacity: n <= (s.energy + 3) ? 1 : 0.18 }}>⚡</Text>)}
-                          {s.enjoyment ? [1,2,3,4,5].map(n => <Text key={'h'+n} style={{ fontSize: 14, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>) : null}
+                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= (s.energy + 3) ? 1 : 0.18 }}>⚡</Text>)}
+                          {s.enjoyment ? [1,2,3,4,5].map(n => <Text key={'h'+n} style={{ fontSize: SIZES.bodySmall, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>) : null}
                         </View>
                       </View>
                     </View>
                     <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
                       {techSegs.length > 0 && (
                         <View style={{ marginBottom: repSegs.length > 0 ? 12 : 0 }}>
-                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'🎹 Technique'}</Text>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'🎹 Technique'}</Text>
                           {techSegs.map(seg => (
                             <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.steel, marginBottom: 8 }}>
-                              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{seg.title || seg.group || 'Technical work'}</Text>
-                              {(formatArticulation(seg) || formatTempo(seg)) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.steel, marginTop: 1 }}>{[formatArticulation(seg), formatTempo(seg)].filter(Boolean).join(' · ')}</Text> : null}
-                              {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
+                              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text }}>{seg.title || seg.group || 'Technical work'}</Text>
+                              {(formatArticulation(seg) || formatTempo(seg)) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.steel, marginTop: 1 }}>{[formatArticulation(seg), formatTempo(seg)].filter(Boolean).join(' · ')}</Text> : null}
+                              {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
                             </View>
                           ))}
                         </View>
                       )}
                       {repSegs.length > 0 && (
                         <View style={{ marginBottom: 8 }}>
-                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'📜 Repertoire'}</Text>
+                          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'📜 Repertoire'}</Text>
                           {repSegs.map(seg => (
                             <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginBottom: 8 }}>
                               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }}>{'📜 ' + (seg.compositionId ? compName(seg.compositionId) : seg.title || 'Piece')}</Text>
-                              {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
-                              {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
+                              {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
+                              {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
                             </View>
                           ))}
                         </View>
                       )}
-                      {s.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{s.wins}</Text></View> : null}
+                      {s.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{s.wins}</Text></View> : null}
                     </View>
                   </BlurView>
                 );
@@ -508,7 +509,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
             </ScrollView>
           ) : (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.textDim, opacity: 0.5 }}>Select a day to view entries</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.cardTitle, color: COLOURS.textDim, opacity: 0.5 }}>Select a day to view entries</Text>
             </View>
           )}
         </View>
