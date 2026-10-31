@@ -7,6 +7,7 @@ import { dialTick } from '../utils/dialFeedback';
 const SIZE = 216;
 const STROKE = 16;
 const KNOB_R = STROKE / 2 + 4;
+const KNOB_FILL = '#ffffff'; // design: ok white knob: its navy outline makes it read on both themes
 // The knob's radius (STROKE/2 + 4) is larger than the ring's own half-
 // stroke, so it overhangs the ring's outer edge slightly. R used to be
 // (SIZE - STROKE) / 2, which put the ring's outer edge exactly on the
@@ -127,7 +128,7 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
           cx={CENTER + R * Math.cos(knobRad)}
           cy={CENTER + R * Math.sin(knobRad)}
           r={KNOB_R}
-          fill="#ffffff" stroke={COLOURS.navy} strokeWidth={2}
+          fill={KNOB_FILL} stroke={COLOURS.navy} strokeWidth={2}
         />
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center' }} pointerEvents="none">
