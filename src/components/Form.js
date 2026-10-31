@@ -143,7 +143,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              paddingVertical: 11,
+              paddingVertical: 12,
             }]}
           >
             <Text style={{ fontSize: SIZES.body, fontFamily: 'Lato', color: value ? COLOURS.text : COLOURS.textDim }}>
@@ -319,7 +319,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
           onPress={() => { onChange(today); setOpen(false); }}
           activeOpacity={0.75}
           hitSlop={HIT_PILL}
-          style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
+          style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
         >
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>Today</Text>
         </TouchableOpacity>
@@ -333,7 +333,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
         onPress={() => setOpen(o => !o)}
         onLayout={e => setContainerW(e.nativeEvent.layout.width)}
         activeOpacity={0.8}
-        style={[inputStyle, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 11 }]}
+        style={[inputStyle, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 }]}
       >
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.body, color: value ? COLOURS.text : COLOURS.textDim }}>
           {value ? fmtDisplay(value) : 'Select date…'}
