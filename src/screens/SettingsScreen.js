@@ -27,6 +27,9 @@ import { exportAllJSON, copyAllJSON, parseImportJSON, planImport, describeImport
 import { parseConflicts, parseOutbox, dirtyCount, tombstoneIndex, blockedByDeletion } from '../utils/syncQueue';
 import { outbox } from '../db/outbox';
 
+// GitHub's own button colours. They belong to GitHub's brand, not to the app palette.
+const GITHUB = { bg: '#24292e', fg: '#ffffff' }; // design: ok brand colours
+
 function timeAgo(iso) {
   if (!iso) return null;
   const diffSec = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
@@ -90,7 +93,7 @@ function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBor
       {icon && (
         <View style={{
           width: 34, height: 34, borderRadius: RADIUS.sm,
-          backgroundColor: danger ? 'rgba(214,40,40,0.10)' : COLOURS.navyA(0.10),
+          backgroundColor: danger ? COLOURS.dangerLight : COLOURS.navyA(0.10),
           alignItems: 'center', justifyContent: 'center',
           marginRight: 12,
         }}>
@@ -151,7 +154,7 @@ function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, 
 function StatusDot({ connected }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: connected ? '#00B478' : COLOURS.textDim }} />
+      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: connected ? COLOURS.success : COLOURS.textDim }} />
       <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: connected ? TINT_TEXT.success : COLOURS.textDim }}>
         {connected ? 'Connected' : 'Not connected'}
       </Text>
@@ -163,7 +166,7 @@ function ResultBanner({ result, errorKey = 'errors' }) {
   if (!result) return null;
   const hasErrors = result[errorKey] > 0;
   return (
-    <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: hasErrors ? 'rgba(214,40,40,0.07)' : 'rgba(0,180,120,0.08)' }}>
+    <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: hasErrors ? COLOURS.dangerLight : COLOURS.successLight }}>
       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: hasErrors ? COLOURS.red : TINT_TEXT.success }}>
         {result.message}
       </Text>
@@ -484,7 +487,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                       accessibilityRole="button" accessibilityLabel={`Restore this version of ${c.label}`}
                       style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
                     >
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>Restore this version</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Restore this version</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => dismissConflict(c)} activeOpacity={0.75} hitSlop={HIT_PILL}
@@ -508,24 +511,24 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           <GlassInput label="Project URL" value={url} onChangeText={setUrl} placeholder="https://xxxx.supabase.co" keyboardType="url" />
           <GlassInput label="Anon key" value={anonKey} onChangeText={setAnonKey} placeholder="eyJhbGci…" secureTextEntry />
           {error && (
-            <View style={{ marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: 'rgba(214,40,40,0.07)' }}>
+            <View style={{ marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: COLOURS.dangerLight }}>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.red }}>{error}</Text>
             </View>
           )}
           <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingBottom: 14 }}>
             <TouchableOpacity onPress={handleSaveCredentials} activeOpacity={0.8}
               style={{ flex: 1, paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>Save</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Save</Text>
             </TouchableOpacity>
             {credsSaved && (
               <TouchableOpacity onPress={handleClearCredentials} activeOpacity={0.8}
-                style={{ paddingHorizontal: 18, paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.08)' }}>
+                style={{ paddingHorizontal: 18, paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.dangerLight }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.red }}>Clear</Text>
               </TouchableOpacity>
             )}
           </View>
           {savedBanner && (
-            <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: 'rgba(0,180,120,0.08)' }}>
+            <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: COLOURS.successLight }}>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.success }}>✓ Credentials saved</Text>
             </View>
           )}
@@ -539,8 +542,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
               {phase !== 'sent' ? (
                 <>
                   <TouchableOpacity onPress={handleGitHub} activeOpacity={0.8}
-                    style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: '#24292e', alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>🐙  Continue with GitHub</Text>
+                    style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: GITHUB.bg, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: GITHUB.fg }}>🐙  Continue with GitHub</Text>
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                     <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.navyA(0.10) }} />
