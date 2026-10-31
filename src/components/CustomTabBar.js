@@ -7,6 +7,7 @@ import { COLOURS, RADIUS } from '../theme';
 import { useNavScrollContext } from '../context/NavScrollContext';
 import { useSyncIssue } from '../db/useSyncIssue';
 import { tabBarLayout } from '../utils/tabBarLayout';
+import { DURATION } from '../utils/motion';
 
 const TAB_ICONS = {
   Home:     { active: 'home',          inactive: 'home-outline' },
@@ -52,7 +53,7 @@ export function CustomTabBar({ state, navigation }) {
   useEffect(() => {
     Animated.timing(widthAnim, {
       toValue: compact ? LABEL_W + COMPACT_RIM * 2 : expandedWidth,
-      duration: 280,
+      duration: DURATION.slide,
       useNativeDriver: false,
     }).start();
   }, [compact, expandedWidth, widthAnim]);
