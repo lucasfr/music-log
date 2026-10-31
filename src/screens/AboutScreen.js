@@ -3,14 +3,14 @@ import { View, Text, ScrollView, Image } from 'react-native';
 import { Tap as TouchableOpacity } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, SIZES } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
 
 const YEAR = new Date().getFullYear();
 
 function GlassCard({ children }) {
   return (
     <BlurView intensity={40} tint={COLOURS.blurTint} style={{
-      borderRadius: 18, overflow: 'hidden', marginBottom: 12,
+      borderRadius: RADIUS.md, overflow: 'hidden', marginBottom: 12,
       shadowColor: COLOURS.navyA(0.10), shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 1, shadowRadius: 16, elevation: 4,
     }}>
@@ -38,7 +38,7 @@ export default function AboutScreen({ isDesktop }) {
         <View style={{ alignItems: 'center', paddingVertical: 36, gap: 4 }}>
           <Image
             source={require('../../assets/icon.png')}
-            style={{ width: 90, height: 90, borderRadius: 22 }}
+            style={{ width: 90, height: 90, borderRadius: RADIUS.lg }}
           />
           <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.hero, color: COLOURS.text, marginTop: 14, letterSpacing: -0.5 }}>
             music<Text style={{ color: COLOURS.practiceText }}>.</Text>
