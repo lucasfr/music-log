@@ -122,7 +122,7 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
                   )}
                   {seg.feltDifficulty ? (
                     <View style={{ marginTop: 4 }}>
@@ -132,18 +132,18 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                   ) : null}
                   {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                   {(seg.challenges || []).length > 0 && (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                       {seg.challenges.map(t => (
-                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
+                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
                           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text>
                         </View>
                       ))}
                     </View>
                   )}
                   {(seg.progress || []).length > 0 && (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                       {seg.progress.map(t => (
-                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
+                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
                           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text>
                         </View>
                       ))}
@@ -189,18 +189,18 @@ export function SessionDetailModal({ visible, session, compositions, onClose, on
                     ) : null}
                     {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 6, lineHeight: 20 }}>{seg.notes}</Text> : null}
                     {(seg.challenges || []).length > 0 && (
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                         {seg.challenges.map(t => (
-                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
+                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
                             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text>
                           </View>
                         ))}
                       </View>
                     )}
                     {(seg.progress || []).length > 0 && (
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                         {seg.progress.map(t => (
-                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
+                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
                             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text>
                           </View>
                         ))}
