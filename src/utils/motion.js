@@ -3,6 +3,8 @@
 // components/Motion.js.
 
 export const DURATION = {
+  quick: 150,   // a short reaction: a swipe row opening or closing, neighbours shifting as a card is dragged
+  slide: 260,   // a slower settle: the swipe hint sliding back closed
   enter: 320,   // a card or button fading up into place
   fill: 650,    // a progress bar filling
 };

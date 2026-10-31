@@ -34,6 +34,11 @@ test('the whole stagger never takes longer than the cap plus one entrance', () =
   assert.ok(DURATION.enter > 0 && DURATION.fill > 0);
 });
 
+test('named durations are positive and ordered from quick to fill', () => {
+  assert.ok(DURATION.quick > 0);
+  assert.ok(DURATION.quick < DURATION.slide && DURATION.slide < DURATION.enter && DURATION.enter < DURATION.fill);
+});
+
 test('clampFraction keeps a bar inside its track, whatever it is given', () => {
   assert.equal(clampFraction(0.4), 0.4);
   assert.equal(clampFraction(0), 0);
