@@ -129,7 +129,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           elevation: 6,
           opacity: disabled ? 0.4 : 1,
         }, style]}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: '#fff', letterSpacing: 0.3 }}>{label}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.onNavy, letterSpacing: 0.3 }}>{label}</Text>
       </PressScale>
     );
   }
@@ -145,7 +145,7 @@ export function Btn({ onPress, label, variant = 'default', style, disabled }) {
           paddingVertical: 9,
           paddingHorizontal: 14,
           alignItems: 'center',
-          shadowColor: 'rgba(214,40,40,0.15)',
+          shadowColor: COLOURS.dangerLight,
           shadowOffset: { width: 0, height: 3 },
           shadowOpacity: 1,
           shadowRadius: 10,
@@ -246,7 +246,7 @@ export function TagCloud({ tags, selected, onToggle }) {
               paddingHorizontal: 11,
               paddingVertical: 5,
               borderRadius: RADIUS.pill,
-              backgroundColor: active ? 'rgba(247,127,0,0.14)' : COLOURS.w(0.55),
+              backgroundColor: active ? COLOURS.accent2Light : COLOURS.w(0.55),
               shadowColor: active ? COLOURS.accent2Mid : COLOURS.glassShadow,
               shadowOffset: { width: 0, height: active ? 3 : 1 },
               shadowOpacity: 1,
@@ -275,6 +275,7 @@ export function Divider({ style }) {
 export function EmptyState({ icon, text }) {
   return (
     <View style={{ alignItems: 'center', padding: 48 }}>
+      {/* design: ok emoji */}
       <Text style={{ fontSize: 36, marginBottom: 12 }}>{icon}</Text>
       <Text style={{ fontFamily: 'Lato', fontSize: 15, color: COLOURS.textDim, textAlign: 'center', lineHeight: 22 }}>{text}</Text>
     </View>
