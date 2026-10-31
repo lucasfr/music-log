@@ -90,7 +90,7 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
         />
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center' }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 32, color: COLOURS.text }}>{fmtClock(remainingMs)}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.hero, color: COLOURS.text }}>{fmtClock(remainingMs)}</Text>
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>of {fmtMinutes(plannedMs)}</Text>
       </View>
     </View>
@@ -199,7 +199,7 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 2 }}>
         segment {timer.currentIndex + 1} of {timer.segments.length}
       </Text>
-      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text, marginBottom: 8, textAlign: 'center' }}>
+      <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.display, color: COLOURS.text, marginBottom: 8, textAlign: 'center' }}>
         {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
         {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
       </Text>
@@ -335,7 +335,7 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
             activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
               position: 'absolute', top: 8, right: 20, zIndex: 10,
-              paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
+              paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill,
               backgroundColor: COLOURS.w(0.75),
               shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 1, shadowRadius: 8, elevation: 3,
