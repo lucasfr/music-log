@@ -51,7 +51,7 @@ const ind = StyleSheet.create({
   sign:   { fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, lineHeight: 14, width: 7, textAlign: 'right' },
   signSlot: { width: 7 },
   val:    { fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, lineHeight: 14, minWidth: 17 },
-  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute', top: 2, alignSelf: 'center' },
+  dotRow: { flexDirection: 'row', gap: 4, position: 'absolute', top: 2, alignSelf: 'center' },
   dot:    { width: 5, height: 5, borderRadius: 3 },
 });
 
@@ -146,22 +146,22 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       {/* Month nav: the screen title comes first, then the month. Swiping the grid does the same. */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, paddingHorizontal: 4 }}>
         <TouchableOpacity onPress={onPrevMonth} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
-          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
+          <Text style={{ fontSize: SIZES.screenTitle, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>‹</Text>
         </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.text }}>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>
             {MONTHS[viewMonth]} {viewYear}
           </Text>
           {onToday && !today.startsWith(monthPrefix) ? (
             <TouchableOpacity onPress={onToday} activeOpacity={0.75} hitSlop={HIT_PILL}
               accessibilityRole="button" accessibilityLabel="Go to the current month"
-              style={{ marginTop: 4, paddingHorizontal: 12, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
+              style={{ marginTop: 4, paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>Today</Text>
             </TouchableOpacity>
           ) : null}
         </View>
         <TouchableOpacity onPress={onNextMonth} accessibilityRole="button" accessibilityLabel="Next month" hitSlop={{ top: 10, bottom: 10, left: 16, right: 16 }}>
-          <Text style={{ fontSize: 30, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
+          <Text style={{ fontSize: SIZES.screenTitle, color: COLOURS.navy, fontWeight: '300', lineHeight: 34 }}>›</Text>
         </TouchableOpacity>
       </View>
 
@@ -179,7 +179,7 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
                 {/* design: ok emoji */}
                 <Text style={{ fontSize: 24, lineHeight: 28, marginBottom: 4 }}>{stat.emoji}</Text>
                 <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.display, color: COLOURS.navy, lineHeight: 28, fontVariant: ['lining-nums'] }}>{stat.value}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 3, letterSpacing: 0.2 }}>{stat.label}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 4, letterSpacing: 0.2 }}>{stat.label}</Text>
               </View>
             ))}
           </View>
@@ -234,16 +234,16 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 12, paddingHorizontal: 4 }}>
         {[{ dot: COLOURS.red, label: 'Practice' }, { dot: COLOURS.amber, label: 'Lesson' }].map(({ dot, label }) => (
-          <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <View style={{ width: 11, height: 11, borderRadius: 6, backgroundColor: dot }} />
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{label}</Text>
           </View>
         ))}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text style={{ fontSize: SIZES.tiny }}>⚡</Text>
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Energy</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text style={{ fontSize: SIZES.tiny }}>❤️</Text>
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Enjoyment</Text>
         </View>
@@ -389,7 +389,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
               </View>
 
               {selSessions.length === 0 && selLessons.length === 0 && (
-                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim }}>No sessions on this day. Use the buttons above to log one.</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim }}>No sessions on this day. Use the buttons above to log one.</Text>
               )}
 
               {selLessons.map(l => {
@@ -402,7 +402,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.amber, alignSelf: 'stretch' }} />
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                          <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg }}>
+                          <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: COLOURS.lessonBg }}>
                             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.lessonText }}>{'🎓 lesson'}</Text>
                           </View>
                           {(l.duration || l.teacher) ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{[l.duration ? l.duration + ' min' : null, l.teacher].filter(Boolean).join(' · ')}</Text> : null}
@@ -439,7 +439,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                             const n = seg.compositionId ? compName(seg.compositionId) : (seg.title || seg.pieceName || 'Piece');
                             return (
                               <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.amber, marginBottom: 8 }}>
-                                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }}>{'📜 ' + n}</Text>
+                                <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>{'📜 ' + n}</Text>
                                 {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                                 {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
                                 {seg.feedback ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19, fontStyle: 'italic' }}>{seg.feedback}</Text> : null}
@@ -448,9 +448,9 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                           })}
                         </View>
                       )}
-                      {l.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
-                      {l.overallNotes ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.overallNotes}</Text></View> : null}
-                      {l.nextFocus ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.nextFocus}</Text></View> : null}
+                      {l.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🌟 Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.wins}</Text></View> : null}
+                      {l.overallNotes ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md, marginBottom: 8 }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'✨ Lesson notes'}</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.overallNotes}</Text></View> : null}
+                      {l.nextFocus ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'🎯 Focus before next lesson'}</Text><Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{l.nextFocus}</Text></View> : null}
                     </View>
                   </BlurView>
                 );
@@ -465,7 +465,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                       <View style={{ width: 4, borderRadius: 2, backgroundColor: COLOURS.red, alignSelf: 'stretch' }} />
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                          <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
+                          <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: COLOURS.practiceBg }}>
                             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.practiceText }}>{'🎹 practice'}</Text>
                           </View>
                           {s.duration ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{s.duration + ' min'}</Text> : null}
@@ -494,14 +494,14 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                           <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{'📜 Repertoire'}</Text>
                           {repSegs.map(seg => (
                             <View key={seg.id} style={{ paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: COLOURS.navy, marginBottom: 8 }}>
-                              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }}>{'📜 ' + (seg.compositionId ? compName(seg.compositionId) : seg.title || 'Piece')}</Text>
+                              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>{'📜 ' + (seg.compositionId ? compName(seg.compositionId) : seg.title || 'Piece')}</Text>
                               {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                               {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 2, lineHeight: 19 }}>{seg.notes}</Text> : null}
                             </View>
                           ))}
                         </View>
                       )}
-                      {s.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>{'✨ Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{s.wins}</Text></View> : null}
+                      {s.wins ? <View style={{ padding: 10, backgroundColor: COLOURS.w(0.55), borderRadius: RADIUS.md }}><Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{'✨ Wins'}</Text><Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{s.wins}</Text></View> : null}
                     </View>
                   </BlurView>
                 );
