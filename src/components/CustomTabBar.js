@@ -111,7 +111,7 @@ export function CustomTabBar({ state, navigation }) {
                 <Ionicons
                   name={focused ? icons.active : icons.inactive}
                   size={20}
-                  color={focused ? '#ffffff' : COLOURS.textDim}
+                  color={focused ? COLOURS.onNavy : COLOURS.textDim}
                 />
               </Pop>
               {route.name === 'Settings' && syncProblem ? (
@@ -122,7 +122,7 @@ export function CustomTabBar({ state, navigation }) {
                 }} />
               ) : null}
               {focused ? (
-                <Text numberOfLines={1} maxFontSizeMultiplier={1.1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', marginTop: 1 }}>
+                <Text numberOfLines={1} maxFontSizeMultiplier={1.1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.onNavy, marginTop: 1 }}>
                   {TAB_LABELS[route.name] || route.name}
                 </Text>
               ) : null}

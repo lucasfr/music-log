@@ -21,6 +21,7 @@ export const COLOURS = {
   // Text
   text:      '#09637E',
   textMuted: '#088395',
+  onNavy:    '#ffffff',   // text and icons on a filled navy or steel surface
   textDim:   '#3A767C',   // was #7AB2B2 (2.1:1) — now 4.6:1 on the page bg, 5.2:1 on white
 
   // Glass
@@ -55,6 +56,9 @@ export const COLOURS = {
   // Piece accents (gold)
   yellowLight:  'rgba(252,191,73,0.15)',
   yellowMid:    'rgba(252,191,73,0.35)',
+
+  // Challenge chips (lilac): what kept coming up, shown beside the burgundy progress chips
+  challengeLight: 'rgba(221,174,211,0.15)',
 
   // Teal accents (metadata / generic pills)
   tealAccent:  'rgba(8,131,149,0.10)',
@@ -105,6 +109,7 @@ const DARK = {
   ink: '#1E3A44', red: '#E0668F', amber: '#FF9A33', gold: '#FCBF49',
   bg: '#0A1418', bg2: '#13242A',
   text: '#E4F3F6', textMuted: '#9BD0DA', textDim: '#8FB6BE',
+  onNavy: '#0A1418',   // the dark page colour: dark glyphs on the bright teal fills (white was 2.5:1 on steel)
   glass: 'rgba(255,255,255,0.07)', glassHover: 'rgba(255,255,255,0.12)',
   glassBorder: 'rgba(255,255,255,0)', glassBorderSubtle: 'rgba(255,255,255,0.10)',
   glassShadow: 'rgba(59,179,198,0.16)', glassShadowMd: 'rgba(59,179,198,0.24)',
@@ -115,6 +120,7 @@ const DARK = {
   lessonText: '#FFC48A', lessonBg: 'rgba(255,154,51,0.16)', lessonBorder: 'rgba(255,154,51,0.40)',
   pinkLight: 'rgba(255,154,51,0.16)', pinkMid: 'rgba(255,154,51,0.38)',
   yellowLight: 'rgba(252,191,73,0.16)', yellowMid: 'rgba(252,191,73,0.38)',
+  challengeLight: 'rgba(221,174,211,0.16)',
   tealAccent: 'rgba(59,179,198,0.16)', tealBorder: 'rgba(59,179,198,0.40)',
   danger: '#FF7A6B', dangerLight: 'rgba(255,122,107,0.16)',
   success: '#4CC3A0', successLight: 'rgba(76,195,160,0.16)',
