@@ -44,6 +44,7 @@ import { useLayout } from './src/utils/useLayout';
 import { useUndoableDelete } from './src/components/Undo';
 import { COLOURS, live } from './src/theme';
 import { ThemeProvider, useTheme, takeResumeRoute } from './src/theme/ThemeContext';
+import { PartsGallery } from './src/dev/PartsGallery';
 
 const Tab = createBottomTabNavigator();
 
@@ -54,6 +55,9 @@ const isStandalone =
     window.navigator.standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches
   );
+
+// ?gallery in the web address opens the parts gallery (src/dev/PartsGallery.js) instead of the app.
+const GALLERY = Platform.OS === 'web' && typeof window !== 'undefined' && /[?&]gallery\b/.test(window.location.search);
 
 function AppInner({ fontsLoaded }) {
   const { resolved } = useTheme();
@@ -326,10 +330,12 @@ function AppInner({ fontsLoaded }) {
 // Inside the provider so the theme is applied before anything reads COLOURS, and
 // subscribed to it so the safe-area background follows a theme change.
 function Root({ fontsLoaded }) {
-  useTheme();
+  const { resolved } = useTheme();
   return (
     <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
-      <AppInner fontsLoaded={fontsLoaded} />
+      {GALLERY
+        ? (fontsLoaded ? <PartsGallery key={resolved} /> : null)
+        : <AppInner fontsLoaded={fontsLoaded} />}
     </SafeAreaProvider>
   );
 }
