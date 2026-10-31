@@ -343,7 +343,7 @@ function StartPracticeCard({ repeatPlan, routines, compositions, lastSession, to
           flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12,
           borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.45), borderWidth: 1, borderColor: tint(accent, 0.4),
         }}>
-        <View style={{ width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: tint(accent, 0.22) }}>
+        <View style={{ width: 38, height: 38, borderRadius: RADIUS.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: tint(accent, 0.22) }}>
           <Ionicons name={s.icon} size={20} color={accent} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
@@ -1077,7 +1077,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         <View style={{
           position: 'absolute',
           left: 0, right: '50%', top: 12, bottom: 12,
-          borderRadius: 20,
+          borderRadius: RADIUS.lg,
           backgroundColor: COLOURS.w(0.28),
           borderWidth: 1,
           borderColor: COLOURS.w(0.55),
