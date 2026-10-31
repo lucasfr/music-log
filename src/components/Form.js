@@ -87,7 +87,7 @@ export function RatingBar({ label, emoji, value, onChange, size = 26 }) {
           >
             {/* Icons that become filled pop in one after another (not on first load). */}
             <Pop trigger={n <= value} delay={(n - 1) * 35}>
-              <Text style={{ fontSize: size, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
+              <Text style={{ fontSize: size, opacity: n <= value ? 1 : COLOURS.ratingEmpty, transform: [{ scale: n <= value ? 1 : 0.88 }], userSelect: 'none', cursor: 'pointer' }}>
                 {emoji}
               </Text>
             </Pop>

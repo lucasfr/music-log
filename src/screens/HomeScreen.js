@@ -535,7 +535,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Difficulty</Text>
                         <View style={{ flexDirection: 'row', gap: 2 }}>
-                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}
+                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : COLOURS.ratingEmpty }}>🎵</Text>)}
                         </View>
                       </View>
                     ) : null}
@@ -543,7 +543,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Enjoyment</Text>
                         <View style={{ flexDirection: 'row', gap: 2 }}>
-                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>)}
+                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : COLOURS.ratingEmpty }}>⭐</Text>)}
                         </View>
                       </View>
                     ) : null}
@@ -690,13 +690,13 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                     {seg.feltDifficulty ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Difficulty</Text>
-                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>)}</View>
+                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : COLOURS.ratingEmpty }}>🎵</Text>)}</View>
                       </View>
                     ) : null}
                     {seg.liking ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
                         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Liking</Text>
-                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>)}</View>
+                        <View style={{ flexDirection: 'row', gap: 2 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : COLOURS.ratingEmpty }}>⭐</Text>)}</View>
                       </View>
                     ) : null}
                     {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}

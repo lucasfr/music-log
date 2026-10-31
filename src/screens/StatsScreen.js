@@ -273,7 +273,7 @@ function ZeldaBarFractional({ emoji, fill, total = 5, size = 22 }) {
     <View style={{ flexDirection: 'row', position: 'relative' }}>
       {/* Dim base row */}
       {Array.from({ length: total }, (_, i) => (
-        <Text key={i} style={{ fontSize: size, opacity: 0.18 }}>{emoji}</Text>
+        <Text key={i} style={{ fontSize: size, opacity: COLOURS.ratingEmpty }}>{emoji}</Text>
       ))}
       {/* Filled overlay — clipped to fill width */}
       <View style={{

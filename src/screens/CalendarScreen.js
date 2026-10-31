@@ -409,8 +409,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                         </View>
                         {(l.energy != null || l.enjoyment) ? (
                           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 6 }}>
-                            {l.energy != null ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= (l.energy + 3) ? 1 : 0.18 }}>⚡</Text>)}</View> : null}
-                            {l.enjoyment ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= l.enjoyment ? 1 : 0.18 }}>❤️</Text>)}</View> : null}
+                            {l.energy != null ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= (l.energy + 3) ? 1 : COLOURS.ratingEmpty }}>⚡</Text>)}</View> : null}
+                            {l.enjoyment ? <View style={{ flexDirection: 'row', gap: 1 }}>{[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= l.enjoyment ? 1 : COLOURS.ratingEmpty }}>❤️</Text>)}</View> : null}
                           </View>
                         ) : null}
                       </View>
@@ -471,8 +471,8 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
                           {s.duration ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{s.duration + ' min'}</Text> : null}
                         </View>
                         <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= (s.energy + 3) ? 1 : 0.18 }}>⚡</Text>)}
-                          {s.enjoyment ? [1,2,3,4,5].map(n => <Text key={'h'+n} style={{ fontSize: SIZES.bodySmall, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>) : null}
+                          {[1,2,3,4,5].map(n => <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= (s.energy + 3) ? 1 : COLOURS.ratingEmpty }}>⚡</Text>)}
+                          {s.enjoyment ? [1,2,3,4,5].map(n => <Text key={'h'+n} style={{ fontSize: SIZES.bodySmall, opacity: n <= s.enjoyment ? 1 : COLOURS.ratingEmpty }}>❤️</Text>) : null}
                         </View>
                       </View>
                     </View>

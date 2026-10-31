@@ -62,6 +62,9 @@ export const COLOURS = {
   // Challenge chips (lilac): what kept coming up, shown beside the burgundy progress chips
   challengeLight: 'rgba(221,174,211,0.15)',
 
+  // Rating icons: how visible an unfilled one is. A filled one is fully opaque.
+  ratingEmpty: 0.32,   // was 0.18, too faint on the light page
+
   // Teal accents (metadata / generic pills)
   tealAccent:  'rgba(8,131,149,0.10)',
   tealBorder:  'rgba(8,131,149,0.30)',
@@ -126,6 +129,7 @@ const DARK = {
   pinkLight: 'rgba(255,154,51,0.16)', pinkMid: 'rgba(255,154,51,0.38)',
   yellowLight: 'rgba(252,191,73,0.16)', yellowMid: 'rgba(252,191,73,0.38)',
   challengeLight: 'rgba(221,174,211,0.16)',
+  ratingEmpty: 0.22,
   tealAccent: 'rgba(59,179,198,0.16)', tealBorder: 'rgba(59,179,198,0.40)',
   danger: '#FF7A6B', dangerLight: 'rgba(255,122,107,0.16)', dangerMid: 'rgba(255,122,107,0.40)',
   success: '#4CC3A0', successLight: 'rgba(76,195,160,0.16)',

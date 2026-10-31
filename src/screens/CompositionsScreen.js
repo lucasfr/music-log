@@ -52,7 +52,7 @@ function DifficultyPicker({ value, onChange }) {
           style={{ flexDirection: 'row', gap: 2 }}
         >
           {[1, 2, 3, 4, 5].map(n => (
-            <Text key={n} style={{ fontSize: SIZES.display, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
+            <Text key={n} style={{ fontSize: SIZES.display, opacity: n <= value ? 1 : COLOURS.ratingEmpty, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
           ))}
         </View>
         {value > 0 && (
@@ -347,7 +347,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                   <View style={{ flexDirection: 'row', gap: 2 }}>
                     {[1,2,3,4,5].map(n => (
                       <TouchableOpacity key={n} onPress={() => f('liking', data.liking === n ? 0 : n)} activeOpacity={0.75} hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }} style={{ paddingHorizontal: 8 }}>
-                        <Text style={{ fontSize: SIZES.display, opacity: n <= (data.liking || 0) ? 1 : 0.18, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
+                        <Text style={{ fontSize: SIZES.display, opacity: n <= (data.liking || 0) ? 1 : COLOURS.ratingEmpty, transform: [{ scale: n <= (data.liking || 0) ? 1 : 0.88 }] }}>⭐</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -469,7 +469,7 @@ function DifficultyDisplay({ value }) {
   return (
     <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
       {[1, 2, 3, 4, 5].map(n => (
-        <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
+        <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= value ? 1 : COLOURS.ratingEmpty, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
       ))}
     </View>
   );
@@ -507,7 +507,7 @@ function CardSummary({ comp }) {
           {comp.liking > 0 && (
             <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
               {[1,2,3,4,5].map(n => (
-                <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= comp.liking ? 1 : 0.18 }}>⭐</Text>
+                <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= comp.liking ? 1 : COLOURS.ratingEmpty }}>⭐</Text>
               ))}
             </View>
           )}
@@ -656,13 +656,13 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                       <View style={{ flexDirection: 'row', gap: 16, marginBottom: 8 }}>
                         <View style={{ flexDirection: 'row', gap: 2 }}>
                           {[1,2,3,4,5].map(n => (
-                            <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= energyBar ? 1 : 0.18 }}>⚡</Text>
+                            <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= energyBar ? 1 : COLOURS.ratingEmpty }}>⚡</Text>
                           ))}
                         </View>
                         {s.enjoyment ? (
                           <View style={{ flexDirection: 'row', gap: 2 }}>
                             {[1,2,3,4,5].map(n => (
-                              <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>
+                              <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= s.enjoyment ? 1 : COLOURS.ratingEmpty }}>❤️</Text>
                             ))}
                           </View>
                         ) : null}
@@ -681,7 +681,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Difficulty</Text>
                               <View style={{ flexDirection: 'row', gap: 2 }}>
                                 {[1,2,3,4,5].map(n => (
-                                  <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
+                                  <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : COLOURS.ratingEmpty }}>🎵</Text>
                                 ))}
                               </View>
                             </View>
@@ -691,7 +691,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Enjoyment</Text>
                               <View style={{ flexDirection: 'row', gap: 2 }}>
                                 {[1,2,3,4,5].map(n => (
-                                  <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>
+                                  <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : COLOURS.ratingEmpty }}>⭐</Text>
                                 ))}
                               </View>
                             </View>

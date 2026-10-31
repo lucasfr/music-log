@@ -25,7 +25,7 @@ function StarRow({ value, total = 5, emoji = '🎵' }) {
   return (
     <View style={{ flexDirection: 'row', gap: 2, alignItems: 'center', marginTop: 6 }}>
       {Array.from({ length: total }, (_, i) => (
-        <Text key={i} style={{ fontSize: SIZES.bodySmall, opacity: i < value ? 1 : 0.18 }}>{emoji}</Text>
+        <Text key={i} style={{ fontSize: SIZES.bodySmall, opacity: i < value ? 1 : COLOURS.ratingEmpty }}>{emoji}</Text>
       ))}
     </View>
   );
