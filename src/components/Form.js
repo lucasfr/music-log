@@ -192,7 +192,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
   return (
     <Field label={label}>
       <View style={[inputStyle, { overflow: 'hidden', paddingHorizontal: 0, paddingVertical: 0 }]}>
-        <Picker selectedValue={value || ''} onValueChange={onChange} style={{ color: COLOURS.text, height: 44 }}>
+        <Picker selectedValue={value || ''} onValueChange={onChange} style={{ color: COLOURS.text, height: 44, backgroundColor: 'transparent', borderWidth: 0, paddingHorizontal: 8, fontFamily: 'Lato', fontSize: SIZES.body }}>
           <Picker.Item label={placeholder || '—'} value="" />
           {options.map(o => {
             const v = o.value ?? o;
