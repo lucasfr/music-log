@@ -5,7 +5,7 @@ import {
 import { Tap as TouchableOpacity } from './Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { SectionTitle, Btn } from './UI';
 import { TextF, SelectF } from './Form';
 import { ArticulationPicker, DynamicsPicker } from './SegmentEditor';
@@ -45,25 +45,25 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
         elevation: 2,
       }}>
         <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.tealAccent, marginRight: 10 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {isTech ? 'technique' : 'repertoire'}
           </Text>
         </View>
-        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>
+        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
           {segment.title || 'Untitled'}
           {isTech && segment.compositionId
             ? ` · ${(compositions.find(c => c.id === segment.compositionId) || {}).title || ''}`
             : ''}
         </Text>
         {isTech && formatTouch(segment) ? (
-          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.steel, marginRight: 10 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.steel, marginRight: 10 }}>
             {formatTouch(segment)}
           </Text>
         ) : null}
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginRight: 12 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginRight: 12 }}>
           {segment.plannedMinutes} min
         </Text>
-        <Text style={{ fontSize: 13, color: COLOURS.steel, marginRight: 2 }}>✎</Text>
+        <Text style={{ fontSize: SIZES.label, color: COLOURS.steel, marginRight: 2 }}>✎</Text>
         {dragHandle}
       </TouchableOpacity>
     );
@@ -83,7 +83,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
     }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.tealAccent }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: isTech ? COLOURS.steel : COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.6 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: isTech ? COLOURS.steel : COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.6 }}>
             {isTech ? 'technique' : 'repertoire'}
           </Text>
         </View>
@@ -106,14 +106,14 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
                     backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.65),
                   }}
                 >
-                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
+                  <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.label, color: active ? COLOURS.navy : COLOURS.textMuted }}>{g}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
           {segment.title !== 'Sight-reading' && (
             <View style={{ marginBottom: 10 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Articulation</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Articulation</Text>
               <ArticulationPicker
                 value={segment.articulation}
                 onChange={v => field('articulation', v)}
@@ -122,7 +122,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
           )}
           {segment.title !== 'Sight-reading' && (
             <View style={{ marginBottom: 10 }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Dynamics</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Dynamics</Text>
               <DynamicsPicker
                 value={segment.dynamics}
                 onChange={v => field('dynamics', v)}
@@ -167,7 +167,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
           backgroundColor: isValid ? COLOURS.navy : COLOURS.navyA(0.15),
         }}
       >
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: isValid ? '#fff' : COLOURS.textDim }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: isValid ? COLOURS.onNavy : COLOURS.textDim }}>
           Confirm
         </Text>
       </TouchableOpacity>
@@ -178,7 +178,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
         hitSlop={HIT_PILL}
         style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 10, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.dangerLight }}
       >
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.danger }}>Remove segment</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.danger }}>Remove segment</Text>
       </TouchableOpacity>
     </View>
   );
@@ -267,10 +267,10 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Set up timer</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>Set up timer</Text>
               <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
-                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.bodySmall }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -286,17 +286,17 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
               <TouchableOpacity onPress={() => addSegment('technique')} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Technique</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>+ Technique</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => addSegment('repertoire')} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Repertoire</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>+ Repertoire</Text>
               </TouchableOpacity>
             </View>
 
             {draftSegments.length === 0 && (
               <View style={{ borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: COLOURS.w(0.35) }}>
-                <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14, textAlign: 'center' }}>
+                <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: SIZES.bodySmall, textAlign: 'center' }}>
                   Add the segments you plan to work through, and how many minutes each gets.
                 </Text>
                 {previousSession ? (
@@ -304,26 +304,26 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
                     <TouchableOpacity onPress={repeatLast} activeOpacity={0.75} hitSlop={HIT_PILL}
                       accessibilityRole="button" accessibilityLabel={`Repeat last session: ${previousSummary}`}
                       style={{ ...TOUCH_PILL, marginTop: 14, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>↻ Repeat last session</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>↻ Repeat last session</Text>
                     </TouchableOpacity>
-                    <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 6, textAlign: 'center' }}>{previousSummary}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 6, textAlign: 'center' }}>{previousSummary}</Text>
                   </>
                 ) : null}
                 {routines.length > 0 ? (
                   <View style={{ marginTop: 18, alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Your routines</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>Your routines</Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 8 }}>
                       {routines.map(r => (
                         <View key={r.id} style={{ flexDirection: 'row', alignItems: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
                           <TouchableOpacity onPress={() => loadRoutine(r)} activeOpacity={0.75} hitSlop={HIT_PILL}
                             accessibilityRole="button" accessibilityLabel={`Load routine ${r.name}, ${r.segments.length} segments`}
                             style={{ ...TOUCH_PILL, paddingLeft: 14, paddingRight: 6 }}>
-                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>{r.name}</Text>
+                            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>{r.name}</Text>
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => deleteRoutine(r)} activeOpacity={0.75} hitSlop={{ top: 4, bottom: 4, left: 0, right: 6 }}
                             accessibilityRole="button" accessibilityLabel={`Remove routine ${r.name}`}
                             style={{ minWidth: 36, minHeight: 36, alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 13, color: COLOURS.textDim }}>✕</Text>
+                            <Text style={{ fontSize: SIZES.label, color: COLOURS.textDim }}>✕</Text>
                           </TouchableOpacity>
                         </View>
                       ))}
@@ -359,11 +359,11 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
                   <TouchableOpacity onPress={saveRoutine} disabled={!routineName.trim()} activeOpacity={0.8} hitSlop={HIT_PILL}
                     style={{ ...TOUCH_PILL, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: routineName.trim() ? COLOURS.navy : COLOURS.navyA(0.15) }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: routineName.trim() ? '#fff' : COLOURS.textDim }}>Save routine</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: routineName.trim() ? COLOURS.onNavy : COLOURS.textDim }}>Save routine</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => { setNaming(false); setRoutineName(''); }} activeOpacity={0.8} hitSlop={HIT_PILL}
                     style={{ ...TOUCH_PILL, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10) }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textMuted }}>Cancel</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textMuted }}>Cancel</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -371,7 +371,7 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
               <TouchableOpacity onPress={() => setNaming(true)} activeOpacity={0.75} hitSlop={HIT_PILL}
                 accessibilityRole="button" accessibilityLabel="Save this plan as a routine"
                 style={{ ...TOUCH_PILL, alignSelf: 'flex-start', paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, marginTop: 4, marginBottom: 8 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Save as routine</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>Save as routine</Text>
               </TouchableOpacity>
             ))}
 
