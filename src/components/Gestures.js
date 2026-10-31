@@ -354,7 +354,7 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
             alignItems: 'center',
           }}
         >
-          <View style={{ position: 'absolute', top: -14, paddingHorizontal: 12, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
+          <View style={{ position: 'absolute', top: -14, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.onNavy }}>
               Drop here · {overIdx + 1} of {data.length}
             </Text>
