@@ -348,7 +348,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
       accessibilityRole="radio" accessibilityLabel={a11y} accessibilityState={{ selected: active }}
       style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.10) }}
     >
-      <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? COLOURS.onNavy : COLOURS.textMuted }}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -383,8 +383,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                       backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.10),
                     }}
                   >
-                    <Ionicons name={THEME_ICONS[o.key] || 'color-palette-outline'} size={16} color={active ? '#fff' : COLOURS.textMuted} />
-                    <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
+                    <Ionicons name={THEME_ICONS[o.key] || 'color-palette-outline'} size={16} color={active ? COLOURS.onNavy : COLOURS.textMuted} />
+                    <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? COLOURS.onNavy : COLOURS.textMuted }}>{o.label}</Text>
                   </TouchableOpacity>
                 );
               })}
