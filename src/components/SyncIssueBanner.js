@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { Tap as TouchableOpacity } from './Motion';
 import { Ionicons } from './Icon';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
 import { useSyncIssue } from '../db/useSyncIssue';
 
 // A banner for a sync problem that needs attention (not for being offline, see db/syncIssue.js).
@@ -25,8 +25,8 @@ export function SyncIssueBanner({ onPress }) {
     >
       <Ionicons name="alert-circle-outline" size={22} color={COLOURS.red} />
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{issue.title}</Text>
-        <Text numberOfLines={3} style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, marginTop: 2, lineHeight: 17 }}>{issue.message}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{issue.title}</Text>
+        <Text numberOfLines={3} style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted, marginTop: 2, lineHeight: 17 }}>{issue.message}</Text>
       </View>
       {onPress ? <Ionicons name="chevron-forward" size={18} color={COLOURS.textDim} /> : null}
     </TouchableOpacity>
