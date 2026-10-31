@@ -252,6 +252,7 @@ export function hitFor(w, h = w) {
 }
 
 export const SIZES = {
+  hero:         36,   // big numbers: the timer clock, the tempo, the dial value, the About title
   screenTitle:  28,   // music.log wordmark
   display:      26,   // serif date headings, stat numbers, chevron glyphs
   sectionTitle: 22,   // screen headings (Compositions, Calendar…)
