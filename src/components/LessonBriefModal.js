@@ -6,7 +6,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { Btn } from './UI';
 import { Tap as TouchableOpacity } from './Motion';
 import { briefText } from '../utils/insights';
@@ -44,13 +44,13 @@ export function LessonBriefModal({ visible, brief, text: given, title = 'Lesson 
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>{title}</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>{title}</Text>
               <TouchableOpacity
                 onPress={onClose} activeOpacity={0.75} hitSlop={HIT_PILL}
                 accessibilityRole="button" accessibilityLabel="Close"
                 style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10) }}
               >
-                <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted }}>Done</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>Done</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -59,22 +59,22 @@ export function LessonBriefModal({ visible, brief, text: given, title = 'Lesson 
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 48 }}>
           {blocks.map((b, i) => {
             if (b.kind === 'title') {
-              return <Text key={i} selectable style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text, lineHeight: 28, marginBottom: 14 }}>{b.lines.join('\n')}</Text>;
+              return <Text key={i} selectable style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.text, lineHeight: 28, marginBottom: 14 }}>{b.lines.join('\n')}</Text>;
             }
             if (b.kind === 'list') {
               return (
                 <View key={i} style={{ marginBottom: 16 }}>
-                  <Text accessibilityRole="header" style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.text, marginBottom: 6 }}>{b.heading}</Text>
+                  <Text accessibilityRole="header" style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.text, marginBottom: 6 }}>{b.heading}</Text>
                   {b.items.map((item, j) => (
                     <View key={j} style={{ flexDirection: 'row', gap: 10, marginBottom: 4 }}>
                       <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: COLOURS.steel, marginTop: 8 }} />
-                      <Text selectable style={{ flex: 1, fontFamily: 'Lato', fontSize: 15, color: COLOURS.text, lineHeight: 22 }}>{item}</Text>
+                      <Text selectable style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.body, color: COLOURS.text, lineHeight: 22 }}>{item}</Text>
                     </View>
                   ))}
                 </View>
               );
             }
-            return <Text key={i} selectable style={{ fontFamily: 'Lato', fontSize: 15, color: COLOURS.text, lineHeight: 22, marginBottom: 16 }}>{b.lines.join('\n')}</Text>;
+            return <Text key={i} selectable style={{ fontFamily: 'Lato', fontSize: SIZES.body, color: COLOURS.text, lineHeight: 22, marginBottom: 16 }}>{b.lines.join('\n')}</Text>;
           })}
 
           <Btn
