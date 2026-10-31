@@ -19,7 +19,7 @@ import {
 import { scaleCoverage, techniqueBreakdown, toggleFilter, COF_KEYS, COF_MINORS, DYNAMICS_LABELS } from '../utils/scaleStats';
 import { AnimatedFill, FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { labelIndices, labelAnchor } from '../utils/chartLabels';
-import { coverageColour, readableOn } from '../utils/chartColours';
+import { coverageColour, coverageRamp, readableOn, energyColours, LIKING_LINE, COVERAGE_TEAL_SELECTED } from '../utils/chartColours';
 import { parseCollapsed, serializeCollapsed, toggleCollapsed } from '../utils/collapsed';
 import { STATUS_OPTIONS, ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../constants';
 import Svg, { Path, Circle, Line, Text as SvgText, G } from 'react-native-svg';
@@ -447,7 +447,7 @@ function WeeklyTrendChart({ sessions, period }) {
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>⚡ Energy</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <View style={{ width: 20, height: 2, backgroundColor: '#E87EA1', borderRadius: 1 }} />
+          <View style={{ width: 20, height: 2, backgroundColor: LIKING_LINE, borderRadius: 1 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>❤️ Liking</Text>
         </View>
       </View>
@@ -460,7 +460,7 @@ function WeeklyTrendChart({ sessions, period }) {
           ))}
           {/* Right axis — liking (1…5) */}
           {[1, 2, 3, 4, 5].map(v => (
-            <SvgText key={v} x={width - padR + 4} y={toYLiking(v) + 3} textAnchor="start" fontSize="11" fill="#E87EA1" fontFamily="Lato">{v}</SvgText>
+            <SvgText key={v} x={width - padR + 4} y={toYLiking(v) + 3} textAnchor="start" fontSize="11" fill={LIKING_LINE} fontFamily="Lato">{v}</SvgText>
           ))}
           {/* Zero line for energy */}
           <Line x1={padL} y1={toYEnergy(0)} x2={width - padR} y2={toYEnergy(0)} stroke={COLOURS.glassBorderSubtle} strokeWidth="1" strokeDasharray="3,3" />
@@ -470,11 +470,11 @@ function WeeklyTrendChart({ sessions, period }) {
             const x = xAt(i);
             return <Circle key={`e${i}`} cx={x} cy={toYEnergy(v)} r={3} fill={COLOURS.amber} />;
           })}
-          {likingPath ? <Path d={likingPath} fill="none" stroke="#E87EA1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
+          {likingPath ? <Path d={likingPath} fill="none" stroke={LIKING_LINE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /> : null}
           {likingPts.map((v, i) => {
             if (v === null) return null;
             const x = xAt(i);
-            return <Path key={`l${i}`} d={diamondPath(x, toYLiking(v))} fill="#E87EA1" />;
+            return <Path key={`l${i}`} d={diamondPath(x, toYLiking(v))} fill={LIKING_LINE} />;
           })}
           {visible.map((key, i) => {
             const label = xLabel(key, i);
@@ -496,10 +496,6 @@ function WeeklyTrendChart({ sessions, period }) {
 }
 
 // ─── Energy vs Duration scatter plot ───────────────────────────────
-
-const ENERGY_COLOURS = {
-  '-2': '#8C2045', '-1': '#B85C7A', '0': '#7AB2B2', '1': '#F77F00', '2': '#FCBF49',
-};
 
 function ScatterPlot({ sessions }) {
   const [width, setWidth] = useState(0);
@@ -552,7 +548,7 @@ function ScatterPlot({ sessions }) {
           {/* Dots */}
           {pts.map((p, i) => (
             <Circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={4}
-              fill={ENERGY_COLOURS[String(Math.round(p.y))] || COLOURS.steel}
+              fill={energyColours(COLOURS.isDark)[String(Math.round(p.y))] || COLOURS.steel}
               opacity={0.75}
             />
           ))}
@@ -564,7 +560,7 @@ function ScatterPlot({ sessions }) {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
         {['-2','-1','0','1','2'].map(v => (
           <View key={v} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ENERGY_COLOURS[v] }} />
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: energyColours(COLOURS.isDark)[v] }} />
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{v > 0 ? `+${v}` : v}</Text>
           </View>
         ))}
@@ -1090,8 +1086,8 @@ function ScaleCoverage({ sessions }) {
             const midRad   = midDeg * Math.PI / 180;
             const majorSel = sel?.ring === 'major' && sel?.index === i;
             const minorSel = sel?.ring === 'minor' && sel?.index === i;
-            const majorFill = majorSel ? '#FCBF49' : amberForCount(majorCounts[i], maxCount);
-            const minorFill = minorSel ? '#1D9E75' : tealForCount(minorCounts[i], maxCount);
+            const majorFill = majorSel ? COLOURS.gold : amberForCount(majorCounts[i], maxCount);
+            const minorFill = minorSel ? COVERAGE_TEAL_SELECTED : tealForCount(minorCounts[i], maxCount);
             return (
               <G key={key}>
                 <Path
@@ -1177,11 +1173,11 @@ function ScaleCoverage({ sessions }) {
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#EF9F27' }} />
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('amber', COLOURS.isDark)[2] }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>major</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#5DCAA5' }} />
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('teal', COLOURS.isDark)[2] }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>minor</Text>
         </View>
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>

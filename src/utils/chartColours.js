@@ -71,3 +71,15 @@ export function coverageColour(kind, n, max, dark) {
   return steps[i === -1 ? steps.length - 1 : i];
 }
 export const coverageRamp = (kind, dark) => RAMPS[kind][dark ? 'dark' : 'light'];
+
+// Colours that sit outside the ramps.
+export const COVERAGE_TEAL_SELECTED = '#1D9E75';   // the selected minor key on the circle of fifths
+export const LIKING_LINE = '#E87EA1';              // the liking line and its axis on the energy chart
+
+// The energy scatter: -2 (very low) to +2 (high). The light set is the original. The dark set keeps
+// each hue but lifts it, because #8C2045 was only 2.1:1 against the dark page.
+const ENERGY = {
+  light: { '-2': '#8C2045', '-1': '#B85C7A', '0': '#7AB2B2', '1': '#F77F00', '2': '#FCBF49' },
+  dark:  { '-2': '#E0668F', '-1': '#CC7F9C', '0': '#5E9AA3', '1': '#FF9A33', '2': '#FCBF49' },
+};
+export const energyColours = dark => ENERGY[dark ? 'dark' : 'light'];
