@@ -80,7 +80,7 @@ export function OnboardingScreen({ onComplete }) {
 
   const card = (
     <BlurView intensity={60} tint={COLOURS.blurTint} style={{
-      borderRadius: 24,
+      borderRadius: RADIUS.lg,
       overflow: 'hidden',
       width: isDesktopWeb ? 420 : '100%',
       shadowColor: COLOURS.navyA(0.20),
@@ -99,7 +99,7 @@ export function OnboardingScreen({ onComplete }) {
           <Text style={{ fontSize: 48, marginBottom: 20 }}>{slide.emoji}</Text>
           <Text style={{
             fontFamily: 'CormorantGaramond-Italic',
-            fontSize: 38,
+            fontSize: SIZES.hero,
             lineHeight: 46,
             color: COLOURS.text,
             letterSpacing: -0.5,
@@ -109,7 +109,7 @@ export function OnboardingScreen({ onComplete }) {
           </Text>
           <Text style={{
             fontFamily: 'Lato',
-            fontSize: 15,
+            fontSize: SIZES.body,
             lineHeight: 24,
             color: COLOURS.textMuted,
             marginBottom: 28,
@@ -134,7 +134,7 @@ export function OnboardingScreen({ onComplete }) {
             shadowOpacity: 1, shadowRadius: 16, elevation: 6,
           }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.onNavy, letterSpacing: 0.3 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.onNavy, letterSpacing: 0.3 }}>
             {slide.isFinal ? 'Start logging →' : 'Continue →'}
           </Text>
         </TouchableOpacity>
