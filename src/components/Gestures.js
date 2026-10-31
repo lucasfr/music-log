@@ -18,7 +18,7 @@ import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, Animated, PanResponder, TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
 import { Ionicons } from './Icon';
 import * as Haptics from 'expo-haptics';
-import { COLOURS, RADIUS, TOUCH } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH } from '../theme';
 import { overIndex, shiftFor, snapOffset, clampDy, toSlot } from '../utils/reorder';
 import { getLocalPref, setLocalPref } from '../utils';
 
@@ -147,8 +147,8 @@ export function SwipeRow({
             alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <Ionicons name="trash-outline" size={22} color="#fff" />
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: '#fff', marginTop: 2 }}>{label}</Text>
+          <Ionicons name="trash-outline" size={22} color={COLOURS.onNavy} />
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.onNavy, marginTop: 2 }}>{label}</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -354,7 +354,7 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
           }}
         >
           <View style={{ position: 'absolute', top: -14, paddingHorizontal: 12, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: '#fff' }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.onNavy }}>
               Drop here · {overIdx + 1} of {data.length}
             </Text>
           </View>
