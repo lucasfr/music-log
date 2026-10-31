@@ -82,7 +82,7 @@ export function ScalesPicker({ selected = [], onChange }) {
                 <TouchableOpacity
                   onPress={() => toggleMotion(name)}
                   activeOpacity={0.75}
-                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5 }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6 }}
                 >
                   <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>{name}</Text>
                   {isContrary && (
@@ -92,14 +92,14 @@ export function ScalesPicker({ selected = [], onChange }) {
                 <TouchableOpacity
                   onPress={() => cycleInterval(name)}
                   activeOpacity={0.75}
-                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: COLOURS.w(0.5) }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 6, borderLeftWidth: 1, borderLeftColor: COLOURS.w(0.5) }}
                 >
                   <Text style={{ fontFamily: interval !== 'unison' ? 'Lato-Bold' : 'Lato', fontSize: interval !== 'unison' ? 11 : 11, color: interval !== 'unison' ? COLOURS.tealBorder : COLOURS.textDim }}>{INTERVAL_LABELS[interval]}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => toggleOctaves(name)}
                   activeOpacity={0.75}
-                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 5, borderLeftWidth: 1, borderLeftColor: COLOURS.w(0.5) }}
+                  hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 8, paddingVertical: 6, borderLeftWidth: 1, borderLeftColor: COLOURS.w(0.5) }}
                 >
                   <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{octaves}oct</Text>
                 </TouchableOpacity>
@@ -135,7 +135,7 @@ export function ScalesPicker({ selected = [], onChange }) {
               onPress={() => toggle(s)}
               activeOpacity={0.75}
               hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
-                paddingHorizontal: 10, paddingVertical: 5,
+                paddingHorizontal: 10, paddingVertical: 6,
                 borderRadius: RADIUS.pill,
                 backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.55),
                 shadowColor: active ? COLOURS.tealBorder : COLOURS.glassShadow,
@@ -151,7 +151,7 @@ export function ScalesPicker({ selected = [], onChange }) {
           <TouchableOpacity
             onPress={() => setShowAll(true)}
             activeOpacity={0.75}
-            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
+            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 10, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent, shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:1}, shadowOpacity:1, shadowRadius:4, elevation:1 }}
           >
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>+ more</Text>
           </TouchableOpacity>
@@ -186,7 +186,7 @@ export function ArticulationPicker({ value, onChange }) {
 
   function pills(current, onPick) {
     return (
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {ARTICULATION_OPTIONS.map(a => {
           const active = current === a;
           return (
@@ -243,7 +243,7 @@ export function ArticulationPicker({ value, onChange }) {
 export function DynamicsPicker({ value, onChange }) {
   const chosen = dynamicsOf({ dynamics: value });
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
       {DYNAMICS_OPTIONS.map(k => {
         const active = chosen.includes(k);
         return (
@@ -345,7 +345,7 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
           {isTech ? (
             <>
               <Field label="Technique group" icon="fitness-outline">
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {TECH_GROUPS.map(g => {
                     const active = segment.group === g;
                     return (
