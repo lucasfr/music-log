@@ -188,6 +188,7 @@ function AppInner({ fontsLoaded }) {
   if (!fontsLoaded || !ready || dataLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: COLOURS.bg, alignItems: 'center', justifyContent: 'center' }}>
+        {/* design: ok system serif: the fonts have not loaded yet */}
         <Text style={{ fontFamily: 'serif', fontSize: 28, color: COLOURS.navy, fontStyle: 'italic', letterSpacing: -0.5 }}>
           music<Text style={{ color: COLOURS.practiceText }}>.</Text>
           <Text style={{ color: COLOURS.lessonText }}>log</Text>
@@ -263,10 +264,10 @@ function AppInner({ fontsLoaded }) {
           colors: {
             primary:      COLOURS.navy,
             background:   COLOURS.bg,
-            card:         'rgba(234,240,245,0.92)',
+            card:         COLOURS.sheet,
             text:         COLOURS.text,
             border:       COLOURS.glassBorder,
-            notification: COLOURS.pink,
+            notification: COLOURS.red,
           },
         }}
       >
