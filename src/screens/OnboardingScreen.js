@@ -95,6 +95,7 @@ export function OnboardingScreen({ onComplete }) {
         paddingBottom: 32,
       }} {...panResponder.panHandlers}>
         <Animated.View style={{ opacity, transform: [{ translateX }] }}>
+          {/* design: ok emoji */}
           <Text style={{ fontSize: 48, marginBottom: 20 }}>{slide.emoji}</Text>
           <Text style={{
             fontFamily: 'CormorantGaramond-Italic',
