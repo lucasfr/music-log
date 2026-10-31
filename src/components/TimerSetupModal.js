@@ -44,7 +44,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
         shadowRadius: 8,
         elevation: 2,
       }}>
-        <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.tealAccent, marginRight: 10 }}>
+        <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: isTech ? COLOURS.accent2Light : COLOURS.tealAccent, marginRight: 10 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.steel, textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {isTech ? 'technique' : 'repertoire'}
           </Text>
@@ -101,7 +101,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
                   onPress={() => field('title', g)}
                   activeOpacity={0.75}
                   hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
-                    paddingHorizontal: 10, paddingVertical: 5,
+                    paddingHorizontal: 10, paddingVertical: 6,
                     borderRadius: RADIUS.pill,
                     backgroundColor: active ? COLOURS.steelA(0.14) : COLOURS.w(0.65),
                   }}
@@ -163,7 +163,7 @@ function DraftSegmentRow({ segment, compositions, onChange, onRemove, dragHandle
         activeOpacity={0.75}
         disabled={!isValid}
         hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
-          marginTop: 12, paddingVertical: 9, borderRadius: RADIUS.pill, alignItems: 'center',
+          marginTop: 12, paddingVertical: 8, borderRadius: RADIUS.pill, alignItems: 'center',
           backgroundColor: isValid ? COLOURS.navy : COLOURS.navyA(0.15),
         }}
       >
@@ -269,7 +269,7 @@ export function TimerSetupModal({ visible, onClose, onStart, compositions, previ
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>Set up timer</Text>
               <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
-                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
+                hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55) }}>
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.bodySmall }}>Cancel</Text>
               </TouchableOpacity>
             </View>
