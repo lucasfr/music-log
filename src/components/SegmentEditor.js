@@ -317,7 +317,7 @@ export function SegmentEditor({ segment, onChange, onRemove, dragHandle, composi
       <TouchableOpacity
         onPress={() => setOpen(o => !o)}
         activeOpacity={0.75}
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 13, backgroundColor: COLOURS.glass }}
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, backgroundColor: COLOURS.glass }}
       >
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
