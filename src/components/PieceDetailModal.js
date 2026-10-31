@@ -62,11 +62,11 @@ function SpotRow({ spot, onToggle, onRemove }) {
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 }}>
       <TouchableOpacity onPress={onToggle} hitSlop={HIT_PILL} accessibilityRole="checkbox" accessibilityState={{ checked: fixed }}
         accessibilityLabel={`${spotLabel(spot.bars)}, ${fixed ? 'fixed' : 'still tricky'}`}
-        style={{ width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: fixed ? COLOURS.success : COLOURS.w(0.55), borderWidth: 1, borderColor: fixed ? COLOURS.success : COLOURS.glassBorderSubtle }}>
-        {fixed ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, lineHeight: 18, color: COLOURS.onNavy }}>✓</Text> : null}
+        style={{ width: 26, height: 26, borderRadius: RADIUS.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: fixed ? COLOURS.success : COLOURS.w(0.55), borderWidth: 1, borderColor: fixed ? COLOURS.success : COLOURS.glassBorderSubtle }}>
+        {fixed ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, lineHeight: 18, color: COLOURS.onNavy }}>✓</Text> : null}
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: fixed ? COLOURS.textDim : COLOURS.text, textDecorationLine: fixed ? 'line-through' : 'none' }}>{spotLabel(spot.bars)}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: fixed ? COLOURS.textDim : COLOURS.text, textDecorationLine: fixed ? 'line-through' : 'none' }}>{spotLabel(spot.bars)}</Text>
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>
           {fixed && spot.fixed ? `Fixed ${fmtDate(spot.fixed)}` : spot.added ? `Since ${fmtDate(spot.added)}` : ''}
         </Text>
@@ -106,7 +106,7 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: COLOURS.glass }}>
-              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'CormorantGaramond-Italic', fontSize: 21, color: COLOURS.text, marginRight: 12 }}>{report.title}</Text>
+              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.sectionTitle, color: COLOURS.text, marginRight: 12 }}>{report.title}</Text>
               <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT} accessibilityRole="button" accessibilityLabel="Close">
                 <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.body }}>Done</Text>
               </TouchableOpacity>
@@ -118,7 +118,7 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             {report.composer ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>{report.composer}</Text> : null}
             {status ? (
-              <View style={{ paddingHorizontal: 9, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: sc.bg || COLOURS.tealAccent }}>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: sc.bg || COLOURS.tealAccent }}>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: sc.text || COLOURS.navy }}>{status}</Text>
               </View>
             ) : null}
@@ -134,7 +134,7 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
           {tempo ? (
             <Section title="Tempo">
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 34, color: COLOURS.text }}>{tempo.latest}</Text>
+                <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.hero, color: COLOURS.text }}>{tempo.latest}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>bpm{tempo.target ? ` of ${tempo.target}` : ''}</Text>
               </View>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 8 }}>{describeTempo(tempo)}</Text>
@@ -156,14 +156,14 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
               <SpotRow key={s.id} spot={s} onToggle={() => save(setSpotFixed(piece.spots, s.id, true, today))} onRemove={() => save(removeSpot(piece.spots, s.id))} />
             ))}
             {spots.open.length === 0 ? (
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim, marginBottom: 6 }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, marginBottom: 6 }}>
                 {spots.fixed.length ? 'Nothing tricky at the moment.' : 'None noted. Add the bars that keep going wrong and they will show in the timer and your summaries.'}
               </Text>
             ) : null}
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
               <TextInput value={spotText} onChangeText={setSpotText} onSubmitEditing={addNew} returnKeyType="done" placeholder="Bars 9-12, or the left hand jump" placeholderTextColor={COLOURS.textDim}
                 accessibilityLabel="Add a tricky spot"
-                style={{ flex: 1, fontFamily: 'Lato', fontSize: 15, color: COLOURS.text, paddingHorizontal: 12, paddingVertical: 9, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.6), borderWidth: 1, borderColor: COLOURS.glassBorderSubtle }} />
+                style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.body, color: COLOURS.text, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.6), borderWidth: 1, borderColor: COLOURS.glassBorderSubtle }} />
               <TouchableOpacity onPress={addNew} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel="Add spot"
                 style={{ paddingHorizontal: 16, justifyContent: 'center', borderRadius: RADIUS.md, backgroundColor: COLOURS.steel }}>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Add</Text>
@@ -181,7 +181,7 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
 
           {runThroughs ? (
             <Section title="Run-throughs">
-              <Text style={{ fontFamily: 'Lato', fontSize: 15, color: COLOURS.text }}>{describeRunThroughs(runThroughs)}</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.body, color: COLOURS.text }}>{describeRunThroughs(runThroughs)}</Text>
             </Section>
           ) : null}
 
@@ -200,7 +200,7 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
           {recent.length > 0 ? (
             <Section title="Recent sessions">
               {recent.map((r, i) => (
-                <View key={`${r.date}-${i}`} style={{ flexDirection: 'row', gap: 10, paddingVertical: 5 }}>
+                <View key={`${r.date}-${i}`} style={{ flexDirection: 'row', gap: 10, paddingVertical: 6 }}>
                   <Text style={{ width: 92, fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textDim }}>{fmtDate(r.date)}</Text>
                   <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text }}>
                     {[r.minutes ? `${r.minutes} min` : null, r.tempo ? `${r.tempo} bpm` : null, r.runThroughs ? formatRunThroughs({ runThroughs: r.runThroughs }) : null, r.section].filter(Boolean).join(' · ') || 'Played'}
@@ -215,8 +215,8 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
               {stages.map((st, i) => {
                 const c = STATUS_COLOURS[st.status] || {};
                 return (
-                  <View key={`${st.status}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 5 }}>
-                    <View style={{ paddingHorizontal: 9, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: c.bg || COLOURS.tealAccent }}>
+                  <View key={`${st.status}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: c.bg || COLOURS.tealAccent }}>
                       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: c.text || COLOURS.navy }}>{st.status}</Text>
                     </View>
                     <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>
