@@ -7,7 +7,7 @@ import { Tap as TouchableOpacity } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '../components/Icon';
-import { COLOURS, RADIUS, STATUS_COLOURS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
+import { COLOURS, RADIUS, SIZES, STATUS_COLOURS, TOUCH_PILL, HIT_PILL, HIT_TEXT } from '../theme';
 import { SectionTitle, Btn, BtnRow, StatusPill, MetaChip, EmptyState, GlassCard } from '../components/UI';
 import { SwipeRow } from '../components/Gestures';
 import { notify } from '../utils/notify';
@@ -57,7 +57,7 @@ function DifficultyPicker({ value, onChange }) {
         </View>
         {value > 0 && (
           <TouchableOpacity onPress={() => onChange(0)} activeOpacity={0.7} hitSlop={HIT_TEXT}>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>clear</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>clear</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -86,8 +86,8 @@ function TagInput({ value = [], onChange }) {
             activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}
           >
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.navy }}>{t}</Text>
-            <Text style={{ fontSize: 12, color: COLOURS.textDim }}>✕</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.navy }}>{t}</Text>
+            <Text style={{ fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>✕</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -97,7 +97,7 @@ function TagInput({ value = [], onChange }) {
         </View>
         <TouchableOpacity onPress={addTag} activeOpacity={0.8}
           hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 10, borderRadius: RADIUS.sm, backgroundColor: COLOURS.navy, justifyContent: 'center', shadowColor: COLOURS.glassShadowMd, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 8, elevation: 3 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: '#fff' }}>Add</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.onNavy }}>Add</Text>
         </TouchableOpacity>
       </View>
     </Field>
@@ -150,7 +150,7 @@ function AutocompleteField({ label, value, onChange, placeholder, suggestions })
                   borderTopColor: COLOURS.glassBorderSubtle,
                 }}
               >
-                <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text }}>{s}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{s}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -206,7 +206,7 @@ function KeysPicker({ value = [], onChange }) {
               hitSlop={{ top: 12, bottom: 4, left: 14, right: 14 }}
               style={{ paddingBottom: 14 }}
             >
-              <Text style={{ fontSize: 16, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
+              <Text style={{ fontSize: SIZES.body, color: COLOURS.danger, fontWeight: '300' }}>✕</Text>
             </TouchableOpacity>
           </View>
         ))}
@@ -219,7 +219,7 @@ function KeysPicker({ value = [], onChange }) {
             shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2,
           }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Add key</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>+ Add key</Text>
         </TouchableOpacity>
       </View>
     </Field>
@@ -246,7 +246,7 @@ function TimeSigPicker({ value = [], onChange }) {
                 shadowOffset: { width: 0, height: active ? 3 : 1 },
                 shadowOpacity: 1, shadowRadius: active ? 8 : 4, elevation: active ? 3 : 1,
               }}>
-              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 14, color: active ? COLOURS.navy : COLOURS.textMuted }}>{sig}</Text>
+              <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? COLOURS.navy : COLOURS.textMuted }}>{sig}</Text>
             </TouchableOpacity>
           );
         })}
@@ -276,7 +276,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                 {comp.title ? 'Edit piece' : 'Add piece'}
               </Text>
               <TouchableOpacity onPress={onClose} hitSlop={HIT_TEXT}>
-                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Cancel</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.body }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -337,7 +337,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                     <TextF value={data.tempo ? String(data.tempo) : ''} onChange={v => f('tempo', v.replace(/[^0-9]/g, ''))} placeholder="e.g. 92" />
                   </Field>
                 </View>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, flex: 1, marginBottom: 14 }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, flex: 1, marginBottom: 14 }}>
                   Drives the metronome default when you time a practice segment on this piece.
                 </Text>
               </View>
@@ -353,7 +353,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                   </View>
                   {(data.liking || 0) > 0 && (
                     <TouchableOpacity onPress={() => f('liking', 0)} activeOpacity={0.7} hitSlop={{ top: 14, bottom: 14, left: 6, right: 12 }}>
-                      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>clear</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>clear</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -367,7 +367,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                     paddingHorizontal: 14, paddingVertical: 7, borderRadius: RADIUS.pill,
                     backgroundColor: (STATUS_COLOURS[data.status] || {}).bg || COLOURS.w(0.50),
                   }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: (STATUS_COLOURS[data.status] || {}).text || COLOURS.textMuted }}>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: (STATUS_COLOURS[data.status] || {}).text || COLOURS.textMuted }}>
                       {data.status || 'ambition'}
                     </Text>
                   </View>
@@ -378,7 +378,7 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                       activeOpacity={0.75}
                       hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
                     >
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>📦 Shelve now</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textDim }}>📦 Shelve now</Text>
                     </TouchableOpacity>
                   )}
 
@@ -388,11 +388,11 @@ function CompModal({ comp, onSave, onClose, composerSuggestions, arrangementSugg
                       activeOpacity={0.75}
                       hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
                     >
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.textDim }}>↺ Un-shelve</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textDim }}>↺ Un-shelve</Text>
                     </TouchableOpacity>
                   ) : null}
 
-                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, flex: 1, minWidth: 180 }}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, flex: 1, minWidth: 180 }}>
                     {data.shelvedAt
                       ? 'Manually shelved — logging a session or lesson for this piece will automatically resume it.'
                       : 'Derived automatically from your practice log — logging moves it out of ambition; 60+ days of inactivity rolls it to shelved.'}
@@ -469,7 +469,7 @@ function DifficultyDisplay({ value }) {
   return (
     <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
       {[1, 2, 3, 4, 5].map(n => (
-        <Text key={n} style={{ fontSize: 14, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
+        <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= value ? 1 : 0.18, transform: [{ scale: n <= value ? 1 : 0.88 }] }}>🎹</Text>
       ))}
     </View>
   );
@@ -479,8 +479,8 @@ function NoteSection({ label, value }) {
   if (!value) return null;
   return (
     <View style={{ marginBottom: 14 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>{label}</Text>
-      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22 }}>{value}</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted, lineHeight: 22 }}>{value}</Text>
     </View>
   );
 }
@@ -500,14 +500,14 @@ function CardSummary({ comp }) {
   if (!line && !rated) return null;
   return (
     <View style={{ marginTop: 8 }}>
-      {line ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 19 }}>{line}</Text> : null}
+      {line ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 19 }}>{line}</Text> : null}
       {rated ? (
         <View style={{ flexDirection: 'row', gap: 14, marginTop: line ? 6 : 0, alignItems: 'center' }}>
           {comp.difficulty > 0 && <DifficultyDisplay value={comp.difficulty} />}
           {comp.liking > 0 && (
             <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
               {[1,2,3,4,5].map(n => (
-                <Text key={n} style={{ fontSize: 14, opacity: n <= comp.liking ? 1 : 0.18 }}>⭐</Text>
+                <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= comp.liking ? 1 : 0.18 }}>⭐</Text>
               ))}
             </View>
           )}
@@ -536,13 +536,13 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
       <TouchableOpacity onPress={() => setExpanded(e => !e)} activeOpacity={0.8} style={{ padding: 14, backgroundColor: COLOURS.glass }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 18, color: COLOURS.text, marginBottom: 2 }}>📜 {comp.title}</Text>
-            {comp.composer ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted }}>{comp.composer}</Text> : null}
-            {comp.arrangement ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 1 }}>arr. {comp.arrangement}</Text> : null}
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.cardTitle, color: COLOURS.text, marginBottom: 2 }}>📜 {comp.title}</Text>
+            {comp.composer ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted }}>{comp.composer}</Text> : null}
+            {comp.arrangement ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 1 }}>arr. {comp.arrangement}</Text> : null}
           </View>
           <View style={{ alignItems: 'flex-end', gap: 6, marginLeft: 10 }}>
             <StatusPill status={comp.status} />
-            <Text style={{ fontSize: 12, color: COLOURS.textDim }}>{expanded ? '▲' : '▼'}</Text>
+            <Text style={{ fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{expanded ? '▲' : '▼'}</Text>
           </View>
         </View>
 
@@ -562,7 +562,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                   shadowOffset: { width: 0, height: tab === t ? 3 : 1 },
                   shadowOpacity: 1, shadowRadius: tab === t ? 8 : 4, elevation: tab === t ? 3 : 1,
                 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: tab === t ? '#fff' : COLOURS.textMuted }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: tab === t ? COLOURS.onNavy : COLOURS.textMuted }}>
                   {t}
                 </Text>
               </TouchableOpacity>
@@ -579,11 +579,11 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                   </View>
                 ) : null}
                 {(comp.dateStarted || comp.dateCompleted) ? (
-                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 12 }}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 12 }}>
                     {[comp.dateStarted ? `Started ${comp.dateStarted}` : '', comp.dateCompleted ? `Completed ${comp.dateCompleted}` : ''].filter(Boolean).join('  ·  ')}
                   </Text>
                 ) : null}
-                {comp.info ? <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 22, marginBottom: 14 }}>{comp.info}</Text> : null}
+                {comp.info ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted, lineHeight: 22, marginBottom: 14 }}>{comp.info}</Text> : null}
                 <BtnRow>
                   <Btn label="Remove" variant="danger" onPress={() => onDelete(comp.id)} />
                   {onOpenPage ? <Btn label="Progress" onPress={() => onOpenPage(comp.id)} /> : null}
@@ -598,7 +598,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                 <NoteSection label="📚 Teacher feedback" value={comp.teacherFeedback} />
                 <NoteSection label="💡 My notes" value={comp.myNotes} />
                 {!comp.kerrinNotes && !comp.teacherFeedback && !comp.myNotes &&
-                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 13 }}>No notes yet.</Text>
+                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: SIZES.label }}>No notes yet.</Text>
                 }
               </>
             )}
@@ -609,7 +609,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                 <NoteSection label="🎶 Musical focus areas" value={comp.musicalFocus} />
                 <NoteSection label="🔄 Practice notes" value={comp.practiceNotes} />
                 {!comp.technicalChallenges && !comp.musicalFocus && !comp.practiceNotes &&
-                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 13 }}>No study notes yet.</Text>
+                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: SIZES.label }}>No study notes yet.</Text>
                 }
               </>
             )}
@@ -620,7 +620,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                 <NoteSection label="🎧 Recording references" value={comp.resourceRecordings} />
                 <NoteSection label="🎥 Tutorial videos" value={comp.resourceTutorials} />
                 {!comp.resourceSheet && !comp.resourceRecordings && !comp.resourceTutorials &&
-                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 13 }}>No resources added yet.</Text>
+                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: SIZES.label }}>No resources added yet.</Text>
                 }
               </>
             )}
@@ -628,7 +628,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
             {tab === 'sessions' && (
               <>
                 {compSessions.length === 0 ? (
-                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 13 }}>No sessions logged yet for this piece.</Text>
+                  <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: SIZES.label }}>No sessions logged yet for this piece.</Text>
                 ) : compSessions.map(s => {
                   const seg = (s.segments || []).find(sg => sg.compositionId === comp.id);
                   const energyBar = (s.energy ?? 0) + 3;
@@ -637,16 +637,16 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
 
                       {/* Header row: date + duration */}
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text }}>{fmtDate(s.date)}</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text }}>{fmtDate(s.date)}</Text>
                         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
                           {seg?.duration ? (
                             <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.tealAccent }}>
-                              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>⏱ {seg.duration} min</Text>
+                              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>⏱ {seg.duration} min</Text>
                             </View>
                           ) : null}
                           {s.duration ? (
                             <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.6) }}>
-                              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>{s.duration} min total</Text>
+                              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{s.duration} min total</Text>
                             </View>
                           ) : null}
                         </View>
@@ -656,13 +656,13 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                       <View style={{ flexDirection: 'row', gap: 16, marginBottom: 8 }}>
                         <View style={{ flexDirection: 'row', gap: 2 }}>
                           {[1,2,3,4,5].map(n => (
-                            <Text key={n} style={{ fontSize: 14, opacity: n <= energyBar ? 1 : 0.18 }}>⚡</Text>
+                            <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= energyBar ? 1 : 0.18 }}>⚡</Text>
                           ))}
                         </View>
                         {s.enjoyment ? (
                           <View style={{ flexDirection: 'row', gap: 2 }}>
                             {[1,2,3,4,5].map(n => (
-                              <Text key={n} style={{ fontSize: 14, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>
+                              <Text key={n} style={{ fontSize: SIZES.bodySmall, opacity: n <= s.enjoyment ? 1 : 0.18 }}>❤️</Text>
                             ))}
                           </View>
                         ) : null}
@@ -670,7 +670,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
 
                       {/* Section */}
                       {seg?.section ? (
-                        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 4 }}>📍 {seg.section}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 4 }}>📍 {seg.section}</Text>
                       ) : null}
 
                       {/* Felt difficulty + piece liking */}
@@ -678,20 +678,20 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
                         <View style={{ flexDirection: 'row', gap: 12, marginBottom: 4, alignItems: 'center' }}>
                           {seg?.feltDifficulty > 0 && (
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Difficulty</Text>
+                              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Difficulty</Text>
                               <View style={{ flexDirection: 'row', gap: 2 }}>
                                 {[1,2,3,4,5].map(n => (
-                                  <Text key={n} style={{ fontSize: 13, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
+                                  <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.feltDifficulty ? 1 : 0.18 }}>🎵</Text>
                                 ))}
                               </View>
                             </View>
                           )}
                           {seg?.liking > 0 && (
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Enjoyment</Text>
+                              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Enjoyment</Text>
                               <View style={{ flexDirection: 'row', gap: 2 }}>
                                 {[1,2,3,4,5].map(n => (
-                                  <Text key={n} style={{ fontSize: 13, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>
+                                  <Text key={n} style={{ fontSize: SIZES.label, opacity: n <= seg.liking ? 1 : 0.18 }}>⭐</Text>
                                 ))}
                               </View>
                             </View>
@@ -701,20 +701,20 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
 
                       {/* Notes */}
                       {seg?.notes ? (
-                        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 19 }}>{seg.notes}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4, lineHeight: 19 }}>{seg.notes}</Text>
                       ) : null}
 
                       {/* Challenge + progress tags */}
                       {((seg?.challenges || []).length > 0 || (seg?.progress || []).length > 0) && (
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
                           {(seg?.challenges || []).map(t => (
-                            <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}>
-                              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>🚧 {t}</Text>
+                            <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
+                              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>🚧 {t}</Text>
                             </View>
                           ))}
                           {(seg?.progress || []).map(t => (
                             <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
-                              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>✅ {t}</Text>
+                              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>✅ {t}</Text>
                             </View>
                           ))}
                         </View>
@@ -722,7 +722,7 @@ function CompCard({ comp, sessions, onEdit, onDelete, onOpenPage }) {
 
                       {/* Session-level wins */}
                       {s.wins ? (
-                        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 6, fontStyle: 'italic' }}>✨ {s.wins}</Text>
+                        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 6, fontStyle: 'italic' }}>✨ {s.wins}</Text>
                       ) : null}
                     </View>
                   );
@@ -789,7 +789,7 @@ export default function CompositionsScreen({ compositions, sessions, lessons, on
               accessibilityRole="button" accessibilityLabel="Open the timeline of your library"
               style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.14) }}>
               <Ionicons name="git-branch" size={16} color={COLOURS.navy} />
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Timeline</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>Timeline</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -812,21 +812,21 @@ export default function CompositionsScreen({ compositions, sessions, lessons, on
                   shadowRadius: active ? 10 : 6,
                   elevation: active ? 4 : 1,
                 }}>
-                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
+                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.label, color: active ? COLOURS.navy : COLOURS.textMuted }}>{s}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginBottom: 16 }}>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginRight: 2 }}>Sort</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8, marginRight: 2 }}>Sort</Text>
           {PIECE_SORTS.map(o => {
             const active = sortBy === o.key;
             return (
               <TouchableOpacity key={o.key} onPress={() => setSortBy(o.key)} activeOpacity={0.75} hitSlop={HIT_PILL}
                 accessibilityRole="radio" accessibilityLabel={`Sort by ${o.label}`} accessibilityState={{ selected: active }}
                 style={{ ...TOUCH_PILL, paddingHorizontal: 12, borderRadius: RADIUS.pill, backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55) }}>
-                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 13, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
+                <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.label, color: active ? COLOURS.onNavy : COLOURS.textMuted }}>{o.label}</Text>
               </TouchableOpacity>
             );
           })}
@@ -857,7 +857,7 @@ export default function CompositionsScreen({ compositions, sessions, lessons, on
           shadowOpacity: 0.55, shadowRadius: 16, elevation: 8,
         }}
       >
-        <Text style={{ fontSize: 28, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
+        <Text style={{ fontSize: SIZES.screenTitle, color: COLOURS.text, lineHeight: 32, marginTop: -2 }}>+</Text>
       </TouchableOpacity>
 
       {modal && (
