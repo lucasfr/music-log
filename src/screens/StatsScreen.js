@@ -442,11 +442,11 @@ function WeeklyTrendChart({ sessions, period }) {
     <View onLayout={e => setWidth(e.nativeEvent.layout.width)}>
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginBottom: 10 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 20, height: 2, backgroundColor: COLOURS.amber, borderRadius: 1 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>⚡ Energy</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 20, height: 2, backgroundColor: LIKING_LINE, borderRadius: 1 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>❤️ Liking</Text>
         </View>
@@ -600,11 +600,11 @@ function NeglectedPieces({ sessions, compositions }) {
         <View key={id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 10 }}>
           <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: urgencyColour(daysSince) }} />
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }} numberOfLines={1}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }} numberOfLines={1}>
               📜 {title}
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 3 }}>
-              <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[status]?.bg || COLOURS.tealAccent }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
+              <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: STATUS_COLOURS[status]?.bg || COLOURS.tealAccent }}>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: STATUS_COLOURS[status]?.text || COLOURS.navy }}>{status}</Text>
               </View>
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: urgencyColour(daysSince), fontStyle: 'italic' }}>
@@ -639,7 +639,7 @@ function WinsTimeline({ sessions, period }) {
             {i < wins.length - 1 && <View style={{ width: 1, flex: 1, backgroundColor: COLOURS.glassBorderSubtle, marginTop: 4 }} />}
           </View>
           <View style={{ flex: 1, paddingBottom: 4 }}>
-            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 3 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 4 }}>
               {new Date(s.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
             </Text>
             <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.bodySmall, color: COLOURS.text, lineHeight: 20 }}>“{s.wins}”</Text>
@@ -730,7 +730,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
           <Label>Most covered in lessons</Label>
           {topLessonPieces.map(({ id, title, count }) => (
             <View key={id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text, flex: 1 }} numberOfLines={1}>📜 {title}</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text, flex: 1 }} numberOfLines={1}>📜 {title}</Text>
               <View style={{ width: 80, height: 6, backgroundColor: COLOURS.bg2, borderRadius: 3 }}>
                 <View style={{ height: '100%', width: `${(count / maxCount) * 100}%`, backgroundColor: COLOURS.amber, borderRadius: 3 }} />
               </View>
@@ -748,7 +748,7 @@ function LessonInsights({ lessons, sessions, compositions, period }) {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
             {lessonOnlyPieces.map(({ id, title }) => (
               <View key={id} style={{
-                paddingHorizontal: 10, paddingVertical: 5,
+                paddingHorizontal: 10, paddingVertical: 6,
                 borderRadius: RADIUS.pill,
                 backgroundColor: COLOURS.lessonBg,
                 shadowColor: COLOURS.lessonBorder,
@@ -865,11 +865,11 @@ function LibraryGrowthChart({ compositions, sessions, lessons }) {
       )}
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 6 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 16, height: 2, backgroundColor: COLOURS.amber, borderRadius: 1 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Total</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 16, height: 2, backgroundColor: COLOURS.steel, borderRadius: 1 }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>Active</Text>
         </View>
@@ -932,7 +932,7 @@ function TechniqueBreakdown({ sessions }) {
             <View style={{ flex: 1, height: 14, backgroundColor: COLOURS.bg2, borderRadius: RADIUS.pill }}>
               <View style={{ height: '100%', width: `${(data.count / maxCount) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: RADIUS.pill }} />
             </View>
-            <View style={{ alignItems: 'flex-end', gap: 3, width: 80, flexShrink: 0 }}>
+            <View style={{ alignItems: 'flex-end', gap: 4, width: 80, flexShrink: 0 }}>
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textDim }}>{data.count}×{data.minutes > 0 ? `  ⏱${timeStr(data.minutes)}` : ''}</Text>
               {avgDiff !== null && <View style={{ marginTop: 8 }}><ZeldaBarFractional emoji="🎵" fill={avgDiff} size={13} /></View>}
             </View>
@@ -1172,11 +1172,11 @@ function ScaleCoverage({ sessions }) {
 
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('amber', COLOURS.isDark)[2] }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>major</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('teal', COLOURS.isDark)[2] }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>minor</Text>
         </View>
@@ -1302,7 +1302,7 @@ function GradePathway({ compositions, sessions }) {
               accessibilityLabel={`${g.grade}: ${g.ready} of ${g.total} performance-ready`}
               style={{ minHeight: 48, justifyContent: 'center', paddingVertical: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.text }}>{g.grade}</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.text }}>{g.grade}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>
                   {g.ready}/{g.total} ready{g.minutes ? ` \u00b7 ${fmtMin(g.minutes)}` : ''}
                 </Text>
@@ -1456,7 +1456,7 @@ function StaleScales({ sessions }) {
         <View key={`${x.kind}|${x.name}`} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 10 }}>
           <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: urgency(x.daysSince) }} />
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.text }} numberOfLines={1}>{x.name}</Text>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }} numberOfLines={1}>{x.name}</Text>
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: urgency(x.daysSince), marginTop: 2 }}>
               {x.kind === 'Arpeggios' ? 'Arpeggio' : 'Scale'} · {agoLabel(x.daysSince)}
             </Text>
@@ -1571,7 +1571,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               return (
                 <TouchableOpacity key={p.key} onPress={() => setPeriod(p.key)} activeOpacity={0.75}
                   hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
-                    paddingHorizontal: 11, paddingVertical: 5, borderRadius: RADIUS.pill,
+                    paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
                     backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
                     shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
                     shadowOffset: { width: 0, height: active ? 3 : 1 },
@@ -1602,7 +1602,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   {(item.type === 'energy' || item.type === 'enjoyment') ? (
                     item.fill !== null
                       ? <ZeldaBarFractional emoji={item.emoji} fill={item.fill} size={16} />
-                      : <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 24, color: COLOURS.navy, lineHeight: 28 }}>—</Text>
+                      : <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.display, color: COLOURS.navy, lineHeight: 28 }}>—</Text>
                   ) : (
                     <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.screenTitle, color: item.urgent ? COLOURS.red : COLOURS.navy, lineHeight: 32, fontVariant: ['lining-nums'] }}>{item.value}</Text>
                   )}
@@ -1682,7 +1682,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         </StatsSection>
         <StatsSection id="library" title="Library" collapsed={collapsed} onToggle={toggleSection}>
         {compositions.length === 0 ? (
-          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 15, color: COLOURS.textDim, marginBottom: 12 }}>No pieces in the library yet.</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, marginBottom: 12 }}>No pieces in the library yet.</Text>
         ) : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
           {STATUS_OPTIONS.map(s => {
@@ -1705,7 +1705,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   <Text style={{ fontSize: SIZES.screenTitle, lineHeight: 34, marginBottom: 8, color: sc.text || COLOURS.navy }}>
                     {STATUS_EMOJI[s] || '🎵'}
                   </Text>
-                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 30, color: sc.text || COLOURS.navy, lineHeight: 32 }}>
+                  <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.screenTitle, color: sc.text || COLOURS.navy, lineHeight: 32 }}>
                     {count}
                   </Text>
                   <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: sc.text || COLOURS.textDim, marginTop: 4, letterSpacing: 0.3, opacity: 0.85 }}>{s}</Text>
@@ -1756,13 +1756,13 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
             <View style={{ flex: isDesktop ? 1 : undefined, paddingRight: isDesktop ? 20 : 0 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <Label style={{ marginBottom: 0 }}>Most practised</Label>
-                <View style={{ flexDirection: 'row', gap: 5 }}>
+                <View style={{ flexDirection: 'row', gap: 6 }}>
                   {[{ key: 'count', label: 'Sessions' }, { key: 'time', label: 'Time' }].map(opt => {
                     const active = pieceSort === opt.key;
                     return (
                       <TouchableOpacity key={opt.key} onPress={() => setPieceSort(opt.key)} activeOpacity={0.75}
                         hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
-                          paddingHorizontal: 9, paddingVertical: 4, borderRadius: RADIUS.pill,
+                          paddingHorizontal: 8, paddingVertical: 4, borderRadius: RADIUS.pill,
                           backgroundColor: active ? COLOURS.navy : COLOURS.w(0.55),
                           shadowColor: active ? COLOURS.glassShadowMd : COLOURS.glassShadow,
                           shadowOffset: { width: 0, height: active ? 2 : 1 },
@@ -1782,7 +1782,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                   borderLeftColor: COLOURS.steel,
                   paddingBottom: 4,
                 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text, flex: 1 }}>📜 {name}</Text>
                     <View style={{ alignItems: 'flex-end', gap: 1 }}>
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.textDim }}>
@@ -1797,14 +1797,14 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
                     <View style={{ height: '100%', width: `${((pieceSort === 'time' ? mins : count) / activePieceMax) * 100}%`, backgroundColor: COLOURS.steel, borderRadius: 2 }} />
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-                    <View style={{ gap: 3 }}>
+                    <View style={{ gap: 4 }}>
                       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Session</Text>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
                         {avgEnergy !== null && <ZeldaBarFractional emoji="⚡" fill={avgEnergy + 3} size={12} />}
                         {avgSessionEnjoyment !== null && <ZeldaBarFractional emoji="❤️" fill={avgSessionEnjoyment} size={12} />}
                       </View>
                     </View>
-                    <View style={{ gap: 3 }}>
+                    <View style={{ gap: 4 }}>
                       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Piece</Text>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
                         {avgLiking !== null && <ZeldaBarFractional emoji="⭐" fill={avgLiking} size={12} />}
