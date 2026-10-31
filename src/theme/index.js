@@ -22,6 +22,7 @@ export const COLOURS = {
   text:      '#09637E',
   textMuted: '#088395',
   onNavy:    '#ffffff',   // text and icons on a filled navy or steel surface
+  onAmber:   '#003049',   // icons on the amber play button (white was 2.6:1)
   textDim:   '#3A767C',   // was #7AB2B2 (2.1:1) — now 4.6:1 on the page bg, 5.2:1 on white
 
   // Glass
@@ -110,6 +111,7 @@ const DARK = {
   bg: '#0A1418', bg2: '#13242A',
   text: '#E4F3F6', textMuted: '#9BD0DA', textDim: '#8FB6BE',
   onNavy: '#0A1418',   // the dark page colour: dark glyphs on the bright teal fills (white was 2.5:1 on steel)
+  onAmber: '#0A1418',   // dark glyph on amber (white was 2.1:1)
   glass: 'rgba(255,255,255,0.07)', glassHover: 'rgba(255,255,255,0.12)',
   glassBorder: 'rgba(255,255,255,0)', glassBorderSubtle: 'rgba(255,255,255,0.10)',
   glassShadow: 'rgba(59,179,198,0.16)', glassShadowMd: 'rgba(59,179,198,0.24)',
