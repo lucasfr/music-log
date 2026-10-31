@@ -38,6 +38,10 @@ for (const key of Object.keys(THEMES)) {
     assert.ok(contrast(c.onInk, c.ink) >= 4.5, `${c.onInk} on ${c.ink} is ${contrast(c.onInk, c.ink).toFixed(2)}:1`);
   });
 
+  test(`${key}: an unfilled rating icon is visible but clearly lighter than a filled one`, () => {
+    assert.ok(c.ratingEmpty >= 0.2 && c.ratingEmpty <= 0.5, `ratingEmpty is ${c.ratingEmpty}`);
+  });
+
   test(`${key}: the challenge chip tint is defined`, () => {
     assert.match(c.challengeLight, /^rgba\(221,174,211,0\.\d+\)$/);
   });
