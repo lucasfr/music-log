@@ -121,34 +121,34 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     ) : null}
                   </View>
                   {seg.scales?.length > 0 && (
-                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 3 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 4 }}>{seg.scales.map(s => formatScaleEntry(s, seg.octaves || 1)).join(' · ')}</Text>
                   )}
                   {seg.feedback ? (
                     <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>💬 Feedback</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>💬 Feedback</Text>
                       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text>
                     </View>
                   ) : null}
                   {seg.assignment ? (
                     <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}>
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>📚 Assignment</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>📚 Assignment</Text>
                       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text>
                     </View>
                   ) : null}
                   {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 6, lineHeight: 20 }}>{seg.notes}</Text> : null}
                   {(seg.challenges || []).length > 0 && (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                       {seg.challenges.map(t => (
-                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
+                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
                           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text>
                         </View>
                       ))}
                     </View>
                   )}
                   {(seg.progress || []).length > 0 && (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                       {seg.progress.map(t => (
-                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
+                        <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
                           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text>
                         </View>
                       ))}
@@ -183,13 +183,13 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     {seg.section ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{seg.section}</Text> : null}
                     {seg.feedback ? (
                       <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.steel }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>💬 Feedback</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>💬 Feedback</Text>
                         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.feedback}</Text>
                       </View>
                     ) : null}
                     {seg.assignment ? (
                       <View style={{ marginTop: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: COLOURS.navy }}>
-                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 3 }}>📚 Assignment</Text>
+                        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>📚 Assignment</Text>
                         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{seg.assignment}</Text>
                       </View>
                     ) : null}
@@ -207,18 +207,18 @@ export function LessonDetailModal({ visible, lesson, compositions, onClose, onDe
                     ) : null}
                     {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, marginTop: 6, lineHeight: 20 }}>{seg.notes}</Text> : null}
                     {(seg.challenges || []).length > 0 && (
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                         {seg.challenges.map(t => (
-                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
+                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}>
                             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{t}</Text>
                           </View>
                         ))}
                       </View>
                     )}
                     {(seg.progress || []).length > 0 && (
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                         {seg.progress.map(t => (
-                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
+                          <View key={t} style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}>
                             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.navy }}>{t}</Text>
                           </View>
                         ))}
