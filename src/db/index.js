@@ -44,6 +44,19 @@ async function idbDelete(store, id) {
   });
 }
 
+// Empties every store in one transaction: all of it empties, or none of it.
+async function idbClearAll() {
+  const db = await openIDB();
+  const stores = ['sessions', 'compositions', 'lessons'];
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(stores, 'readwrite');
+    stores.forEach(s => tx.objectStore(s).clear());
+    tx.oncomplete = () => resolve();
+    tx.onerror    = () => reject(tx.error);
+    tx.onabort    = () => reject(tx.error);
+  });
+}
+
 // ─── Native: expo-sqlite ────────────────────────────────────────────────────
 
 let _db = null;
@@ -326,4 +339,20 @@ export async function deleteLesson(id) {
   if (Platform.OS === 'web') { await idbDelete('lessons', id); return; }
   const db = await getDB();
   await db.runAsync('DELETE FROM lessons WHERE id = ?', [id]);
+}
+
+// ─── CLEAR ───────────────────────────────────────────────────────────────────
+
+// Removes every session (and its segments), lesson and piece stored on this device. Local only: to
+// delete everywhere, use clearAllRecords in hooks.js, which also sends the deletes to Supabase.
+export async function clearAllLocal() {
+  if (Platform.OS === 'web') { await idbClearAll(); return; }
+  const db = await getDB();
+  await db.withTransactionAsync(async () => {
+    // Segments first: they point at sessions, and are not left behind even if foreign keys are off.
+    await db.runAsync('DELETE FROM segments');
+    await db.runAsync('DELETE FROM sessions');
+    await db.runAsync('DELETE FROM lessons');
+    await db.runAsync('DELETE FROM compositions');
+  });
 }

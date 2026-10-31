@@ -18,7 +18,7 @@ import {
 } from '@expo-google-fonts/lato';
 
 import './src/components/EmojiIcons'; // draws emoji as icons inside <Text> (must load before any screen renders)
-import { useSessions, useCompositions, useLessons } from './src/db/hooks';
+import { useSessions, useCompositions, useLessons, clearAllRecords } from './src/db/hooks';
 import { outbox } from './src/db/outbox';
 import { useForegroundRefresh } from './src/utils/useForegroundRefresh';
 import { backfillTechniqueGroups } from './src/db/migrations';
@@ -117,6 +117,15 @@ function AppInner({ fontsLoaded }) {
   const deleteSession = id => undo.schedule(id, 'Session', () => removeSession(id));
   const deleteLesson  = id => undo.schedule(id, 'Lesson',  () => removeLesson(id));
   const deleteComp    = id => undo.schedule(id, 'Piece',   () => removeComp(id));
+
+  // Settings → Danger zone → Clear all data. Deletes everything here and, when signed in, everywhere (see
+  // clearAllRecords), then reloads the three lists so every screen empties. Uses the unfiltered lists,
+  // so an item sitting in its undo window is cleared too. Resolves to the result (see describeClear).
+  const clearAll = async () => {
+    const result = await clearAllRecords({ sessions: allSessions, lessons: allLessons, compositions: allCompositions });
+    await Promise.all([reloadSessions(), reloadComps(), reloadLessons()]);
+    return result;
+  };
 
   // Saves made through the UI give feedback: a light success haptic on native, and a short
   // message when the save newly reaches a milestone (first session, a 7-day streak, 10 hours…).
@@ -233,7 +242,7 @@ function AppInner({ fontsLoaded }) {
         case 'History':  return <HistoryScreen  key="history"  sessions={sessions} lessons={lessons} compositions={compositionsWithStatus} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={isDesktop} />;
         case 'Stats':    return <StatsScreen    key="stats"    sessions={sessions} compositions={compositionsWithStatus} lessons={lessons} isDesktop={isDesktop} onSaveComposition={saveComp} />;
         case 'Timeline': return <TimelineScreen key="timeline" compositions={compositionsWithStatus} sessions={sessions} lessons={lessons} isDesktop={isDesktop} />;
-        case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />;
+        case 'Settings': return <SettingsScreen key="settings" isDesktop={isDesktop} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} onClearAll={clearAll} />;
         case 'About':    return <AboutScreen    key="about"    isDesktop={isDesktop} />;
         default:         return <HomeScreen     key="home"     {...screenProps} onOpenSettings={() => setActiveTab('Settings')} />;
       }
@@ -302,7 +311,7 @@ function AppInner({ fontsLoaded }) {
             {() => <TimelineScreen compositions={compositionsWithStatus} sessions={sessions} lessons={lessons} isDesktop={false} />}
           </Tab.Screen>
           <Tab.Screen name="Settings">
-            {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} />}
+            {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} onClearAll={clearAll} />}
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>

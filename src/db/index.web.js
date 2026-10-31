@@ -61,3 +61,17 @@ export async function getAllLessons() {
 }
 export async function saveLesson(lesson)     { await idbPut('lessons', lesson); }
 export async function deleteLesson(id)       { await idbDelete('lessons', id); }
+
+// Empties every store in one transaction: all of it empties, or none of it. Local only: to delete
+// everywhere, use clearAllRecords in hooks.js, which also sends the deletes to Supabase.
+export async function clearAllLocal() {
+  const db = await openIDB();
+  const stores = ['sessions', 'compositions', 'lessons'];
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(stores, 'readwrite');
+    stores.forEach(s => tx.objectStore(s).clear());
+    tx.oncomplete = () => resolve();
+    tx.onerror    = () => reject(tx.error);
+    tx.onabort    = () => reject(tx.error);
+  });
+}
