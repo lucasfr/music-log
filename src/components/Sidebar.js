@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, Platform } from 'react-native';
 import { Tap as TouchableOpacity } from './Motion';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from './Icon';
-import { COLOURS, RADIUS, live } from '../theme';
+import { COLOURS, RADIUS, SIZES, live } from '../theme';
 
 const SIDEBAR_W = 200;
 
@@ -51,7 +51,7 @@ export function Sidebar({ activeTab, onNavigate }) {
                 <Ionicons
                   name={active ? item.icon : item.iconOut}
                   size={20}
-                  color="#ffffff"
+                  color={active ? COLOURS.onNavy : COLOURS.textMuted}
                 />
               </View>
               <Text style={[styles.navLabel, active && styles.navLabelActive]}>
@@ -74,7 +74,7 @@ export function Sidebar({ activeTab, onNavigate }) {
               style={[styles.navItem, active && styles.navItemActive]}
             >
               <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
-                <Ionicons name={active ? item.icon : item.iconOut} size={20} color="#ffffff" />
+                <Ionicons name={active ? item.icon : item.iconOut} size={20} color={active ? COLOURS.onNavy : COLOURS.textMuted} />
               </View>
               <Text style={[styles.navLabel, active && styles.navLabelActive]}>{item.name}</Text>
             </TouchableOpacity>
