@@ -47,7 +47,7 @@ function timeAgo(iso) {
 function GlassCard({ children, style }) {
   return (
     <BlurView intensity={40} tint={COLOURS.blurTint} style={[{
-      borderRadius: 18,
+      borderRadius: RADIUS.md,
       overflow: 'hidden',
       marginBottom: 12,
       shadowColor: COLOURS.navyA(0.10),
@@ -142,7 +142,7 @@ function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, 
           backgroundColor: COLOURS.navyA(0.06),
           paddingHorizontal: 14,
           paddingVertical: 12,
-          borderRadius: 12,
+          borderRadius: RADIUS.sm,
           borderWidth: 1,
           borderColor: COLOURS.navyA(0.10),
         }}
@@ -556,7 +556,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                       value={email} onChangeText={setEmail}
                       placeholder="you@example.com" placeholderTextColor={COLOURS.textDim}
                       autoCapitalize="none" autoCorrect={false} keyboardType="email-address"
-                      style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, backgroundColor: COLOURS.navyA(0.06), paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: COLOURS.navyA(0.10), marginBottom: 10 }}
+                      style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, backgroundColor: COLOURS.navyA(0.06), paddingHorizontal: 14, paddingVertical: 12, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: COLOURS.navyA(0.10), marginBottom: 10 }}
                     />
                     <TouchableOpacity onPress={handleSendMagicLink} activeOpacity={0.8} disabled={phase === 'sending'}
                       style={{ paddingVertical: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center' }}>
