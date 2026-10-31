@@ -4,7 +4,7 @@ import { Tap as TouchableOpacity } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '../components/Icon';
-import { COLOURS, RADIUS, HIT_TEXT, TOUCH_PILL, HIT_PILL, TINT_TEXT } from '../theme';
+import { COLOURS, RADIUS, SIZES, HIT_TEXT, TOUCH_PILL, HIT_PILL, TINT_TEXT } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import { notify } from '../utils/notify';
 import { usePref } from '../utils/usePref';
@@ -64,7 +64,7 @@ function SectionHeader({ children }) {
   return (
     <Text style={{
       fontFamily: 'Lato-Bold',
-      fontSize: 12,
+      fontSize: SIZES.labelSmall,
       color: COLOURS.textDim,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
@@ -89,7 +89,7 @@ function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBor
     }, radius]}>
       {icon && (
         <View style={{
-          width: 34, height: 34, borderRadius: 10,
+          width: 34, height: 34, borderRadius: RADIUS.sm,
           backgroundColor: danger ? 'rgba(214,40,40,0.10)' : COLOURS.navyA(0.10),
           alignItems: 'center', justifyContent: 'center',
           marginRight: 12,
@@ -98,11 +98,11 @@ function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBor
         </View>
       )}
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: danger ? COLOURS.red : COLOURS.text }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: danger ? COLOURS.red : COLOURS.text }}>
           {label}
         </Text>
         {sublabel ? (
-          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 1 }}>{sublabel}</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 1 }}>{sublabel}</Text>
         ) : null}
       </View>
       {right ?? (onPress ? <Ionicons name="chevron-forward" size={16} color={COLOURS.textDim} /> : null)}
@@ -120,7 +120,7 @@ function Row({ icon, label, sublabel, right, onPress, danger, first, last, noBor
 function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, keyboardType }) {
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 14 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>
         {label}
       </Text>
       <TextInput
@@ -134,7 +134,7 @@ function GlassInput({ label, value, onChangeText, placeholder, secureTextEntry, 
         keyboardType={keyboardType}
         style={{
           fontFamily: 'Lato',
-          fontSize: 14,
+          fontSize: SIZES.bodySmall,
           color: COLOURS.text,
           backgroundColor: COLOURS.navyA(0.06),
           paddingHorizontal: 14,
@@ -152,7 +152,7 @@ function StatusDot({ connected }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: connected ? '#00B478' : COLOURS.textDim }} />
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: connected ? TINT_TEXT.success : COLOURS.textDim }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: connected ? TINT_TEXT.success : COLOURS.textDim }}>
         {connected ? 'Connected' : 'Not connected'}
       </Text>
     </View>
@@ -163,8 +163,8 @@ function ResultBanner({ result, errorKey = 'errors' }) {
   if (!result) return null;
   const hasErrors = result[errorKey] > 0;
   return (
-    <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: hasErrors ? 'rgba(214,40,40,0.07)' : 'rgba(0,180,120,0.08)' }}>
-      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: hasErrors ? COLOURS.red : TINT_TEXT.success }}>
+    <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: hasErrors ? 'rgba(214,40,40,0.07)' : 'rgba(0,180,120,0.08)' }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: hasErrors ? COLOURS.red : TINT_TEXT.success }}>
         {result.message}
       </Text>
     </View>
@@ -348,7 +348,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
       accessibilityRole="radio" accessibilityLabel={a11y} accessibilityState={{ selected: active }}
       style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.10) }}
     >
-      <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 14, color: active ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? '#fff' : COLOURS.textMuted }}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -384,12 +384,12 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                     }}
                   >
                     <Ionicons name={THEME_ICONS[o.key] || 'color-palette-outline'} size={16} color={active ? '#fff' : COLOURS.textMuted} />
-                    <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: 14, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
+                    <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? '#fff' : COLOURS.textMuted }}>{o.label}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 10 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
               System follows your device's light or dark setting.
             </Text>
           </View>
@@ -399,7 +399,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
         <SectionHeader>Practice</SectionHeader>
         <GlassCard>
           <View style={{ padding: 14 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, marginBottom: 8 }}>Weekly goal</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, marginBottom: 8 }}>Weekly goal</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {GOAL_OPTIONS.map(g => chip(
                 `g${g}`, g ? `${g / 60}h` : 'Off', Number(goalRaw) === g,
@@ -407,12 +407,12 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                 g ? `${g / 60} hours a week` : 'No weekly goal',
               ))}
             </View>
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 10 }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
               Shown on Home as progress through your week.
             </Text>
             {Platform.OS !== 'web' && (
               <>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Daily reminder</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Daily reminder</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {['', ...REMINDER_TIMES].map(t => chip(
                     `r${t}`, t || 'Off', reminderTime === t,
@@ -465,7 +465,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
             <SectionHeader>Edits replaced by sync</SectionHeader>
             <GlassCard>
               <View style={{ padding: 16 }}>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, lineHeight: 19 }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, lineHeight: 19 }}>
                   Two devices changed the same entry. The newer version was kept, and the other one is saved here so nothing is lost.
                 </Text>
               </View>
@@ -474,8 +474,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                   key={`${c.table}:${c.id}:${c.record.updated_at}`}
                   style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: COLOURS.navyA(0.07) }}
                 >
-                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text }}>{c.label}</Text>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, marginTop: 2 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{c.label}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 2 }}>
                     {c.side === 'this device' ? 'Your edit on this device' : 'The edit from your other device'} · replaced {timeAgo(c.at)}
                   </Text>
                   <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
@@ -484,14 +484,14 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                       accessibilityRole="button" accessibilityLabel={`Restore this version of ${c.label}`}
                       style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
                     >
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Restore this version</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>Restore this version</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => dismissConflict(c)} activeOpacity={0.75} hitSlop={HIT_PILL}
                       accessibilityRole="button" accessibilityLabel={`Dismiss ${c.label}`}
                       style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10) }}
                     >
-                      <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted }}>Dismiss</Text>
+                      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>Dismiss</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -508,25 +508,25 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           <GlassInput label="Project URL" value={url} onChangeText={setUrl} placeholder="https://xxxx.supabase.co" keyboardType="url" />
           <GlassInput label="Anon key" value={anonKey} onChangeText={setAnonKey} placeholder="eyJhbGci…" secureTextEntry />
           {error && (
-            <View style={{ marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: 'rgba(214,40,40,0.07)' }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.red }}>{error}</Text>
+            <View style={{ marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: 'rgba(214,40,40,0.07)' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.red }}>{error}</Text>
             </View>
           )}
           <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingBottom: 14 }}>
             <TouchableOpacity onPress={handleSaveCredentials} activeOpacity={0.8}
               style={{ flex: 1, paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Save</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>Save</Text>
             </TouchableOpacity>
             {credsSaved && (
               <TouchableOpacity onPress={handleClearCredentials} activeOpacity={0.8}
                 style={{ paddingHorizontal: 18, paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.08)' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.red }}>Clear</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.red }}>Clear</Text>
               </TouchableOpacity>
             )}
           </View>
           {savedBanner && (
-            <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: 'rgba(0,180,120,0.08)' }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.success }}>✓ Credentials saved</Text>
+            <View style={{ marginHorizontal: 16, marginBottom: 14, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: 'rgba(0,180,120,0.08)' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.success }}>✓ Credentials saved</Text>
             </View>
           )}
         </GlassCard>
@@ -540,39 +540,40 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                 <>
                   <TouchableOpacity onPress={handleGitHub} activeOpacity={0.8}
                     style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: '#24292e', alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>🐙  Continue with GitHub</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: '#fff' }}>🐙  Continue with GitHub</Text>
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                     <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.navyA(0.10) }} />
-                    <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>or</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>or</Text>
                     <View style={{ flex: 1, height: 1, backgroundColor: COLOURS.navyA(0.10) }} />
                   </View>
                   <View style={{ marginBottom: 8 }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Email</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Email</Text>
                     <TextInput
                       value={email} onChangeText={setEmail}
                       placeholder="you@example.com" placeholderTextColor={COLOURS.textDim}
                       autoCapitalize="none" autoCorrect={false} keyboardType="email-address"
-                      style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.text, backgroundColor: COLOURS.navyA(0.06), paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: COLOURS.navyA(0.10), marginBottom: 10 }}
+                      style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, backgroundColor: COLOURS.navyA(0.06), paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: COLOURS.navyA(0.10), marginBottom: 10 }}
                     />
                     <TouchableOpacity onPress={handleSendMagicLink} activeOpacity={0.8} disabled={phase === 'sending'}
                       style={{ paddingVertical: 11, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center' }}>
                       {phase === 'sending'
                         ? <ActivityIndicator color={COLOURS.navy} size="small" />
-                        : <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.navy }}>Send magic link</Text>
+                        : <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.navy }}>Send magic link</Text>
                       }
                     </TouchableOpacity>
                   </View>
                 </>
               ) : (
                 <View style={{ alignItems: 'center', paddingVertical: 8, gap: 8 }}>
+                  {/* design: ok emoji */}
                   <Text style={{ fontSize: 32 }}>📬</Text>
                   <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 20, color: COLOURS.navy }}>Check your email</Text>
-                  <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, textAlign: 'center', lineHeight: 20 }}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, textAlign: 'center', lineHeight: 20 }}>
                     Click the link from Supabase, then come back here.
                   </Text>
                   <TouchableOpacity onPress={() => { setPhase('idle'); loadState(); }} hitSlop={HIT_TEXT} style={{ marginTop: 4 }}>
-                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>I've clicked the link ↗</Text>
+                    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>I've clicked the link ↗</Text>
                   </TouchableOpacity>
                 </View>
               )}
