@@ -344,7 +344,7 @@ export default function CalendarScreen({ sessions, lessons, compositions, onSave
           flex: 1,
           marginTop: 12,
           marginBottom: 12,
-          borderRadius: 20,
+          borderRadius: RADIUS.lg,
           overflow: 'hidden',
           backgroundColor: COLOURS.w(0.28),
           borderWidth: 1,
