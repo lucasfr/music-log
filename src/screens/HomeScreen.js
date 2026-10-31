@@ -158,7 +158,7 @@ function LessonEntry({ lesson, compositions, onPress, showDate = true, isSelecte
                 {newPieces.map(p => {
                   const name = p.compositionId ? compName(p.compositionId) : p.pieceName;
                   return name ? (
-                    <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: 'rgba(252,191,73,0.18)', borderRadius: RADIUS.pill }}>
+                    <View key={p.id} style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: COLOURS.yellowLight, borderRadius: RADIUS.pill }}>
                       <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.lessonText }}>✦ {name}</Text>
                     </View>
                   ) : null;
@@ -202,8 +202,8 @@ function GlassBtn({ label, onPress, color, danger, small }) {
       paddingHorizontal: small ? 10 : 16, paddingVertical: 8,
       alignSelf: small ? 'flex-start' : 'auto',
       borderRadius: RADIUS.pill,
-      backgroundColor: danger ? 'rgba(214,40,40,0.07)' : COLOURS.w(0.55),
-      shadowColor: danger ? 'rgba(214,40,40,0.10)' : COLOURS.navyA(0.08),
+      backgroundColor: danger ? COLOURS.dangerLight : COLOURS.w(0.55),
+      shadowColor: danger ? COLOURS.dangerLight : COLOURS.navyA(0.08),
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 1, shadowRadius: 6, elevation: 2,
     }}>
@@ -298,8 +298,8 @@ function ResumeTimerCard({ summary, onResume, onDiscard }) {
         <TouchableOpacity onPress={onResume} activeOpacity={0.85} hitSlop={HIT_PILL}
           accessibilityRole="button" accessibilityLabel="Resume the timer"
           style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
-          <Ionicons name="play" size={18} color="#fff" />
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: '#fff' }}>Resume</Text>
+          <Ionicons name="play" size={18} color={COLOURS.onNavy} />
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.onNavy }}>Resume</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onDiscard} activeOpacity={0.8} hitSlop={HIT_PILL}
           accessibilityRole="button" accessibilityLabel="Discard the saved timer"
@@ -375,7 +375,7 @@ function StartPracticeCard({ repeatPlan, routines, compositions, lastSession, to
             width: 60, height: 60, borderRadius: 30, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center', paddingLeft: 3,
             shadowColor: COLOURS.glowTeal, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 14, elevation: 6,
           }}>
-            <Ionicons name="play" size={28} color="#fff" />
+            <Ionicons name="play" size={28} color={COLOURS.onNavy} />
           </View>
           <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim }}>Set up</Text>
         </TouchableOpacity>
@@ -404,7 +404,7 @@ function BackupNudge({ due, onBackup, onLater }) {
   const pill = (label, onPress, primary) => (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} hitSlop={HIT_PILL}
       style={{ ...TOUCH_PILL, paddingHorizontal: 16, borderRadius: RADIUS.pill, backgroundColor: primary ? COLOURS.navy : COLOURS.navyA(0.10) }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: primary ? '#fff' : COLOURS.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: primary ? COLOURS.onNavy : COLOURS.textMuted }}>{label}</Text>
     </TouchableOpacity>
   );
   return (
@@ -506,7 +506,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                   {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                   {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
                       {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
                     </View>
                   )}
@@ -549,7 +549,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                     {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                     {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
                         {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
                       </View>
                     )}
@@ -659,7 +659,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                   {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                   {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                      {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
                       {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
                     </View>
                   )}
@@ -701,7 +701,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
                     {seg.notes ? <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, marginTop: 4, lineHeight: 20 }}>{seg.notes}</Text> : null}
                     {((seg.challenges||[]).length > 0 || (seg.progress||[]).length > 0) && (
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(221,174,211,0.15)', borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
+                        {(seg.challenges||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.challengeLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted }}>{t}</Text></View>)}
                         {(seg.progress||[]).map(t => <View key={t} style={{ paddingHorizontal: 7, paddingVertical: 2, backgroundColor: COLOURS.accentLight, borderRadius: RADIUS.pill }}><Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.navy }}>{t}</Text></View>)}
                       </View>
                     )}
