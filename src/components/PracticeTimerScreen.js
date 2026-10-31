@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { AppBackground } from './Background';
 import { playChime } from '../utils/chime';
 import { useKeepAwake } from '../utils/useKeepAwake';
@@ -91,7 +91,7 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center' }}>
         <Text style={{ fontFamily: 'Lato-Bold', fontSize: 32, color: COLOURS.text }}>{fmtClock(remainingMs)}</Text>
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 2 }}>of {fmtMinutes(plannedMs)}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>of {fmtMinutes(plannedMs)}</Text>
       </View>
     </View>
   );
@@ -196,7 +196,7 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
           }} />
         ))}
       </View>
-      <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 2 }}>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 2 }}>
         segment {timer.currentIndex + 1} of {timer.segments.length}
       </Text>
       <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 24, color: COLOURS.text, marginBottom: 8, textAlign: 'center' }}>
@@ -205,15 +205,15 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
       </Text>
 
       {pieceInfo ? (
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: -4, marginBottom: 8 }}>{pieceInfo}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: -4, marginBottom: 8 }}>{pieceInfo}</Text>
       ) : null}
 
       {timer.currentSegment.type === 'repertoire' && openSpotsLine(linkedComposition) ? (
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy, marginBottom: 8 }}>Work on: {openSpotsLine(linkedComposition)}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy, marginBottom: 8 }}>Work on: {openSpotsLine(linkedComposition)}</Text>
       ) : null}
 
       {timer.currentSegment.type === 'technique' && formatTouch(timer.currentSegment) ? (
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.steel, marginTop: -2, marginBottom: 10 }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.steel, marginTop: -2, marginBottom: 10 }}>
           {formatTouch(timer.currentSegment)}
         </Text>
       ) : null}
@@ -230,26 +230,26 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
           onPress={() => (timer.isRunning ? handlePause() : handleStart())}
           activeOpacity={0.85}
           style={{
-            width: 52, height: 52, borderRadius: 26,
+            width: 52, height: 52, borderRadius: RADIUS.pill,
             backgroundColor: COLOURS.navy,
             alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <Ionicons name={timer.isRunning ? 'pause' : 'play'} size={28} color="#fff" />
+          <Ionicons name={timer.isRunning ? 'pause' : 'play'} size={28} color={COLOURS.onNavy} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleAddMinutes(5)}
           activeOpacity={0.85}
-          style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(247,127,0,0.14)', alignItems: 'center', justifyContent: 'center' }}
+          style={{ paddingHorizontal: 18, height: 52, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accent2Light, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.lessonText }}>+5 min</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.lessonText }}>+5 min</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSkip}
           activeOpacity={0.85}
-          style={{ paddingHorizontal: 18, height: 52, borderRadius: 26, backgroundColor: 'rgba(140,32,69,0.10)', alignItems: 'center', justifyContent: 'center' }}
+          style={{ paddingHorizontal: 18, height: 52, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accentLight, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.practiceText }}>Skip ›</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.practiceText }}>Skip ›</Text>
         </TouchableOpacity>
       </View>
 
@@ -257,26 +257,26 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
           time you do one; the count goes to the log form with the segment (see timerLog.js). */}
       {timer.currentSegment.type === 'repertoire' ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16 }}>
-          <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>run-throughs</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>run-throughs</Text>
           <TouchableOpacity
             onPress={() => timer.addRunThrough(-1)} activeOpacity={0.85} hitSlop={HIT_PILL}
             accessibilityRole="button" accessibilityLabel="One fewer run-through"
-            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: 44, height: 44, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center', justifyContent: 'center' }}
           >
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 22, color: COLOURS.textMuted }}>{'\u2212'}</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.sectionTitle, color: COLOURS.textMuted }}>{'\u2212'}</Text>
           </TouchableOpacity>
           <Text
             accessibilityLabel={`${runThroughsOf(timer.currentSegment)} run-throughs`}
-            style={{ minWidth: 34, textAlign: 'center', fontFamily: 'CormorantGaramond', fontSize: 28, color: COLOURS.text, fontVariant: ['lining-nums'] }}
+            style={{ minWidth: 34, textAlign: 'center', fontFamily: 'CormorantGaramond', fontSize: SIZES.screenTitle, color: COLOURS.text, fontVariant: ['lining-nums'] }}
           >
             {runThroughsOf(timer.currentSegment)}
           </Text>
           <TouchableOpacity
             onPress={() => timer.addRunThrough(1)} activeOpacity={0.85} hitSlop={HIT_PILL}
             accessibilityRole="button" accessibilityLabel="One more run-through"
-            style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: 52, height: 52, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center' }}
           >
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 26, color: '#fff' }}>+</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.display, color: COLOURS.onNavy }}>+</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -288,22 +288,22 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
           <TouchableOpacity
             onPress={() => { const bpm = bpmRef.current; if (bpm) timer.setSegmentTempo(bpm); }} activeOpacity={0.85} hitSlop={HIT_PILL}
             accessibilityRole="button" accessibilityLabel="Log the metronome tempo as your clean tempo for this segment"
-            style={{ paddingHorizontal: 16, height: 40, borderRadius: 20, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center', justifyContent: 'center' }}
+            style={{ paddingHorizontal: 16, height: 40, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10), alignItems: 'center', justifyContent: 'center' }}
           >
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Log tempo as clean</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>Log tempo as clean</Text>
           </TouchableOpacity>
           {Number(timer.currentSegment.tempo) > 0 ? (
-            <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>Clean: {timer.currentSegment.tempo} bpm</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>Clean: {timer.currentSegment.tempo} bpm</Text>
           ) : null}
         </View>
       ) : null}
 
       {timer.nextSegment ? (
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
           up next: {timer.nextSegment.title} · {timer.nextSegment.plannedMinutes} min
         </Text>
       ) : (
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 14, marginBottom: 10 }}>
           last segment — session ends after this
         </Text>
       )}
@@ -341,29 +341,29 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
               shadowOpacity: 1, shadowRadius: 8, elevation: 3,
             }}
           >
-            <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.textDim, fontSize: 13 }}>Finish</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.textDim, fontSize: SIZES.label }}>Finish</Text>
           </TouchableOpacity>
 
           {awaitingStart ? (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginBottom: 6 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginBottom: 6 }}>
                 segment {timer.currentIndex + 1} of {timer.segments.length}
               </Text>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 28, color: COLOURS.text, marginBottom: 6, textAlign: 'center' }}>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.screenTitle, color: COLOURS.text, marginBottom: 6, textAlign: 'center' }}>
                 {timer.currentSegment.title || (timer.currentSegment.type === 'technique' ? 'Technical work' : 'Piece')}
                 {timer.currentSegment.type === 'technique' && linkedComposition ? ` · ${linkedComposition.title}` : ''}
               </Text>
-              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textDim, marginBottom: 32 }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginBottom: 32 }}>
                 {timer.currentSegment.plannedMinutes} min
               </Text>
               <TouchableOpacity
                 onPress={handleStartNext}
                 activeOpacity={0.85}
-                style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: COLOURS.navy, alignItems: 'center', justifyContent: 'center' }}
+                style={{ width: 84, height: 84, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, alignItems: 'center', justifyContent: 'center' }}
               >
-                <Ionicons name="play" size={44} color="#fff" />
+                <Ionicons name="play" size={44} color={COLOURS.onNavy} />
               </TouchableOpacity>
-              <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim, marginTop: 14 }}>tap to start</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 14 }}>tap to start</Text>
             </View>
           ) : isDesktop ? (
           // Side by side on desktop rather than stacked — there's width to
