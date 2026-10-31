@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Image } from 'react-native';
 import { Tap as TouchableOpacity } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS } from '../theme';
+import { COLOURS, SIZES } from '../theme';
 
 const YEAR = new Date().getFullYear();
 
@@ -23,7 +23,7 @@ function GlassCard({ children }) {
 
 function CardLabel({ children }) {
   return (
-    <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.steel, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 12 }}>
+    <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.steel, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 12 }}>
       {children}
     </Text>
   );
@@ -44,13 +44,13 @@ export default function AboutScreen({ isDesktop }) {
             music<Text style={{ color: COLOURS.practiceText }}>.</Text>
             <Text style={{ color: COLOURS.lessonText }}>log</Text>
           </Text>
-          <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textDim, letterSpacing: 1.4, marginTop: 2 }}>v1.1.0</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, letterSpacing: 1.4, marginTop: 2 }}>v1.1.0</Text>
         </View>
 
         {/* Why this exists */}
         <GlassCard>
           <CardLabel>Why this exists</CardLabel>
-          <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.textMuted, lineHeight: 24 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted, lineHeight: 24 }}>
             Starting piano as an adult is humbling. Progress is real but hard to see day to day — and practice without reflection tends to plateau. music.log is a quiet space to record what you worked on, how it felt, and watch the arc of improvement over weeks and months.
           </Text>
         </GlassCard>
@@ -67,10 +67,10 @@ export default function AboutScreen({ isDesktop }) {
             ['🔄', 'Sync (optional)',  'Connect your own Supabase project to keep sessions, lessons, and your library in step across devices.'],
           ].map(([icon, title, body]) => (
             <View key={title} style={{ flexDirection: 'row', gap: 14, marginBottom: 14, alignItems: 'flex-start' }}>
-              <Text style={{ fontSize: 22, width: 28, textAlign: 'center', marginTop: 1 }}>{icon}</Text>
+              <Text style={{ fontSize: SIZES.sectionTitle, width: 28, textAlign: 'center', marginTop: 1 }}>{icon}</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 2 }}>{title}</Text>
-                <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textMuted, lineHeight: 20 }}>{body}</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 2 }}>{title}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted, lineHeight: 20 }}>{body}</Text>
               </View>
             </View>
           ))}
@@ -79,18 +79,18 @@ export default function AboutScreen({ isDesktop }) {
         {/* Built with */}
         <GlassCard>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: COLOURS.text, marginBottom: 14 }}>Made with ❤️ and 🎹</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 14 }}>Made with ❤️ and 🎹</Text>
             <View style={{ height: 1, backgroundColor: COLOURS.navyA(0.08), width: '100%', marginBottom: 14 }} />
             <View style={{ alignItems: 'center', gap: 8, marginBottom: 14 }}>
               <View style={{ paddingVertical: 3, paddingHorizontal: 10, backgroundColor: COLOURS.navy, borderRadius: 6 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: '#fff', letterSpacing: 0.5 }}>MIT</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.onNavy, letterSpacing: 0.5 }}>MIT</Text>
               </View>
-              <Text style={{ fontFamily: 'Lato', fontSize: 12, color: COLOURS.textMuted, lineHeight: 18, textAlign: 'center' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted, lineHeight: 18, textAlign: 'center' }}>
                 {`Licensed under the MIT Licence\nCopyright © ${YEAR} Lucas França\nOpen source, free to use and modify.`}
               </Text>
             </View>
             <TouchableOpacity onPress={() => { if (typeof window !== 'undefined') window.open('https://lfranca.uk', '_blank'); }}>
-              <Text style={{ fontFamily: 'Lato', fontSize: 14, color: COLOURS.steel, textDecorationLine: 'underline' }}>lfranca.uk</Text>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.steel, textDecorationLine: 'underline' }}>lfranca.uk</Text>
             </TouchableOpacity>
           </View>
         </GlassCard>
