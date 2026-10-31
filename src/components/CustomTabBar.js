@@ -3,7 +3,7 @@ import { View, Text, Animated, TouchableOpacity, Platform, useWindowDimensions }
 import { Ionicons } from './Icon';
 import { Pop } from './Motion';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
 import { useNavScrollContext } from '../context/NavScrollContext';
 import { useSyncIssue } from '../db/useSyncIssue';
 import { tabBarLayout } from '../utils/tabBarLayout';
@@ -123,7 +123,7 @@ export function CustomTabBar({ state, navigation }) {
                 }} />
               ) : null}
               {focused ? (
-                <Text numberOfLines={1} maxFontSizeMultiplier={1.1} style={{ fontFamily: 'Lato-Bold', fontSize: 11, color: COLOURS.onNavy, marginTop: 1 }}>
+                <Text numberOfLines={1} maxFontSizeMultiplier={1.1} style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: COLOURS.onNavy, marginTop: 1 }}>
                   {TAB_LABELS[route.name] || route.name}
                 </Text>
               ) : null}
