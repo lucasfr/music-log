@@ -248,6 +248,7 @@ export function hitFor(w, h = w) {
 
 export const SIZES = {
   screenTitle:  28,   // music.log wordmark
+  display:      26,   // serif date headings, stat numbers, chevron glyphs
   sectionTitle: 22,   // screen headings (Compositions, Calendar…)
   cardTitle:    18,   // piece title, session date in card
   body:         16,   // primary body text
