@@ -84,7 +84,7 @@ function TagInput({ value = [], onChange }) {
             key={t}
             onPress={() => onChange(value.filter(x => x !== t))}
             activeOpacity={0.75}
-            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: 'rgba(214,40,40,0.12)', shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}
+            hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: COLOURS.accentLight, shadowColor: COLOURS.accentMid, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 }}
           >
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.navy }}>{t}</Text>
             <Text style={{ fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>✕</Text>
@@ -805,7 +805,7 @@ export default function CompositionsScreen({ compositions, sessions, lessons, on
               <TouchableOpacity key={s} onPress={() => setFilterStatus(s)} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL,
                   paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.pill,
-                  backgroundColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.bg || 'rgba(247,127,0,0.14)') : active ? 'rgba(247,127,0,0.14)' : COLOURS.w(0.55),
+                  backgroundColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.bg || COLOURS.accent2Light) : active ? COLOURS.accent2Light : COLOURS.w(0.55),
                   shadowColor: active && s !== 'all' ? (STATUS_COLOURS[s]?.border || COLOURS.accent2Mid) : active ? COLOURS.accent2Mid : COLOURS.glassShadow,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: active ? 0.6 : 0.5,
