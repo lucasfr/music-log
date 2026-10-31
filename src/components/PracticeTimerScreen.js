@@ -40,6 +40,10 @@ const RING_SIZE = 190;
 const RING_R = 80;
 const RING_STROKE = 11;
 const CIRCUMFERENCE = 2 * Math.PI * RING_R;
+// The Finish button floats at the top right (right: 20) and is about 66 wide. On a phone the
+// segment bars keep that much clear on both sides (20 + 66 + 8 of gap, less the 24 of padding the
+// content already has), so they stay centred and never run under the button.
+const FINISH_CLEARANCE = 70;
 
 function fmtClock(ms) {
   const totalSec = Math.max(0, Math.ceil(ms / 1000));
@@ -188,7 +192,7 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
     <>
       {/* The whole plan at a glance: one bar per segment, as wide as its planned minutes. */}
       <View accessible accessibilityLabel={`Segment ${timer.currentIndex + 1} of ${timer.segments.length}`}
-        style={{ flexDirection: 'row', gap: 4, width: '100%', maxWidth: 320, marginBottom: 12 }}>
+        style={{ flexDirection: 'row', gap: 4, marginBottom: 12, ...(isDesktop ? { width: '100%', maxWidth: 320 } : { alignSelf: 'stretch', marginHorizontal: FINISH_CLEARANCE }) }}>
         {timer.segments.map((s, i) => (
           <View key={s.id || i} style={{
             flex: Math.max(1, Number(s.plannedMinutes) || 1), height: 5, borderRadius: 3,
