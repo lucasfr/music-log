@@ -6,7 +6,7 @@ import {
 import { Tap as TouchableOpacity } from './Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS, TOUCH_PILL, HIT_PILL } from '../theme';
+import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { GlassCard, SectionTitle, Btn } from '../components/UI';
 import { Field, TextF, NumberF, DatePickerF, RatingBar } from '../components/Form';
 import { SegmentEditor } from '../components/SegmentEditor';
@@ -126,18 +126,18 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <TouchableOpacity onPress={() => addPiece('technique')} activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:8, elevation:2 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Technique</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>+ Technique</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => addPiece('repertoire')} activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:8, elevation:2 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>+ Repertoire</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>+ Repertoire</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {pieces.length === 0 && (
         <View style={{ borderRadius: RADIUS.md, padding: 24, alignItems: 'center', marginBottom: 12, backgroundColor: COLOURS.w(0.35), shadowColor: COLOURS.glassShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 1 }}>
-          <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: 14 }}>Add technique and repertoire segments from this lesson</Text>
+          <Text style={{ fontFamily: 'Lato', color: COLOURS.textDim, fontSize: SIZES.bodySmall }}>Add technique and repertoire segments from this lesson</Text>
         </View>
       )}
 
@@ -180,10 +180,10 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
     return (
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 28, paddingTop: 24, paddingBottom: 8 }}>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 22, color: COLOURS.text }}>Log lesson</Text>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>Log lesson</Text>
           <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
             hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-            <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
+            <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.bodySmall }}>Cancel</Text>
           </TouchableOpacity>
         </View>
         <View style={{ flex: 1 }}>
@@ -203,10 +203,10 @@ export function LessonModal({ visible, onClose, onSave, compositions, initialDat
         <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
           <BlurView intensity={50} tint={COLOURS.blurTint} style={{ borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, backgroundColor: COLOURS.glass }}>
-              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: 22, color: COLOURS.text }}>Log lesson</Text>
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>Log lesson</Text>
               <TouchableOpacity onPress={requestClose} activeOpacity={0.75}
                 hitSlop={HIT_PILL} style={{ ...TOUCH_PILL, paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}>
-                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 14 }}>Cancel</Text>
+                <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.bodySmall }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
