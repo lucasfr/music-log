@@ -24,6 +24,12 @@ for (const key of Object.keys(THEMES)) {
     assert.ok(contrast(c.onNavy, c.steel) >= 3, `${c.onNavy} on ${c.steel} is ${contrast(c.onNavy, c.steel).toFixed(2)}:1`);
   });
 
+  test(`${key}: an icon on a success or danger fill is clear (at least 3:1)`, () => {
+    for (const fill of ['success', 'danger']) {
+      assert.ok(contrast(c.onNavy, c[fill]) >= 3, `${c.onNavy} on ${fill} ${c[fill]} is ${contrast(c.onNavy, c[fill]).toFixed(2)}:1`);
+    }
+  });
+
   test(`${key}: an icon on an amber fill is clear (at least 3:1)`, () => {
     assert.ok(contrast(c.onAmber, c.amber) >= 3, `${c.onAmber} on ${c.amber} is ${contrast(c.onAmber, c.amber).toFixed(2)}:1`);
   });

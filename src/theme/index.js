@@ -21,7 +21,7 @@ export const COLOURS = {
   // Text
   text:      '#09637E',
   textMuted: '#088395',
-  onNavy:    '#ffffff',   // text and icons on a filled navy or steel surface
+  onNavy:    '#ffffff',   // text and icons on a filled navy, steel, success or danger surface
   onAmber:   '#003049',   // icons on the amber play button (white was 2.6:1)
   textDim:   '#3A767C',   // was #7AB2B2 (2.1:1) — now 4.6:1 on the page bg, 5.2:1 on white
 
