@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { Tap as TouchableOpacity } from '../components/Motion';
 import { BlurView } from 'expo-blur';
-import { COLOURS, RADIUS } from '../theme';
+import { COLOURS, RADIUS, SIZES } from '../theme';
+import { DURATION } from '../utils/motion';
 
 const SLIDES = [
   {
@@ -54,14 +55,14 @@ export function OnboardingScreen({ onComplete }) {
   function goTo(next) {
     if (next >= SLIDES.length) { onComplete(); return; }
     Animated.parallel([
-      Animated.timing(opacity,    { toValue: 0, duration: 160, useNativeDriver: true }),
-      Animated.timing(translateX, { toValue: -20, duration: 160, useNativeDriver: true }),
+      Animated.timing(opacity,    { toValue: 0, duration: DURATION.quick, useNativeDriver: true }),
+      Animated.timing(translateX, { toValue: -20, duration: DURATION.quick, useNativeDriver: true }),
     ]).start(() => {
       setIndex(next);
       translateX.setValue(20);
       Animated.parallel([
-        Animated.timing(opacity,    { toValue: 1, duration: 200, useNativeDriver: true }),
-        Animated.timing(translateX, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(opacity,    { toValue: 1, duration: DURATION.quick, useNativeDriver: true }),
+        Animated.timing(translateX, { toValue: 0, duration: DURATION.quick, useNativeDriver: true }),
       ]).start();
     });
   }
@@ -132,7 +133,7 @@ export function OnboardingScreen({ onComplete }) {
             shadowOpacity: 1, shadowRadius: 16, elevation: 6,
           }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: '#fff', letterSpacing: 0.3 }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 15, color: COLOURS.onNavy, letterSpacing: 0.3 }}>
             {slide.isFinal ? 'Start logging →' : 'Continue →'}
           </Text>
         </TouchableOpacity>
@@ -150,7 +151,7 @@ export function OnboardingScreen({ onComplete }) {
     return (
       <View style={{
         position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(9,40,60,0.30)',
+        backgroundColor: COLOURS.backdropColor,
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 100,
