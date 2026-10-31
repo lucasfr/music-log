@@ -21,6 +21,7 @@ import * as Haptics from 'expo-haptics';
 import { COLOURS, RADIUS, SIZES, TOUCH } from '../theme';
 import { overIndex, shiftFor, snapOffset, clampDy, toSlot } from '../utils/reorder';
 import { getLocalPref, setLocalPref } from '../utils';
+import { DURATION } from '../utils/motion';
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -75,16 +76,16 @@ export function SwipeRow({
     const t = setTimeout(() => {
       setLocalPref('swipeHintSeen', '1');
       Animated.sequence([
-        Animated.timing(x, { toValue: -44, duration: 320, useNativeDriver: false }),
+        Animated.timing(x, { toValue: -44, duration: DURATION.enter, useNativeDriver: false }),
         Animated.delay(450),
-        Animated.timing(x, { toValue: 0, duration: 260, useNativeDriver: false }),
+        Animated.timing(x, { toValue: 0, duration: DURATION.slide, useNativeDriver: false }),
       ]).start();
     }, 900);
     return () => clearTimeout(t);
   }, [hint, x]);
 
   const animateTo = (to, done) =>
-    Animated.timing(x, { toValue: to, duration: 170, useNativeDriver: false }).start(done);
+    Animated.timing(x, { toValue: to, duration: DURATION.quick, useNativeDriver: false }).start(done);
 
   const close = () => { setIsOpen(false); animateTo(0); };
   const open  = () => { setIsOpen(true); animateTo(-SWIPE_ACTION_W); };
@@ -229,14 +230,14 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
       buzz();
       Animated.timing(slotTop, {
         toValue: s.startY + snapOffset(s.keys, layouts.current, s.index, over),
-        duration: 140,
+        duration: DURATION.quick,
         useNativeDriver: false,
       }).start();
       s.keys.forEach((k, i) => {
         if (k === s.key) return;
         Animated.timing(getShift(k), {
           toValue: shiftFor(i, s.index, over, s.h),
-          duration: 140,
+          duration: DURATION.quick,
           useNativeDriver: false,
         }).start();
       });
@@ -277,7 +278,7 @@ export function ReorderList({ data, keyExtractor, renderItem, onReorder, onDragC
     if (s.timer) clearInterval(s.timer);
     drag.current = null;
     const target = snapOffset(s.keys, layouts.current, s.index, s.over);
-    Animated.timing(getShift(s.key), { toValue: target, duration: 120, useNativeDriver: false }).start(() => {
+    Animated.timing(getShift(s.key), { toValue: target, duration: DURATION.quick, useNativeDriver: false }).start(() => {
       const { onReorder: reorderCb, onDragChange: odc } = latest.current;
       setActiveKey(null);
       if (odc) odc(false);
