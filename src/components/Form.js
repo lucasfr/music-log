@@ -70,7 +70,7 @@ export function RatingBar({ label, emoji, value, onChange, size = 26 }) {
   return (
     <View>
       {label ? (
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>
           {label}
         </Text>
       ) : null}
@@ -149,7 +149,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
             <Text style={{ fontSize: SIZES.body, fontFamily: 'Lato', color: value ? COLOURS.text : COLOURS.textDim }}>
               {display}
             </Text>
-            <Text style={{ fontSize: 13, color: COLOURS.textDim }}>▾</Text>
+            <Text style={{ fontSize: SIZES.label, color: COLOURS.textDim }}>▾</Text>
           </TouchableOpacity>
         </Field>
         <Modal visible={open} transparent animationType="slide">
@@ -167,7 +167,7 @@ export function SelectF({ label, value, onChange, options, placeholder }) {
             }}>
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 14, borderBottomWidth: 1, borderBottomColor: COLOURS.glassBorderSubtle }}>
                 <TouchableOpacity onPress={() => setOpen(false)} hitSlop={HIT_TEXT}>
-                  <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: 16 }}>Done</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', color: COLOURS.navy, fontSize: SIZES.body }}>Done</Text>
                 </TouchableOpacity>
               </View>
               <Picker
@@ -250,14 +250,16 @@ export function DatePickerF({ label, value, onChange, icon }) {
       <View style={{ backgroundColor: COLOURS.w(0.65), padding: 16 }}>
         {/* Month nav */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          {/* design: ok negative margin keeps the 44 pt target inside a 30 pt header */}
           <TouchableOpacity onPress={prevMonth} accessibilityRole="button" accessibilityLabel="Previous month" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
-            <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>‹</Text>
+            <Text style={{ fontSize: SIZES.display, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>‹</Text>
           </TouchableOpacity>
-          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: 18, color: COLOURS.text }}>
+          <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.cardTitle, color: COLOURS.text }}>
             {MONTHS_LONG[viewMonth]} {viewYear}
           </Text>
+          {/* design: ok negative margin keeps the 44 pt target inside a 30 pt header */}
           <TouchableOpacity onPress={nextMonth} accessibilityRole="button" accessibilityLabel="Next month" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginVertical: -7, marginHorizontal: -10 }}>
-            <Text style={{ fontSize: 26, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>›</Text>
+            <Text style={{ fontSize: SIZES.display, color: COLOURS.navy, fontWeight: '300', lineHeight: 30 }}>›</Text>
           </TouchableOpacity>
         </View>
 
@@ -265,7 +267,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
         <View style={{ flexDirection: 'row', marginBottom: 4 }}>
           {DAYS_SHORT.map((d, i) => (
             <View key={i} style={{ width: CELL_W, alignItems: 'center' }}>
-              <Text style={{ fontFamily: 'Lato-Bold', fontSize: 12, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.5 }}>{d}</Text>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.5 }}>{d}</Text>
             </View>
           ))}
         </View>
@@ -297,9 +299,9 @@ export function DatePickerF({ label, value, onChange, icon }) {
                 >
                   <Text style={{
                     fontFamily: isSelected || isToday ? 'Lato-Bold' : 'Lato',
-                    fontSize: 14,
+                    fontSize: SIZES.bodySmall,
                     color: isSelected
-                      ? '#fff'
+                      ? COLOURS.onNavy
                       : isFuture
                         ? COLOURS.textDim
                         : isToday
@@ -319,7 +321,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
           hitSlop={HIT_PILL}
           style={{ ...TOUCH_PILL, alignSelf: 'center', marginTop: 12, paddingHorizontal: 16, paddingVertical: 7, borderRadius: RADIUS.pill, backgroundColor: COLOURS.w(0.55), shadowColor: COLOURS.glassShadow, shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:6, elevation:2 }}
         >
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: 13, color: COLOURS.navy }}>Today</Text>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>Today</Text>
         </TouchableOpacity>
       </View>
     </BlurView>
@@ -336,7 +338,7 @@ export function DatePickerF({ label, value, onChange, icon }) {
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.body, color: value ? COLOURS.text : COLOURS.textDim }}>
           {value ? fmtDisplay(value) : 'Select date…'}
         </Text>
-        <Text style={{ fontSize: 14, color: COLOURS.textDim }}>{open ? '▴' : '▾'}</Text>
+        <Text style={{ fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>{open ? '▴' : '▾'}</Text>
       </TouchableOpacity>
 
       {/* Inline calendar dropdown */}
