@@ -20,7 +20,7 @@ export function SyncIssueBanner({ onPress }) {
       style={{
         flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44,
         marginBottom: 16, padding: 12, borderRadius: RADIUS.md,
-        backgroundColor: 'rgba(214,40,40,0.10)', borderWidth: 1, borderColor: 'rgba(214,40,40,0.30)',
+        backgroundColor: COLOURS.dangerLight, borderWidth: 1, borderColor: COLOURS.dangerMid,
       }}
     >
       <Ionicons name="alert-circle-outline" size={22} color={COLOURS.red} />
