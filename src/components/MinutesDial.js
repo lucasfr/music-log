@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { View, Text, PanResponder } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { COLOURS } from '../theme';
+import { COLOURS, SIZES } from '../theme';
 import { dialTick } from '../utils/dialFeedback';
 
 const SIZE = 216;
@@ -132,8 +132,8 @@ export function MinutesDial({ value, onChange, max = 60, step = 1, label = 'min'
         />
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center' }} pointerEvents="none">
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: 38, color: COLOURS.navy }}>{value}</Text>
-        <Text style={{ fontFamily: 'Lato', fontSize: 13, color: COLOURS.textDim }}>{label}</Text>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.hero, color: COLOURS.navy }}>{value}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>{label}</Text>
       </View>
     </View>
   );
