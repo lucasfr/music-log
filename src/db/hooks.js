@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   getAllSessions, saveSession, deleteSession,
   getAllCompositions, saveComposition, deleteComposition,
@@ -9,6 +9,7 @@ import { fromRemoteComposition } from './records';
 import { outbox } from './outbox';
 import { notify } from '../utils/notify';
 import { isTombstone } from '../utils/syncQueue';
+import { singleFlight } from '../utils/singleFlight';
 import { clearAllData } from '../utils/clearData';
 
 // A failed write to local storage used to vanish: the form has already closed by then, so the entry
@@ -67,197 +68,138 @@ export function clearAllRecords(local) {
   });
 }
 
-// ─── Sessions ─────────────────────────────────────────────────────────────────
+// ─── Sessions, lessons and pieces ─────────────────────────────────────────────
+//
+// The three hooks differ only in which table they use, how their list is sorted and a couple of
+// names, so one hook (useRecords) does the work for all of them. They used to be three copies, and a
+// fix to one had to be remembered in the other two.
+//
+// How a reload, a save and a delete behave:
+//  - A reload reads this device first (so the screen is never empty while the network answers), then
+//    pulls from Supabase and merges. Only one reload runs at a time per table; asking for another while
+//    one is running makes it run once more when it finishes, instead of starting a second one beside it.
+//    Two overlapping reloads used to be able to finish out of order, so an older one could put an older
+//    list on the screen.
+//  - A save writes to this device, shows the change at once, and sends it to Supabase in the
+//    background: save() resolves when the record is stored locally, not when the network has answered,
+//    so a form never waits on a slow connection. (It used to await a whole reload, pull included.)
+//  - A delete works the same way.
 
-export function useSessions() {
-  const [sessions, setSessions] = useState([]);
+const bySessionDate = (a, b) => (b.date || '').localeCompare(a.date || '');
+
+const RECORDS = {
+  sessions: {
+    label: 'practice session',
+    getAll: getAllSessions, saveLocal: saveSession, deleteLocal: deleteSession,
+    sort: bySessionDate,
+  },
+  compositions: {
+    label: 'piece',
+    getAll: getAllCompositions, saveLocal: saveComposition, deleteLocal: deleteComposition,
+    sort: (a, b) => (a.title || '').localeCompare(b.title || ''),
+    // Supabase rows are snake_case (time_sigs); reshape them like local ones so the metronome
+    // can read a piece's tempo and time signature on a device that only has it from sync.
+    fromRemote: fromRemoteComposition,
+  },
+  lessons: {
+    label: 'lesson',
+    getAll: getAllLessons, saveLocal: saveLesson, deleteLocal: deleteLesson,
+    sort: bySessionDate,
+  },
+};
+
+function useRecords(table) {
+  const cfg = RECORDS[table];
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const reload = useCallback(async () => {
+  // `isStale()` is true once another reload has been asked for since this one began (a save, say): what
+  // this run has read may already be out of date, so it leaves showing it to the next run.
+  const reloadOnce = useCallback(async isStale => {
     // Load local first for instant render
-    const local = await getAllSessions();
-    setSessions(local.filter(r => !pendingDeletes.sessions.has(r.id)));
+    const local = await cfg.getAll();
+    if (!isStale()) setItems(local.filter(r => !pendingDeletes[table].has(r.id)));
     setLoading(false);
 
     // Then pull remote and merge
-    const remote = await pullTable('sessions', local);
-    if (remote) {
-      // Retry edits that never reached the server, and keep a copy of whichever side loses when
-      // two devices edited the same record (see utils/syncQueue.js).
-      outbox.processPull('sessions', local, remote);
-      // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed
-      // here too, and one this device deleted stays gone while the server still has the row.
-      const plan = outbox.processDeletes('sessions', local, remote);
-      for (const id of plan.deleteLocal) await deleteSession(id);
-      const kept = plan.deleteLocal.length ? local.filter(r => !plan.deleteLocal.includes(r.id)) : local;
-      // Filter out anything we've locally deleted or recently saved
-      const safeRemote = remote
-        .filter(r => !plan.skip.has(r.id) && !pendingDeletes.sessions.has(r.id))
-        .map(r => {
-          const guarded = pendingSaves.sessions.get(r.id);
-          return guarded ? guarded : r;
-        });
-      const merged = mergeRows(kept, safeRemote)
-        .filter(r => !pendingDeletes.sessions.has(r.id))
-        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      // Write any remote-wins rows back to local db
-      for (const row of merged) {
-        const localRow = kept.find(l => l.id === row.id);
-        if (!localRow || row !== localRow) await saveSession(row);
-      }
-      setSessions(merged);
+    const pulled = await pullTable(table, local);
+    const remote = pulled ? (cfg.fromRemote ? pulled.map(cfg.fromRemote) : pulled) : null;
+    if (!remote) return;
+
+    // Retry edits that never reached the server, and keep a copy of whichever side loses when
+    // two devices edited the same record (see utils/syncQueue.js).
+    outbox.processPull(table, local, remote);
+    // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed
+    // here too, and one this device deleted stays gone while the server still has the row.
+    const plan = outbox.processDeletes(table, local, remote);
+    for (const id of plan.deleteLocal) await cfg.deleteLocal(id);
+    const kept = plan.deleteLocal.length ? local.filter(r => !plan.deleteLocal.includes(r.id)) : local;
+    // Filter out anything we've locally deleted or recently saved
+    const safeRemote = remote
+      .filter(r => !plan.skip.has(r.id) && !pendingDeletes[table].has(r.id))
+      .map(r => {
+        const guarded = pendingSaves[table].get(r.id);
+        return guarded ? guarded : r;
+      });
+    const merged = mergeRows(kept, safeRemote)
+      .filter(r => !pendingDeletes[table].has(r.id))
+      .sort(cfg.sort);
+    // Write any remote-wins rows back to local db
+    const keptById = new Map(kept.map(l => [l.id, l]));
+    for (const row of merged) {
+      const localRow = keptById.get(row.id);
+      if (!localRow || row !== localRow) await cfg.saveLocal(row);
     }
-  }, []);
+    if (!isStale()) setItems(merged);
+  }, [table, cfg]);
+
+  // One reload at a time (see utils/singleFlight.js); asking again while one runs makes it go round once more.
+  const reload = useMemo(() => singleFlight(reloadOnce), [reloadOnce]);
 
   useEffect(() => { reload(); }, [reload]);
 
-  const save = useCallback(async (session) => {
-    const record = { ...session, updated_at: new Date().toISOString() };
-    pendingSaves.sessions.set(record.id, record);
-    await guardLocalWrite(() => saveSession(record), 'practice session');
-    outbox.trackEdit('sessions', record, session.updated_at); // the version this edit started from
-    outbox.pushTracked('sessions', record).finally(() => {
-      setTimeout(() => pendingSaves.sessions.delete(record.id), SAVE_GUARD_MS);
+  // A reload the caller is not waiting for: its failure is logged, not thrown into a form.
+  const reloadInBackground = useCallback(() => {
+    reload().catch(e => console.warn(`[sync] reload ${table} failed:`, e && e.message));
+  }, [reload, table]);
+
+  const save = useCallback(async (item) => {
+    const record = { ...item, updated_at: new Date().toISOString() };
+    pendingSaves[table].set(record.id, record);
+    await guardLocalWrite(() => cfg.saveLocal(record), cfg.label);
+    setItems(prev => [...prev.filter(r => r.id !== record.id), record].sort(cfg.sort));
+    outbox.trackEdit(table, record, item.updated_at); // the version this edit started from
+    outbox.pushTracked(table, record).finally(() => {
+      setTimeout(() => pendingSaves[table].delete(record.id), SAVE_GUARD_MS);
     });
-    await reload();
-  }, [reload]);
+    reloadInBackground();
+  }, [table, cfg, reloadInBackground]);
 
   const remove = useCallback(async (id) => {
-    pendingDeletes.sessions.add(id);
-    await deleteSession(id);
-    outbox.trackDelete('sessions', id).finally(() => {
+    pendingDeletes[table].add(id);
+    await cfg.deleteLocal(id);
+    setItems(prev => prev.filter(r => r.id !== id));
+    outbox.trackDelete(table, id).finally(() => {
       // Keep the guard for a while to survive any in-flight pulls
-      setTimeout(() => pendingDeletes.sessions.delete(id), SAVE_GUARD_MS);
+      setTimeout(() => pendingDeletes[table].delete(id), SAVE_GUARD_MS);
     });
-    await reload();
-  }, [reload]);
+    reloadInBackground();
+  }, [table, cfg, reloadInBackground]);
 
-  return { sessions, loading, save, remove, reload };
+  return { items, loading, save, remove, reload };
 }
 
-// ─── Compositions ─────────────────────────────────────────────────────────────
+export function useSessions() {
+  const { items, ...rest } = useRecords('sessions');
+  return { sessions: items, ...rest };
+}
 
 export function useCompositions() {
-  const [compositions, setCompositions] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const reload = useCallback(async () => {
-    const local = await getAllCompositions();
-    setCompositions(local.filter(r => !pendingDeletes.compositions.has(r.id)));
-    setLoading(false);
-
-    // Supabase rows are snake_case (time_sigs); reshape them like local ones so the metronome
-    // can read a piece's tempo and time signature on a device that only has it from sync.
-    const pulled = await pullTable('compositions', local);
-    const remote = pulled ? pulled.map(fromRemoteComposition) : null;
-    if (remote) {
-      outbox.processPull('compositions', local, remote);
-      // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed
-      // here too, and one this device deleted stays gone while the server still has the row.
-      const plan = outbox.processDeletes('compositions', local, remote);
-      for (const id of plan.deleteLocal) await deleteComposition(id);
-      const kept = plan.deleteLocal.length ? local.filter(r => !plan.deleteLocal.includes(r.id)) : local;
-      // Filter out anything we've locally deleted or recently saved
-      const safeRemote = remote
-        .filter(r => !plan.skip.has(r.id) && !pendingDeletes.compositions.has(r.id))
-        .map(r => {
-          const guarded = pendingSaves.compositions.get(r.id);
-          return guarded ? guarded : r;
-        });
-      const merged = mergeRows(kept, safeRemote)
-        .filter(r => !pendingDeletes.compositions.has(r.id))
-        .sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-      for (const row of merged) {
-        const localRow = kept.find(l => l.id === row.id);
-        if (!localRow || row !== localRow) await saveComposition(row);
-      }
-      setCompositions(merged);
-    }
-  }, []);
-
-  useEffect(() => { reload(); }, [reload]);
-
-  const save = useCallback(async (comp) => {
-    const record = { ...comp, updated_at: new Date().toISOString() };
-    pendingSaves.compositions.set(record.id, record);
-    await guardLocalWrite(() => saveComposition(record), 'piece');
-    outbox.trackEdit('compositions', record, comp.updated_at);
-    outbox.pushTracked('compositions', record).finally(() => {
-      setTimeout(() => pendingSaves.compositions.delete(record.id), SAVE_GUARD_MS);
-    });
-    await reload();
-  }, [reload]);
-
-  const remove = useCallback(async (id) => {
-    pendingDeletes.compositions.add(id);
-    await deleteComposition(id);
-    outbox.trackDelete('compositions', id).finally(() => {
-      setTimeout(() => pendingDeletes.compositions.delete(id), SAVE_GUARD_MS);
-    });
-    await reload();
-  }, [reload]);
-
-  return { compositions, loading, save, remove, reload };
+  const { items, ...rest } = useRecords('compositions');
+  return { compositions: items, ...rest };
 }
 
-// ─── Lessons ──────────────────────────────────────────────────────────────────
-
 export function useLessons() {
-  const [lessons, setLessons] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const reload = useCallback(async () => {
-    const local = await getAllLessons();
-    setLessons(local.filter(r => !pendingDeletes.lessons.has(r.id)));
-    setLoading(false);
-
-    const remote = await pullTable('lessons', local);
-    if (remote) {
-      outbox.processPull('lessons', local, remote);
-      // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed
-      // here too, and one this device deleted stays gone while the server still has the row.
-      const plan = outbox.processDeletes('lessons', local, remote);
-      for (const id of plan.deleteLocal) await deleteLesson(id);
-      const kept = plan.deleteLocal.length ? local.filter(r => !plan.deleteLocal.includes(r.id)) : local;
-      // Filter out anything we've locally deleted or recently saved
-      const safeRemote = remote
-        .filter(r => !plan.skip.has(r.id) && !pendingDeletes.lessons.has(r.id))
-        .map(r => {
-          const guarded = pendingSaves.lessons.get(r.id);
-          return guarded ? guarded : r;
-        });
-      const merged = mergeRows(kept, safeRemote)
-        .filter(r => !pendingDeletes.lessons.has(r.id))
-        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      for (const row of merged) {
-        const localRow = kept.find(l => l.id === row.id);
-        if (!localRow || row !== localRow) await saveLesson(row);
-      }
-      setLessons(merged);
-    }
-  }, []);
-
-  useEffect(() => { reload(); }, [reload]);
-
-  const save = useCallback(async (lesson) => {
-    const record = { ...lesson, updated_at: new Date().toISOString() };
-    pendingSaves.lessons.set(record.id, record);
-    await guardLocalWrite(() => saveLesson(record), 'lesson');
-    outbox.trackEdit('lessons', record, lesson.updated_at);
-    outbox.pushTracked('lessons', record).finally(() => {
-      setTimeout(() => pendingSaves.lessons.delete(record.id), SAVE_GUARD_MS);
-    });
-    await reload();
-  }, [reload]);
-
-  const remove = useCallback(async (id) => {
-    pendingDeletes.lessons.add(id);
-    await deleteLesson(id);
-    outbox.trackDelete('lessons', id).finally(() => {
-      setTimeout(() => pendingDeletes.lessons.delete(id), SAVE_GUARD_MS);
-    });
-    await reload();
-  }, [reload]);
-
-  return { lessons, loading, save, remove, reload };
+  const { items, ...rest } = useRecords('lessons');
+  return { lessons: items, ...rest };
 }
