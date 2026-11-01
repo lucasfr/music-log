@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -12,7 +12,7 @@ import { MetronomeControl } from './MetronomeControl';
 import { Ionicons } from './Icon';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { formatTouch } from '../utils';
-import { runThroughsOf, openSpotsLine } from '../utils/insights';
+import { runThroughsOf, openSpotsLine, setSpotTempo, addSpotReps } from '../utils/insights';
 
 // Isolated from PracticeTimerScreen for the same reason MetronomeControl is
 // memoized against it: the countdown ring's remaining-time display forces
@@ -26,12 +26,12 @@ import { runThroughsOf, openSpotsLine } from '../utils/insights';
 // through creating this section's elements — still costs real JS-thread
 // time every 250ms unless this section is memoized too, with props that
 // stay referentially stable across pure countdown ticks.
-const MetronomeSection = React.memo(function MetronomeSection({ composition, segmentKey, compact, suggestedBpm, bpmRef }) {
+const MetronomeSection = React.memo(function MetronomeSection({ composition, segmentKey, compact, suggestedBpm, bpmRef, onSpotChange }) {
   // Always on screen. On a phone it starts as a compact bar (tempo and play) with the time
   // signature, subdivision and ramp folded away; it used to sit behind a toggle you had to find.
   return (
     <View style={{ width: '100%', maxWidth: 320, marginTop: compact ? 4 : 0 }}>
-      <MetronomeControl key={segmentKey} composition={composition} compact={compact} suggestedBpm={suggestedBpm} bpmRef={bpmRef} />
+      <MetronomeControl key={segmentKey} composition={composition} compact={compact} suggestedBpm={suggestedBpm} bpmRef={bpmRef} onSpotChange={onSpotChange} />
     </View>
   );
 });
@@ -101,9 +101,25 @@ function CountdownRing({ getRemainingMs, plannedMs, subscribeTick, isRunning }) 
   );
 }
 
-export function PracticeTimerScreen({ visible, initialSegments, restore, compositions, tempoSuggestions, onFinish, isDesktop }) {
+export function PracticeTimerScreen({ visible, initialSegments, restore, compositions, tempoSuggestions, onFinish, onSaveComposition, isDesktop }) {
   const timer = usePracticeTimer(initialSegments, restore);
   const bpmRef = useRef(null); // the metronome's current tempo, written by MetronomeControl
+  // Saves a change to one of a piece's tricky spots (a new clean tempo, more clean goes) made from the
+  // metronome. It reads the latest pieces and saver through refs, so the callback itself never changes and
+  // the memoized metronome section above is not re-rendered by it.
+  const compositionsRef = useRef(compositions);
+  compositionsRef.current = compositions;
+  const saveRef = useRef(onSaveComposition);
+  saveRef.current = onSaveComposition;
+  const onSpotChange = useCallback((compositionId, spotId, patch) => {
+    const piece = (compositionsRef.current || []).find(c => c.id === compositionId);
+    const save = saveRef.current;
+    if (!piece || !save || !patch) return;
+    let spots = piece.spots;
+    if (patch.tempo) spots = setSpotTempo(spots, spotId, patch.tempo);
+    if (patch.reps) spots = addSpotReps(spots, spotId, patch.reps.clean, patch.reps.total);
+    save({ ...piece, spots });
+  }, []);
   useKeepAwake(visible && timer.isRunning);
   // True right after a segment transition that landed paused (timeout or
   // skip, both now autoStart:false) — shows an interstitial with its own
@@ -321,6 +337,7 @@ export function PracticeTimerScreen({ visible, initialSegments, restore, composi
       compact={!isDesktop}
       suggestedBpm={(tempoSuggestions && timer.currentSegment.compositionId && tempoSuggestions[timer.currentSegment.compositionId]) || null}
       bpmRef={bpmRef}
+      onSpotChange={onSpotChange}
     />
   );
 

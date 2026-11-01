@@ -8,7 +8,9 @@ import { COLOURS, RADIUS, SIZES, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
 import { addTap, bpmFromTaps } from '../utils/tapTempo';
 import { isSilentStep, nextBars, describeSilentBars } from '../utils/silentBars';
-import { openSpots, spotLabel } from '../utils/insights';
+import { allStrong, firstOnly, halfBar, fitPattern, cycleBeat, beatSound, isDefault, describePattern, STRONG, WEAK, MUTE } from '../utils/beatPattern';
+import { openSpots, spotLabel, nextSpotTempo } from '../utils/insights';
+import { emptyReps, recordRep, readyToStep, describeReps, REPS_TO_STEP } from '../utils/cleanReps';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { Ionicons } from './Icon';
 import { FadeInUp } from './Motion';
@@ -186,7 +188,7 @@ function SigChip({ sig, active, onPress }) {
 // own tick/animation state and knocking the visuals out of sync with the
 // audio, which kept ticking fine underneath since its scheduler lives in a
 // ref-held closure unaffected by re-renders.
-export const MetronomeControl = React.memo(function MetronomeControl({ composition, compact = false, suggestedBpm = null, bpmRef = null }) {
+export const MetronomeControl = React.memo(function MetronomeControl({ composition, compact = false, suggestedBpm = null, bpmRef = null, onSpotChange = null }) {
   // Tempo and time signature of the linked piece (90 bpm and 4/4 when it has none).
   const piece = pieceMetronomeDefaults(composition);
   const defaultBpm = piece.bpm;
@@ -211,6 +213,13 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const [silentEnabled, setSilentEnabled] = useState(false);
   const [silentPlayBars, setSilentPlayBars] = useState(2);
   const [silentQuietBars, setSilentQuietBars] = useState(2);
+  // Which main beats of the bar sound strong, weak or not at all (see utils/beatPattern.js). Fitted to the
+  // current bar every render, so it stays right when the time signature changes. All strong is the default.
+  const [accentPattern, setAccentPattern] = useState([]);
+  // Clean goes at the tricky spot being practised (see utils/cleanReps.js). They are added to the spot's totals
+  // when you log them or raise the tempo, not on every tap, so a session doesn't save to the piece dozens of times.
+  const [activeSpotId, setActiveSpotId] = useState(null);
+  const [reps, setReps] = useState(emptyReps());
 
   // The piece's values can arrive after this card opens (a sync landing mid-session). Follow
   // them, but only for a control that still shows the previous default, so something you've
@@ -258,6 +267,9 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   silentEnabledRef.current = silentEnabled;
   silentPlayBarsRef.current = silentPlayBars;
   silentQuietBarsRef.current = silentQuietBars;
+  const pattern = fitPattern(accentPattern, mainBeats);
+  const patternRef = useRef(pattern);
+  patternRef.current = pattern;
 
   const LOOKAHEAD_SEC = 0.12;
   const SCHEDULER_INTERVAL_MS = 30;
@@ -306,7 +318,15 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     // A silent bar plays nothing, but the beat dots keep moving (they follow the clock, not this).
     if (silentEnabledRef.current && isSilentStep(stepIndex, currentSubdivision * currentMainBeats, silentPlayBarsRef.current, silentQuietBarsRef.current)) return;
     const isMain = stepIndex % currentSubdivision === 0;
-    const buffer = isMain ? buffersRef.current.accent : buffersRef.current.sub;
+    let buffer;
+    if (isMain) {
+      // The main beats follow the accent pattern: strong and weak are different clicks, a silent beat plays nothing.
+      const sound = beatSound(patternRef.current, Math.floor(stepIndex / currentSubdivision) % currentMainBeats);
+      if (sound === MUTE) return;
+      buffer = sound === WEAK ? buffersRef.current.sub : buffersRef.current.accent;
+    } else {
+      buffer = buffersRef.current.sub;
+    }
     if (!buffer) return;
     const source = ctx.createBufferSource();
     source.buffer = buffer;
@@ -567,8 +587,24 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   // the piece has a faster tempo, ramps up towards that (the same ramp as the Ramp tempo option below).
   const spotsWithTempo = openSpots(composition).filter(s => s.tempo);
   function practiseSpot(s) {
+    if (s.id !== activeSpotId) setReps(emptyReps());
+    setActiveSpotId(s.id);
     setBpm(Math.max(30, Math.min(240, s.tempo)));
     if (piece.hasTempo && piece.bpm > s.tempo) { setRampTarget(Math.min(240, piece.bpm)); setRampEnabled(true); }
+  }
+  const activeSpot = spotsWithTempo.find(s => s.id === activeSpotId) || null;
+  const nextSpot = activeSpot ? nextSpotTempo(activeSpot, piece.hasTempo ? piece.bpm : undefined) : null;
+  // Five clean in a row: save this session's goes to the spot, give it the next tempo, and play at it.
+  function raiseSpot() {
+    if (!activeSpot || !nextSpot) return;
+    if (onSpotChange && composition) onSpotChange(composition.id, activeSpot.id, { tempo: nextSpot, reps: reps.total > 0 ? { clean: reps.clean, total: reps.total } : undefined });
+    setBpm(Math.max(30, Math.min(240, nextSpot)));
+    setReps(emptyReps());
+  }
+  function logSpotReps() {
+    if (!activeSpot || !reps.total) return;
+    if (onSpotChange && composition) onSpotChange(composition.id, activeSpot.id, { reps: { clean: reps.clean, total: reps.total } });
+    setReps(emptyReps());
   }
 
   const currentTempoName = tempoName(bpm);
@@ -643,6 +679,40 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>{spotLabel(s.bars)} · {s.tempo}</Text>
             </TouchableOpacity>
           ))}
+        </View>
+      ) : null}
+
+      {activeSpot ? (
+        <View style={{ alignItems: 'center', marginBottom: 10 }} accessibilityLiveRegion="polite">
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textAlign: 'center' }}>
+            {spotLabel(activeSpot.bars)}: {describeReps(reps) || 'tap Clean or Miss after each go'}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+            <TouchableOpacity onPress={() => setReps(r => recordRep(r, true))} activeOpacity={0.75} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              accessibilityRole="button" accessibilityLabel={`Clean go at ${spotLabel(activeSpot.bars)}`}
+              style={{ minHeight: 44, paddingHorizontal: 22, justifyContent: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.success }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Clean</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setReps(r => recordRep(r, false))} activeOpacity={0.75} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              accessibilityRole="button" accessibilityLabel={`Missed go at ${spotLabel(activeSpot.bars)}`}
+              style={{ minHeight: 44, paddingHorizontal: 22, justifyContent: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.10) }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textMuted }}>Miss</Text>
+            </TouchableOpacity>
+          </View>
+          {readyToStep(reps) && nextSpot ? (
+            <TouchableOpacity onPress={raiseSpot} activeOpacity={0.8} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              accessibilityRole="button" accessibilityLabel={`${REPS_TO_STEP} clean in a row. Raise the tempo to ${nextSpot}`}
+              style={{ marginTop: 10, minHeight: 44, paddingHorizontal: 18, justifyContent: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>{REPS_TO_STEP} clean: go up to {nextSpot}</Text>
+            </TouchableOpacity>
+          ) : null}
+          {reps.total > 0 && onSpotChange ? (
+            <TouchableOpacity onPress={logSpotReps} activeOpacity={0.75} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button" accessibilityLabel={`Log ${reps.clean} clean of ${reps.total} goes to the spot`}
+              style={{ marginTop: 8, minHeight: 36, justifyContent: 'center' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>Log these {reps.total} {reps.total === 1 ? 'go' : 'goes'} to the spot</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       ) : null}
 
@@ -837,6 +907,29 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             </View>
           </View>
         )}
+      </View>
+
+      <View style={{ marginTop: 8 }}>
+        <Text style={{ textAlign: 'center', fontFamily: isDefault(pattern) ? 'Lato' : 'Lato-Bold', fontSize: SIZES.label, color: isDefault(pattern) ? COLOURS.textDim : COLOURS.steel }}>{describePattern(pattern)}</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+          {pattern.map((s, i) => (
+            <TouchableOpacity key={i} onPress={() => setAccentPattern(cycleBeat(pattern, i))} activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel={`Beat ${i + 1}: ${s === STRONG ? 'strong' : s === WEAK ? 'weak' : 'silent'}. Tap to change`}
+              style={{ width: 44, height: 44, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: s === STRONG ? COLOURS.navy : s === WEAK ? COLOURS.navyA(0.25) : 'transparent', borderWidth: s === MUTE ? 1.5 : 0, borderColor: COLOURS.navyA(0.35) }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: s === STRONG ? COLOURS.onNavy : COLOURS.navy }}>{i + 1}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+          {[['All', allStrong], ['1 only', firstOnly], ['Half bar', halfBar]].map(([label, make]) => (
+            <TouchableOpacity key={label} onPress={() => setAccentPattern(make(mainBeats))} activeOpacity={0.75} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              accessibilityRole="button" accessibilityLabel={`Accents: ${label}`}
+              style={{ minHeight: 36, justifyContent: 'center', paddingHorizontal: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navyA(0.08) }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textMuted }}>{label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
       </FadeInUp>
       )}

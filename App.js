@@ -229,7 +229,7 @@ function AppInner({ fontsLoaded }) {
 
   const screenProps = {
     sessions, lessons, compositions: compositionsWithStatus,
-    onSave: saveSessionUI, onSaveLesson: saveLessonUI,
+    onSave: saveSessionUI, onSaveLesson: saveLessonUI, onSaveComposition: saveComp,
     onDelete: deleteSession, onDeleteLesson: deleteLesson,
     isDesktop,
   };

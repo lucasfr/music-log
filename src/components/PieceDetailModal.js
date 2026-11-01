@@ -12,6 +12,9 @@ import {
 } from '../utils/insights';
 import { tint } from '../utils/tint';
 import { memoryState, withMemorised, withPlayedFromMemory } from '../utils/memory';
+import { spotRepsLine } from '../utils/cleanReps';
+import { performanceProgress, withPerformance } from '../utils/performancePlan';
+import { DatePickerF } from './Form';
 
 // One page for one piece: where it stands (practice, tempo and whether it will get there in time), the
 // bars that keep going wrong, what your teacher has said, how it has gone lately, and the stages it has
@@ -71,6 +74,9 @@ function SpotRow({ spot, onToggle, onRemove, onTempo, pieceTempo }) {
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>
           {fixed && spot.fixed ? `Fixed ${fmtDate(spot.fixed)}` : spot.added ? `Since ${fmtDate(spot.added)}` : ''}
         </Text>
+        {spotRepsLine(spot) ? (
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{spotRepsLine(spot)}</Text>
+        ) : null}
         {!fixed && onTempo ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
             {spot.tempo ? (
@@ -122,6 +128,8 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
   const sc = STATUS_COLOURS[status] || {};
   const save = list => onSavePiece && onSavePiece({ ...piece, spots: list });
   const memory = memoryState(piece, today);
+  // Where the piece stands against its performance date (see utils/performancePlan.js), if it has one.
+  const perf = performanceProgress(piece, today, tempo ? { latest: tempo.latest, target: tempo.target } : null);
   const savePiece = next => onSavePiece && onSavePiece(next);
   const addNew = () => { if (!spotText.trim()) return; save(addSpot(piece.spots, spotText, today)); setSpotText(''); };
   const trajectoryColour = !trajectory ? null
@@ -205,6 +213,32 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
                 ))}
               </View>
             ) : null}
+          </Section>
+
+          <Section title="Performance">
+            <DatePickerF label="Performance date" value={piece.performDate || ''} onChange={d => savePiece(withPerformance(piece, d, today))} icon="calendar-outline" />
+            {perf ? (
+              <View style={{ marginTop: 4 }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: perf.behind ? COLOURS.amber : COLOURS.text, lineHeight: 20, marginBottom: 8 }}>{perf.line}</Text>
+                {perf.stages.map(s => (
+                  <View key={s.key} accessible accessibilityLabel={`${s.label}, ${s.done ? 'done' : s.overdue ? `overdue, was due ${fmtDate(s.due)}` : `due ${fmtDate(s.due)}`}`}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 }}>
+                    <Text style={{ width: 20, fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: s.done ? COLOURS.success : s.overdue ? COLOURS.amber : COLOURS.textDim }}>{s.done ? '✓' : '•'}</Text>
+                    <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: s.done ? COLOURS.textDim : COLOURS.text }}>{s.label}</Text>
+                    <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: s.overdue ? COLOURS.amber : COLOURS.textDim }}>{s.done ? 'done' : `by ${fmtDate(s.due)}`}</Text>
+                  </View>
+                ))}
+                <TouchableOpacity onPress={() => savePiece(withPerformance(piece, '', today))} hitSlop={HIT_PILL}
+                  accessibilityRole="button" accessibilityLabel="Clear the performance date"
+                  style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center', marginTop: 4 }}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.steel }}>Clear the date</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, marginTop: 6 }}>
+                Set a date and the app works back from it: notes, hands together, up to tempo, memorised. Anything behind goes into Today's plan.
+              </Text>
+            )}
           </Section>
 
           <Section title="From memory">

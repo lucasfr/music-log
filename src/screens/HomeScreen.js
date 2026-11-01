@@ -757,7 +757,7 @@ function DesktopDetailPanel({ session, lesson, compositions, onCloseSession, onC
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function HomeScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onDelete, onDeleteLesson, isDesktop, onOpenSettings }) {
+export default function HomeScreen({ sessions, lessons, compositions, onSave, onSaveLesson, onSaveComposition, onDelete, onDeleteLesson, isDesktop, onOpenSettings }) {
   const today = todayISO();
   const [logModalDate,    setLogModalDate]    = useState(null);
   const [logModalSession, setLogModalSession] = useState(null);
@@ -1168,6 +1168,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
             compositions={compositions}
             tempoSuggestions={tempoSuggestions}
             onFinish={handleTimerFinish}
+            onSaveComposition={onSaveComposition}
             isDesktop
           />
         )}
@@ -1232,6 +1233,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
           compositions={compositions}
           tempoSuggestions={tempoSuggestions}
           onFinish={handleTimerFinish}
+          onSaveComposition={onSaveComposition}
         />
       )}
     </SafeAreaView>

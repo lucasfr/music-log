@@ -11,6 +11,7 @@ import { usePref } from '../utils/usePref';
 import { setLocalPref, todayISO, fmtDate } from '../utils';
 import { GOAL_OPTIONS, REMINDER_TIMES } from '../utils/planning';
 import { parseRestDays, toggleRestDay, serializeRestDays } from '../utils/progress';
+import { YEAR_GOAL_OPTIONS, MONTH_GOAL_OPTIONS } from '../utils/goals';
 import { setDailyReminder } from '../utils/reminders';
 import {
   getSupabaseCredentials,
@@ -408,6 +409,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   const [goalRaw, setGoalRaw] = usePref('weeklyGoalMin', '0');
   const [reminderTime, setReminderTime] = usePref('reminderTime', '');
   const [restRaw, setRestRaw] = usePref('restDays', '[]');
+  const [monthGoalRaw, setMonthGoalRaw] = usePref('monthGoalHours', '0');
+  const [yearGoalRaw, setYearGoalRaw] = usePref('yearGoalHours', '0');
   const restDays = parseRestDays(restRaw);
   const [lastBackup] = usePref('lastBackup', '');
   const markBackedUp = () => setLocalPref('lastBackup', todayISO());
@@ -483,6 +486,25 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
             </View>
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
               Shown on Home as progress through your week.
+            </Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Monthly goal</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {MONTH_GOAL_OPTIONS.map(g => chip(
+                `m${g}`, g ? `${g}h` : 'Off', Number(monthGoalRaw) === g,
+                () => setMonthGoalRaw(String(g)),
+                g ? `${g} hours a month` : 'No monthly goal',
+              ))}
+            </View>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Yearly goal</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {YEAR_GOAL_OPTIONS.map(g => chip(
+                `y${g}`, g ? `${g}h` : 'Off', Number(yearGoalRaw) === g,
+                () => setYearGoalRaw(String(g)),
+                g ? `${g} hours a year` : 'No yearly goal',
+              ))}
+            </View>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
+              Shown on Home with whether you are ahead of, on, or behind an even pace.
             </Text>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Rest days</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

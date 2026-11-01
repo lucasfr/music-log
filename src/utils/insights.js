@@ -3,8 +3,11 @@
 //
 // Dates are local 'YYYY-MM-DD' strings throughout, compared by calendar date (never through
 // toISOString(), which is UTC).
-
-import { dueFromMemory } from './memory.js';
+//
+// This file must stay free of imports: the tests that cover it load its source as a data: URL (see
+// tests/insights.test.mjs), where a relative import cannot be resolved. Anything it needs from another module is
+// passed in by the caller instead (see the `opts` of buildTodayPlan). tests/insightsSelfContained.test.mjs
+// fails with an explanation if an import is added.
 
 const num = v => {
   const n = Number(v);
@@ -656,9 +659,11 @@ export function buildTodayPlan(target, sessions, lessons, compositions, today, o
   const assigned = openAssignmentPieces(lessons, sessions, today);
   const titleKey = c => String(c.title || '').trim().toLowerCase();
   const flaggedPieces = new Set(mockFlags.filter(f => f && f.kind === 'piece' && f.label).map(f => String(f.label).trim().toLowerCase()));
-  const memoryDue = new Map(dueFromMemory(compositions, today).map(x => [x.id, x.daysSince]));
+  const memoryDue = new Map((Array.isArray(opts.memoryDue) ? opts.memoryDue : []).filter(x => x && x.id).map(x => [x.id, x.daysSince]));
+  // Given by the caller (performancePlanNudge in utils/performancePlan.js): (piece, today, tempo) -> { score, reason } | null.
+  const perfNudge = typeof opts.performanceNudge === 'function' ? opts.performanceNudge : null;
   const ranked = (compositions || [])
-    .filter(c => c.status === 'learning' || c.status === 'consolidating' || flaggedPieces.has(titleKey(c)) || memoryDue.has(c.id))
+    .filter(c => c.status === 'learning' || c.status === 'consolidating' || flaggedPieces.has(titleKey(c)) || memoryDue.has(c.id) || !!(perfNudge && perfNudge(c, today, null)))
     .map(c => {
       const r = pieceReport(c, sessions, lessons, today, examDate);
       const days = r.practice.daysSince;
@@ -666,6 +671,9 @@ export function buildTodayPlan(target, sessions, lessons, compositions, today, o
       let score = 0;
       if (assigned.has(c.id)) { score += 3; reasons.push('open task from your lesson'); }
       if (flaggedPieces.has(titleKey(c))) { score += 2.5; reasons.push('flagged in your mock exam'); }
+      // A performance date (see utils/performancePlan.js): behind schedule, or close.
+      const nudge = perfNudge ? perfNudge(c, today, r.tempo ? { latest: r.tempo.latest, target: r.tempo.target } : null) : null;
+      if (nudge) { score += nudge.score; reasons.push(nudge.reason); }
       if (r.stalled) { score += 2; reasons.push(`tempo stalled at ${r.stalled.bpm}`); }
       if (r.trajectory && r.trajectory.status === 'behind') { score += 2; reasons.push('behind on tempo'); }
       if (memoryDue.has(c.id)) { score += 1.5; reasons.push(`not played from memory for ${memoryDue.get(c.id)} days`); }
@@ -1034,6 +1042,12 @@ const cleanSpotTempo = v => {
   const n = Math.round(Number(v));
   return Number.isFinite(n) && n >= SPOT_TEMPO_MIN && n <= SPOT_TEMPO_MAX ? n : null;
 };
+// The totals of clean and all goes at a spot (see utils/cleanReps.js); only present when they make sense.
+const cleanSpotReps = v => {
+  const total = Math.round(Number(v && v.total));
+  const clean = Math.round(Number(v && v.clean));
+  return Number.isFinite(total) && Number.isFinite(clean) && total > 0 && clean >= 0 && clean <= total ? { clean, total } : null;
+};
 
 export function parseSpots(raw) {
   if (!Array.isArray(raw)) return [];
@@ -1046,7 +1060,8 @@ export function parseSpots(raw) {
     if (!bars || !key || seen.has(key)) return;
     seen.add(key);
     const tempo = cleanSpotTempo(x.tempo);
-    out.push({ id: String(x.id || key), bars, status: x.status === 'fixed' ? 'fixed' : 'open', added: x.added || null, fixed: x.status === 'fixed' ? (x.fixed || null) : null, ...(tempo ? { tempo } : {}) });
+    const reps = cleanSpotReps(x.reps);
+    out.push({ id: String(x.id || key), bars, status: x.status === 'fixed' ? 'fixed' : 'open', added: x.added || null, fixed: x.status === 'fixed' ? (x.fixed || null) : null, ...(tempo ? { tempo } : {}), ...(reps ? { reps } : {}) });
   });
   return out;
 }
@@ -1078,6 +1093,19 @@ export function setSpotTempo(spots, id, bpm) {
     if (x.id !== id) return x;
     const { tempo: _old, ...rest } = x;
     return tempo ? { ...rest, tempo } : rest;
+  });
+}
+
+// More goes added to one spot's totals: `clean` of `total` more. Anything that isn't a sensible count
+// (negative, more clean than total, not a number) adds nothing. A new list; an unknown id changes nothing.
+export function addSpotReps(spots, id, clean, total) {
+  const c = Math.round(Number(clean));
+  const t = Math.round(Number(total));
+  const ok = Number.isFinite(c) && Number.isFinite(t) && t > 0 && c >= 0 && c <= t;
+  return parseSpots(spots).map(x => {
+    if (x.id !== id || !ok) return x;
+    const had = x.reps || { clean: 0, total: 0 };
+    return { ...x, reps: { clean: had.clean + c, total: had.total + t } };
   });
 }
 

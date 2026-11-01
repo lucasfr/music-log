@@ -12,6 +12,7 @@ import { Btn } from './UI';
 import { Field, TextF, NumberF, SelectF, DatePickerF } from './Form';
 import { ScalesPicker } from './SegmentEditor';
 import { MockExamModal } from './MockExamModal';
+import { ScaleLadderModal } from './ScaleLadderModal';
 import { Tap as TouchableOpacity } from './Motion';
 import { usePref } from '../utils/usePref';
 import { todayISO } from '../utils';
@@ -52,6 +53,7 @@ export function GradeTargetCard({ sessions, compositions }) {
   const [raw, setRaw] = usePref('gradeTarget', '');
   const [editing, setEditing] = useState(false);
   const [mockOpen, setMockOpen] = useState(false);
+  const [ladderOpen, setLadderOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const target = useMemo(() => parseTarget(raw), [raw]);
   // One stable object for the editor to start from. A fresh one on every render would make it
@@ -106,6 +108,7 @@ export function GradeTargetCard({ sessions, compositions }) {
           ) : null}
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Pill label="Scale ladder" onPress={() => setLadderOpen(true)} a11y="Practise the scales from this target with the metronome" />
           <Pill label="Mock exam" onPress={() => setMockOpen(true)} a11y="Start a mock exam from this target" />
           <Pill label="Edit" onPress={() => setEditing(true)} a11y="Edit target" />
         </View>
@@ -182,6 +185,7 @@ export function GradeTargetCard({ sessions, compositions }) {
       ) : null}
       {modal}
       <MockExamModal visible={mockOpen} readinessResult={r} onClose={() => setMockOpen(false)} />
+      <ScaleLadderModal visible={ladderOpen} readinessResult={r} onClose={() => setLadderOpen(false)} />
     </View>
   );
 }

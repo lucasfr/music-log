@@ -23,6 +23,7 @@ import { PracticeVolumeChart, WeeklyTrendChart, ScatterPlot, DayOfWeekChart } fr
 import { NeglectedPieces, WinsTimeline, StreakHistory, LessonInsights, LibraryGrowthChart, GradePathway } from './stats/LibrarySections';
 import { TechniqueBreakdown, ScaleCoverage, StaleScales } from './stats/TechniqueSections';
 import { TempoProgress } from './stats/TempoSections';
+import { SightReadingLadder } from './stats/SightReadingLadder';
 
 // The sections themselves live in ./stats/ (one file per group of charts); this file is the page:
 // the period switch, the overview tiles, and the folding sections that hold them.
@@ -229,6 +230,12 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
         <StatsSection id="tempo" title="Tempo progress" collapsed={collapsed} onToggle={toggleSection}>
         <GlassCard>
           <TempoProgress sessions={sessions} compositions={compositions} examDate={examDate} onOpenPiece={setOpenPieceId} />
+        </GlassCard>
+
+        </StatsSection>
+        <StatsSection id="sightreading" title="Sight-reading ladder" collapsed={collapsed} onToggle={toggleSection}>
+        <GlassCard>
+          <SightReadingLadder />
         </GlassCard>
 
         </StatsSection>

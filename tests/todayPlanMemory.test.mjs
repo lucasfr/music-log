@@ -2,11 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildTodayPlan } from '../src/utils/insights.js';
 import { dueFromMemory } from '../src/utils/memory.js';
+import { performancePlanNudge } from '../src/utils/performancePlan.js';
 
 const TODAY = '2026-11-01';
 const piece = (id, title, extra = {}) => ({ id, title, status: 'performance-ready', ...extra });
 const ids = () => { let n = 0; return () => `seg${n++}`; };
-const plan = (compositions, opts = {}, sessions = []) => buildTodayPlan(null, sessions, [], compositions, TODAY, { makeId: ids(), ...opts });
+// The plan is given the memory and performance logic by its caller (insights.js has no imports), as Home does.
+const plan = (compositions, opts = {}, sessions = []) => buildTodayPlan(null, sessions, [], compositions, TODAY, {
+  makeId: ids(), memoryDue: dueFromMemory(compositions, TODAY), performanceNudge: performancePlanNudge, ...opts,
+});
 const titles = p => p.items.filter(i => i.kind === 'piece').map(i => i.title);
 
 test('dueFromMemory: only memorised pieces 14 or more days since a run, longest-waiting first, shelved left out', () => {
@@ -85,4 +89,30 @@ test('with no flags and no memorised pieces the plan is exactly what it was befo
   const b = plan(comps, { mockFlags: [] });
   assert.deepEqual(a.items, b.items);
   assert.deepEqual(titles(a).sort(), ['Cons', 'Learning']);
+});
+
+test('without the memory and performance inputs the plan ignores them (the caller supplies them)', () => {
+  const comps = [piece('a', 'Sonatina', { memorised: true, lastFromMemory: '2026-10-10', performDate: '2026-11-10', performFrom: '2026-10-01' })];
+  const bare = buildTodayPlan(null, [], [], comps, TODAY, { makeId: ids() });
+  assert.deepEqual(titles(bare), []);
+  assert.deepEqual(titles(plan(comps)), ['Sonatina']);
+});
+
+test('a piece behind for its performance is planned, with the reason', () => {
+  const comps = [{ id: 'a', title: 'Prelude', status: 'new', performDate: '2026-11-20', performFrom: '2026-10-20' }];
+  const p = plan(comps);
+  assert.deepEqual(titles(p), ['Prelude']);
+  assert.equal(p.items[0].reason, 'behind for your performance on 20 Nov');
+});
+
+test('a performance two weeks off is planned, a distant on-schedule one is not', () => {
+  const near = [{ id: 'a', title: 'Near', status: 'consolidating', performDate: '2026-11-10', performFrom: '2026-10-30' }];
+  assert.match(plan(near).items[0].reason, /performance in 9 days|behind for your performance/);
+  const far = [{ id: 'b', title: 'Far', status: 'performance-ready', memorised: true, performDate: '2027-03-01', performFrom: '2026-10-30' }];
+  assert.deepEqual(titles(plan(far)), []);
+});
+
+test('a performance date that has passed does not plan the piece', () => {
+  const old = [{ id: 'a', title: 'Old', status: 'new', performDate: '2026-10-01', performFrom: '2026-09-01' }];
+  assert.deepEqual(titles(plan(old)), []);
 });

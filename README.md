@@ -51,6 +51,12 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🎓 **Mock exam** — on the Grade target card: a random pick of the scales and arpeggios your target asks for, then your pieces, then sight-reading, one at a time against the clock, with a summary of what you flagged and what took longest; each run is kept so the next says how it compares, and what you flagged feeds Today's plan on Home for two weeks
 - 🎯 **Tempo for each tricky spot** — give a spot its own clean tempo on the piece's page (with the next tempo to try), and the metronome offers a chip for it that sets the tempo and ramps up towards the piece's own
 - 🔀 **Conflicts explained** — when two devices edit the same entry, Settings lists the saved copy with a few plain lines on what differs from the version that was kept
+- 🔁 **Clean reps** — in the timer, tap a tricky spot's chip in the metronome and tap Clean or Miss after each go; five clean in a row offers the next tempo, and the spot keeps its lifetime total
+- 🪜 **Scale ladder** — on the Grade target card: a short routine of your target's scales with the metronome, where Clean steps the tempo up and the clean tempo is kept per scale
+- 🥁 **Accent patterns** — tap each beat of the bar to make it strong, weak or silent, or use All, 1 only and Half bar
+- 🎤 **Performance countdown** — give a piece a date and it works back through notes, hands together, up to tempo and memorised, and says whether you are behind; anything behind feeds Today's plan
+- 🎯 **Monthly and yearly goals** — set hours in Settings and Home shows progress against an even pace, and how many minutes a day would catch up
+- 👁️ **Sight-reading ladder** — on Stats: log how each attempt at a level went and it suggests when to step up or down
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
@@ -111,6 +117,13 @@ music-log/
 │   ├── conflictDiff.test.mjs       # What differs between a kept version and a saved conflict copy
 │   ├── statsStreakRest.test.mjs    # Stats streaks with rest days, and that they agree with Home's
 │   ├── backupNewFields.test.mjs    # Memorised fields and spots survive a JSON export and restore
+│   ├── insightsSelfContained.test.mjs # insights.js must have no imports (other tests load it as a data: URL)
+│   ├── cleanReps.test.mjs          # Clean goes at a spot, and its lifetime totals
+│   ├── performancePlan.test.mjs    # The performance countdown and its nudge to Today's plan
+│   ├── goals.test.mjs              # Monthly and yearly hours against an even pace
+│   ├── sightLadder.test.mjs        # When the sight-reading ladder says up, down or stay
+│   ├── scaleLadder.test.mjs        # Clean tempo per scale, stepping, and picking a routine
+│   ├── beatPattern.test.mjs        # Strong, weak and silent beats
 │   ├── imports.test.mjs            # Every file parses and every import and imported name exists
 │   └── fakeSupabase.mjs            # An in-memory stand-in for the Supabase client (not a test itself)
 ├── web/
@@ -194,6 +207,12 @@ music-log/
         ├── memory.js                # Memorised pieces and the last time one was played from memory; pure, unit-tested
         ├── mockExam.js              # Picking and timing a mock exam from the grade target, its history and flags; pure, unit-tested
         ├── conflictDiff.js          # What differs between a kept version and a saved conflict copy; pure, unit-tested
+        ├── cleanReps.js             # Clean goes at a tricky spot; pure, unit-tested
+        ├── performancePlan.js       # The performance countdown for a piece; pure, unit-tested
+        ├── goals.js                 # Monthly and yearly hours against an even pace; pure, unit-tested
+        ├── sightLadder.js           # The sight-reading ladder; pure, unit-tested
+        ├── scaleLadder.js           # Clean tempo per scale and the routine; pure, unit-tested
+        ├── beatPattern.js           # Strong, weak and silent beats of the bar; pure, unit-tested
         ├── chartSummaries.js        # One-sentence spoken summaries of the Stats charts; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)

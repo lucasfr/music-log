@@ -13,6 +13,9 @@ import { Tap as TouchableOpacity } from './Motion';
 import { fmtDate } from '../utils';
 import { usePref } from '../utils/usePref';
 import { parseMockHistory, freshFlags } from '../utils/mockExam';
+import { dueFromMemory } from '../utils/memory';
+import { performancePlanNudge } from '../utils/performancePlan';
+import { yearProgress, monthProgress } from '../utils/goals';
 import { LessonBriefModal } from './LessonBriefModal';
 import { ENERGY_LABELS } from '../constants';
 import {
@@ -274,7 +277,13 @@ function TodaysPlanCard({ sessions, lessons, compositions, today, practicedToday
   const mockFlags = useMemo(() => freshFlags(parseMockHistory(mockRaw), today), [mockRaw, today]);
   const target = useMemo(() => parseTarget(targetRaw), [targetRaw]);
   const plan = useMemo(
-    () => buildTodayPlan(target, sessions, lessons, compositions, today, { examDate: (target && target.date) || null, mockFlags }),
+    () => buildTodayPlan(target, sessions, lessons, compositions, today, {
+      examDate: (target && target.date) || null,
+      mockFlags,
+      // insights.js has no imports of its own (see its header), so the memory and performance logic is passed in.
+      memoryDue: dueFromMemory(compositions, today),
+      performanceNudge: performancePlanNudge,
+    }),
     [target, sessions, lessons, compositions, today, mockFlags],
   );
   if (practicedToday || !onStartPlan || !plan.items.length) return null;
@@ -328,12 +337,45 @@ function MoreInsights({ children }) {
   );
 }
 
+// ─── Monthly and yearly goals ──────────────────────────────────────────────────────────────
+// Hours against the goals you set in Settings → Practice, and whether that is ahead of an even pace (see
+// utils/goals.js). Nothing is shown until a goal is set.
+
+function GoalRow({ label, p }) {
+  const colour = p.status === 'behind' ? COLOURS.amber : p.status === 'on' ? COLOURS.steel : COLOURS.success;
+  return (
+    <View accessible accessibilityLabel={`${label}: ${p.line}`} style={{ marginBottom: 12 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{label}</Text>
+      <View style={{ height: 6, borderRadius: 3, backgroundColor: COLOURS.navyA(0.10), overflow: 'hidden', marginTop: 6 }}>
+        <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.round(p.fraction * 100)}%`, backgroundColor: colour }} />
+        <View style={{ position: 'absolute', top: 0, bottom: 0, left: `${Math.min(100, Math.round((p.expected / p.goal) * 100))}%`, width: 2, backgroundColor: COLOURS.navyA(0.45) }} />
+      </View>
+      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: p.status === 'behind' ? COLOURS.amber : COLOURS.textDim, marginTop: 4 }}>{p.line}</Text>
+    </View>
+  );
+}
+
+function GoalsCard({ sessions, today }) {
+  const [monthRaw] = usePref('monthGoalHours', '0');
+  const [yearRaw] = usePref('yearGoalHours', '0');
+  const month = useMemo(() => monthProgress(sessions, today, Number(monthRaw)), [sessions, today, monthRaw]);
+  const year = useMemo(() => yearProgress(sessions, today, Number(yearRaw)), [sessions, today, yearRaw]);
+  if (!month && !year) return null;
+  return (
+    <Card accent={COLOURS.steel} title="Goals" subtitle="The line marks where an even pace would be">
+      {month ? <GoalRow label="This month" p={month} /> : null}
+      {year ? <GoalRow label="This year" p={year} /> : null}
+    </Card>
+  );
+}
+
 export function HomeInsightCards({ sessions, lessons, compositions, today, onSaveLesson, practicedToday, onStartPlan }) {
   return (
     <>
       <LessonChecklist lessons={lessons} sessions={sessions} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
       <WeeklyReviewCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
       <TodaysPlanCard sessions={sessions} lessons={lessons} compositions={compositions} today={today} practicedToday={practicedToday} onStartPlan={onStartPlan} />
+      <GoalsCard sessions={sessions} today={today} />
       <MoreInsights>
         <TodaysScales sessions={sessions} today={today} />
         <LessonBriefCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
