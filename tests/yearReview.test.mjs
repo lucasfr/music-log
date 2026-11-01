@@ -81,6 +81,17 @@ test('wins: the five most recent, trimmed, blanks skipped', () => {
   assert.deepEqual(r.wins.map(w => w.text), ['Win 6', 'Win 5', 'Win 4', 'Win 2', 'Win 1']);
 });
 
+test('hours for each month, January first, and which is busiest, for the bar chart', () => {
+  const r = yearReview([S('2026-01-10', 60), S('2026-03-01', 90), S('2026-03-02', 30), S('2026-12-31', 15)], [], comps, 2026);
+  assert.equal(r.months.length, 12);
+  assert.deepEqual(r.months, [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0.3]);
+  assert.equal(r.busiestIndex, 2);
+  assert.equal(r.months[r.busiestIndex], r.busiestMonth.hours);
+  const none = yearReview([], [{ date: '2026-02-01' }], comps, 2026);
+  assert.deepEqual(none.months, new Array(12).fill(0));
+  assert.equal(none.busiestIndex, -1);
+});
+
 test('lessons alone make a year that is not empty, and a lesson-only year still gets its line', () => {
   const r = yearReview([], [{ date: '2026-02-01' }, { date: '2026-03-01' }], comps, 2026);
   assert.equal(r.empty, false);

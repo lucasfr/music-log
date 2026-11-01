@@ -39,7 +39,7 @@ function longestRun(dates, restDays) {
 const scaleNames = seg => (seg.scales || []).map(e => (typeof e === 'string' ? e : e && e.scale)).filter(Boolean);
 
 // -> { year, empty, hours, sessions, lessons, activeDays, longestRun, busiestMonth, topPiece, piecesPlayed, scalesPlayed,
-//      memorised, biggestGain, wins, highlights }
+//      memorised, biggestGain, wins, highlights, months, busiestIndex }
 export function yearReview(sessions, lessons, compositions, year, restDays = []) {
   const y = String(year);
   const inYear = d => typeof d === 'string' && ISO.test(d) && d.slice(0, 4) === y;
@@ -103,5 +103,8 @@ export function yearReview(sessions, lessons, compositions, year, restDays = [])
     hours: round1(minutes / 60), sessions: ss.length, lessons: ls.length, activeDays, longestRun: run,
     busiestMonth: byMonth[topMonthIndex] > 0 ? { month: MONTHS[topMonthIndex], hours: round1(byMonth[topMonthIndex] / 60) } : null,
     topPiece, piecesPlayed: pieceMinutes.size, scalesPlayed: scales.size, memorised, biggestGain, wins, highlights,
+    // Hours in each month (January first), and which month is busiest (-1 with no practice), for the bar chart.
+    months: byMonth.map(m => round1(m / 60)),
+    busiestIndex: byMonth[topMonthIndex] > 0 ? topMonthIndex : -1,
   };
 }
