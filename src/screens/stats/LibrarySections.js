@@ -10,6 +10,7 @@ import Svg, { Path, Circle, Text as SvgText } from 'react-native-svg';
 import { deriveStatusHistory, todayISO } from '../../utils';
 import { ZeldaBarFractional } from './shared';
 import { librarySummary } from '../../utils/chartSummaries';
+import { memorisedIds } from '../../utils/memory';
 
 export function NeglectedPieces({ sessions, compositions }) {
   const today = todayISO();
@@ -323,6 +324,7 @@ export function LibraryGrowthChart({ compositions, sessions, lessons }) {
 // practice each has had. Tap a grade to see its pieces, furthest along first.
 export function GradePathway({ compositions, sessions }) {
   const path = useMemo(() => gradePathway(compositions, sessions), [compositions, sessions]);
+  const memorised = useMemo(() => memorisedIds(compositions), [compositions]);
   const [open, setOpen] = useState(() => {
     const next = path.find(g => g.pieces.some(p => p.status !== 'performance-ready' && p.status !== 'ambition' && p.status !== 'shelved'));
     return next ? next.grade : null;
@@ -360,6 +362,7 @@ export function GradePathway({ compositions, sessions }) {
                   <View style={{ flex: 1 }}>
                     <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{p.title}</Text>
                     {p.composer ? <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{p.composer}</Text> : null}
+                    {memorised.has(p.id) ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.success }}>Memorised</Text> : null}
                   </View>
                   <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: sc.bg || COLOURS.glass }}>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.tiny, color: sc.text || COLOURS.textDim }}>{p.status}</Text>

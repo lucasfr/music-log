@@ -25,7 +25,7 @@ import { backfillTechniqueGroups } from './src/db/migrations';
 import { deriveCompositionStatus, initPrefs, getLocalPref, setLocalPref, todayISO } from './src/utils';
 import * as Haptics from 'expo-haptics';
 import { notify } from './src/utils/notify';
-import { detectMilestones } from './src/utils/progress';
+import { detectMilestones, parseRestDays } from './src/utils/progress';
 import { setupUpdatePrompt } from './src/utils/updatePrompt';
 import HomeScreen from './src/screens/HomeScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
@@ -144,6 +144,7 @@ function AppInner({ fontsLoaded }) {
         { sessions: allSessions, lessons: allLessons },
         { sessions: [...allSessions, s], lessons: allLessons },
         todayISO(),
+        parseRestDays(getLocalPref('restDays', '[]')),
       ));
     }
     return result;
@@ -157,6 +158,7 @@ function AppInner({ fontsLoaded }) {
         { sessions: allSessions, lessons: allLessons },
         { sessions: allSessions, lessons: [...allLessons, l] },
         todayISO(),
+        parseRestDays(getLocalPref('restDays', '[]')),
       ));
     }
     return result;

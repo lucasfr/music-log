@@ -11,6 +11,7 @@ import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL, STATUS_COLOURS } from '..
 import { Btn } from './UI';
 import { Field, TextF, NumberF, SelectF, DatePickerF } from './Form';
 import { ScalesPicker } from './SegmentEditor';
+import { MockExamModal } from './MockExamModal';
 import { Tap as TouchableOpacity } from './Motion';
 import { usePref } from '../utils/usePref';
 import { todayISO } from '../utils';
@@ -50,6 +51,7 @@ function daysLeftText(d) {
 export function GradeTargetCard({ sessions, compositions }) {
   const [raw, setRaw] = usePref('gradeTarget', '');
   const [editing, setEditing] = useState(false);
+  const [mockOpen, setMockOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const target = useMemo(() => parseTarget(raw), [raw]);
   // One stable object for the editor to start from. A fresh one on every render would make it
@@ -103,7 +105,10 @@ export function GradeTargetCard({ sessions, compositions }) {
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{daysLeftText(daysLeft)} · {target.date}</Text>
           ) : null}
         </View>
-        <Pill label="Edit" onPress={() => setEditing(true)} a11y="Edit target" />
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Pill label="Mock exam" onPress={() => setMockOpen(true)} a11y="Start a mock exam from this target" />
+          <Pill label="Edit" onPress={() => setEditing(true)} a11y="Edit target" />
+        </View>
       </View>
 
       {counts.total > 0 ? (
@@ -176,6 +181,7 @@ export function GradeTargetCard({ sessions, compositions }) {
         </View>
       ) : null}
       {modal}
+      <MockExamModal visible={mockOpen} readinessResult={r} onClose={() => setMockOpen(false)} />
     </View>
   );
 }

@@ -13,7 +13,8 @@ import { LessonDetailModal } from '../components/LessonDetailModal';
 import { fmtDate, formatArticulation, formatTempo, latestSession } from '../utils';
 import { FAB } from '../components/FAB';
 import { DaySheet } from '../components/DaySheet';
-import { currentStreak } from '../utils/progress';
+import { currentStreak, parseRestDays } from '../utils/progress';
+import { usePref } from '../utils/usePref';
 
 const DAYS   = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -113,7 +114,8 @@ function CalendarGrid({ sessions, lessons, viewYear, viewMonth, today, cellW, ce
   const monthPrefix   = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
   const monthSessions = sessions.filter(s => s.date.startsWith(monthPrefix));
   const monthLessons  = (lessons || []).filter(l => l.date.startsWith(monthPrefix));
-  const streak        = currentStreak(sessions, today);
+  const [restRaw]     = usePref('restDays', '[]');
+  const streak        = currentStreak(sessions, today, parseRestDays(restRaw));
 
   // Swipe the grid sideways to change month (left for next, right for previous). It only takes
   // over a clearly horizontal drag, so scrolling the page and tapping a day still work.

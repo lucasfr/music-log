@@ -25,7 +25,7 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 📖 **History** — chronological feed of all sessions and lessons, fully expanded inline with complete segment detail, wins, and next-focus notes; search across piece names, notes, wins and dates, filter to practice or lessons, and swipe an entry left to delete it (virtualised, so it stays smooth as the log grows)
 - 🎓 **Lessons** — log lessons separately with teacher, duration, per-piece feedback, assignments, overall notes, wins, and focus for next time
 - ⏱️ **Practice timer** — pomodoro-style segmented sessions: build a plan of technique/repertoire segments (each with its own minutes dial, drag its grip to reorder it, swipe a collapsed one left to remove it), confirm and collapse each one as you set it up, then run through them with a countdown ring, pause/skip/+5min controls, an optional articulation per technique segment (shown on the countdown screen and carried into the log form), and automatic session logging when you finish
-- 🥁 **Metronome** — built into the timer screen: adjustable tempo (tap ±5 / hold ±1, named tempo markings from Largo to Presto), time signatures from 2/4 to 12/8 (compound meters felt in their conventional main pulses, not literal numerator), quarter-through-16th-note subdivisions, a "use piece tempo" shortcut that reads a linked library piece's stored tempo/time signature, and an optional tempo ramp (auto-increases bpm toward a target every N bars — useful for bringing a hard passage up to speed). Runs on a real audio-engine clock (react-native-audio-api) rather than JS timers, for steady timing independent of anything else happening in the app, and resumes correctly if the app is backgrounded mid-session. A Tap tempo button sets the tempo from a few taps of your own
+- 🥁 **Metronome** — built into the timer screen: adjustable tempo (tap ±5 / hold ±1, named tempo markings from Largo to Presto), time signatures from 2/4 to 12/8 (compound meters felt in their conventional main pulses, not literal numerator), quarter-through-16th-note subdivisions, a "use piece tempo" shortcut that reads a linked library piece's stored tempo/time signature, and an optional tempo ramp (auto-increases bpm toward a target every N bars — useful for bringing a hard passage up to speed). Runs on a real audio-engine clock (react-native-audio-api) rather than JS timers, for steady timing independent of anything else happening in the app, and resumes correctly if the app is backgrounded mid-session. A Tap tempo button sets the tempo from a few taps of your own, and Silent bars clicks for a few bars then goes quiet for a few so you have to keep the pulse yourself
 - 🔄 **Optional cloud sync** — push/pull sessions, lessons, and compositions to a Supabase project of your own, with GitHub or magic-link sign-in; works the same on web and native, with a last-synced / sync-error indicator in Settings and a Check sync button that tests the tables, a write and read-back, and record counts on this device against the server. Pulls download only the records that changed, with a full pull once a day as a safety net
 - 🎼 **Segment logging** — sessions split into technique segments (Hanon, Scales, Arpeggios, Chord work, Sight-reading, Technical exercise) and repertoire segments, each with notes, felt difficulty, challenge tags, and progress tags
 - 🎹 **Scale & arpeggio detail tracking** — scales/arpeggios tracked individually with parallel/contrary motion, unison/3rds/6ths/10ths interval apart, and 1–4 octaves per entry, backward-compatible with older plain-string entries. Catalogue covers major/natural/harmonic/melodic minor, modes, pentatonic, chromatic (all 12 keys), whole tone, diminished, augmented, blues, and dominant/diminished 7th arpeggios (all 12 keys)
@@ -46,6 +46,9 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🗂️ **Foldable Stats** — each Stats section folds away and stays that way
 - 📈 **Tempo progress and scales to revisit** — the BPM logged on pieces and exercises over time, with a suggested next tempo and a stalled / on-track note; scales and arpeggios left for two weeks or more are listed so they don't drop out of rotation
 - 🔊 **Charts read aloud** — each Stats chart has a one-sentence summary for VoiceOver and TalkBack (totals, the high point, the latest value, which way it is heading)
+- 🛋️ **Rest days** — pick the weekdays you take off (Settings → Practice) and a day off with nothing logged neither breaks your streak nor adds to it; practising on one still counts. Home, the Calendar and the streak milestones all use it
+- 🧠 **From memory** — tick a piece as memorised on its page and tap "Played from memory today" after you play it without the score; the page says how long ago that was and when a run-through is due, and the grade pathway marks memorised pieces
+- 🎓 **Mock exam** — on the Grade target card: a random pick of the scales and arpeggios your target asks for, then your pieces, then sight-reading, one at a time against the clock, with a summary of what you flagged and what took longest
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
@@ -96,6 +99,10 @@ music-log/
 │   ├── selfTest.test.mjs           # The Check sync checks, against the same fake client
 │   ├── chartSummaries.test.mjs     # The spoken summaries of the Stats charts
 │   ├── tapTempo.test.mjs           # Turning taps into a tempo
+│   ├── restDays.test.mjs           # Streaks with planned days off, in the clock-change edge cases
+│   ├── silentBars.test.mjs         # Which metronome steps fall in a silent bar
+│   ├── memory.test.mjs             # Memorised pieces and when they were last played from memory
+│   ├── mockExam.test.mjs           # The seeded shuffle, the picks, and the summary of a mock exam
 │   ├── imports.test.mjs            # Every file parses and every import and imported name exists
 │   └── fakeSupabase.mjs            # An in-memory stand-in for the Supabase client (not a test itself)
 ├── web/
@@ -175,6 +182,9 @@ music-log/
         ├── tabBarLayout.js          # Fitting the tab bar to the screen width; pure, unit-tested
         ├── syncQueue.js             # The outbox, tombstone deletes and conflict copies; pure, unit-tested
         ├── tapTempo.js              # Taps to a tempo for the metronome; pure, unit-tested
+        ├── silentBars.js            # Which metronome steps are inside a silent bar; pure, unit-tested
+        ├── memory.js                # Memorised pieces and the last time one was played from memory; pure, unit-tested
+        ├── mockExam.js              # Picking and timing a mock exam from the grade target; pure, unit-tested
         ├── chartSummaries.js        # One-sentence spoken summaries of the Stats charts; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)

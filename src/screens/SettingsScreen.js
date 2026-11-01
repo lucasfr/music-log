@@ -10,6 +10,7 @@ import { notify } from '../utils/notify';
 import { usePref } from '../utils/usePref';
 import { setLocalPref, todayISO, fmtDate } from '../utils';
 import { GOAL_OPTIONS, REMINDER_TIMES } from '../utils/planning';
+import { parseRestDays, toggleRestDay, serializeRestDays } from '../utils/progress';
 import { setDailyReminder } from '../utils/reminders';
 import {
   getSupabaseCredentials,
@@ -405,6 +406,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   const THEME_ICONS = { system: 'phone-portrait-outline', light: 'sunny-outline', dark: 'moon-outline' };
   const [goalRaw, setGoalRaw] = usePref('weeklyGoalMin', '0');
   const [reminderTime, setReminderTime] = usePref('reminderTime', '');
+  const [restRaw, setRestRaw] = usePref('restDays', '[]');
+  const restDays = parseRestDays(restRaw);
   const [lastBackup] = usePref('lastBackup', '');
   const markBackedUp = () => setLocalPref('lastBackup', todayISO());
   const chooseReminder = async t => {
@@ -479,6 +482,17 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
             </View>
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
               Shown on Home as progress through your week.
+            </Text>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Rest days</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {[['Mon', 1, 'Monday'], ['Tue', 2, 'Tuesday'], ['Wed', 3, 'Wednesday'], ['Thu', 4, 'Thursday'], ['Fri', 5, 'Friday'], ['Sat', 6, 'Saturday'], ['Sun', 0, 'Sunday']].map(([label, day, full]) => chip(
+                `rest${day}`, label, restDays.includes(day),
+                () => setRestRaw(serializeRestDays(toggleRestDay(restDays, day))),
+                `${full} is a rest day`,
+              ))}
+            </View>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
+              A day off doesn't break your streak. Practising on one still counts.
             </Text>
             {Platform.OS !== 'web' && (
               <>

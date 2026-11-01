@@ -14,7 +14,7 @@ import { exportSessionJSON, exportAllJSON, copySessionJSON } from '../utils/expo
 import AboutScreen from './AboutScreen';
 import { FAB } from '../components/FAB';
 import { TimerSetupModal } from '../components/TimerSetupModal';
-import { weekSummary, latestFocus, currentStreak as streakFrom } from '../utils/progress';
+import { weekSummary, latestFocus, currentStreak as streakFrom, parseRestDays } from '../utils/progress';
 import { RatingMini } from '../components/UI';
 import { usePref } from '../utils/usePref';
 import { goalProgress, backupNudge, snoozeUntil, parseRoutines, routineToPlan, relativeDay, todaySummary, planSummary, lastPracticedLine } from '../utils/planning';
@@ -834,7 +834,8 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
   const todayJustOpened = todayOpen && !todayWasOpen.current;
   useEffect(() => { todayWasOpen.current = todayOpen; }, [todayOpen]);
 
-  const currentStreak = useMemo(() => streakFrom(sessions, today), [sessions, today]);
+  const [restRaw] = usePref('restDays', '[]');
+  const currentStreak = useMemo(() => streakFrom(sessions, today, parseRestDays(restRaw)), [sessions, today, restRaw]);
   // The next tempo to try on each library piece, offered beside "Use piece tempo" in the metronome.
   const tempoSuggestions = useMemo(() => tempoSuggestionMap(sessions, compositions, today), [sessions, compositions, today]);
 

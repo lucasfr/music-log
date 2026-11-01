@@ -11,6 +11,7 @@ import {
   addSpot, setSpotFixed, removeSpot, spotLabel,
 } from '../utils/insights';
 import { tint } from '../utils/tint';
+import { memoryState, withMemorised, withPlayedFromMemory } from '../utils/memory';
 
 // One page for one piece: where it stands (practice, tempo and whether it will get there in time), the
 // bars that keep going wrong, what your teacher has said, how it has gone lately, and the stages it has
@@ -95,6 +96,8 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
   const status = report.status;
   const sc = STATUS_COLOURS[status] || {};
   const save = list => onSavePiece && onSavePiece({ ...piece, spots: list });
+  const memory = memoryState(piece, today);
+  const savePiece = next => onSavePiece && onSavePiece(next);
   const addNew = () => { if (!spotText.trim()) return; save(addSpot(piece.spots, spotText, today)); setSpotText(''); };
   const trajectoryColour = !trajectory ? null
     : trajectory.status === 'behind' ? COLOURS.amber
@@ -176,6 +179,29 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
                   <SpotRow key={s.id} spot={s} onToggle={() => save(setSpotFixed(piece.spots, s.id, false, today))} onRemove={() => save(removeSpot(piece.spots, s.id))} />
                 ))}
               </View>
+            ) : null}
+          </Section>
+
+          <Section title="From memory">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}>
+              <TouchableOpacity onPress={() => savePiece(withMemorised(piece, !memory.memorised, today))} hitSlop={HIT_PILL}
+                accessibilityRole="checkbox" accessibilityState={{ checked: memory.memorised }} accessibilityLabel="Memorised"
+                style={{ width: 26, height: 26, borderRadius: RADIUS.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: memory.memorised ? COLOURS.success : COLOURS.w(0.55), borderWidth: 1, borderColor: memory.memorised ? COLOURS.success : COLOURS.glassBorder }}>
+                {memory.memorised ? <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, lineHeight: 18, color: COLOURS.onNavy }}>✓</Text> : null}
+              </TouchableOpacity>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.text }}>Memorised</Text>
+            </View>
+            {memory.line ? (
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: memory.stale ? COLOURS.amber : COLOURS.textDim, marginBottom: 8, lineHeight: 19 }}>{memory.line}</Text>
+            ) : (
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, marginBottom: 8 }}>Tick it once you can play it without the score.</Text>
+            )}
+            {memory.memorised ? (
+              <TouchableOpacity onPress={() => savePiece(withPlayedFromMemory(piece, today))} hitSlop={HIT_PILL}
+                accessibilityRole="button" accessibilityLabel="Played from memory today"
+                style={{ alignSelf: 'flex-start', minHeight: 44, paddingHorizontal: 16, justifyContent: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.12) }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.steel }}>Played from memory today</Text>
+              </TouchableOpacity>
             ) : null}
           </Section>
 

@@ -7,6 +7,7 @@ import { AudioContext } from 'react-native-audio-api';
 import { COLOURS, RADIUS, SIZES, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
 import { addTap, bpmFromTaps } from '../utils/tapTempo';
+import { isSilentStep, nextBars, describeSilentBars } from '../utils/silentBars';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { Ionicons } from './Icon';
 import { FadeInUp } from './Motion';
@@ -205,6 +206,10 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   const [rampEnabled, setRampEnabled] = useState(false);
   const [rampTarget, setRampTarget] = useState(() => Math.min(240, defaultBpm + 40));
   const [rampEveryBars, setRampEveryBars] = useState(4);
+  // Silent bars: click for N bars, then none for N (see utils/silentBars.js). Off by default.
+  const [silentEnabled, setSilentEnabled] = useState(false);
+  const [silentPlayBars, setSilentPlayBars] = useState(2);
+  const [silentQuietBars, setSilentQuietBars] = useState(2);
 
   // The piece's values can arrive after this card opens (a sync landing mid-session). Follow
   // them, but only for a control that still shows the previous default, so something you've
@@ -244,6 +249,14 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   rampEnabledRef.current = rampEnabled;
   rampTargetRef.current = rampTarget;
   rampEveryBarsRef.current = rampEveryBars;
+  // The same for the silent-bar settings, so changing them mid-playback applies at once without
+  // restarting the click (the scheduler reads these on every click it schedules).
+  const silentEnabledRef = useRef(silentEnabled);
+  const silentPlayBarsRef = useRef(silentPlayBars);
+  const silentQuietBarsRef = useRef(silentQuietBars);
+  silentEnabledRef.current = silentEnabled;
+  silentPlayBarsRef.current = silentPlayBars;
+  silentQuietBarsRef.current = silentQuietBars;
 
   const LOOKAHEAD_SEC = 0.12;
   const SCHEDULER_INTERVAL_MS = 30;
@@ -289,6 +302,8 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
   // already-scheduled-but-not-yet-played nodes still sitting in the small
   // lookahead window.
   function scheduleClickAt(ctx, time, stepIndex, currentSubdivision, currentMainBeats) {
+    // A silent bar plays nothing, but the beat dots keep moving (they follow the clock, not this).
+    if (silentEnabledRef.current && isSilentStep(stepIndex, currentSubdivision * currentMainBeats, silentPlayBarsRef.current, silentQuietBarsRef.current)) return;
     const isMain = stepIndex % currentSubdivision === 0;
     const buffer = isMain ? buffersRef.current.accent : buffersRef.current.sub;
     if (!buffer) return;
@@ -751,6 +766,49 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
                 </TouchableOpacity>
                 <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, minWidth: 16, textAlign: 'center' }}>{rampEveryBars}</Text>
                 <TouchableOpacity onPress={() => setRampEveryBars(n => Math.min(32, n + 1))} accessibilityRole="button" accessibilityLabel="More bars between tempo steps" hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                  <Text style={{ fontSize: SIZES.bodySmall, color: COLOURS.navy }}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+      </View>
+
+      <View style={{ marginTop: 8 }}>
+        <TouchableOpacity onPress={() => setSilentEnabled(e => !e)} activeOpacity={0.75}
+          accessibilityRole="button" accessibilityState={{ selected: silentEnabled }}
+          accessibilityLabel={silentEnabled ? `Silent bars on: ${describeSilentBars(silentPlayBars, silentQuietBars)}` : 'Silent bars off'}
+          style={{
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+            minHeight: 44, paddingVertical: 8, borderRadius: RADIUS.sm,
+            backgroundColor: silentEnabled ? COLOURS.steelA(0.12) : COLOURS.navyA(0.06),
+          }}>
+          <Text style={{ fontFamily: silentEnabled ? 'Lato-Bold' : 'Lato', fontSize: SIZES.label, color: silentEnabled ? COLOURS.steel : COLOURS.textDim }}>
+            {silentEnabled ? describeSilentBars(silentPlayBars, silentQuietBars) : 'Silent bars'}
+          </Text>
+        </TouchableOpacity>
+        {silentEnabled && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 18, marginTop: 8 }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.tiny, color: COLOURS.textDim, marginBottom: 4 }}>click for</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setSilentPlayBars(n => nextBars(n, -1))} accessibilityRole="button" accessibilityLabel="Fewer bars with the click" hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                  <Text style={{ fontSize: SIZES.bodySmall, color: COLOURS.navy }}>−</Text>
+                </TouchableOpacity>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, minWidth: 16, textAlign: 'center' }}>{silentPlayBars}</Text>
+                <TouchableOpacity onPress={() => setSilentPlayBars(n => nextBars(n, 1))} accessibilityRole="button" accessibilityLabel="More bars with the click" hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                  <Text style={{ fontSize: SIZES.bodySmall, color: COLOURS.navy }}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.tiny, color: COLOURS.textDim, marginBottom: 4 }}>then silent for</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => setSilentQuietBars(n => nextBars(n, -1))} accessibilityRole="button" accessibilityLabel="Fewer silent bars" hitSlop={HIT_ICON} style={TOUCH_ICON}>
+                  <Text style={{ fontSize: SIZES.bodySmall, color: COLOURS.navy }}>−</Text>
+                </TouchableOpacity>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, minWidth: 16, textAlign: 'center' }}>{silentQuietBars}</Text>
+                <TouchableOpacity onPress={() => setSilentQuietBars(n => nextBars(n, 1))} accessibilityRole="button" accessibilityLabel="More silent bars" hitSlop={HIT_ICON} style={TOUCH_ICON}>
                   <Text style={{ fontSize: SIZES.bodySmall, color: COLOURS.navy }}>+</Text>
                 </TouchableOpacity>
               </View>
