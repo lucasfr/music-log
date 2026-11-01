@@ -155,10 +155,85 @@ const DARK = {
   entryWash:    'rgba(255,255,255,0.10)',
 };
 
+// ─── Colour schemes ───────────────────────────────────────────────────────────────────────────────────────────
+// A scheme is a second palette family beside the standard teal: it changes the base colour and the page, in a light
+// and a dark version, and nothing else. The meaning colours stay as they are in every scheme (burgundy is practice,
+// amber is lessons, gold is pieces, and the status and danger colours), so an entry looks like what it is whichever
+// scheme is chosen. Each scheme below is a handful of seed colours; lightScheme() and darkScheme() build the
+// whole palette from them, the same way LIGHT and DARK are built, so a scheme works everywhere the standard
+// themes do. tests/colourSchemes.test.mjs checks every one for contrast.
+// This file has no imports: tests read its source as a data: URL.
+const rgbOf = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const tintOf = (h, a) => { const [r, g, b] = rgbOf(h); return `rgba(${r},${g},${b},${a})`; };
+const capped = (v, max = 1) => +Math.min(max, v).toFixed(3);
+
+function lightScheme(s) {
+  return {
+    ...LIGHT,
+    navy: s.navy, steel: s.steel, tealLight: s.tealLight, ink: s.ink,
+    bg: s.bg, bg2: s.bg2, text: s.text, textMuted: s.textMuted, textDim: s.textDim,
+    glassBorderSubtle: tintOf(s.navy, 0.08), glassShadow: tintOf(s.navy, 0.12), glassShadowMd: tintOf(s.navy, 0.18),
+    backdropColor: tintOf(s.ink, 0.45),
+    tealAccent: tintOf(s.steel, 0.10), tealBorder: tintOf(s.steel, 0.30),
+    navyA: a => tintOf(s.navy, a), steelA: a => tintOf(s.steel, a), shadow: a => tintOf(s.navy, a),
+    sheet: tintOf(s.bg, 0.97), glowTeal: tintOf(s.steel, 0.30),
+  };
+}
+
+function darkScheme(s) {
+  return {
+    ...DARK,
+    navy: s.navy, steel: s.steel, tealLight: s.tealLight, ink: s.ink,
+    bg: s.bg, bg2: s.bg2, text: s.text, textMuted: s.textMuted, textDim: s.textDim,
+    onNavy: s.bg,   // the dark page colour, as in the standard dark theme: dark glyphs on the bright fills
+    glassShadow: tintOf(s.steel, 0.16), glassShadowMd: tintOf(s.steel, 0.24),
+    modalBg: tintOf(s.surface, 0.94), tealAccent: tintOf(s.steel, 0.16), tealBorder: tintOf(s.steel, 0.40),
+    navyA: a => tintOf(s.navy, capped(a * 1.3)), steelA: a => tintOf(s.steel, capped(a * 1.3)),
+    shadow: a => tintOf(s.steel, capped(a * 2.2, 0.5)),
+    float: s.surface, sheet: tintOf(s.surface, 0.98), glowTeal: tintOf(s.steel, 0.55),
+  };
+}
+
+const SCHEME_SEEDS = {
+  forest: {
+    label: 'Forest',
+    light: { bg: '#EEF4EE', bg2: '#DCEADD', navy: '#195C3C', steel: '#1F7A53', tealLight: '#8DBB9A', ink: '#0F3322', text: '#195C3C', textMuted: '#237048', textDim: '#386A50' },
+    dark:  { bg: '#0B1510', bg2: '#14251B', surface: '#1C3226', navy: '#3FA774', steel: '#52C48E', tealLight: '#6AA586', ink: '#1B3A2A', text: '#E3F4EA', textMuted: '#9ED6B6', textDim: '#8DB8A0' },
+  },
+  indigo: {
+    label: 'Indigo',
+    light: { bg: '#EFF0F8', bg2: '#DDE0F0', navy: '#3B4BA0', steel: '#4A5BBD', tealLight: '#9AA5D8', ink: '#1B2255', text: '#3B4BA0', textMuted: '#4756AC', textDim: '#525B94' },
+    dark:  { bg: '#0C0F1C', bg2: '#151A30', surface: '#1D2340', navy: '#7388E6', steel: '#8E9EF2', tealLight: '#6F7BB8', ink: '#212849', text: '#E6E9FB', textMuted: '#B0BAF0', textDim: '#9AA3D2' },
+  },
+  graphite: {
+    label: 'Graphite',
+    light: { bg: '#F1F1F0', bg2: '#E0E0DE', navy: '#3D4650', steel: '#566370', tealLight: '#A6AEB6', ink: '#1F252B', text: '#3D4650', textMuted: '#4F5B66', textDim: '#5A646E' },
+    dark:  { bg: '#111314', bg2: '#1B1E20', surface: '#24282B', navy: '#9AA6B2', steel: '#B4BEC8', tealLight: '#7A8590', ink: '#272B2F', text: '#ECEFF1', textMuted: '#B8C1C9', textDim: '#A0AAB3' },
+  },
+};
+
+// Every palette, by key: 'light' and 'dark' are the standard teal; each scheme adds '<scheme>-light' and '<scheme>-dark'.
 export const THEMES = {
   light: { label: 'Light', colours: LIGHT },
   dark:  { label: 'Dark',  colours: DARK  },
+  ...Object.fromEntries(Object.entries(SCHEME_SEEDS).flatMap(([key, s]) => [
+    [`${key}-light`, { label: `${s.label} light`, colours: lightScheme(s.light) }],
+    [`${key}-dark`,  { label: `${s.label} dark`,  colours: darkScheme(s.dark)  }],
+  ])),
 };
+
+// What Settings offers: the standard teal first, then each scheme. The mode (System, Light or Dark) is chosen separately,
+// and themeKey() puts the two together.
+export const SCHEMES = {
+  standard: { label: 'Standard', light: 'light', dark: 'dark' },
+  ...Object.fromEntries(Object.entries(SCHEME_SEEDS).map(([key, s]) => [key, { label: s.label, light: `${key}-light`, dark: `${key}-dark` }])),
+};
+
+// The theme key for a scheme and a mode ('light' or 'dark'); an unknown scheme is the standard one.
+export function themeKey(scheme, mode) {
+  const s = SCHEMES[scheme] || SCHEMES.standard;
+  return mode === 'dark' ? s.dark : s.light;
+}
 
 // Swap COLOURS over to a theme. Cheap and synchronous; the app remounts afterwards
 // (see ThemeContext) so every component re-reads the new values.

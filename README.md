@@ -62,6 +62,7 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 📅 **Next lesson** — on Home: the date with a countdown, questions for your teacher that go into the lesson summary, and a reminder the evening before
 - 🎆 **Year in review** — on Stats: the year's hours, busiest month, longest run, most-played piece, tempo gain and a few wins, with a stepper for other years
 - 💾 **Settings in the backup** — rest days, goals, grade target, mock exam history and more travel in the JSON file and are restored only where a device has none; the daily reminder skips your rest days
+- 🎨 **Colour schemes** — Settings → Appearance: Standard teal, Forest, Indigo and Graphite, each in a light and a dark version and each working with System, Light and Dark; practice stays burgundy, lessons amber and pieces gold in every scheme
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
@@ -135,6 +136,7 @@ music-log/
 │   ├── yearReview.test.mjs         # The year in review
 │   ├── reminderPlan.test.mjs       # Which days the daily reminder fires, and when the lesson reminder does
 │   ├── backupPrefs.test.mjs        # Settings in the JSON backup and their restore
+│   ├── colourSchemes.test.mjs      # Every colour scheme: contrast, meaning colours unchanged, switching back leaves nothing behind
 │   ├── imports.test.mjs            # Every file parses and every import and imported name exists
 │   └── fakeSupabase.mjs            # An in-memory stand-in for the Supabase client (not a test itself)
 ├── web/

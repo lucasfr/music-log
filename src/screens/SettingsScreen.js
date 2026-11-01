@@ -4,7 +4,7 @@ import { Tap as TouchableOpacity } from '../components/Motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '../components/Icon';
-import { COLOURS, RADIUS, SIZES, HIT_TEXT, TOUCH_PILL, HIT_PILL, TINT_TEXT } from '../theme';
+import { COLOURS, RADIUS, SIZES, HIT_TEXT, TOUCH_PILL, HIT_PILL, TINT_TEXT, THEMES, themeKey } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import { notify } from '../utils/notify';
 import { usePref } from '../utils/usePref';
@@ -410,7 +410,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
           ? `Last synced ${timeAgo(syncStatus.lastSuccessAt)}`
           : 'Device sync';
 
-  const { pref: themePref, setTheme, options: themeOptions } = useTheme();
+  const { pref: themePref, setTheme, options: themeOptions, scheme: themeScheme, setScheme, schemes } = useTheme();
   const THEME_ICONS = { system: 'phone-portrait-outline', light: 'sunny-outline', dark: 'moon-outline' };
   const [goalRaw, setGoalRaw] = usePref('weeklyGoalMin', '0');
   const [reminderTime, setReminderTime] = usePref('reminderTime', '');
@@ -472,8 +472,39 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                 );
               })}
             </View>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text, marginTop: 18, marginBottom: 8 }}>Colour scheme</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {schemes.map(s => {
+                const active = themeScheme === s.key;
+                // The dots show the scheme in the mode you are in now: its base colour, its second colour and its page.
+                const p = THEMES[themeKey(s.key, COLOURS.isDark ? 'dark' : 'light')].colours;
+                return (
+                  <TouchableOpacity
+                    key={s.key}
+                    onPress={() => { if (!active) setScheme(s.key, { resume: 'Settings' }); }}
+                    activeOpacity={0.75}
+                    hitSlop={HIT_PILL}
+                    accessibilityRole="radio"
+                    accessibilityLabel={`${s.label} colour scheme`}
+                    accessibilityState={{ selected: active }}
+                    style={{
+                      ...TOUCH_PILL, flexDirection: 'row', alignItems: 'center', gap: 8,
+                      paddingHorizontal: 14, borderRadius: RADIUS.pill,
+                      backgroundColor: active ? COLOURS.navy : COLOURS.navyA(0.10),
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row' }}>
+                      {[p.navy, p.steel, p.bg].map((c, i) => (
+                        <View key={i} style={{ width: 14, height: 14, borderRadius: RADIUS.pill, backgroundColor: c, marginLeft: i ? -4 : 0, borderWidth: 1, borderColor: active ? COLOURS.onNavy : COLOURS.navyA(0.25) }} />
+                      ))}
+                    </View>
+                    <Text style={{ fontFamily: active ? 'Lato-Bold' : 'Lato', fontSize: SIZES.bodySmall, color: active ? COLOURS.onNavy : COLOURS.textMuted }}>{s.label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
-              System follows your device's light or dark setting.
+              System follows your device's light or dark setting. A colour scheme changes the base colour and the page; practice stays burgundy, lessons amber and pieces gold.
             </Text>
           </View>
         </GlassCard>
