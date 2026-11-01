@@ -45,6 +45,7 @@ import { useUndoableDelete } from './src/components/Undo';
 import { COLOURS, live } from './src/theme';
 import { ThemeProvider, useTheme, takeResumeRoute } from './src/theme/ThemeContext';
 import { PartsGallery } from './src/dev/PartsGallery';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 const Tab = createBottomTabNavigator();
 
@@ -234,6 +235,10 @@ function AppInner({ fontsLoaded }) {
     isDesktop,
   };
 
+  // A render error in one screen shows that screen's own fallback (with a backup export) instead of
+  // blanking the whole app. The key makes each tab its own boundary, so moving to another tab starts clean.
+  const guarded = (name, node) => <ErrorBoundary key={name} name={name} resetKeys={[resolved]}>{node}</ErrorBoundary>;
+
   // ── Desktop layout: sidebar + content ──────────────────────────────────────
   if (Platform.OS === 'web' && isDesktop) {
     const renderScreen = () => {
@@ -258,7 +263,7 @@ function AppInner({ fontsLoaded }) {
           <View style={styles.desktopLayout}>
             <Sidebar activeTab={activeTab} onNavigate={setActiveTab} />
             <View style={styles.desktopContent}>
-              {renderScreen()}
+              {guarded(activeTab, renderScreen())}
             </View>
           </View>
           {showOnboarding && <OnboardingScreen onComplete={completeOnboarding} />}
@@ -295,25 +300,25 @@ function AppInner({ fontsLoaded }) {
           }}
         >
           <Tab.Screen name="Home">
-            {({ navigation }) => <HomeScreen     {...screenProps} onOpenSettings={() => navigation.navigate('Settings')} />}
+            {({ navigation }) => guarded('Home', <HomeScreen     {...screenProps} onOpenSettings={() => navigation.navigate('Settings')} />)}
           </Tab.Screen>
           <Tab.Screen name="Calendar">
-            {() => <CalendarScreen {...screenProps} />}
+            {() => guarded('Calendar', <CalendarScreen {...screenProps} />)}
           </Tab.Screen>
           <Tab.Screen name="History">
-            {() => <HistoryScreen sessions={sessions} lessons={lessons} compositions={compositionsWithStatus} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={false} />}
+            {() => guarded('History', <HistoryScreen sessions={sessions} lessons={lessons} compositions={compositionsWithStatus} onDelete={deleteSession} onDeleteLesson={deleteLesson} isDesktop={false} />)}
           </Tab.Screen>
           <Tab.Screen name="Pieces">
-            {({ navigation }) => <CompositionsScreen compositions={compositionsWithStatus} sessions={sessions} lessons={lessons} onSave={saveComp} onDelete={deleteComp} isDesktop={false} onOpenTimeline={() => navigation.navigate('Timeline')} />}
+            {({ navigation }) => guarded('Pieces', <CompositionsScreen compositions={compositionsWithStatus} sessions={sessions} lessons={lessons} onSave={saveComp} onDelete={deleteComp} isDesktop={false} onOpenTimeline={() => navigation.navigate('Timeline')} />)}
           </Tab.Screen>
           <Tab.Screen name="Stats">
-            {() => <StatsScreen sessions={sessions} compositions={compositionsWithStatus} lessons={lessons} isDesktop={false} onSaveComposition={saveComp} />}
+            {() => guarded('Stats', <StatsScreen sessions={sessions} compositions={compositionsWithStatus} lessons={lessons} isDesktop={false} onSaveComposition={saveComp} />)}
           </Tab.Screen>
           <Tab.Screen name="Timeline">
-            {() => <TimelineScreen compositions={compositionsWithStatus} sessions={sessions} lessons={lessons} isDesktop={false} />}
+            {() => guarded('Timeline', <TimelineScreen compositions={compositionsWithStatus} sessions={sessions} lessons={lessons} isDesktop={false} />)}
           </Tab.Screen>
           <Tab.Screen name="Settings">
-            {() => <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} onClearAll={clearAll} />}
+            {() => guarded('Settings', <SettingsScreen isDesktop={false} sessions={sessions} lessons={lessons} compositions={compositions} onSaveSession={saveSession} onSaveLesson={saveLesson} onSaveComposition={saveComp} onClearAll={clearAll} />)}
           </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>
@@ -344,9 +349,11 @@ function Root({ fontsLoaded }) {
   const { resolved } = useTheme();
   return (
     <SafeAreaProvider style={{ backgroundColor: COLOURS.bg }}>
-      {GALLERY
-        ? (fontsLoaded ? <PartsGallery key={resolved} /> : null)
-        : <AppInner fontsLoaded={fontsLoaded} />}
+      <ErrorBoundary name="music.log" resetKeys={[resolved]}>
+        {GALLERY
+          ? (fontsLoaded ? <PartsGallery key={resolved} /> : null)
+          : <AppInner fontsLoaded={fontsLoaded} />}
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
