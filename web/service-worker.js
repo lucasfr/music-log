@@ -1,5 +1,8 @@
 // Service worker for Music.log PWA
-const CACHE = 'musiclog-v4';
+// The cache name ends in a placeholder that patch-dist.js replaces with a hash of the build, so every
+// deploy gets a cache of its own and the activate step below deletes the older ones (served unstamped,
+// it is just a fixed name).
+const CACHE = 'musiclog-__BUILD_ID__';
 const PRECACHE = ['/', '/index.html'];
 
 // A cheap fingerprint of a response, used to tell whether the page we served from the cache
@@ -26,11 +29,19 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// Only this site's own files are cached. A request to another origin (the Supabase API, say) is left
+// alone, so the worker never answers for it or stores it. Where the worker cannot tell (no location,
+// as in the tests' sandbox) the request is treated as the site's own.
+function isOwn(url) {
+  try { return new URL(url, self.location.href).origin === self.location.origin; } catch (e) { return true; }
+}
+
 // Cache first, refreshed in the background. That makes loads instant, but it means a deploy
 // is only visible on the visit after the one that noticed it. So when the refreshed page
 // differs from the one just served, tell the open page, which offers a Reload.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (!isOwn(e.request.url)) return;
   e.respondWith(
     caches.match(e.request).then(cached => {
       const fetchPromise = fetch(e.request).then(res => {

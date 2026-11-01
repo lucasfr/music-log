@@ -19,8 +19,9 @@ const response = (etag, { status = 200, type = 'basic', lastModified } = {}) => 
 });
 
 // Load the worker into a fresh sandbox. `cached` is what the cache holds; `network` is a
-// function returning the (promise of a) network response.
-function boot({ cached, network }) {
+// function returning the (promise of a) network response. `origin` gives the worker a location
+// (the sandbox has none otherwise), so requests to other origins can be told apart.
+function boot({ cached, network, origin }) {
   const handlers = {};
   const posted = [];
   const puts = [];
@@ -31,6 +32,7 @@ function boot({ cached, network }) {
       claim() {},
       matchAll: async () => [{ postMessage: m => posted.push(m) }],
     },
+    ...(origin ? { location: { origin, href: origin + '/' } } : {}),
   };
   const caches = {
     open: async () => ({ addAll: async () => {}, put: async (...a) => { puts.push(a); } }),
@@ -38,7 +40,7 @@ function boot({ cached, network }) {
     keys: async () => [],
     delete: async () => true,
   };
-  vm.runInNewContext(code, { self, caches, fetch: network, Promise, console });
+  vm.runInNewContext(code, { self, caches, fetch: network, Promise, console, URL });
   return { handlers, posted, puts };
 }
 
@@ -120,4 +122,25 @@ test('non-GET requests are left alone', async () => {
   const events = [];
   w.handlers.fetch({ request: { method: 'POST', mode: 'cors' }, respondWith: () => events.push('responded'), waitUntil: () => {} });
   assert.deepEqual(events, [], 'the worker does not answer POSTs');
+});
+
+test('requests to another origin (the Supabase API) are left alone, never answered or stored', async () => {
+  const w = boot({ origin: 'https://app.test', cached: response('"a"'), network: async () => response('"b"') });
+  const events = [];
+  w.handlers.fetch({ request: { method: 'GET', mode: 'cors', url: 'https://abc.supabase.co/rest/v1/sessions?select=id' }, respondWith: () => events.push('responded'), waitUntil: () => {} });
+  assert.deepEqual(events, [], 'the worker does not answer for another site');
+  assert.equal(w.puts.length, 0);
+});
+
+test('the site\'s own requests are still handled when the worker knows its origin', async () => {
+  const w = boot({ origin: 'https://app.test', cached: response('"old"'), network: async () => response('"new"') });
+  const res = await doFetch(w, { method: 'GET', mode: 'navigate', url: 'https://app.test/' });
+  assert.equal(res.headers.get('etag'), '"old"');
+  assert.equal(w.posted.length, 1);
+  const rel = await doFetch(w, { method: 'GET', mode: 'no-cors', url: '/_expo/static/js/web/app-123.js' });
+  assert.ok(rel, 'a path on the same site is answered too');
+});
+
+test('the cache name carries the build stamp that patch-dist.js fills in', () => {
+  assert.match(code, /const CACHE = 'musiclog-__BUILD_ID__';/);
 });

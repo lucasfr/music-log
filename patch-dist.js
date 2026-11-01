@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const file = path.join(__dirname, 'dist', 'index.html');
 let html = fs.readFileSync(file, 'utf8');
@@ -69,3 +70,39 @@ html = html.replace('</head>', inject + '</head>');
 
 fs.writeFileSync(file, html, 'utf8');
 console.log('dist/index.html patched successfully');
+
+// 3. The web app manifest the <link rel="manifest"> above points at. Expo's Metro export does not
+// write one (the web keys in app.json belong to the old Webpack setup), and without a file there
+// Netlify's catch-all redirect answers /manifest.json with index.html, which is not a manifest, so
+// Chrome and Android could not install the app. The icon is the 1024px app icon (Chrome wants one
+// of 512px or more); the touch icon is the 180px one.
+const root = __dirname;
+const dist = path.join(root, 'dist');
+fs.copyFileSync(path.join(root, 'assets', 'icon.png'), path.join(dist, 'icon.png'));
+const manifest = {
+  name: 'music.log',
+  short_name: 'music.log',
+  description: 'Piano practice session logger',
+  start_url: '/',
+  scope: '/',
+  display: 'standalone',
+  orientation: 'portrait',
+  background_color: '#EAF0F5',
+  theme_color: '#EBF4F6',
+  icons: [
+    { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    { src: '/icon.png', sizes: '1024x1024', type: 'image/png', purpose: 'any' },
+  ],
+};
+fs.writeFileSync(path.join(dist, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf8');
+console.log('dist/manifest.json written');
+
+// 4. The service worker, stamped with this build. Its cache name used to be bumped by hand, so every
+// deploy left the previous hashed bundles in the cache for good. The id comes from index.html, which
+// names the bundles, so it changes exactly when a deploy ships something new, and the worker's
+// activate step then deletes every older cache.
+const buildId = crypto.createHash('sha1').update(html).digest('hex').slice(0, 10);
+const sw = fs.readFileSync(path.join(root, 'web', 'service-worker.js'), 'utf8');
+if (!sw.includes("'musiclog-__BUILD_ID__'")) throw new Error('web/service-worker.js has no cache name placeholder (musiclog-__BUILD_ID__) to stamp');
+fs.writeFileSync(path.join(dist, 'service-worker.js'), sw.replace("'musiclog-__BUILD_ID__'", "'musiclog-" + buildId + "'"), 'utf8');
+console.log('dist/service-worker.js written (build ' + buildId + ')');
