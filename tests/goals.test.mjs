@@ -32,6 +32,9 @@ test('the lines say what to do when behind', () => {
   assert.match(p.line, /^40 hours of 100 hours this year, 10\.1 hours behind pace: about \d+ min a day to catch up\.$/);
   const minutes = Number(/about (\d+) min/.exec(p.line)[1]);
   assert.equal(minutes, Math.ceil(((100 - 40) * 60) / p.daysLeft));
+  assert.equal(p.catchUpMinutes, minutes);
+  assert.equal(yearProgress([S('2026-02-01', 60 * 60)], '2026-07-02', 100).catchUpMinutes, 0);       // not behind: nothing to catch up
+  assert.equal(yearProgress([S('2026-02-01', 40 * 60)], '2026-12-31', 100).catchUpMinutes, 0);        // behind on the last day: no days left
   assert.match(yearProgress([S('2026-02-01', 60 * 60)], '2026-07-02', 100).line, /ahead of pace\.$/);
   assert.match(yearProgress([S('2026-02-01', 50 * 60)], '2026-07-02', 100).line, /on pace\.$/);
   assert.match(yearProgress([S('2026-02-01', 100 * 60)], '2026-07-02', 100).line, /goal reached\.$/);

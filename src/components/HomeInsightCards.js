@@ -19,6 +19,7 @@ import { yearProgress, monthProgress } from '../utils/goals';
 import { parseNextLesson, lessonCountdown, parseQuestions, serializeQuestions, addQuestion, removeQuestion } from '../utils/lessonPrep';
 import { setLessonReminder } from '../utils/reminders';
 import { notify } from '../utils/notify';
+import { tint } from '../utils/tint';
 import { DatePickerF } from './Form';
 import { LessonBriefModal } from './LessonBriefModal';
 import { ENERGY_LABELS } from '../constants';
@@ -29,18 +30,32 @@ import {
 
 const ENERGY_LEVELS = [-2, -1, 0, 1, 2];
 
-// `accent` (a theme colour) puts a coloured bar down the card's left edge, so each kind of card is
-// recognisable at a glance.
-function Card({ title, subtitle, children, accent }) {
+// Every insight card has the same header as the tiles on the Start practice card: a tinted icon chip in the card's
+// colour (`accent`, with `icon`), a short bold title and a dim line under it. `right` is a small element at the
+// end of the header; with `onPress` the header taps to open and close the card (`expanded` says which).
+function Card({ title, subtitle, children, accent = COLOURS.steel, icon, right, onPress, expanded }) {
+  const Header = onPress ? TouchableOpacity : View;
+  const headerProps = onPress
+    ? { onPress, activeOpacity: 0.8, hitSlop: HIT_PILL, accessibilityRole: 'button', accessibilityState: { expanded: !!expanded }, accessibilityLabel: `${title}. ${subtitle || ''}`.trim() }
+    : {};
   return (
     <View style={{
-      borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), padding: 16, paddingLeft: accent ? 24 : 16, marginBottom: 16,
+      borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.5), borderWidth: 1, borderColor: COLOURS.w(0.6), padding: 16, marginBottom: 12,
       shadowColor: COLOURS.shadow(0.08), shadowOffset: { width: 0, height: 3 }, shadowOpacity: 1, shadowRadius: 10, elevation: 2,
     }}>
-      {accent ? <View style={{ position: 'absolute', left: 10, top: 16, bottom: 16, width: 4, borderRadius: 2, backgroundColor: accent }} /> : null}
-      <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.sectionTitle, color: COLOURS.text }}>{title}</Text>
-      {subtitle ? <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{subtitle}</Text> : null}
-      <View style={{ marginTop: 12 }}>{children}</View>
+      <Header {...headerProps} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 38 }}>
+        {icon ? (
+          <View style={{ width: 38, height: 38, borderRadius: RADIUS.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: tint(accent, 0.22) }}>
+            <Ionicons name={icon} size={20} color={accent} />
+          </View>
+        ) : null}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.text }}>{title}</Text>
+          {subtitle ? <Text numberOfLines={2} style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 2 }}>{subtitle}</Text> : null}
+        </View>
+        {right || null}
+      </Header>
+      {children ? <View style={{ marginTop: 12 }}>{children}</View> : null}
     </View>
   );
 }
@@ -65,7 +80,7 @@ function LessonChecklist({ lessons, sessions, compositions, today, onSaveLesson 
   }
 
   return (
-    <Card accent={COLOURS.amber} title="From your lesson" subtitle={`${fmtDate(lessonDate)} \u00b7 ${open > 0 ? `${open} to do` : 'all done'}`}>
+    <Card accent={COLOURS.amber} icon="checkmark-circle-outline" title="From your lesson" subtitle={`${fmtDate(lessonDate)} \u00b7 ${open > 0 ? `${open} to do` : 'all done'}`}>
       {items.map(it => {
         const finished = it.status !== 'open';
         return (
@@ -122,7 +137,7 @@ function EnergyScope({ sessions }) {
   if (links.minutes !== null) linkLines.push(`energy and session length show ${describeLink(links.minutes, 'length')}`);
 
   return (
-    <Card accent={COLOURS.success} title="How much energy have you got?" subtitle="See what you usually do on days like this">
+    <Card accent={COLOURS.success} icon="pulse-outline" title="How much energy have you got?" subtitle="See what you usually do on days like this">
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {ENERGY_LEVELS.map(level => {
           const active = energy === level;
@@ -183,7 +198,7 @@ function TodaysScales({ sessions, today }) {
   if (!items.length) return null;
   const fromTarget = items.some(x => x.fromTarget);
   return (
-    <Card accent={COLOURS.red} title="Scales for today" subtitle={fromTarget ? 'From your grade target, the ones that need it most' : 'Ones you have let slip'}>
+    <Card accent={COLOURS.red} icon="musical-notes-outline" title="Scales for today" subtitle={fromTarget ? 'From your grade target, the ones that need it most' : 'Ones you have let slip'}>
       {items.map(x => (
         <View
           key={`${x.group}|${x.label}`}
@@ -225,7 +240,7 @@ function LessonBriefCard({ lessons, sessions, compositions, today }) {
     : `${totals.sessions} ${totals.sessions === 1 ? 'session' : 'sessions'}, ${minutesText(totals.minutes)}${runThroughs ? `, ${runThroughs} ${runThroughs === 1 ? 'run-through' : 'run-throughs'}` : ''}.`;
 
   return (
-    <Card accent={COLOURS.gold} title="Lesson summary" subtitle={when}>
+    <Card accent={COLOURS.gold} icon="journal-outline" title="Lesson summary" subtitle={when}>
       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
       <View style={{ flexDirection: 'row', marginTop: 12 }}>
         <TouchableOpacity
@@ -255,7 +270,7 @@ function WeeklyReviewCard({ lessons, sessions, compositions, today }) {
   const what = `${totals.sessions} ${totals.sessions === 1 ? 'session' : 'sessions'}, ${minutesText(totals.minutes)}${runThroughs ? `, ${runThroughs} ${runThroughs === 1 ? 'run-through' : 'run-throughs'}` : ''}.`;
 
   return (
-    <Card accent={COLOURS.steel} title="Last week" subtitle={`${fmtDate(review.week.from)} to ${fmtDate(review.week.to)}`}>
+    <Card accent={COLOURS.steel} icon="calendar-outline" title="Last week" subtitle={`${fmtDate(review.week.from)} to ${fmtDate(review.week.to)}`}>
       <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, lineHeight: 20 }}>{what}</Text>
       <View style={{ flexDirection: 'row', marginTop: 12 }}>
         <TouchableOpacity
@@ -293,27 +308,35 @@ function TodaysPlanCard({ sessions, lessons, compositions, today, practicedToday
   );
   if (practicedToday || !onStartPlan || !plan.items.length) return null;
   return (
-    <Card accent={COLOURS.steel} title="Today's plan" subtitle={`${plan.minutes} min, from what needs attention`}>
+    <Card
+      accent={COLOURS.steel} icon="sparkles-outline" title="Today's plan" subtitle="From what needs attention"
+      right={(
+        <View style={{ paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.pill, backgroundColor: tint(COLOURS.steel, 0.22) }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text }}>{plan.minutes} min</Text>
+        </View>
+      )}
+    >
       {plan.items.map((x, i) => (
         <View
           key={`${x.kind}-${x.title}-${i}`}
           accessible
           accessibilityLabel={`${x.title}, ${x.minutes} minutes, ${x.reason}`}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: COLOURS.navyA(0.08) }}
         >
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, minWidth: 0 }}>
             <Text numberOfLines={1} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>{x.title}</Text>
             <Text numberOfLines={1} style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 1 }}>{x.reason}</Text>
           </View>
-          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.navy }}>{x.minutes} min</Text>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textMuted }}>{x.minutes} min</Text>
         </View>
       ))}
       <TouchableOpacity
         onPress={() => onStartPlan(plan.segments)} activeOpacity={0.85} hitSlop={HIT_PILL}
         accessibilityRole="button" accessibilityLabel={`Start today's plan, ${plan.minutes} minutes`}
-        style={{ ...TOUCH_PILL, alignSelf: 'flex-start', marginTop: 10, paddingHorizontal: 22, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steel, alignItems: 'center', justifyContent: 'center' }}
+        style={{ minHeight: 48, marginTop: 12, paddingHorizontal: 22, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
       >
-        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Start</Text>
+        <Ionicons name="play" size={18} color={COLOURS.onNavy} />
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.onNavy }}>Start today's plan</Text>
       </TouchableOpacity>
     </Card>
   );
@@ -350,6 +373,7 @@ function NextLessonCard({ today }) {
   const [dateRaw, setDateRaw] = usePref('nextLesson', '');
   const [questionsRaw, setQuestionsRaw] = usePref('teacherQuestions', '[]');
   const [remindOn, setRemindOn] = usePref('lessonReminderOn', '');
+  const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const date = parseNextLesson(dateRaw);
   const countdown = lessonCountdown(date, today);
@@ -371,9 +395,21 @@ function NextLessonCard({ today }) {
     if (!r.ok) { notify('Reminder not set', r.reason); return; }
     setRemindOn('1');
   };
+  // Closed, the card is one row: the countdown and how many questions are waiting. Open, it is the editor.
+  const nq = questions.length;
+  const qWords = `${nq} ${nq === 1 ? 'question' : 'questions'}`;
+  const sub = countdown
+    ? `${countdown.line.replace(/\.$/, '')}${nq ? ` \u00b7 ${qWords}` : ''}`
+    : nq ? `${qWords} saved` : 'Add the date and your questions';
 
   return (
-    <Card accent={COLOURS.amber} title="Next lesson" subtitle={countdown ? countdown.line : 'Set the date and keep your questions for your teacher here'}>
+    <Card
+      accent={COLOURS.amber} icon="school-outline" title="Next lesson" subtitle={sub}
+      onPress={() => setOpen(o => !o)} expanded={open}
+      right={<Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={COLOURS.textDim} />}
+    >
+      {open ? (
+      <>
       <DatePickerF label="Lesson date" value={date} onChange={changeDate} icon="calendar-outline" />
       {questions.map(q => (
         <View key={q.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}>
@@ -407,6 +443,8 @@ function NextLessonCard({ today }) {
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.steel }}>The lesson is over: clear the questions</Text>
         </TouchableOpacity>
       ) : null}
+      </>
+      ) : null}
     </Card>
   );
 }
@@ -415,16 +453,27 @@ function NextLessonCard({ today }) {
 // Hours against the goals you set in Settings → Practice, and whether that is ahead of an even pace (see
 // utils/goals.js). Nothing is shown until a goal is set.
 
-function GoalRow({ label, p }) {
+const GOAL_WORDS = { ahead: 'Ahead of pace', on: 'On pace', done: 'Goal reached' };
+
+// One goal as a column: the label, the hours so far over the goal, a bar with a mark where an even pace would be, and
+// one short line on how it is going. The two goals sit side by side.
+function GoalColumn({ label, p }) {
   const colour = p.status === 'behind' ? COLOURS.amber : p.status === 'on' ? COLOURS.steel : COLOURS.success;
+  const words = p.status === 'behind'
+    ? (p.catchUpMinutes > 0 ? `Behind: about ${p.catchUpMinutes} min a day to catch up` : 'Behind pace')
+    : GOAL_WORDS[p.status];
   return (
-    <View accessible accessibilityLabel={`${label}: ${p.line}`} style={{ marginBottom: 12 }}>
-      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{label}</Text>
+    <View accessible accessibilityLabel={`${label}: ${p.line}`} style={{ flex: 1, minWidth: 0 }}>
+      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.8 }}>{label}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 4 }}>
+        <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.display, color: COLOURS.text, fontVariant: ['lining-nums'] }}>{p.hours}</Text>
+        <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>/ {p.goal} h</Text>
+      </View>
       <View style={{ height: 6, borderRadius: 3, backgroundColor: COLOURS.navyA(0.10), overflow: 'hidden', marginTop: 6 }}>
         <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.round(p.fraction * 100)}%`, backgroundColor: colour }} />
         <View style={{ position: 'absolute', top: 0, bottom: 0, left: `${Math.min(100, Math.round((p.expected / p.goal) * 100))}%`, width: 2, backgroundColor: COLOURS.navyA(0.45) }} />
       </View>
-      <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: p.status === 'behind' ? COLOURS.amber : COLOURS.textDim, marginTop: 4 }}>{p.line}</Text>
+      <Text numberOfLines={2} style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: p.status === 'behind' ? COLOURS.amber : COLOURS.textDim, marginTop: 6 }}>{words}</Text>
     </View>
   );
 }
@@ -436,21 +485,27 @@ function GoalsCard({ sessions, today }) {
   const year = useMemo(() => yearProgress(sessions, today, Number(yearRaw)), [sessions, today, yearRaw]);
   if (!month && !year) return null;
   return (
-    <Card accent={COLOURS.steel} title="Goals" subtitle="The line marks where an even pace would be">
-      {month ? <GoalRow label="This month" p={month} /> : null}
-      {year ? <GoalRow label="This year" p={year} /> : null}
+    <Card accent={COLOURS.steel} icon="speedometer-outline" title="Goals" subtitle="Hours against an even pace">
+      <View style={{ flexDirection: 'row', gap: 16 }}>
+        {month ? <GoalColumn label="This month" p={month} /> : null}
+        {year ? <GoalColumn label="This year" p={year} /> : null}
+      </View>
     </Card>
   );
 }
 
-export function HomeInsightCards({ sessions, lessons, compositions, today, onSaveLesson, practicedToday, onStartPlan }) {
+// Today's plan sits right under Start practice on Home, so it is its own export; the rest of the cards follow the week.
+export function HomePlanCard(props) {
+  return <TodaysPlanCard {...props} />;
+}
+
+export function HomeInsightCards({ sessions, lessons, compositions, today, onSaveLesson }) {
   return (
     <>
+      <NextLessonCard today={today} />
+      <GoalsCard sessions={sessions} today={today} />
       <LessonChecklist lessons={lessons} sessions={sessions} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
       <WeeklyReviewCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
-      <NextLessonCard today={today} />
-      <TodaysPlanCard sessions={sessions} lessons={lessons} compositions={compositions} today={today} practicedToday={practicedToday} onStartPlan={onStartPlan} />
-      <GoalsCard sessions={sessions} today={today} />
       <MoreInsights>
         <TodaysScales sessions={sessions} today={today} />
         <LessonBriefCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />

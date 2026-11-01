@@ -45,7 +45,8 @@ function progress(sessions, today, from, totalDays, goalHours, label) {
     const perDay = left > 0 ? Math.ceil(((goal - hours) * 60) / left) : 0;
     line += `, ${hoursText(expected - hours)} behind pace${left > 0 ? `: about ${perDay} min a day to catch up` : ''}.`;
   }
-  return { hours: round1(hours), goal, expected: round1(expected), fraction: Math.min(1, hours / goal), status, daysLeft: left, line };
+  const catchUpMinutes = status === 'behind' && left > 0 ? Math.ceil(((goal - hours) * 60) / left) : 0;
+  return { hours: round1(hours), goal, expected: round1(expected), fraction: Math.min(1, hours / goal), status, daysLeft: left, catchUpMinutes, line };
 }
 
 // -> null when there is no goal; otherwise { hours, goal, expected, fraction, status, daysLeft, line }

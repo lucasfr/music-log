@@ -25,7 +25,7 @@ import { timerToLogSegments } from '../utils/timerLog';
 import { SyncIssueBanner } from '../components/SyncIssueBanner';
 import { FadeInUp, AnimatedFill, Tap as TouchableOpacity } from '../components/Motion';
 import { delayFor } from '../utils/motion';
-import { HomeInsightCards } from '../components/HomeInsightCards';
+import { HomeInsightCards, HomePlanCard } from '../components/HomeInsightCards';
 import { tempoSuggestionMap } from '../utils/insights';
 import { PracticeTimerScreen } from '../components/PracticeTimerScreen';
 import { useNavScrollHandler } from '../context/NavScrollContext';
@@ -949,6 +949,13 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
         />
       </FadeInUp>
 
+      {/* Today's plan: the one thing worth doing next, straight under Start practice (nothing once you have practised) */}
+      {sessions.length > 0 || (lessons || []).length > 0 ? (
+        <FadeInUp delay={delayFor(1)}>
+          <HomePlanCard sessions={sessions} lessons={lessons || []} compositions={compositions} today={today} practicedToday={todaySessions.length > 0} onStartPlan={startPlan} />
+        </FadeInUp>
+      ) : null}
+
       {/* Today */}
       <FadeInUp>
       <View style={{ marginBottom: 16 }}>
@@ -1024,7 +1031,7 @@ export default function HomeScreen({ sessions, lessons, compositions, onSave, on
       {sessions.length > 0 ? <FadeInUp delay={delayFor(2)}><WeekStrip week={week} lastWeek={lastWeek} goal={goal} streak={currentStreak} /></FadeInUp> : null}
       {sessions.length > 0 || (lessons || []).length > 0 ? (
         <FadeInUp delay={delayFor(3)}>
-          <HomeInsightCards sessions={sessions} lessons={lessons || []} compositions={compositions} today={today} onSaveLesson={onSaveLesson} practicedToday={todaySessions.length > 0} onStartPlan={startPlan} />
+          <HomeInsightCards sessions={sessions} lessons={lessons || []} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
         </FadeInUp>
       ) : null}
       {backupDue ? (
