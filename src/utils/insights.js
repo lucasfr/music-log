@@ -829,6 +829,9 @@ export function lessonBrief(lessons, sessions, compositions, today, opts = {}) {
       .map(p => ({ name: p.name, line: openSpotsLine((compositions || []).find(c => c.id === p.compositionId)) }))
       .filter(x => x.line),
     plannedNext: lastFocus ? lastFocus.tomorrowFocus.trim() : null,
+    // Questions for the teacher, as plain text, given by the caller (see utils/lessonPrep.js); only present when there are some.
+    ...(Array.isArray(opts.questions) && opts.questions.some(q => typeof q === 'string' && q.trim())
+      ? { questions: opts.questions.filter(q => typeof q === 'string' && q.trim()).map(q => q.trim()) } : {}),
   };
 }
 
@@ -897,6 +900,7 @@ export function briefText(b) {
     L.push('', `What ${b.lastLesson.teacher || 'my teacher'} said last time`);
     b.lastLesson.feedback.forEach(f => L.push(`- ${f.label}: ${f.text}`));
   }
+  if (b.questions && b.questions.length) { L.push('', 'Questions for my teacher'); b.questions.forEach(q => L.push(`- ${q}`)); }
   if (b.plannedNext) L.push('', `Planned next: ${b.plannedNext}`);
   return L.join('\n');
 }

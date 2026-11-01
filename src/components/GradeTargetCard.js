@@ -13,6 +13,9 @@ import { Field, TextF, NumberF, SelectF, DatePickerF } from './Form';
 import { ScalesPicker } from './SegmentEditor';
 import { MockExamModal } from './MockExamModal';
 import { ScaleLadderModal } from './ScaleLadderModal';
+import { readinessScore } from '../utils/readinessScore';
+import { suggestNextPieces } from '../utils/nextPiece';
+import { parseMockHistory } from '../utils/mockExam';
 import { Tap as TouchableOpacity } from './Motion';
 import { usePref } from '../utils/usePref';
 import { todayISO } from '../utils';
@@ -68,6 +71,23 @@ export function GradeTargetCard({ sessions, compositions }) {
     [sessions, compositions, today],
   );
 
+  // One number for how ready you are, from the pieces of the card plus the latest mock exam (see utils/readinessScore.js),
+  // and which library pieces to bring up next (see utils/nextPiece.js).
+  const [mockRaw] = usePref('mockExamHistory', '[]');
+  const score = useMemo(() => {
+    if (!r) return null;
+    const history = parseMockHistory(mockRaw);
+    const last = history.length ? history[history.length - 1] : null;
+    return readinessScore({
+      scales: { recent: r.counts.recent, total: r.counts.total },
+      pieces: target && target.grade ? { ready: r.pieces.ready, needed: r.pieces.needed } : { ready: 0, needed: 0 },
+      sight: r.sightReading ? { sessions: r.sightReading.sessions } : null,
+      mock: last ? { flagged: last.flagged.length, count: last.count } : null,
+      daysLeft: r.daysLeft,
+    });
+  }, [r, target, mockRaw]);
+  const nextPieces = useMemo(() => suggestNextPieces(compositions, target), [compositions, target]);
+
   const modal = (
     <GradeTargetModal
       visible={editing}
@@ -114,6 +134,27 @@ export function GradeTargetCard({ sessions, compositions }) {
         </View>
       </View>
 
+      {score ? (
+        <View style={{ marginTop: 14 }} accessible accessibilityLabel={`${score.line} ${score.parts.map(p => `${p.label}: ${p.percent} percent`).join('. ')}`}>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond', fontSize: SIZES.hero, color: score.status === 'on track' ? COLOURS.success : COLOURS.amber, fontVariant: ['lining-nums'] }}>{score.score}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>/ 100 · {score.status}</Text>
+          </View>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, lineHeight: 19, marginTop: 2 }}>{score.line}</Text>
+          {score.parts.map(p => (
+            <View key={p.key} style={{ marginTop: 8 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.text }}>{p.label}</Text>
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{p.detail}</Text>
+              </View>
+              <View style={{ height: 5, borderRadius: 3, backgroundColor: COLOURS.navyA(0.10), overflow: 'hidden', marginTop: 3 }}>
+                <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${p.percent}%`, backgroundColor: p.percent >= 70 ? COLOURS.success : p.percent >= 40 ? COLOURS.steel : COLOURS.amber }} />
+              </View>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
       {counts.total > 0 ? (
         <View style={{ marginTop: 16 }}>
           <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>Scales and arpeggios</Text>
@@ -150,6 +191,16 @@ export function GradeTargetCard({ sessions, compositions }) {
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 6 }}>
               Your library has {plural(pieces.candidates, 'piece', 'pieces')} marked {target.grade}; the target needs {pieces.needed}.
             </Text>
+          ) : null}
+          {nextPieces && nextPieces.shortfall > 0 && nextPieces.candidates.length ? (
+            <View style={{ marginTop: 10 }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.textDim, textTransform: 'uppercase', letterSpacing: 0.6 }}>Next to bring up</Text>
+              {nextPieces.candidates.map(c => (
+                <Text key={c.id} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text, marginTop: 4 }} numberOfLines={1}>
+                  {c.title}<Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>  · {c.reason}</Text>
+                </Text>
+              ))}
+            </View>
           ) : null}
         </View>
       ) : null}

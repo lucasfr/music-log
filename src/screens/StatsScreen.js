@@ -24,6 +24,7 @@ import { NeglectedPieces, WinsTimeline, StreakHistory, LessonInsights, LibraryGr
 import { TechniqueBreakdown, ScaleCoverage, StaleScales } from './stats/TechniqueSections';
 import { TempoProgress } from './stats/TempoSections';
 import { SightReadingLadder } from './stats/SightReadingLadder';
+import { YearInReview } from './stats/YearInReview';
 
 // The sections themselves live in ./stats/ (one file per group of charts); this file is the page:
 // the period switch, the overview tiles, and the folding sections that hold them.
@@ -312,6 +313,12 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <StreakHistory sessions={periodSessions} />
             </View>
           </View>
+        </GlassCard>
+
+        </StatsSection>
+        <StatsSection id="yearreview" title="Year in review" collapsed={collapsed} onToggle={toggleSection}>
+        <GlassCard>
+          <YearInReview sessions={sessions} lessons={lessons || []} compositions={compositions} />
         </GlassCard>
 
         </StatsSection>

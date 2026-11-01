@@ -6,7 +6,7 @@
 // Each renders nothing when there is nothing to show, so Home only adds a line for them.
 
 import React, { useMemo, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TextInput, Platform } from 'react-native';
 import { COLOURS, RADIUS, SIZES, TOUCH_PILL, HIT_PILL } from '../theme';
 import { Ionicons } from './Icon';
 import { Tap as TouchableOpacity } from './Motion';
@@ -16,6 +16,10 @@ import { parseMockHistory, freshFlags } from '../utils/mockExam';
 import { dueFromMemory } from '../utils/memory';
 import { performancePlanNudge } from '../utils/performancePlan';
 import { yearProgress, monthProgress } from '../utils/goals';
+import { parseNextLesson, lessonCountdown, parseQuestions, serializeQuestions, addQuestion, removeQuestion } from '../utils/lessonPrep';
+import { setLessonReminder } from '../utils/reminders';
+import { notify } from '../utils/notify';
+import { DatePickerF } from './Form';
 import { LessonBriefModal } from './LessonBriefModal';
 import { ENERGY_LABELS } from '../constants';
 import {
@@ -210,7 +214,8 @@ const minutesText = m => {
 
 function LessonBriefCard({ lessons, sessions, compositions, today }) {
   const [open, setOpen] = useState(false);
-  const brief = useMemo(() => lessonBrief(lessons, sessions, compositions, today), [lessons, sessions, compositions, today]);
+  const [questionsRaw] = usePref('teacherQuestions', '[]');
+  const brief = useMemo(() => lessonBrief(lessons, sessions, compositions, today, { questions: parseQuestions(questionsRaw).map(q => q.text) }), [lessons, sessions, compositions, today, questionsRaw]);
   if (!brief.totals.sessions && !brief.period.hasLesson) return null;
 
   const { totals, runThroughs, period } = brief;
@@ -337,6 +342,75 @@ function MoreInsights({ children }) {
   );
 }
 
+// ─── Next lesson ────────────────────────────────────────────────────────────────────
+// The date of your next lesson, a countdown, a running list of questions for your teacher (they go into the lesson
+// summary), and, in the app, a reminder the evening before (see utils/lessonPrep.js and utils/reminderPlan.js).
+
+function NextLessonCard({ today }) {
+  const [dateRaw, setDateRaw] = usePref('nextLesson', '');
+  const [questionsRaw, setQuestionsRaw] = usePref('teacherQuestions', '[]');
+  const [remindOn, setRemindOn] = usePref('lessonReminderOn', '');
+  const [text, setText] = useState('');
+  const date = parseNextLesson(dateRaw);
+  const countdown = lessonCountdown(date, today);
+  const questions = useMemo(() => parseQuestions(questionsRaw), [questionsRaw]);
+  const native = Platform.OS !== 'web';
+
+  const changeDate = d => {
+    setDateRaw(d || '');
+    if (remindOn === '1' && native) setLessonReminder(d || '', today);
+  };
+  const add = () => {
+    if (!text.trim()) return;
+    setQuestionsRaw(serializeQuestions(addQuestion(questions, text, today)));
+    setText('');
+  };
+  const toggleReminder = async () => {
+    if (remindOn === '1') { await setLessonReminder('', today); setRemindOn(''); return; }
+    const r = await setLessonReminder(date, today);
+    if (!r.ok) { notify('Reminder not set', r.reason); return; }
+    setRemindOn('1');
+  };
+
+  return (
+    <Card accent={COLOURS.amber} title="Next lesson" subtitle={countdown ? countdown.line : 'Set the date and keep your questions for your teacher here'}>
+      <DatePickerF label="Lesson date" value={date} onChange={changeDate} icon="calendar-outline" />
+      {questions.map(q => (
+        <View key={q.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}>
+          <Text style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.text, lineHeight: 20 }}>{q.text}</Text>
+          <TouchableOpacity onPress={() => setQuestionsRaw(serializeQuestions(removeQuestion(questions, q.id)))} hitSlop={HIT_PILL}
+            accessibilityRole="button" accessibilityLabel={`Remove the question: ${q.text}`}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.sectionTitle, lineHeight: 24, color: COLOURS.textDim }}>×</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+      <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
+        <TextInput value={text} onChangeText={setText} onSubmitEditing={add} returnKeyType="done" placeholder="A question for your teacher" placeholderTextColor={COLOURS.textDim}
+          accessibilityLabel="Add a question for your teacher"
+          style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.body, color: COLOURS.text, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.6), borderWidth: 1, borderColor: COLOURS.glassBorder }} />
+        <TouchableOpacity onPress={add} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel="Add question"
+          style={{ paddingHorizontal: 16, justifyContent: 'center', borderRadius: RADIUS.md, backgroundColor: COLOURS.steel }}>
+          <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Add</Text>
+        </TouchableOpacity>
+      </View>
+      {native && date && countdown && !countdown.passed ? (
+        <TouchableOpacity onPress={toggleReminder} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityState={{ selected: remindOn === '1' }}
+          accessibilityLabel={remindOn === '1' ? 'The reminder the evening before is on. Tap to turn it off' : 'Remind me the evening before'}
+          style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center', marginTop: 8 }}>
+          <Text style={{ fontFamily: remindOn === '1' ? 'Lato-Bold' : 'Lato', fontSize: SIZES.label, color: COLOURS.steel }}>{remindOn === '1' ? 'Reminder on: the evening before at 18:00' : 'Remind me the evening before'}</Text>
+        </TouchableOpacity>
+      ) : null}
+      {countdown && countdown.passed && questions.length ? (
+        <TouchableOpacity onPress={() => { setQuestionsRaw('[]'); setDateRaw(''); }} hitSlop={HIT_PILL} accessibilityRole="button"
+          accessibilityLabel="Clear the questions and the date now the lesson is over"
+          style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center', marginTop: 8 }}>
+          <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.steel }}>The lesson is over: clear the questions</Text>
+        </TouchableOpacity>
+      ) : null}
+    </Card>
+  );
+}
+
 // ─── Monthly and yearly goals ──────────────────────────────────────────────────────────────
 // Hours against the goals you set in Settings → Practice, and whether that is ahead of an even pace (see
 // utils/goals.js). Nothing is shown until a goal is set.
@@ -374,6 +448,7 @@ export function HomeInsightCards({ sessions, lessons, compositions, today, onSav
     <>
       <LessonChecklist lessons={lessons} sessions={sessions} compositions={compositions} today={today} onSaveLesson={onSaveLesson} />
       <WeeklyReviewCard lessons={lessons} sessions={sessions} compositions={compositions} today={today} />
+      <NextLessonCard today={today} />
       <TodaysPlanCard sessions={sessions} lessons={lessons} compositions={compositions} today={today} practicedToday={practicedToday} onStartPlan={onStartPlan} />
       <GoalsCard sessions={sessions} today={today} />
       <MoreInsights>

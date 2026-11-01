@@ -1,5 +1,7 @@
 import { Platform } from 'react-native';
 import { buildSessionPayload, buildAllPayload, parseImportJSON, planImport, describeImport } from './backup';
+import { collectPrefs } from './prefsBackup';
+import { getLocalPref } from '../utils';
 
 // The payloads and the import logic are in backup.js (pure, so tests/backup.test.mjs covers them).
 // This file is the part that touches the device: saving a file, sharing it, the clipboard and the
@@ -13,7 +15,7 @@ export async function exportSessionJSON(session, compositions) {
 }
 
 export async function exportAllJSON(sessions, lessons, compositions) {
-  await downloadJSON(buildAllPayload(sessions, lessons, compositions), `musiclog-export-${new Date().toISOString().slice(0, 10)}.json`);
+  await downloadJSON(buildAllPayload(sessions, lessons, compositions, new Date(), collectPrefs(getLocalPref)), `musiclog-export-${new Date().toISOString().slice(0, 10)}.json`);
 }
 
 // ─── Copy to clipboard ───────────────────────────────────────────────────────
@@ -23,7 +25,7 @@ export async function copySessionJSON(session, compositions) {
 }
 
 export async function copyAllJSON(sessions, lessons, compositions) {
-  await copyToClipboard(buildAllPayload(sessions, lessons, compositions));
+  await copyToClipboard(buildAllPayload(sessions, lessons, compositions, new Date(), collectPrefs(getLocalPref)));
 }
 
 // ─── Shared download helper ───────────────────────────────────────────────────

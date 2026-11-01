@@ -14,6 +14,7 @@ import { tint } from '../utils/tint';
 import { memoryState, withMemorised, withPlayedFromMemory } from '../utils/memory';
 import { spotRepsLine } from '../utils/cleanReps';
 import { performanceProgress, withPerformance } from '../utils/performancePlan';
+import { parseSections, addSection, removeSection, cycleSection, describeSections, STAGE_LABELS, MAX_STAGE } from '../utils/sections';
 import { DatePickerF } from './Form';
 
 // One page for one piece: where it stands (practice, tempo and whether it will get there in time), the
@@ -112,6 +113,7 @@ function SpotRow({ spot, onToggle, onRemove, onTempo, pieceTempo }) {
 
 export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, onSavePiece, onClose }) {
   const [spotText, setSpotText] = useState('');
+  const [sectionText, setSectionText] = useState('');
   const today = todayISO();
   const report = useMemo(
     () => (piece ? pieceReport(piece, sessions, lessons, today, examDate || null) : null),
@@ -130,6 +132,8 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
   const memory = memoryState(piece, today);
   // Where the piece stands against its performance date (see utils/performancePlan.js), if it has one.
   const perf = performanceProgress(piece, today, tempo ? { latest: tempo.latest, target: tempo.target } : null);
+  const sections = parseSections(piece.sections);
+  const addNewSection = () => { if (!sectionText.trim()) return; savePiece({ ...piece, sections: addSection(piece.sections, sectionText) }); setSectionText(''); };
   const savePiece = next => onSavePiece && onSavePiece(next);
   const addNew = () => { if (!spotText.trim()) return; save(addSpot(piece.spots, spotText, today)); setSpotText(''); };
   const trajectoryColour = !trajectory ? null
@@ -213,6 +217,40 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
                 ))}
               </View>
             ) : null}
+          </Section>
+
+          <Section title="Sections">
+            {sections.length === 0 ? (
+              <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, marginBottom: 8 }}>
+                Split the piece into parts (A, bars 17 to 32, the coda) and give each its own stage. The performance countdown then follows the weakest part.
+              </Text>
+            ) : null}
+            {sections.map(s => (
+              <View key={s.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <TouchableOpacity onPress={() => savePiece({ ...piece, sections: cycleSection(piece.sections, s.id) })} activeOpacity={0.75} hitSlop={HIT_PILL}
+                  accessibilityRole="button" accessibilityLabel={`${s.name}: ${STAGE_LABELS[s.stage].toLowerCase()}. Tap for the next stage`}
+                  style={{ flex: 1, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingHorizontal: 12, borderRadius: RADIUS.md, backgroundColor: s.stage >= MAX_STAGE ? COLOURS.successLight : COLOURS.w(0.55) }}>
+                  <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{s.name}</Text>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: s.stage === 0 ? COLOURS.amber : s.stage >= MAX_STAGE ? COLOURS.success : COLOURS.steel }}>{STAGE_LABELS[s.stage]}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => savePiece({ ...piece, sections: removeSection(piece.sections, s.id) })} hitSlop={HIT_PILL}
+                  accessibilityRole="button" accessibilityLabel={`Remove the section ${s.name}`}>
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.sectionTitle, lineHeight: 24, color: COLOURS.textDim }}>×</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            {describeSections(sections) ? (
+              <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, lineHeight: 19, marginBottom: 8 }}>{describeSections(sections)}</Text>
+            ) : null}
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+              <TextInput value={sectionText} onChangeText={setSectionText} onSubmitEditing={addNewSection} returnKeyType="done" placeholder="Bars 17-32, or the coda" placeholderTextColor={COLOURS.textDim}
+                accessibilityLabel="Add a section"
+                style={{ flex: 1, fontFamily: 'Lato', fontSize: SIZES.body, color: COLOURS.text, paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.md, backgroundColor: COLOURS.w(0.6), borderWidth: 1, borderColor: COLOURS.glassBorder }} />
+              <TouchableOpacity onPress={addNewSection} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel="Add section"
+                style={{ paddingHorizontal: 16, justifyContent: 'center', borderRadius: RADIUS.md, backgroundColor: COLOURS.steel }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Add</Text>
+              </TouchableOpacity>
+            </View>
           </Section>
 
           <Section title="Performance">

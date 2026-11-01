@@ -7,6 +7,8 @@
 // starts). Pure (no React Native imports), so it's unit-tested in plain Node, see
 // tests/performancePlan.test.mjs. Dates are local 'YYYY-MM-DD' strings, counted by calendar date.
 
+import { pieceStageFromSections } from './sections.js';
+
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const validDate = s => typeof s === 'string' && ISO.test(s) && !Number.isNaN(new Date(`${s}T12:00:00Z`).getTime());
 const dayNumber = s => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 86400000;
@@ -40,7 +42,13 @@ export function withPerformance(piece, date, today) {
 }
 
 // Which stages are done for this piece. `tempo` is { latest, target } (what pieceReport gives), or nothing.
+// A piece split into sections (see utils/sections.js) is judged by its weakest section: a stage is done when every
+// section has reached it. Otherwise the stages come from the piece's status and tempo.
 export function stagesDone(piece, tempo) {
+  const fromSections = pieceStageFromSections(piece && piece.sections);
+  if (fromSections !== null) {
+    return { notes: fromSections >= 1, hands: fromSections >= 2, tempo: fromSections >= 3, memory: fromSections >= 4 || !!piece.memorised };
+  }
   const status = piece && piece.status;
   const started = !!status && status !== 'new' && status !== 'ambition';
   const together = status === 'consolidating' || status === 'performance-ready';

@@ -124,7 +124,9 @@ export function buildSessionPayload(session, compositions, now = new Date()) {
   };
 }
 
-export function buildAllPayload(sessions, lessons, compositions, now = new Date()) {
+// Preferences (rest days, goals, grade target and so on) travel under `prefs` when there are any: the caller reads them
+// (see utils/prefsBackup.js) and passes them in, so this file stays free of anything but data in, data out.
+export function buildAllPayload(sessions, lessons, compositions, now = new Date(), prefs = null) {
   const compName = nameLookup(compositions);
   return {
     exported_at: now.toISOString(),
@@ -133,6 +135,7 @@ export function buildAllPayload(sessions, lessons, compositions, now = new Date(
     sessions: [...sessions].sort((a, b) => a.date.localeCompare(b.date)).map(s => exportSession(s, compName)),
     lessons: [...lessons].sort((a, b) => a.date.localeCompare(b.date)).map(l => exportLesson(l, compName)),
     compositions: [...compositions].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(exportComposition),
+    ...(isObj(prefs) && Object.keys(prefs).length ? { prefs } : {}),
   };
 }
 
@@ -236,6 +239,8 @@ export function parseImportJSON(json, now = new Date().toISOString()) {
     sessions:     sessionsIn.map(s => importSession(s, now)),
     lessons:      (data.lessons || []).map(l => importLesson(l, now)),
     compositions: (data.compositions || []).map(c => importComposition(c, now)),
+    // The preferences in the file, if it has any; what may be restored is decided by planPrefsRestore.
+    ...(isObj(data.prefs) ? { prefs: data.prefs } : {}),
   };
 }
 

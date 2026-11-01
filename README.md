@@ -57,6 +57,11 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🎤 **Performance countdown** — give a piece a date and it works back through notes, hands together, up to tempo and memorised, and says whether you are behind; anything behind feeds Today's plan
 - 🎯 **Monthly and yearly goals** — set hours in Settings and Home shows progress against an even pace, and how many minutes a day would catch up
 - 👁️ **Sight-reading ladder** — on Stats: log how each attempt at a level went and it suggests when to step up or down
+- 🧩 **Sections of a piece** — split a piece into parts and move each through notes, hands together, up to tempo and memorised; the page names the part holding it back, and the performance countdown follows the weakest part
+- 📊 **Readiness score** — on the Grade target card: one number from your scales, pieces, sight-reading and latest mock exam, whether it is where you should be for the time left, and what is pulling it down; below it, the library pieces closest to ready
+- 📅 **Next lesson** — on Home: the date with a countdown, questions for your teacher that go into the lesson summary, and a reminder the evening before
+- 🎆 **Year in review** — on Stats: the year's hours, busiest month, longest run, most-played piece, tempo gain and a few wins, with a stepper for other years
+- 💾 **Settings in the backup** — rest days, goals, grade target, mock exam history and more travel in the JSON file and are restored only where a device has none; the daily reminder skips your rest days
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
@@ -124,6 +129,12 @@ music-log/
 │   ├── sightLadder.test.mjs        # When the sight-reading ladder says up, down or stay
 │   ├── scaleLadder.test.mjs        # Clean tempo per scale, stepping, and picking a routine
 │   ├── beatPattern.test.mjs        # Strong, weak and silent beats
+│   ├── sections.test.mjs           # Sections of a piece, and the countdown reading them
+│   ├── nextPieceAndReadiness.test.mjs # Which piece to bring up next, and the readiness score
+│   ├── lessonPrepAndPrefs.test.mjs # The next lesson, questions for the teacher, and which settings are backed up
+│   ├── yearReview.test.mjs         # The year in review
+│   ├── reminderPlan.test.mjs       # Which days the daily reminder fires, and when the lesson reminder does
+│   ├── backupPrefs.test.mjs        # Settings in the JSON backup and their restore
 │   ├── imports.test.mjs            # Every file parses and every import and imported name exists
 │   └── fakeSupabase.mjs            # An in-memory stand-in for the Supabase client (not a test itself)
 ├── web/
@@ -213,6 +224,13 @@ music-log/
         ├── sightLadder.js           # The sight-reading ladder; pure, unit-tested
         ├── scaleLadder.js           # Clean tempo per scale and the routine; pure, unit-tested
         ├── beatPattern.js           # Strong, weak and silent beats of the bar; pure, unit-tested
+        ├── sections.js              # Sections of a piece and their stages; pure, unit-tested
+        ├── nextPiece.js             # Which library pieces to bring up for the target; pure, unit-tested
+        ├── readinessScore.js        # One readiness number for the grade target; pure, unit-tested
+        ├── lessonPrep.js            # The next lesson date and questions for the teacher; pure, unit-tested
+        ├── yearReview.js            # The year in review; pure, unit-tested
+        ├── reminderPlan.js          # Which days the daily reminder fires and when the lesson one does; pure, unit-tested
+        ├── prefsBackup.js           # Which settings go in the backup and which may be restored; pure, unit-tested
         ├── chartSummaries.js        # One-sentence spoken summaries of the Stats charts; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)

@@ -8,7 +8,7 @@ import { COLOURS, RADIUS, SIZES, HIT_TEXT, TOUCH_PILL, HIT_PILL, TINT_TEXT } fro
 import { useTheme } from '../theme/ThemeContext';
 import { notify } from '../utils/notify';
 import { usePref } from '../utils/usePref';
-import { setLocalPref, todayISO, fmtDate } from '../utils';
+import { setLocalPref, getLocalPref, todayISO, fmtDate } from '../utils';
 import { GOAL_OPTIONS, REMINDER_TIMES } from '../utils/planning';
 import { parseRestDays, toggleRestDay, serializeRestDays } from '../utils/progress';
 import { YEAR_GOAL_OPTIONS, MONTH_GOAL_OPTIONS } from '../utils/goals';
@@ -31,6 +31,7 @@ import { parseConflicts, parseOutbox, dirtyCount, tombstoneIndex, blockedByDelet
 import { outbox } from '../db/outbox';
 import { describeConflictChanges } from '../utils/conflictDiff';
 import { describeClear } from '../utils/clearData';
+import { planPrefsRestore, describePrefsRestore } from '../utils/prefsBackup';
 
 // GitHub's own button colours. They belong to GitHub's brand, not to the app palette.
 const GITHUB = { bg: '#24292e', fg: '#ffffff' }; // design: ok brand colours
@@ -326,13 +327,18 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
       const json = await pickJSONFile();
       // Only what isn't already on this device is saved: a record with an id that is here is
       // skipped (unless the file's copy is newer), so importing a backup twice adds nothing.
-      const plan = planImport(parseImportJSON(json), { sessions, lessons, compositions });
+      const parsed = parseImportJSON(json);
+      const plan = planImport(parsed, { sessions, lessons, compositions });
       let errors = 0;
       // Pieces go first, so the segments that point at them are saved after them.
       for (const r of plan.compositions) { try { await onSaveComposition(r); } catch { errors++; } }
       for (const r of plan.sessions)     { try { await onSaveSession(r);     } catch { errors++; } }
       for (const r of plan.lessons)      { try { await onSaveLesson(r);      } catch { errors++; } }
-      const summary = describeImport(plan.stats);
+      // Settings in the file (rest days, goals, grade target ...) are filled in only where this device has none,
+      // so an older backup can't undo what you have set since.
+      const prefsPlan = planPrefsRestore(parsed.prefs, getLocalPref);
+      prefsPlan.forEach(p => setLocalPref(p.key, p.value));
+      const summary = [describeImport(plan.stats), describePrefsRestore(prefsPlan)].filter(Boolean).join('; ');
       setImportResult({ errors, message: errors > 0 ? `${summary} · ${errors} failed to save` : summary });
     } catch (e) { setError(e.message || 'Import failed.'); }
   }
@@ -415,7 +421,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   const [lastBackup] = usePref('lastBackup', '');
   const markBackedUp = () => setLocalPref('lastBackup', todayISO());
   const chooseReminder = async t => {
-    const r = await setDailyReminder(t);
+    const r = await setDailyReminder(t, restDays);
     if (r.ok) setReminderTime(t);
     else notify('Reminder not set', r.reason);
   };
@@ -510,12 +516,17 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {[['Mon', 1, 'Monday'], ['Tue', 2, 'Tuesday'], ['Wed', 3, 'Wednesday'], ['Thu', 4, 'Thursday'], ['Fri', 5, 'Friday'], ['Sat', 6, 'Saturday'], ['Sun', 0, 'Sunday']].map(([label, day, full]) => chip(
                 `rest${day}`, label, restDays.includes(day),
-                () => setRestRaw(serializeRestDays(toggleRestDay(restDays, day))),
+                () => {
+                  const next = toggleRestDay(restDays, day);
+                  setRestRaw(serializeRestDays(next));
+                  // The daily reminder skips rest days, so it is scheduled again when they change.
+                  if (reminderTime && Platform.OS !== 'web') setDailyReminder(reminderTime, next);
+                },
                 `${full} is a rest day`,
               ))}
             </View>
             <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 10 }}>
-              A day off doesn't break your streak. Practising on one still counts.
+              A day off doesn't break your streak. Practising on one still counts. The daily reminder skips them.
             </Text>
             {Platform.OS !== 'web' && (
               <>
