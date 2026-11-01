@@ -8,6 +8,7 @@ import { COLOURS, RADIUS, SIZES, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
 import { addTap, bpmFromTaps } from '../utils/tapTempo';
 import { isSilentStep, nextBars, describeSilentBars } from '../utils/silentBars';
+import { openSpots, spotLabel } from '../utils/insights';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { Ionicons } from './Icon';
 import { FadeInUp } from './Motion';
@@ -562,6 +563,14 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     if (tapped) setBpm(tapped);
   }
 
+  // The piece's tricky spots that have a clean tempo of their own: one tap sets the metronome to it and, when
+  // the piece has a faster tempo, ramps up towards that (the same ramp as the Ramp tempo option below).
+  const spotsWithTempo = openSpots(composition).filter(s => s.tempo);
+  function practiseSpot(s) {
+    setBpm(Math.max(30, Math.min(240, s.tempo)));
+    if (piece.hasTempo && piece.bpm > s.tempo) { setRampTarget(Math.min(240, piece.bpm)); setRampEnabled(true); }
+  }
+
   const currentTempoName = tempoName(bpm);
 
   return (
@@ -623,6 +632,19 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
             ? `${composition.title}: ${piece.hasTempo ? `${piece.bpm} bpm` : 'no tempo saved'} · ${piece.hasSig ? piece.sig : 'no time signature saved'}`
             : `${composition.title} has no tempo or time signature saved on this device.`}
       </Text>
+
+      {spotsWithTempo.length ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
+          {spotsWithTempo.map(s => (
+            <TouchableOpacity key={s.id} onPress={() => practiseSpot(s)} activeOpacity={0.75} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              accessibilityRole="button"
+              accessibilityLabel={`Practise ${spotLabel(s.bars)} at ${s.tempo} beats per minute${piece.hasTempo && piece.bpm > s.tempo ? `, ramping up to ${piece.bpm}` : ''}`}
+              style={{ minHeight: 36, justifyContent: 'center', paddingHorizontal: 12, borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.12) }}>
+              <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>{spotLabel(s.bars)} · {s.tempo}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ) : null}
 
       <BeatDotsRow ref={dotsRef} mainBeats={mainBeats} />
 

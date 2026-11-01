@@ -12,6 +12,7 @@ import { Ionicons } from './Icon';
 import { Tap as TouchableOpacity } from './Motion';
 import { fmtDate } from '../utils';
 import { usePref } from '../utils/usePref';
+import { parseMockHistory, freshFlags } from '../utils/mockExam';
 import { LessonBriefModal } from './LessonBriefModal';
 import { ENERGY_LABELS } from '../constants';
 import {
@@ -268,10 +269,13 @@ function WeeklyReviewCard({ lessons, sessions, compositions, today }) {
 
 function TodaysPlanCard({ sessions, lessons, compositions, today, practicedToday, onStartPlan }) {
   const [targetRaw] = usePref('gradeTarget', '');
+  // What the latest mock exam flagged shapes the plan for two weeks (see utils/mockExam.js).
+  const [mockRaw] = usePref('mockExamHistory', '[]');
+  const mockFlags = useMemo(() => freshFlags(parseMockHistory(mockRaw), today), [mockRaw, today]);
   const target = useMemo(() => parseTarget(targetRaw), [targetRaw]);
   const plan = useMemo(
-    () => buildTodayPlan(target, sessions, lessons, compositions, today, { examDate: (target && target.date) || null }),
-    [target, sessions, lessons, compositions, today],
+    () => buildTodayPlan(target, sessions, lessons, compositions, today, { examDate: (target && target.date) || null, mockFlags }),
+    [target, sessions, lessons, compositions, today, mockFlags],
   );
   if (practicedToday || !onStartPlan || !plan.items.length) return null;
   return (

@@ -16,6 +16,7 @@ import { FadeInUp, Tap as TouchableOpacity } from '../components/Motion';
 import { parseCollapsed, serializeCollapsed, toggleCollapsed } from '../utils/collapsed';
 import { STATUS_OPTIONS } from '../constants';
 import { getLocalPref, setLocalPref, todayISO } from '../utils';
+import { parseRestDays } from '../utils/progress';
 import { STATUS_EMOJI, ZeldaBarFractional } from './stats/shared';
 import { ActivityGrid } from './stats/ActivityGrid';
 import { PracticeVolumeChart, WeeklyTrendChart, ScatterPlot, DayOfWeekChart } from './stats/TrendCharts';
@@ -57,6 +58,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   // decides whether a piece is on track for its tempo).
   const [openPieceId, setOpenPieceId] = useState(null);
   const [targetRaw] = usePref('gradeTarget', '');
+  const [restRaw] = usePref('restDays', '[]');
   const examDate = useMemo(() => (parseTarget(targetRaw) || {}).date || '', [targetRaw]);
   const openPiece = openPieceId ? (compositions.find(c => c.id === openPieceId) || null) : null;
   const onNavScroll = useNavScrollHandler(); // collapses the floating tab pill on scroll, like Home
@@ -86,7 +88,7 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
   // Energy: convert -2…+2 scale to 0…5 fill for the Zelda bar
   const energyFill    = avgEnergyNum !== null ? avgEnergyNum + 3 : null; // -2→1, 0→3, +2→5
 
-  const streak = useMemo(() => longestStreak(periodSessions, period, today), [periodSessions, period, today]);
+  const streak = useMemo(() => longestStreak(periodSessions, period, today, parseRestDays(restRaw)), [periodSessions, period, today, restRaw]);
 
 
   const { byCount: topPieces, byTime: topPiecesByTime } = useMemo(() => pieceStats(periodSessions, compositions), [periodSessions, compositions]);

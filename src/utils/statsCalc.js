@@ -124,8 +124,24 @@ export function dayOfWeekBuckets(sessions) {
 
 // ── Streaks ──────────────────────────────────────────────────────────────────────────────────
 
+// The weekday of a calendar date: 0 = Sunday … 6 = Saturday, as Date.getDay (and so as the rest days
+// preference in utils/progress.js).
+export function weekdayOf(iso) {
+  const [y, m, d] = parts(iso);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+// Is every day strictly between `prev` and `next` a rest day? (Adjacent dates have none between, so yes.)
+function onlyRestBetween(prev, next, rest) {
+  for (let d = addDays(prev, 1); d < next; d = addDays(d, 1)) if (!rest.has(weekdayOf(d))) return false;
+  return true;
+}
+
 // Every run of two or more consecutive practice days, oldest first: [{ start, end, len }].
-export function streakRuns(sessions) {
+// `restDays` are weekdays off (see parseRestDays in utils/progress.js): a rest day with nothing logged
+// doesn't split a run, and isn't counted in its length. Without any it is plain consecutive days.
+export function streakRuns(sessions, restDays = []) {
+  const rest = new Set(restDays || []);
   const dates = [...new Set((sessions || []).map(s => s.date))].sort();
   if (!dates.length) return [];
   const runs = [];
@@ -133,7 +149,7 @@ export function streakRuns(sessions) {
   let prev = dates[0];
   let len = 1;
   for (let i = 1; i < dates.length; i++) {
-    if (daysBetween(prev, dates[i]) === 1) { len++; prev = dates[i]; }
+    if (onlyRestBetween(prev, dates[i], rest)) { len++; prev = dates[i]; }
     else {
       if (len > 1) runs.push({ start, end: prev, len });
       start = dates[i]; prev = dates[i]; len = 1;
@@ -152,15 +168,18 @@ export function topStreaks(runs, n = 6) {
 }
 
 // The longest run of consecutive practice days within the period, up to and including today.
-// `sessions` are the ones in the period. For 'all' the walk starts at the first session.
-export function longestStreak(sessions, period, today) {
+// `sessions` are the ones in the period. For 'all' the walk starts at the first session. With
+// `restDays`, a rest day with nothing logged neither ends the run nor counts towards it.
+export function longestStreak(sessions, period, today, restDays = []) {
+  const rest = new Set(restDays || []);
   const dates = new Set((sessions || []).map(s => s.date));
   if (dates.size === 0) return 0;
   const start = period === 'all' ? [...dates].sort()[0] : addDays(today, -(period === '7d' ? 7 : 30));
   let best = 0;
   let current = 0;
   for (let d = start; d <= today; d = addDays(d, 1)) {
-    if (dates.has(d)) { current++; if (current > best) best = current; } else current = 0;
+    if (dates.has(d)) { current++; if (current > best) best = current; }
+    else if (!rest.has(weekdayOf(d))) current = 0;
   }
   return best;
 }

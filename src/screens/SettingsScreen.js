@@ -28,6 +28,7 @@ import { getSyncStatus, subscribeSyncStatus } from '../db/syncStatus';
 import { exportAllJSON, copyAllJSON, parseImportJSON, planImport, describeImport, pickJSONFile } from '../utils/export';
 import { parseConflicts, parseOutbox, dirtyCount, tombstoneIndex, blockedByDeletion } from '../utils/syncQueue';
 import { outbox } from '../db/outbox';
+import { describeConflictChanges } from '../utils/conflictDiff';
 import { describeClear } from '../utils/clearData';
 
 // GitHub's own button colours. They belong to GitHub's brand, not to the app palette.
@@ -550,7 +551,7 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
             <GlassCard>
               <View style={{ padding: 16 }}>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, lineHeight: 19 }}>
-                  Two devices changed the same entry. The newer version was kept, and the other one is saved here so nothing is lost.
+                  Two devices changed the same entry. The newer version was kept, and the other one is saved here so nothing is lost. Using a saved version makes it the current one on all your devices.
                 </Text>
               </View>
               {conflicts.map(c => (
@@ -562,13 +563,16 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                   <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim, marginTop: 2 }}>
                     {c.side === 'this device' ? 'Your edit on this device' : 'The edit from your other device'} · replaced {timeAgo(c.at)}
                   </Text>
+                  {describeConflictChanges(({ sessions, lessons, compositions }[c.table] || []).find(r => r.id === c.id), c.record).map((line, i) => (
+                    <Text key={`${i}-${line}`} style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.text, marginTop: 4 }}>{line}</Text>
+                  ))}
                   <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
                     <TouchableOpacity
                       onPress={() => restoreConflict(c)} activeOpacity={0.75} hitSlop={HIT_PILL}
-                      accessibilityRole="button" accessibilityLabel={`Restore this version of ${c.label}`}
+                      accessibilityRole="button" accessibilityLabel={`Use this saved version of ${c.label} instead of the one that was kept`}
                       style={{ ...TOUCH_PILL, paddingHorizontal: 14, borderRadius: RADIUS.pill, backgroundColor: COLOURS.navy }}
                     >
-                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Restore this version</Text>
+                      <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.onNavy }}>Use this version instead</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => dismissConflict(c)} activeOpacity={0.75} hitSlop={HIT_PILL}

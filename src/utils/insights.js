@@ -4,6 +4,8 @@
 // Dates are local 'YYYY-MM-DD' strings throughout, compared by calendar date (never through
 // toISOString(), which is UTC).
 
+import { dueFromMemory } from './memory.js';
+
 const num = v => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
@@ -638,25 +640,35 @@ export function buildTodayPlan(target, sessions, lessons, compositions, today, o
   const items = [];
 
   const due = suggestScales(target, sessions, today, 3).filter(x => x.status !== 'recent');
-  if (due.length) {
-    const hasScale = due.some(x => x.group === 'Scales');
+  // What the latest mock exam flagged (see utils/mockExam.js): scales and arpeggios join the warm-up, pieces
+  // are pushed up the ranking below. Sight-reading has no segment of its own here, so it is not planned.
+  const mockFlags = Array.isArray(opts.mockFlags) ? opts.mockFlags : [];
+  const flaggedScales = mockFlags.filter(f => f && (f.kind === 'scale' || f.kind === 'arpeggio') && f.label);
+  if (due.length || flaggedScales.length) {
+    const hasScale = due.some(x => x.group === 'Scales') || flaggedScales.some(f => f.kind === 'scale');
+    const names = [...new Set([...flaggedScales.map(f => f.label), ...due.map(x => x.name)])].slice(0, 4);
     items.push({
       kind: 'scales', title: hasScale ? 'Scales' : 'Arpeggios', compositionId: '',
-      minutes: budget >= 40 ? 10 : 8, reason: due.map(x => x.name).join(', '),
+      minutes: budget >= 40 ? 10 : 8, reason: `${flaggedScales.length ? 'mock exam: ' : ''}${names.join(', ')}`,
     });
   }
 
   const assigned = openAssignmentPieces(lessons, sessions, today);
+  const titleKey = c => String(c.title || '').trim().toLowerCase();
+  const flaggedPieces = new Set(mockFlags.filter(f => f && f.kind === 'piece' && f.label).map(f => String(f.label).trim().toLowerCase()));
+  const memoryDue = new Map(dueFromMemory(compositions, today).map(x => [x.id, x.daysSince]));
   const ranked = (compositions || [])
-    .filter(c => c.status === 'learning' || c.status === 'consolidating')
+    .filter(c => c.status === 'learning' || c.status === 'consolidating' || flaggedPieces.has(titleKey(c)) || memoryDue.has(c.id))
     .map(c => {
       const r = pieceReport(c, sessions, lessons, today, examDate);
       const days = r.practice.daysSince;
       const reasons = [];
       let score = 0;
       if (assigned.has(c.id)) { score += 3; reasons.push('open task from your lesson'); }
+      if (flaggedPieces.has(titleKey(c))) { score += 2.5; reasons.push('flagged in your mock exam'); }
       if (r.stalled) { score += 2; reasons.push(`tempo stalled at ${r.stalled.bpm}`); }
       if (r.trajectory && r.trajectory.status === 'behind') { score += 2; reasons.push('behind on tempo'); }
+      if (memoryDue.has(c.id)) { score += 1.5; reasons.push(`not played from memory for ${memoryDue.get(c.id)} days`); }
       if (r.spots.open.length) { score += 1.5; reasons.push(`${r.spots.open.length === 1 ? '1 tricky spot' : `${r.spots.open.length} tricky spots`}`); }
       if (days === null) { score += 1; reasons.push('not played yet'); }
       else if (days >= 7) { score += 1 + Math.min(2, Math.floor((days - 7) / 7)); reasons.push(`not played for ${days} days`); }
@@ -1014,7 +1026,15 @@ export function spotLabel(bars) {
   return /^\d+(\s*[-\u2013\u2014]\s*\d+)?$/.test(t) ? `Bars ${t}` : t;
 }
 
-// A piece's stored spots, cleaned: only well-formed entries, no blank text, each spot once.
+// A piece's stored spots, cleaned: only well-formed entries, no blank text, each spot once. A spot can carry
+// the `tempo` (bpm) you can play it cleanly at; it is only present when it is a sensible number.
+export const SPOT_TEMPO_MIN = 20;
+export const SPOT_TEMPO_MAX = 300;
+const cleanSpotTempo = v => {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n >= SPOT_TEMPO_MIN && n <= SPOT_TEMPO_MAX ? n : null;
+};
+
 export function parseSpots(raw) {
   if (!Array.isArray(raw)) return [];
   const seen = new Set();
@@ -1025,7 +1045,8 @@ export function parseSpots(raw) {
     const key = spotKey(bars);
     if (!bars || !key || seen.has(key)) return;
     seen.add(key);
-    out.push({ id: String(x.id || key), bars, status: x.status === 'fixed' ? 'fixed' : 'open', added: x.added || null, fixed: x.status === 'fixed' ? (x.fixed || null) : null });
+    const tempo = cleanSpotTempo(x.tempo);
+    out.push({ id: String(x.id || key), bars, status: x.status === 'fixed' ? 'fixed' : 'open', added: x.added || null, fixed: x.status === 'fixed' ? (x.fixed || null) : null, ...(tempo ? { tempo } : {}) });
   });
   return out;
 }
@@ -1048,6 +1069,37 @@ export function setSpotFixed(spots, id, fixed, today) {
 }
 
 export const removeSpot = (spots, id) => parseSpots(spots).filter(x => x.id !== id);
+
+// The clean tempo for one spot set to `bpm` (a number outside 20 to 300, or nothing, clears it). A new
+// list; a spot that doesn't exist changes nothing.
+export function setSpotTempo(spots, id, bpm) {
+  const tempo = cleanSpotTempo(bpm);
+  return parseSpots(spots).map(x => {
+    if (x.id !== id) return x;
+    const { tempo: _old, ...rest } = x;
+    return tempo ? { ...rest, tempo } : rest;
+  });
+}
+
+// Where to start when a spot has no tempo yet: a bit over half the piece's own tempo, to a multiple of 2, or
+// 60 when the piece has none.
+export function startSpotTempo(pieceTempo) {
+  const t = Math.round(Number(pieceTempo));
+  if (!Number.isFinite(t) || t <= 0) return 60;
+  return Math.max(SPOT_TEMPO_MIN, Math.round((t * 0.6) / 2) * 2);
+}
+
+// The next tempo to try on a spot: a small step up (5%, at least 2 bpm), but not past the piece's own tempo.
+// null when the spot has no tempo yet, or is already at the piece's tempo.
+export function nextSpotTempo(spot, pieceTempo) {
+  const t = cleanSpotTempo(spot && spot.tempo);
+  if (!t) return null;
+  const target = Math.round(Number(pieceTempo));
+  const hasTarget = Number.isFinite(target) && target > 0;
+  if (hasTarget && t >= target) return null;
+  const next = t + Math.max(2, Math.round(t * 0.05));
+  return Math.min(SPOT_TEMPO_MAX, hasTarget ? Math.min(target, next) : next);
+}
 
 // The spots still to fix on a piece, the longest-standing first.
 export function openSpots(piece) {

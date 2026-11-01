@@ -99,5 +99,5 @@ test('summariseMockExam with nothing flagged, no times, and no items', () => {
   const items = [{ kind: 'scale', label: 'A' }];
   assert.equal(summariseMockExam(items, {}, [30]).line, '1 item in 0:30. Nothing flagged.');
   assert.equal(summariseMockExam(items, undefined, undefined).slowest, null);
-  assert.deepEqual(summariseMockExam(undefined, undefined, undefined), { total: 0, count: 0, needsWork: [], slowest: null, line: '0 items in 0:00. Nothing flagged.' });
+  assert.deepEqual(summariseMockExam(undefined, undefined, undefined), { total: 0, count: 0, needsWork: [], needsWorkItems: [], slowest: null, line: '0 items in 0:00. Nothing flagged.' });
 });

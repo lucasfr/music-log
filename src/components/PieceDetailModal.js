@@ -8,7 +8,7 @@ import { COLOURS, RADIUS, SIZES, HIT_TEXT, HIT_PILL, STATUS_COLOURS } from '../t
 import { fmtDate, deriveStatusHistory, todayISO } from '../utils';
 import {
   pieceReport, describeTempo, describeRunThroughs, agoLabel, formatRunThroughs,
-  addSpot, setSpotFixed, removeSpot, spotLabel,
+  addSpot, setSpotFixed, removeSpot, spotLabel, setSpotTempo, startSpotTempo, nextSpotTempo,
 } from '../utils/insights';
 import { tint } from '../utils/tint';
 import { memoryState, withMemorised, withPlayedFromMemory } from '../utils/memory';
@@ -57,7 +57,7 @@ function TempoLine({ points, target }) {
   );
 }
 
-function SpotRow({ spot, onToggle, onRemove }) {
+function SpotRow({ spot, onToggle, onRemove, onTempo, pieceTempo }) {
   const fixed = spot.status === 'fixed';
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 }}>
@@ -71,6 +71,31 @@ function SpotRow({ spot, onToggle, onRemove }) {
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>
           {fixed && spot.fixed ? `Fixed ${fmtDate(spot.fixed)}` : spot.added ? `Since ${fmtDate(spot.added)}` : ''}
         </Text>
+        {!fixed && onTempo ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
+            {spot.tempo ? (
+              <>
+                <TouchableOpacity onPress={() => onTempo(spot.tempo - 2)} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel={`Lower the clean tempo for ${spotLabel(spot.bars)}`}
+                  style={{ width: 32, height: 32, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOURS.navyA(0.08) }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.navy }}>−</Text>
+                </TouchableOpacity>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text }}>{spot.tempo} bpm</Text>
+                <TouchableOpacity onPress={() => onTempo(spot.tempo + 2)} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel={`Raise the clean tempo for ${spotLabel(spot.bars)}`}
+                  style={{ width: 32, height: 32, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOURS.navyA(0.08) }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.body, color: COLOURS.navy }}>+</Text>
+                </TouchableOpacity>
+                {nextSpotTempo(spot, pieceTempo) ? (
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>Next: {nextSpotTempo(spot, pieceTempo)}</Text>
+                ) : null}
+              </>
+            ) : (
+              <TouchableOpacity onPress={() => onTempo(startSpotTempo(pieceTempo))} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel={`Add a clean tempo for ${spotLabel(spot.bars)}`}
+                style={{ paddingHorizontal: 12, minHeight: 32, justifyContent: 'center', borderRadius: RADIUS.pill, backgroundColor: COLOURS.steelA(0.12) }}>
+                <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.labelSmall, color: COLOURS.steel }}>Add a tempo</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : null}
       </View>
       <TouchableOpacity onPress={onRemove} hitSlop={HIT_PILL} accessibilityRole="button" accessibilityLabel={`Remove ${spotLabel(spot.bars)}`}>
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.sectionTitle, lineHeight: 24, color: COLOURS.textDim }}>×</Text>
@@ -156,7 +181,7 @@ export function PieceDetailModal({ visible, piece, sessions, lessons, examDate, 
 
           <Section title="Tricky spots">
             {spots.open.map(s => (
-              <SpotRow key={s.id} spot={s} onToggle={() => save(setSpotFixed(piece.spots, s.id, true, today))} onRemove={() => save(removeSpot(piece.spots, s.id))} />
+              <SpotRow key={s.id} spot={s} pieceTempo={piece.tempo} onTempo={bpm => save(setSpotTempo(piece.spots, s.id, bpm))} onToggle={() => save(setSpotFixed(piece.spots, s.id, true, today))} onRemove={() => save(removeSpot(piece.spots, s.id))} />
             ))}
             {spots.open.length === 0 ? (
               <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.textDim, marginBottom: 6 }}>

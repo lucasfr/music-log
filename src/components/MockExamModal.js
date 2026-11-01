@@ -10,6 +10,9 @@ import { BlurView } from 'expo-blur';
 import { COLOURS, RADIUS, SIZES, HIT_TEXT, HIT_PILL } from '../theme';
 import { Tap as TouchableOpacity } from './Motion';
 import { buildMockExam, formatElapsed, summariseMockExam } from '../utils/mockExam';
+import { parseMockHistory, serializeMockHistory, addMockRun, describeMockProgress } from '../utils/mockExam';
+import { usePref } from '../utils/usePref';
+import { todayISO } from '../utils';
 import { describeRequirement } from '../utils/insights';
 
 const KIND_LABEL = { scale: 'Scale', arpeggio: 'Arpeggio', piece: 'Piece', sight: 'Sight-reading' };
@@ -30,6 +33,10 @@ export function MockExamModal({ visible, readinessResult, onClose }) {
   const [index, setIndex] = useState(0);
   const [marks, setMarks] = useState({});
   const [seconds, setSeconds] = useState([]);
+  // Every finished run is kept, so the next one can say how it compares and Today's plan can pick up what
+  // you flagged (see utils/mockExam.js).
+  const [historyRaw, setHistoryRaw] = usePref('mockExamHistory', '[]');
+  const progressLine = describeMockProgress(parseMockHistory(historyRaw));
   const [now, setNow] = useState(Date.now());
   const examStart = useRef(0);
   const itemStart = useRef(0);
@@ -60,7 +67,10 @@ export function MockExamModal({ visible, readinessResult, onClose }) {
     const all = [...seconds]; all[index] = taken;
     setSeconds(all);
     itemStart.current = t;
-    if (index + 1 >= items.length) setPhase('done'); else { setIndex(index + 1); setNow(t); }
+    if (index + 1 >= items.length) {
+      setHistoryRaw(serializeMockHistory(addMockRun(parseMockHistory(historyRaw), todayISO(), summariseMockExam(items, marks, all))));
+      setPhase('done');
+    } else { setIndex(index + 1); setNow(t); }
   };
   const toggleMark = () => setMarks(m => ({ ...m, [index]: !m[index] }));
 
@@ -96,6 +106,9 @@ export function MockExamModal({ visible, readinessResult, onClose }) {
                 ))}
               </View>
               <View style={{ marginTop: 20, alignItems: 'flex-start' }}>
+                {progressLine ? (
+                  <Text style={{ fontFamily: 'Lato', fontSize: SIZES.bodySmall, color: COLOURS.textDim, marginBottom: 12 }}>{progressLine}</Text>
+                ) : null}
                 <Button label="Start" primary onPress={start} a11y="Start the mock exam" />
               </View>
             </View>
@@ -137,6 +150,11 @@ export function MockExamModal({ visible, readinessResult, onClose }) {
                     <Text key={`${label}-${i}`} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text, paddingVertical: 3 }}>{label}</Text>
                   ))}
                 </View>
+              ) : null}
+              {summary.needsWorkItems.some(x => x.kind !== 'sight') ? (
+                <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, marginTop: 14, lineHeight: 19 }}>
+                  The scales, arpeggios and pieces you flagged go into Today's plan on Home for the next two weeks.
+                </Text>
               ) : null}
               <View style={{ flexDirection: 'row', gap: 12, marginTop: 24, flexWrap: 'wrap' }}>
                 <Button label="Another" primary onPress={() => { setItems(buildMockExam(readinessResult, Math.random, { describe: describeRequirement })); setPhase('ready'); }} a11y="Set up another mock exam" />

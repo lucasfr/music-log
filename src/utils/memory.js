@@ -41,3 +41,14 @@ export function withPlayedFromMemory(piece, today) {
 
 // The ids of the memorised pieces, for lists that only have the piece's id to go on.
 export const memorisedIds = compositions => new Set((compositions || []).filter(c => c && c.memorised).map(c => c.id));
+
+// The memorised pieces that are due a run from memory (STALE_AFTER_DAYS or more since the last one), the
+// longest-waiting first. A shelved piece isn't asked for. -> [{ id, title, daysSince }]
+export function dueFromMemory(compositions, today) {
+  return (compositions || [])
+    .filter(c => c && c.status !== 'shelved')
+    .map(c => ({ c, s: memoryState(c, today) }))
+    .filter(x => x.s.stale)
+    .sort((a, b) => b.s.daysSince - a.s.daysSince || String(a.c.title).localeCompare(String(b.c.title)))
+    .map(x => ({ id: x.c.id, title: x.c.title || 'Untitled', daysSince: x.s.daysSince }));
+}

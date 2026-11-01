@@ -46,9 +46,11 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 🗂️ **Foldable Stats** — each Stats section folds away and stays that way
 - 📈 **Tempo progress and scales to revisit** — the BPM logged on pieces and exercises over time, with a suggested next tempo and a stalled / on-track note; scales and arpeggios left for two weeks or more are listed so they don't drop out of rotation
 - 🔊 **Charts read aloud** — each Stats chart has a one-sentence summary for VoiceOver and TalkBack (totals, the high point, the latest value, which way it is heading)
-- 🛋️ **Rest days** — pick the weekdays you take off (Settings → Practice) and a day off with nothing logged neither breaks your streak nor adds to it; practising on one still counts. Home, the Calendar and the streak milestones all use it
-- 🧠 **From memory** — tick a piece as memorised on its page and tap "Played from memory today" after you play it without the score; the page says how long ago that was and when a run-through is due, and the grade pathway marks memorised pieces
-- 🎓 **Mock exam** — on the Grade target card: a random pick of the scales and arpeggios your target asks for, then your pieces, then sight-reading, one at a time against the clock, with a summary of what you flagged and what took longest
+- 🛋️ **Rest days** — pick the weekdays you take off (Settings → Practice) and a day off with nothing logged neither breaks your streak nor adds to it; practising on one still counts. Home, the Calendar, Stats and the streak milestones all use it
+- 🧠 **From memory** — tick a piece as memorised on its page and tap "Played from memory today" after you play it without the score; the page says how long ago that was and when a run-through is due, the grade pathway marks memorised pieces, and a memorised piece that is due shows up in Today's plan and in Stats' needs-attention list
+- 🎓 **Mock exam** — on the Grade target card: a random pick of the scales and arpeggios your target asks for, then your pieces, then sight-reading, one at a time against the clock, with a summary of what you flagged and what took longest; each run is kept so the next says how it compares, and what you flagged feeds Today's plan on Home for two weeks
+- 🎯 **Tempo for each tricky spot** — give a spot its own clean tempo on the piece's page (with the next tempo to try), and the metronome offers a chip for it that sets the tempo and ramps up towards the piece's own
+- 🔀 **Conflicts explained** — when two devices edit the same entry, Settings lists the saved copy with a few plain lines on what differs from the version that was kept
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
@@ -103,6 +105,12 @@ music-log/
 │   ├── silentBars.test.mjs         # Which metronome steps fall in a silent bar
 │   ├── memory.test.mjs             # Memorised pieces and when they were last played from memory
 │   ├── mockExam.test.mjs           # The seeded shuffle, the picks, and the summary of a mock exam
+│   ├── mockHistory.test.mjs        # The mock exam history, how long its flags last, and the progress line
+│   ├── todayPlanMemory.test.mjs    # Memorised pieces that are due, and mock exam flags, in Today's plan
+│   ├── spotTempo.test.mjs          # A clean tempo on a tricky spot, and the next one to try
+│   ├── conflictDiff.test.mjs       # What differs between a kept version and a saved conflict copy
+│   ├── statsStreakRest.test.mjs    # Stats streaks with rest days, and that they agree with Home's
+│   ├── backupNewFields.test.mjs    # Memorised fields and spots survive a JSON export and restore
 │   ├── imports.test.mjs            # Every file parses and every import and imported name exists
 │   └── fakeSupabase.mjs            # An in-memory stand-in for the Supabase client (not a test itself)
 ├── web/
@@ -184,7 +192,8 @@ music-log/
         ├── tapTempo.js              # Taps to a tempo for the metronome; pure, unit-tested
         ├── silentBars.js            # Which metronome steps are inside a silent bar; pure, unit-tested
         ├── memory.js                # Memorised pieces and the last time one was played from memory; pure, unit-tested
-        ├── mockExam.js              # Picking and timing a mock exam from the grade target; pure, unit-tested
+        ├── mockExam.js              # Picking and timing a mock exam from the grade target, its history and flags; pure, unit-tested
+        ├── conflictDiff.js          # What differs between a kept version and a saved conflict copy; pure, unit-tested
         ├── chartSummaries.js        # One-sentence spoken summaries of the Stats charts; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)

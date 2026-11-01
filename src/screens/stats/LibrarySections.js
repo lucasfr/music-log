@@ -10,13 +10,18 @@ import Svg, { Path, Circle, Text as SvgText } from 'react-native-svg';
 import { deriveStatusHistory, todayISO } from '../../utils';
 import { ZeldaBarFractional } from './shared';
 import { librarySummary } from '../../utils/chartSummaries';
-import { memorisedIds } from '../../utils/memory';
+import { memorisedIds, dueFromMemory } from '../../utils/memory';
+import { parseRestDays } from '../../utils/progress';
+import { usePref } from '../../utils/usePref';
 
 export function NeglectedPieces({ sessions, compositions }) {
   const today = todayISO();
   const neglected = useMemo(() => neglectedPieces(sessions, compositions, today), [sessions, compositions, today]);
+  // Memorised pieces not played from memory for two weeks or more are due a run, even if you have been
+  // playing them from the score (see dueFromMemory in utils/memory.js).
+  const memoryDue = useMemo(() => dueFromMemory(compositions, today), [compositions, today]);
 
-  if (neglected.length === 0) return (
+  if (neglected.length === 0 && memoryDue.length === 0) return (
     <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.bodySmall, color: COLOURS.textDim }}>
       All active pieces practised in the last 7 days.
     </Text>
@@ -50,6 +55,18 @@ export function NeglectedPieces({ sessions, compositions }) {
                 {sinceLabel(daysSince)}
               </Text>
             </View>
+          </View>
+        </View>
+      ))}
+      {memoryDue.map(({ id, title, daysSince }) => (
+        <View key={`memory-${id}`} accessible accessibilityLabel={`${title}, not played from memory for ${daysSince} days`}
+          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 10 }}>
+          <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: daysSince >= 28 ? COLOURS.red : COLOURS.amber }} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }} numberOfLines={1}>📜 {title}</Text>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: daysSince >= 28 ? COLOURS.red : COLOURS.amber, fontStyle: 'italic', marginTop: 4 }}>
+              not played from memory for {daysSince} days
+            </Text>
           </View>
         </View>
       ))}
@@ -92,7 +109,8 @@ export function WinsTimeline({ sessions, period }) {
 // ─── Streak history ─────────────────────────────────────────────────────
 
 export function StreakHistory({ sessions }) {
-  const streaks = useMemo(() => streakRuns(sessions), [sessions]);
+  const [restRaw] = usePref('restDays', '[]');
+  const streaks = useMemo(() => streakRuns(sessions, parseRestDays(restRaw)), [sessions, restRaw]);
   const { top: visible, maxLen } = useMemo(() => topStreaks(streaks), [streaks]);
 
   if (sessions.length === 0) return (
