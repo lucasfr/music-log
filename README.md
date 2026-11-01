@@ -298,7 +298,7 @@ It then appears in **Settings → Appearance** automatically. A palette also sup
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 20.19+ (CI and Netlify run 22; `.nvmrc` pins it, and `package.json` has an `engines` check)
 - Expo CLI: `npm install -g expo-cli`
 
 ### Installation
@@ -366,6 +366,15 @@ create table if not exists public.compositions (
   notes text, tempo integer, data jsonb,
   created_at timestamptz default now(), updated_at timestamptz default now()
 );
+```
+
+Row-level security is what keeps your data yours: the project's anon key is public by design, so without it anyone holding the key can read every row. Turn it on for each table and allow only your own rows:
+
+```sql
+alter table public.sessions enable row level security;
+create policy "own rows" on public.sessions for all
+  using (user_id = auth.uid()::text) with check (user_id = auth.uid()::text);
+-- and the same two statements for public.lessons and public.compositions
 ```
 
 Already have the tables from an earlier version? Add the column to each: `alter table public.sessions add column if not exists data jsonb;` (and the same for `lessons` and `compositions`), then use **Settings → Push all to Supabase** on the device with the full data. Until the column exists, pushes still work without it and Settings shows the exact statement to run.
