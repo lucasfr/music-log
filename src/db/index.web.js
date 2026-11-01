@@ -1,7 +1,15 @@
 // Web: IndexedDB only — expo-sqlite is never imported on web
 
+// One connection for the life of the page. Every read and write used to open a new one and never close
+// it, which leaves them open until the browser collects them, and an open connection from an older tab
+// would block a future schema upgrade. When the browser asks this one to close (another tab is upgrading)
+// or it is closed under us, it is dropped, so the next call opens a fresh one. A failed open is not kept
+// either (private browsing can refuse it), so it is tried again next time.
+let dbPromise = null;
+
 function openIDB() {
-  return new Promise((resolve, reject) => {
+  if (dbPromise) return dbPromise;
+  const p = new Promise((resolve, reject) => {
     const req = indexedDB.open('musiclog', 3);
     req.onupgradeneeded = e => {
       const db = e.target.result;
@@ -9,9 +17,17 @@ function openIDB() {
       if (!db.objectStoreNames.contains('compositions')) db.createObjectStore('compositions', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('lessons'))      db.createObjectStore('lessons',      { keyPath: 'id' });
     };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = ()  => reject(req.error);
+    req.onsuccess = e => {
+      const db = e.target.result;
+      db.onversionchange = () => { db.close(); if (dbPromise === p) dbPromise = null; };
+      db.onclose         = () => { if (dbPromise === p) dbPromise = null; };
+      resolve(db);
+    };
+    req.onerror = () => reject(req.error);
   });
+  p.catch(() => { if (dbPromise === p) dbPromise = null; });
+  dbPromise = p;
+  return p;
 }
 
 async function idbGetAll(store) {
