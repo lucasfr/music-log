@@ -68,7 +68,20 @@ jobs:
       # build:web copies these in after the export; a missing one means a step in the script broke.
       - name: Check the build output
         run: |
-          for f in index.html service-worker.js apple-touch-icon.png apple-touch-icon-152.png apple-touch-icon-120.png; do
+          for f in index.html service-worker.js manifest.json icon.png apple-touch-icon.png apple-touch-icon-152.png apple-touch-icon-120.png; do
             test -s "dist/$f" || { echo "dist/$f is missing or empty"; exit 1; }
           done
+          # Without a real manifest, Netlify's catch-all redirect answers /manifest.json with index.html.
+          node -e "const m = JSON.parse(require('fs').readFileSync('dist/manifest.json', 'utf8')); if (!m.name || !m.start_url || !(m.icons || []).length) { console.error('dist/manifest.json is incomplete'); process.exit(1); }"
+          # The service worker must be stamped with this build (see patch-dist.js), or old caches are never cleaned.
+          grep -Eq "const CACHE = 'musiclog-[0-9a-f]{10}'" dist/service-worker.js || { echo "dist/service-worker.js is not stamped with a build id"; exit 1; }
           test -n "$(find dist -name '*.js' ! -name service-worker.js | head -1)" || { echo "no JavaScript bundle in dist"; exit 1; }
+
+      # Opens the built app in a real browser: it draws and throws nothing, the manifest and service worker
+      # are right, stored data survives a reload, and it opens offline (tests/e2e/smoke.mjs).
+      # Playwright is installed here only, so package.json and the lockfile stay as they are.
+      - name: Smoke test the built app
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+          node tests/e2e/smoke.mjs dist
