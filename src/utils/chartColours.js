@@ -61,19 +61,51 @@ const RAMPS = {
 };
 export const COVERAGE_KINDS = Object.keys(RAMPS);
 
-// The segment colour for a key practised `n` times when the busiest key has `max`.
-export function coverageColour(kind, n, max, dark) {
+// ── The keys in a colour scheme ──
+// The standard theme colours the circle of fifths with a fixed amber ramp (the major keys) and a fixed green one (the minor
+// keys). In a colour scheme (Forest, Indigo, Graphite ...) the keys follow it instead: the ramps are made from the scheme's
+// own colours, which the caller passes as `palette` (the theme's COLOURS). The names stay ('amber' is still the major keys
+// and 'teal' the minor ones), so nothing that asks for them changes. Major keys use the scheme's base colour; minor keys use a
+// softer tint of it, so the outer and inner rings still read as two things. With no palette, or the standard one, the
+// ramps above are used exactly as before.
+const WHITE = '#FFFFFF';
+const hex2 = v => Math.round(v).toString(16).padStart(2, '0');
+function mix(a, b, t) {   // t = 0 is a, t = 1 is b
+  const [r1, g1, b1] = parse(a);
+  const [r2, g2, b2] = parse(b);
+  return `#${hex2(r1 + (r2 - r1) * t)}${hex2(g1 + (g2 - g1) * t)}${hex2(b1 + (b2 - b1) * t)}`.toUpperCase();
+}
+const usesScheme = p => !!p && !!p.__scheme && p.__scheme !== 'standard';
+
+function schemeRamp(kind, dark, p) {
+  if (kind === 'amber') {
+    return dark
+      ? [mix(p.bg2, p.navy, 0.15), mix(p.bg2, p.navy, 0.42), p.navy, p.steel, mix(p.steel, WHITE, 0.35)]
+      : [mix(p.steel, WHITE, 0.88), mix(p.steel, WHITE, 0.62), mix(p.steel, WHITE, 0.32), p.steel, p.navy];
+  }
+  return dark
+    ? [mix(p.bg2, p.tealLight, 0.12), mix(p.bg2, p.tealLight, 0.38), mix(p.bg2, p.tealLight, 0.75), mix(p.tealLight, WHITE, 0.3), mix(p.tealLight, WHITE, 0.6)]
+    : [mix(p.tealLight, WHITE, 0.8), mix(p.tealLight, WHITE, 0.5), p.tealLight, mix(p.tealLight, p.navy, 0.4), mix(p.tealLight, p.navy, 0.7)];
+}
+
+// The segment colour for a key practised `n` times when the busiest key has `max`. `palette` is the theme's colours, for
+// a colour scheme (see above); leave it out for the standard ramps.
+export function coverageColour(kind, n, max, dark, palette) {
   const ramp = RAMPS[kind];
   if (!n) return ramp.none;
   const t = n / Math.max(max, 1);
-  const steps = dark ? ramp.dark : ramp.light;
+  const steps = coverageRamp(kind, dark, palette);
   const i = ramp.cuts.findIndex(cut => t < cut);
   return steps[i === -1 ? steps.length - 1 : i];
 }
-export const coverageRamp = (kind, dark) => RAMPS[kind][dark ? 'dark' : 'light'];
+export function coverageRamp(kind, dark, palette) {
+  return usesScheme(palette) ? schemeRamp(kind, dark, palette) : RAMPS[kind][dark ? 'dark' : 'light'];
+}
 
 // Colours that sit outside the ramps.
 export const COVERAGE_TEAL_SELECTED = '#1D9E75';   // the selected minor key on the circle of fifths
+// The selected minor key: that green in the standard theme, the scheme's own second colour in a scheme.
+export const selectedMinorColour = palette => (usesScheme(palette) ? palette.steel : COVERAGE_TEAL_SELECTED);
 export const LIKING_LINE = '#E87EA1';              // the liking line and its axis on the energy chart
 
 // The energy scatter: -2 (very low) to +2 (high). The light set is the original. The dark set keeps

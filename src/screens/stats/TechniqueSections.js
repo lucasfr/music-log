@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { COLOURS, RADIUS, SIZES } from '../../theme';
 import { staleScales, agoLabel } from '../../utils/insights';
 import { scaleCoverage, techniqueBreakdown, toggleFilter, COF_KEYS, COF_MINORS, DYNAMICS_LABELS } from '../../utils/scaleStats';
-import { coverageColour, coverageRamp, readableOn, COVERAGE_TEAL_SELECTED } from '../../utils/chartColours';
+import { coverageColour, coverageRamp, readableOn, selectedMinorColour } from '../../utils/chartColours';
 import { ARTICULATION_OPTIONS, ARTICULATION_LABELS } from '../../constants';
 import Svg, { Path, Circle, Text as SvgText, G } from 'react-native-svg';
 import { todayISO } from '../../utils';
@@ -77,9 +77,9 @@ export function TechniqueBreakdown({ sessions }) {
 
 // Segment colours follow the theme, and each key name takes whichever of near-black or white reads
 // on its segment (utils/chartColours.js).
-function amberForCount(n, max) { return coverageColour('amber', n, max, COLOURS.isDark); }
+function amberForCount(n, max) { return coverageColour('amber', n, max, COLOURS.isDark, COLOURS); }
 
-function tealForCount(n, max) { return coverageColour('teal', n, max, COLOURS.isDark); }
+function tealForCount(n, max) { return coverageColour('teal', n, max, COLOURS.isDark, COLOURS); }
 
 function cofArcPath(cx, cy, r1, r2, startDeg, endDeg) {
   const s = startDeg * Math.PI / 180;
@@ -174,7 +174,7 @@ export function ScaleCoverage({ sessions }) {
             const majorSel = sel?.ring === 'major' && sel?.index === i;
             const minorSel = sel?.ring === 'minor' && sel?.index === i;
             const majorFill = majorSel ? COLOURS.gold : amberForCount(majorCounts[i], maxCount);
-            const minorFill = minorSel ? COVERAGE_TEAL_SELECTED : tealForCount(minorCounts[i], maxCount);
+            const minorFill = minorSel ? selectedMinorColour(COLOURS) : tealForCount(minorCounts[i], maxCount);
             return (
               <G key={key}>
                 <Path
@@ -261,11 +261,11 @@ export function ScaleCoverage({ sessions }) {
       {/* Legend */}
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('amber', COLOURS.isDark)[2] }} />
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('amber', COLOURS.isDark, COLOURS)[2] }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>major</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('teal', COLOURS.isDark)[2] }} />
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: coverageRamp('teal', COLOURS.isDark, COLOURS)[2] }} />
           <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim }}>minor</Text>
         </View>
         <Text style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, fontStyle: 'italic' }}>tap for details</Text>

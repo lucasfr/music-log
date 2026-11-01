@@ -100,6 +100,7 @@ export const COLOURS = {
   entryWash:    'rgba(255,255,255,0)',
   isDark:    false,
   __theme:   'light',
+  __scheme:  'standard',   // which colour scheme this palette belongs to (see SCHEMES below); charts use it for the circle of fifths
 };
 
 // ─── Themes ───────────────────────────────────────────────────────────────────────────────────────────────────
@@ -167,9 +168,10 @@ const rgbOf = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const tintOf = (h, a) => { const [r, g, b] = rgbOf(h); return `rgba(${r},${g},${b},${a})`; };
 const capped = (v, max = 1) => +Math.min(max, v).toFixed(3);
 
-function lightScheme(s) {
+function lightScheme(s, scheme) {
   return {
     ...LIGHT,
+    __scheme: scheme,
     navy: s.navy, steel: s.steel, tealLight: s.tealLight, ink: s.ink,
     bg: s.bg, bg2: s.bg2, text: s.text, textMuted: s.textMuted, textDim: s.textDim,
     glassBorderSubtle: tintOf(s.navy, 0.08), glassShadow: tintOf(s.navy, 0.12), glassShadowMd: tintOf(s.navy, 0.18),
@@ -180,9 +182,10 @@ function lightScheme(s) {
   };
 }
 
-function darkScheme(s) {
+function darkScheme(s, scheme) {
   return {
     ...DARK,
+    __scheme: scheme,
     navy: s.navy, steel: s.steel, tealLight: s.tealLight, ink: s.ink,
     bg: s.bg, bg2: s.bg2, text: s.text, textMuted: s.textMuted, textDim: s.textDim,
     onNavy: s.bg,   // the dark page colour, as in the standard dark theme: dark glyphs on the bright fills
@@ -217,8 +220,8 @@ export const THEMES = {
   light: { label: 'Light', colours: LIGHT },
   dark:  { label: 'Dark',  colours: DARK  },
   ...Object.fromEntries(Object.entries(SCHEME_SEEDS).flatMap(([key, s]) => [
-    [`${key}-light`, { label: `${s.label} light`, colours: lightScheme(s.light) }],
-    [`${key}-dark`,  { label: `${s.label} dark`,  colours: darkScheme(s.dark)  }],
+    [`${key}-light`, { label: `${s.label} light`, colours: lightScheme(s.light, key) }],
+    [`${key}-dark`,  { label: `${s.label} dark`,  colours: darkScheme(s.dark, key)  }],
   ])),
 };
 
