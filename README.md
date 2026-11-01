@@ -25,8 +25,8 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 📖 **History** — chronological feed of all sessions and lessons, fully expanded inline with complete segment detail, wins, and next-focus notes; search across piece names, notes, wins and dates, filter to practice or lessons, and swipe an entry left to delete it (virtualised, so it stays smooth as the log grows)
 - 🎓 **Lessons** — log lessons separately with teacher, duration, per-piece feedback, assignments, overall notes, wins, and focus for next time
 - ⏱️ **Practice timer** — pomodoro-style segmented sessions: build a plan of technique/repertoire segments (each with its own minutes dial, drag its grip to reorder it, swipe a collapsed one left to remove it), confirm and collapse each one as you set it up, then run through them with a countdown ring, pause/skip/+5min controls, an optional articulation per technique segment (shown on the countdown screen and carried into the log form), and automatic session logging when you finish
-- 🥁 **Metronome** — built into the timer screen: adjustable tempo (tap ±5 / hold ±1, named tempo markings from Largo to Presto), time signatures from 2/4 to 12/8 (compound meters felt in their conventional main pulses, not literal numerator), quarter-through-16th-note subdivisions, a "use piece tempo" shortcut that reads a linked library piece's stored tempo/time signature, and an optional tempo ramp (auto-increases bpm toward a target every N bars — useful for bringing a hard passage up to speed). Runs on a real audio-engine clock (react-native-audio-api) rather than JS timers, for steady timing independent of anything else happening in the app, and resumes correctly if the app is backgrounded mid-session
-- 🔄 **Optional cloud sync** — push/pull sessions, lessons, and compositions to a Supabase project of your own, with GitHub or magic-link sign-in; works the same on web and native, with a last-synced / sync-error indicator in Settings
+- 🥁 **Metronome** — built into the timer screen: adjustable tempo (tap ±5 / hold ±1, named tempo markings from Largo to Presto), time signatures from 2/4 to 12/8 (compound meters felt in their conventional main pulses, not literal numerator), quarter-through-16th-note subdivisions, a "use piece tempo" shortcut that reads a linked library piece's stored tempo/time signature, and an optional tempo ramp (auto-increases bpm toward a target every N bars — useful for bringing a hard passage up to speed). Runs on a real audio-engine clock (react-native-audio-api) rather than JS timers, for steady timing independent of anything else happening in the app, and resumes correctly if the app is backgrounded mid-session. A Tap tempo button sets the tempo from a few taps of your own
+- 🔄 **Optional cloud sync** — push/pull sessions, lessons, and compositions to a Supabase project of your own, with GitHub or magic-link sign-in; works the same on web and native, with a last-synced / sync-error indicator in Settings and a Check sync button that tests the tables, a write and read-back, and record counts on this device against the server. Pulls download only the records that changed, with a full pull once a day as a safety net
 - 🎼 **Segment logging** — sessions split into technique segments (Hanon, Scales, Arpeggios, Chord work, Sight-reading, Technical exercise) and repertoire segments, each with notes, felt difficulty, challenge tags, and progress tags
 - 🎹 **Scale & arpeggio detail tracking** — scales/arpeggios tracked individually with parallel/contrary motion, unison/3rds/6ths/10ths interval apart, and 1–4 octaves per entry, backward-compatible with older plain-string entries. Catalogue covers major/natural/harmonic/melodic minor, modes, pentatonic, chromatic (all 12 keys), whole tone, diminished, augmented, blues, and dominant/diminished 7th arpeggios (all 12 keys)
 - 🎚️ **Articulation & tempo** — technique segments can record how an exercise was played: legato, non-legato, staccato, staccatissimo, portato, tenuto or accented, set once for both hands or separately for right and left (e.g. RH legato · LH staccato), plus an optional clean-tempo BPM entered by hand. Log legato and staccato versions of the same exercise as separate segments so each keeps its own tempo. Articulation can be set in the timer setup, is shown on the countdown screen, and appears in every detail view, the Stats technique filter, and the JSON export
@@ -44,6 +44,8 @@ It runs as an installable PWA in any browser and as a native iOS/Android app via
 - 📅 **Day sheet** — on a phone, tap any calendar day to see everything logged that day and to log a practice or lesson; swipe the grid to change month
 - ⚠️ **Sync alerts** — a dot on the Settings tab and a banner on Home when a sync problem needs attention (never just for being offline)
 - 🗂️ **Foldable Stats** — each Stats section folds away and stays that way
+- 📈 **Tempo progress and scales to revisit** — the BPM logged on pieces and exercises over time, with a suggested next tempo and a stalled / on-track note; scales and arpeggios left for two weeks or more are listed so they don't drop out of rotation
+- 🔊 **Charts read aloud** — each Stats chart has a one-sentence summary for VoiceOver and TalkBack (totals, the high point, the latest value, which way it is heading)
 - 🔁 **Repeat last session** — an empty session log or an empty timer setup offers to copy your previous session's plan (pieces, scales, minutes), leaving notes, ratings and tags blank; the timer version copies the segments, minutes and articulation, since that's all a timer plan holds
 - 🎯 **Next up and this week** — Home shows the "tomorrow's focus" from your last session so you can pick up where you left off, plus a This week strip (sessions, minutes practised, day streak for the current Monday–Sunday week)
 - 🎉 **Milestones and save feedback** — saving gives a light haptic on native, and a short message when the save newly reaches a milestone (your first session or lesson, 7 / 14 / 30 / 60 / 100 / 365-day streaks, 10 / 25 / 50 / 100… hours, 10 / 25 / 50 / 100… sessions). Each fires once, when it's crossed; importing a backup stays quiet
@@ -88,7 +90,14 @@ music-log/
 │   ├── tabBarLayout.test.mjs      # Fitting seven tabs on a narrow phone
 │   ├── timerSnapshot.test.mjs     # Saving a running timer and offering it back: snapshot, validation, summary
 │   ├── collapsed.test.mjs         # Remembering which Stats sections are folded
-│   └── motion.test.mjs             # Stagger delays and bar clamping for the animation helpers
+│   ├── motion.test.mjs             # Stagger delays and bar clamping for the animation helpers
+│   ├── syncQueue.test.mjs          # The outbox, deletions as tombstones, and conflict copies
+│   ├── pullPlan.test.mjs           # Pulling only what changed, against a fake Supabase client
+│   ├── selfTest.test.mjs           # The Check sync checks, against the same fake client
+│   ├── chartSummaries.test.mjs     # The spoken summaries of the Stats charts
+│   ├── tapTempo.test.mjs           # Turning taps into a tempo
+│   ├── imports.test.mjs            # Every file parses and every import and imported name exists
+│   └── fakeSupabase.mjs            # An in-memory stand-in for the Supabase client (not a test itself)
 ├── web/
 │   ├── index.html                  # HTML template with Apple touch icon tags
 │   └── service-worker.js           # Cache-first service worker; tells the page when a new version has been deployed
@@ -116,6 +125,9 @@ music-log/
     │   ├── records.js              # Native storage keeps the whole record (packRecord/unpackRecord); the Supabase `data` column for fields with no column of their own; the merge of pulled rows; reshapes a pulled Supabase piece into the local form (time_sigs → timeSigs, tempo); pure, unit-tested
     │   ├── syncIssue.js            # Which sync errors are worth showing (never being offline); pure, unit-tested
     │   ├── useSyncIssue.js         # Hook: the current sync problem, for the Settings dot and the Home banner
+    │   ├── outbox.js               # The sync outbox wired to real storage and the real push (the logic is utils/syncQueue.js)
+    │   ├── pullPlan.js             # Which rows a pull must download: a light index first, then only what changed; pure, unit-tested
+    │   ├── selfTest.js             # The Check sync checks (columns, write/read/remove, counts, queue); pure, unit-tested
     │   └── migrations.js           # One-time, flag-guarded data fixes (e.g. technique-group backfill)
     ├── components/
     │   ├── Background.js           # Dot-grid SVG background
@@ -145,7 +157,8 @@ music-log/
     │   ├── CalendarScreen.js       # Monthly calendar: day sheet on a phone, detail panel on desktop, swipe to change month
     │   ├── HistoryScreen.js        # Full chronological session + lesson feed
     │   ├── CompositionsScreen.js   # Composition library: sort, quiet cards, expanded details
-    │   ├── StatsScreen.js          # Overview stats, charts, library breakdown; foldable sections
+    │   ├── StatsScreen.js          # The Stats page: period switch, overview tiles, foldable sections
+    │   ├── stats/                  # The sections themselves: shared, ActivityGrid, TrendCharts, LibrarySections, TechniqueSections, TempoSections
     │   ├── TimelineScreen.js       # Gantt-style composition timeline with status history
     │   ├── SettingsScreen.js       # App settings + Supabase sync setup/sign-in
     │   ├── AboutScreen.js          # About screen
@@ -160,6 +173,9 @@ music-log/
         ├── collapsed.js             # Which Stats sections are folded, remembered between launches; pure, unit-tested
         ├── timerSnapshot.js         # Save/validate/summarise a running timer so it can be resumed; pure, unit-tested
         ├── tabBarLayout.js          # Fitting the tab bar to the screen width; pure, unit-tested
+        ├── syncQueue.js             # The outbox, tombstone deletes and conflict copies; pure, unit-tested
+        ├── tapTempo.js              # Taps to a tempo for the metronome; pure, unit-tested
+        ├── chartSummaries.js        # One-sentence spoken summaries of the Stats charts; pure, unit-tested
         ├── usePref.js              # usePref(key): a preference as React state that updates when it changes anywhere in the app
         ├── reminders.js            # setDailyReminder('18:00'): schedules the daily practice reminder (native only; expo-notifications loaded on demand)
         ├── updatePrompt.js         # The "new version available — Reload" banner shown when the service worker reports a deploy
@@ -265,6 +281,8 @@ npm test
 
 Runs the unit tests (the drag-to-reorder maths, the emoji and icon mappings, the progress and planning helpers, the motion timings, and the service worker's update detection) with Node's built-in test runner (Node 20+, nothing extra to install). They check, among other things, that every card can be dragged to every slot and that the gap that opens while dragging is exactly where the card lands. The maths lives in `src/utils/reorder.js` with no React Native imports precisely so it can be tested this way.
 
+CI (`.github/workflows/ci.yml`) runs the linter, the tests in four timezones, and the web build on every push to `main` and every pull request.
+
 ### Optional: cloud sync
 
 music.log works fully offline with no setup. To sync across devices, create a free [Supabase](https://supabase.com) project, then enter its Project URL and anon key in **Settings → Sync** and sign in (GitHub or email magic link). Nothing is sent anywhere until you do this.
@@ -301,16 +319,16 @@ Already have the tables from an earlier version? Add the column to each: `alter 
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `expo` | ~54 | Build toolchain and runtime |
-| `expo-sqlite` | ~15 | Local SQLite storage (native) |
-| `expo-blur` | ~14 | Glassmorphism `BlurView` cards |
-| `expo-font` | ~13 | Custom font loading |
-| `expo-file-system` | ~18 | Temp file write for JSON export (native) |
-| `expo-sharing` | ~12 | Native share sheet for JSON export |
+| `expo-sqlite` | ~16 | Local SQLite storage (native) |
+| `expo-blur` | ~15 | Glassmorphism `BlurView` cards |
+| `expo-font` | ~14 | Custom font loading |
+| `expo-file-system` | ~19 | Temp file write for JSON export (native) |
+| `expo-sharing` | ~14 | Native share sheet for JSON export |
 | `expo-haptics` | ~15 | Haptic feedback on the metronome, minutes dial and drag-to-reorder |
 | `expo-keep-awake` | ~15 | Keeps the screen on during a practice timer session |
 | `expo-notifications` | ~0.32 | Local notification when a segment ends (native) |
 | `react-native-audio-api` | ^0.13 | Metronome's audio-engine-clock scheduling (real Web Audio API on native + web) |
-| `react-native-web` | ~0.20 | Web render target |
+| `react-native-web` | ^0.21 | Web render target |
 | `react-native-svg` | ~15 | Circle of fifths, charts, dot-grid background, metronome/dial rings |
 | `@expo/vector-icons` | ~14 | Ionicons used throughout UI |
 | `@react-navigation/bottom-tabs` | ^7 | Tab bar navigation |

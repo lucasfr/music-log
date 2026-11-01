@@ -1,8 +1,11 @@
-# Runs the linter and the tests on every push to main and every pull request.
+# Runs the linter, the tests and a web build on every push to main and every pull request.
 #
 # The tests run in several timezones on purpose. A day is not always 24 hours on the days the clocks
 # change, and several date bugs in this app only showed up in a timezone with daylight saving, which a
 # developer's machine (or a plain UTC server) would never reveal.
+#
+# The build is the same command Netlify runs. Without it a broken bundle, a bad import path or a
+# problem in patch-dist.js only shows up when Netlify fails, after the push.
 
 name: CI
 
@@ -46,3 +49,26 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm test
+
+  build:
+    name: Build (web)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPO_NO_TELEMETRY: 1
+      CI: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build:web
+      # build:web copies these in after the export; a missing one means a step in the script broke.
+      - name: Check the build output
+        run: |
+          for f in index.html service-worker.js apple-touch-icon.png apple-touch-icon-152.png apple-touch-icon-120.png; do
+            test -s "dist/$f" || { echo "dist/$f is missing or empty"; exit 1; }
+          done
+          test -n "$(find dist -name '*.js' ! -name service-worker.js | head -1)" || { echo "no JavaScript bundle in dist"; exit 1; }

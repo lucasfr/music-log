@@ -21,7 +21,8 @@ import {
   signInWithGitHub,
   signOut,
 } from '../lib/supabase';
-import { pushRecord, pullTable } from '../db/sync';
+import { pushRecord, pullTable, checkSync } from '../db/sync';
+import { summariseSelfTest } from '../db/selfTest';
 import { getSyncStatus, subscribeSyncStatus } from '../db/syncStatus';
 import { exportAllJSON, copyAllJSON, parseImportJSON, planImport, describeImport, pickJSONFile } from '../utils/export';
 import { parseConflicts, parseOutbox, dirtyCount, tombstoneIndex, blockedByDeletion } from '../utils/syncQueue';
@@ -175,6 +176,33 @@ function ResultBanner({ result, errorKey = 'errors' }) {
   );
 }
 
+// The results of "Check sync": a verdict line, then one line per check with a coloured dot.
+function CheckList({ checks }) {
+  if (!checks) return null;
+  const verdict = summariseSelfTest(checks);
+  const colour = s => (s === 'ok' ? COLOURS.success : s === 'warn' ? COLOURS.amber : COLOURS.red);
+  const tint = s => (s === 'ok' ? COLOURS.successLight : s === 'warn' ? COLOURS.amberLight || COLOURS.navyA(0.08) : COLOURS.dangerLight);
+  return (
+    <View accessibilityLiveRegion="polite" style={{ marginHorizontal: 16, marginBottom: 14 }}>
+      <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.sm, backgroundColor: tint(verdict.status), marginBottom: 8 }}>
+        <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: verdict.status === 'ok' ? TINT_TEXT.success : verdict.status === 'warn' ? COLOURS.text : COLOURS.red }}>
+          {verdict.text}
+        </Text>
+      </View>
+      {checks.map((c, i) => (
+        <View key={`${c.label}-${i}`} accessible accessibilityLabel={`${c.label}: ${c.status === 'ok' ? 'fine' : c.status === 'warn' ? 'look at this' : 'problem'}. ${c.detail}`}
+          style={{ flexDirection: 'row', gap: 10, paddingVertical: 6 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, marginTop: 6, backgroundColor: colour(c.status) }} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: COLOURS.text }}>{c.label}</Text>
+            <Text selectable style={{ fontFamily: 'Lato', fontSize: SIZES.label, color: COLOURS.textDim, lineHeight: 19 }}>{c.detail}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function SettingsScreen({ isDesktop, sessions = [], lessons = [], compositions = [], onSaveSession, onSaveLesson, onSaveComposition, onClearAll }) {
@@ -186,6 +214,8 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
   const [phase,      setPhase]      = useState('idle');
   const [savedBanner, setSavedBanner] = useState(false);
   const [syncResult,  setSyncResult]  = useState(null);
+  const [checks,      setChecks]      = useState(null);
+  const [checking,    setChecking]    = useState(false);
   const [importResult, setImportResult] = useState(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const [clearText,    setClearText]    = useState('');
@@ -343,6 +373,21 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
     }
   }
   const dismissConflict = c => outbox.resolveConflict(c.table, c.id, c.record.updated_at);
+
+  // "Check sync": the schema, a write/read/remove round trip, record counts here and on the server,
+  // and what is still waiting (see db/selfTest.js). Run it on each device to compare them.
+  async function handleCheckSync() {
+    setChecking(true); setChecks(null);
+    try {
+      setChecks(await checkSync(
+        { sessions: sessions.length, lessons: lessons.length, compositions: compositions.length },
+        { edits: waiting, deletes: outbox.pendingDeleteCount(), conflicts: conflicts.length },
+      ));
+    } catch (e) {
+      setChecks([{ label: 'Check sync', status: 'fail', detail: `Couldn't run the check: ${e.message}` }]);
+    }
+    setChecking(false);
+  }
 
   const isSignedIn = !!session;
   const totalRecords = sessions.length + lessons.length + compositions.length;
@@ -616,9 +661,16 @@ export default function SettingsScreen({ isDesktop, sessions = [], lessons = [],
                 onPress={phase === 'syncing' ? null : handleSyncAll}
                 right={phase === 'syncing' ? <ActivityIndicator color={COLOURS.navy} size="small" /> : undefined}
                 first
-                last
               />
               <ResultBanner result={syncResult} />
+              <Row icon="checkmark-circle-outline" label="Check sync"
+                sublabel="Tables, a test write, and record counts"
+                onPress={checking ? null : handleCheckSync}
+                right={checking ? <ActivityIndicator color={COLOURS.navy} size="small" /> : undefined}
+                last={!checks}
+                noBorder={!!checks}
+              />
+              <CheckList checks={checks} />
             </GlassCard>
 
             <SectionHeader>Account</SectionHeader>

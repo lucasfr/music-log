@@ -4,6 +4,9 @@
 import { getClient, getSession } from '../lib/supabase';
 import { reportSyncStart, reportSyncSuccess, reportSyncError } from './syncStatus';
 import { missingColumn, missingColumnHint, REMOTE_COLUMNS, extrasFor, unpackRemote, mergeRows } from './records';
+import { pullChanged, isFullPullDue } from './pullPlan';
+import { runSyncSelfTest } from './selfTest';
+import { getLocalPref, setLocalPref } from '../utils';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -138,16 +141,33 @@ export async function tombstoneRecord(table, id, deletedAt) {
 
 // ─── Pull (load) ──────────────────────────────────────────────────────────────
 
-// Fetches all rows for the current user from a table.
+const fullPullKey = table => `syncFullPullAt:${table}`;
+
+// Fetches the current user's rows from a table: one row per record on the server.
+//
+// Given `local` (this device's records of the table) it downloads only the rows that differ from
+// them; the rest come back as stubs and deletions as marks (see db/pullPlan.js), which is all the
+// merge, the outbox and delete handling need. A full download still happens the first time, once a
+// day after that, and whenever the light way fails (a table without a `data` column, say).
+// Without `local` ("Push all", clearing everything) it is always the full download.
+//
 // Paginates in chunks of 1000 to bypass Supabase's default server-side row
 // limit, which would otherwise silently truncate older records.
 // Caller is responsible for merging with local data (newer updated_at wins).
-export async function pullTable(table) {
+export async function pullTable(table, local) {
   try {
     const session = await getSession();
     if (!session) return null;
     reportSyncStart();
     const client = await getClient();
+    if (Array.isArray(local) && !isFullPullDue(getLocalPref(fullPullKey(table)))) {
+      const res = await pullChanged(client, table, userId(session), local);
+      if (!res.error) {
+        reportSyncSuccess(`pull:${table}`);
+        return [...res.rows, ...res.fetched.map(unpackRemote)];
+      }
+      console.warn(`[sync] light pull ${table} failed, pulling everything:`, res.error.message);
+    }
     const PAGE_SIZE = 1000;
     let allData = [];
     let from = 0;
@@ -157,6 +177,7 @@ export async function pullTable(table) {
         .select('*')
         .eq('user_id', userId(session))
         .order('created_at', { ascending: true })
+        .order('id', { ascending: true })
         .range(from, from + PAGE_SIZE - 1);
       if (error) {
         console.warn(`[sync] pull ${table} failed:`, error.message);
@@ -169,6 +190,7 @@ export async function pullTable(table) {
       from += PAGE_SIZE;
     }
     reportSyncSuccess(`pull:${table}`);
+    setLocalPref(fullPullKey(table), new Date().toISOString());
     return allData.map(unpackRemote);
   } catch (e) {
     console.warn(`[sync] pull ${table} exception:`, e.message);
@@ -182,3 +204,20 @@ export async function pullTable(table) {
 // The merge itself lives in records.js (pure and unit-tested); it is re-exported here so the hooks
 // keep importing it from this file.
 export { mergeRows };
+
+// ─── Self-test (Settings → Check sync) ────────────────────────────────────────
+
+// Runs the checks in db/selfTest.js against the signed-in account. `local` is the number of records
+// on this device per table, `queue` the outbox counts. -> the list of checks.
+export async function checkSync(local, queue) {
+  let client = null;
+  let uid = null;
+  try {
+    const session = await getSession();
+    uid = userId(session);
+    client = session ? await getClient() : null;
+  } catch (e) {
+    return [{ label: 'Signed in', status: 'fail', detail: `Couldn't reach Supabase: ${e.message}` }];
+  }
+  return runSyncSelfTest({ client, uid, local, queue });
+}

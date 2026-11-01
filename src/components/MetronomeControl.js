@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { AudioContext } from 'react-native-audio-api';
 import { COLOURS, RADIUS, SIZES, hitFor, TOUCH_ICON, HIT_ICON } from '../theme';
 import { ACCENT_CLICK_B64, SUB_CLICK_B64, base64ToArrayBuffer } from '../utils/metronomeSounds';
+import { addTap, bpmFromTaps } from '../utils/tapTempo';
 import { pieceMetronomeDefaults } from '../utils/pieceTempo';
 import { Ionicons } from './Icon';
 import { FadeInUp } from './Motion';
@@ -537,6 +538,15 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
     setSubdivision(n);
   }
 
+  // Tap tempo: the taps so far (see utils/tapTempo.js). Two or more give a tempo, which is set the
+  // same way the +/- buttons set it, so the click restarts cleanly on the new tempo.
+  const tapsRef = useRef([]);
+  function tapTempo() {
+    tapsRef.current = addTap(tapsRef.current, Date.now());
+    const tapped = bpmFromTaps(tapsRef.current);
+    if (tapped) setBpm(tapped);
+  }
+
   const currentTempoName = tempoName(bpm);
 
   return (
@@ -553,6 +563,13 @@ export const MetronomeControl = React.memo(function MetronomeControl({ compositi
               <Text style={{ fontFamily: 'Lato', fontSize: SIZES.tiny, color: COLOURS.steel }}>Use piece tempo</Text>
             </TouchableOpacity>
           ) : null}
+          <TouchableOpacity onPress={tapTempo} activeOpacity={0.75}
+            hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+            accessibilityRole="button" accessibilityLabel="Tap tempo"
+            accessibilityHint="Tap along to a beat, and the metronome takes that tempo"
+            style={{ minHeight: 28, justifyContent: 'center', paddingHorizontal: 8, paddingVertical: 6, borderRadius: RADIUS.sm, backgroundColor: COLOURS.steelA(0.10) }}>
+            <Text style={{ fontFamily: 'Lato', fontSize: SIZES.tiny, color: COLOURS.steel }}>Tap tempo</Text>
+          </TouchableOpacity>
           {/* The next tempo to try on this piece, a small step above your last clean reading (see
               suggestNextTempo in utils/insights.js). */}
           {suggestedBpm ? (

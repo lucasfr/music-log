@@ -80,7 +80,7 @@ export function useSessions() {
     setLoading(false);
 
     // Then pull remote and merge
-    const remote = await pullTable('sessions');
+    const remote = await pullTable('sessions', local);
     if (remote) {
       // Retry edits that never reached the server, and keep a copy of whichever side loses when
       // two devices edited the same record (see utils/syncQueue.js).
@@ -148,7 +148,7 @@ export function useCompositions() {
 
     // Supabase rows are snake_case (time_sigs); reshape them like local ones so the metronome
     // can read a piece's tempo and time signature on a device that only has it from sync.
-    const pulled = await pullTable('compositions');
+    const pulled = await pullTable('compositions', local);
     const remote = pulled ? pulled.map(fromRemoteComposition) : null;
     if (remote) {
       outbox.processPull('compositions', local, remote);
@@ -211,7 +211,7 @@ export function useLessons() {
     setLessons(local.filter(r => !pendingDeletes.lessons.has(r.id)));
     setLoading(false);
 
-    const remote = await pullTable('lessons');
+    const remote = await pullTable('lessons', local);
     if (remote) {
       outbox.processPull('lessons', local, remote);
       // Deletions (see planDeletes in utils/syncQueue.js): a record another device deleted is removed

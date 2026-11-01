@@ -4,6 +4,21 @@ All notable changes to music.log are documented here.
 
 ## [Unreleased]
 
+### Added
+- **Check sync** in Settings → Data. One tap tests the whole Supabase path: that each table has every column the app writes (and shows the SQL to add one that's missing), that this account can write a row, read it back with its extra fields intact and remove it, how many records this device and the server each hold, and what is still waiting to be sent (unsent edits and deletes, conflict copies). The test row is written as an already-deleted record, so another device that pulls at that moment ignores it, and it is removed straight afterwards. Run it on each device to compare them (`src/db/selfTest.js`, unit-tested against a fake client).
+- **Tap tempo** on the metronome. Tap along to a beat and the tempo follows the average of your last few taps (two or more; a pause of two seconds starts again; kept within 30 to 240 bpm) (`src/utils/tapTempo.js`, unit-tested).
+- **Stats charts are read aloud.** Practice volume, weekly trends, session quality, day of week, library growth and the circle of fifths each carry a one-sentence summary for VoiceOver and TalkBack (totals, the high point, the latest value, which way it is heading; for the circle, how many of the 24 keys have been practised and how often each) (`src/utils/chartSummaries.js`, unit-tested). Not yet checked with a screen reader.
+- **CI builds the web app.** A new job runs `npm run build:web`, the same command Netlify runs, and checks that the service worker, the touch icons and a JavaScript bundle are in `dist/`, so a broken bundle shows up on the pull request instead of on Netlify.
+
+### Changed
+- **Pulling from Supabase downloads only what changed.** A pull used to fetch every row of a table, segments and all, whenever a screen reloaded. It now asks for a light index first (id, `updated_at` and the deletion mark), compares it with what is on this device, and downloads in full only the rows that differ. It deliberately does not use an "updated since the last pull" cursor: an edit made offline keeps its old `updated_at`, so it can reach the server after another device's last pull and a cursor would never see it. A full pull still happens the first time, once a day after that, when the light way fails, and for "Push all" and "Clear all data" (`src/db/pullPlan.js`, unit-tested, including that the outbox, delete handling and the merge treat the lighter rows exactly like full ones).
+- **The Stats screen is split into one file per group of charts** (`src/screens/stats/`: shared helpers, activity grid, trend charts, library sections, technique and scale sections, tempo progress). `StatsScreen.js` keeps the period switch, the overview tiles and the folding sections, and went from about 1,850 lines to about 400. The code in each section is unchanged apart from the chart summaries above.
+- The full pull now orders by `created_at` then `id`, so rows that share a timestamp can't be skipped or repeated at a page boundary.
+- **README brought up to date**: the project tree (outbox, pull planning, the self-test, the Stats sections, the new utilities and tests), the dependency versions, and the features that were missing (tempo progress, scales to revisit, tap tempo, Check sync).
+
+### Tests
+- `tests/fakeSupabase.mjs`, a small in-memory stand-in for the Supabase client, so the sync code can be tested without a network.
+
 ## [1.2.0] — 2026-10-19
 
 ### Added
