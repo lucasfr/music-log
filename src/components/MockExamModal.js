@@ -147,7 +147,7 @@ export function MockExamModal({ visible, readinessResult, onClose }) {
                 <View style={{ marginTop: 18 }}>
                   <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.bodySmall, color: COLOURS.text, marginBottom: 6 }}>To work on</Text>
                   {summary.needsWork.map((label, i) => (
-                    <Text key={`${label}-${i}`} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text, paddingVertical: 3 }}>{label}</Text>
+                    <Text key={`${label}-${i}`} style={{ fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text, paddingVertical: 4 }}>{label}</Text>
                   ))}
                 </View>
               ) : null}

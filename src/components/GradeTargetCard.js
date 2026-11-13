@@ -147,7 +147,7 @@ export function GradeTargetCard({ sessions, compositions }) {
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.text }}>{p.label}</Text>
                 <Text style={{ fontFamily: 'Lato', fontSize: SIZES.labelSmall, color: COLOURS.textDim }}>{p.detail}</Text>
               </View>
-              <View style={{ height: 5, borderRadius: 3, backgroundColor: COLOURS.navyA(0.10), overflow: 'hidden', marginTop: 3 }}>
+              <View style={{ height: 5, borderRadius: 3, backgroundColor: COLOURS.navyA(0.10), overflow: 'hidden', marginTop: 4 }}>
                 <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${p.percent}%`, backgroundColor: p.percent >= 70 ? COLOURS.success : p.percent >= 40 ? COLOURS.steel : COLOURS.amber }} />
               </View>
             </View>

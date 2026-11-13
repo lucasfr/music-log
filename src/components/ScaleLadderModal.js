@@ -127,7 +127,7 @@ export function ScaleLadderModal({ visible, readinessResult, onClose }) {
               </Text>
               <View style={{ marginTop: 14 }}>
                 {routine.map((q, i) => (
-                  <View key={`${describeRequirement(q)}-${i}`} style={{ flexDirection: 'row', gap: 10, paddingVertical: 5 }}>
+                  <View key={`${describeRequirement(q)}-${i}`} style={{ flexDirection: 'row', gap: 10, paddingVertical: 6 }}>
                     <Text style={{ flex: 1, fontFamily: 'CormorantGaramond-Italic', fontSize: SIZES.body, color: COLOURS.text }}>{describeRequirement(q)}</Text>
                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: SIZES.label, color: cleanThisRun[i] ? COLOURS.success : COLOURS.textDim }}>
                       {cleanThisRun[i] ? `${cleanThisRun[i]} bpm` : cleanTempoFor(map, q) ? `${cleanTempoFor(map, q)} bpm before` : 'not yet'}
