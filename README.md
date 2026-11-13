@@ -5,7 +5,7 @@
 [![Built with Expo](https://img.shields.io/badge/Expo-54-000020?logo=expo)](https://expo.dev)
 [![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react)](https://reactnative.dev)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](https://music-log.netlify.app)
-[![Version](https://img.shields.io/badge/version-1.2.0-088395)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.0-088395)](./CHANGELOG.md)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
 ---
