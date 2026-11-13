@@ -24,6 +24,7 @@ import { NeglectedPieces, WinsTimeline, StreakHistory, LessonInsights, LibraryGr
 import { TechniqueBreakdown, ScaleCoverage, StaleScales } from './stats/TechniqueSections';
 import { TempoProgress } from './stats/TempoSections';
 import { SightReadingLadder } from './stats/SightReadingLadder';
+import { EnergyInsight } from './stats/EnergyInsight';
 import { YearInReview } from './stats/YearInReview';
 
 // The sections themselves live in ./stats/ (one file per group of charts); this file is the page:
@@ -209,6 +210,12 @@ export default function StatsScreen({ sessions, compositions, lessons, isDesktop
               <DayOfWeekChart sessions={sessions} />
             </View>
           </View>
+        </GlassCard>
+
+        </StatsSection>
+        <StatsSection id="energy" title="What your energy predicts" collapsed={collapsed} onToggle={toggleSection}>
+        <GlassCard>
+          <EnergyInsight sessions={sessions} />
         </GlassCard>
 
         </StatsSection>
