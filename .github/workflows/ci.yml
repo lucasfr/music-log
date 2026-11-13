@@ -31,6 +31,9 @@ jobs:
       # --ignore-scripts: nothing here needs the native modules' install scripts.
       - run: npm ci --ignore-scripts
       - run: npm run lint
+      # The type check of the data layer (jsconfig.json). TypeScript is fetched for this step only, so it is
+      # not a dependency of the app.
+      - run: npm run typecheck
 
   test:
     name: Tests (${{ matrix.tz }})
