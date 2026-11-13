@@ -3,7 +3,7 @@
 
 import { getClient, getSession } from '../lib/supabase';
 import { reportSyncStart, reportSyncSuccess, reportSyncError } from './syncStatus';
-import { missingColumn, missingColumnHint, REMOTE_COLUMNS, extrasFor, unpackRemote, mergeRows } from './records';
+import { missingColumn, missingColumnHint, toRemoteRow, unpackRemote, mergeRows } from './records';
 import { pullChanged, isFullPullDue } from './pullPlan';
 import { runSyncSelfTest } from './selfTest';
 import { getLocalPref, setLocalPref } from '../utils';
@@ -20,34 +20,6 @@ function userId(session) {
   return session?.user?.id ?? null;
 }
 
-// Strips local-only fields and adds user_id before pushing to Supabase.
-// segments and keys/timeSigs are already JSON-serialisable objects — Supabase
-// accepts them directly as jsonb.
-function toRow(table, record, uid) {
-  const row = { ...record, user_id: uid };
-  // Normalise created_at / updated_at (local may use camelCase)
-  if (row.createdAt)  { row.created_at  = row.createdAt;  delete row.createdAt; }
-  if (row.updatedAt)  { row.updated_at  = row.updatedAt;  delete row.updatedAt; }
-  if (!row.updated_at) row.updated_at = new Date().toISOString();
-  // Fields with no column of their own travel in `data` (see records.js); everything else is cut
-  // down to the columns the tables have.
-  const allowed = REMOTE_COLUMNS[table];
-  if (allowed) {
-    row.data = extrasFor(table, record) || null;
-    for (const key of Object.keys(row)) {
-      if (!allowed.includes(key)) delete row[key];
-    }
-  }
-  // Map camelCase local fields to snake_case Supabase columns
-  if (table === 'compositions') {
-    if (record.timeSigs !== undefined) row.time_sigs = record.timeSigs;
-    // The form keeps tempo as text, so a cleared field is ''. Postgres rejects '' for an
-    // integer column, which would fail the push for the whole piece, not just the tempo.
-    if ('tempo' in row) row.tempo = Number(row.tempo) > 0 ? Math.round(Number(row.tempo)) : null;
-  }
-  return row;
-}
-
 // ─── Push (save) ──────────────────────────────────────────────────────────────
 
 // Resolves true when the record reached Supabase (possibly without a column the table lacks,
@@ -60,7 +32,7 @@ export async function pushRecord(table, record) {
     if (!session) return null;
     reportSyncStart();
     const client = await getClient();
-    let row = toRow(table, record, userId(session));
+    let row = toRemoteRow(table, record, userId(session));
     // A column the Supabase table doesn't have makes it reject the whole row, not just that
     // field, so a piece with a tempo set never synced at all. Drop the column and try again so
     // the rest of the record gets through, and keep reporting the gap until the column exists.
